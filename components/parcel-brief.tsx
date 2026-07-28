@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Callout, Card } from "./ui";
 
 interface RiskFlag {
@@ -31,10 +31,34 @@ const SEVERITY_COLOR: Record<RiskFlag["severity"], string> = {
  * ~30s, and most people scanning a 200-lot sale want the deterministic numbers
  * first and the narrative only on the handful they're serious about.
  */
-export function ParcelBrief({ lotId }: { lotId: string }) {
-  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [brief, setBrief] = useState<Brief | null>(null);
+export function ParcelBrief({
+  lotId,
+  countyName,
+  initialBrief = null,
+  initialModel = null,
+}: {
+  lotId: string;
+  countyName: string;
+  /** A brief already stored for these inputs, rendered without a round trip. */
+  initialBrief?: Brief | null;
+  initialModel?: string | null;
+}) {
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">(
+    initialBrief ? "done" : "idle",
+  );
+  const [brief, setBrief] = useState<Brief | null>(initialBrief);
+  const [model, setModel] = useState<string>(initialModel ?? "");
   const [error, setError] = useState<string>("");
+  const [elapsed, setElapsed] = useState(0);
+
+  // Generation runs ~35s. A static message for that long reads as a hang, so
+  // show the clock actually moving.
+  useEffect(() => {
+    if (state !== "loading") return;
+    setElapsed(0);
+    const t = setInterval(() => setElapsed((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, [state]);
 
   async function generate() {
     setState("loading");
@@ -52,6 +76,7 @@ export function ParcelBrief({ lotId }: { lotId: string }) {
         return;
       }
       setBrief(data.brief);
+      setModel(data.model ?? "");
       setState("done");
     } catch {
       setError("Network error while generating the brief.");
@@ -64,9 +89,9 @@ export function ParcelBrief({ lotId }: { lotId: string }) {
       <Card>
         <h3 className="text-sm font-semibold">AI risk brief</h3>
         <p className="mt-1 text-sm leading-relaxed text-muted">
-          Reads this parcel against the county&apos;s rules and flags what could go wrong — surviving
-          liens, redemption exposure, title cost, and the facts we don&apos;t have. Takes about 30
-          seconds.
+          Reads this parcel against {countyName} County&apos;s rules and flags what could go wrong —
+          surviving liens, redemption exposure, title cost, and the facts we don&apos;t have. Takes
+          about 35 seconds; the result is saved, so opening this lot again is instant.
         </p>
         <button
           onClick={generate}
@@ -81,9 +106,24 @@ export function ParcelBrief({ lotId }: { lotId: string }) {
   if (state === "loading") {
     return (
       <Card>
-        <h3 className="text-sm font-semibold">AI risk brief</h3>
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 className="text-sm font-semibold">AI risk brief</h3>
+          <span className="tnum text-xs text-muted">{elapsed}s</span>
+        </div>
         <p className="mt-2 animate-pulse text-sm text-muted">
-          Reading the parcel against {"…"} county statutes, lien survival, and title risk.
+          Reading this parcel against {countyName} County statutes, lien survival, and title risk.
+        </p>
+        <div className="mt-3 h-1 w-full overflow-hidden rounded bg-surface-2">
+          <div
+            className="h-full rounded bg-accent transition-all duration-1000 ease-linear"
+            // Approaches but never reaches 100% — it's an estimate, not a
+            // measurement, and a bar that sits full while still working is worse
+            // than one that's honestly still moving.
+            style={{ width: `${Math.min(95, (elapsed / 35) * 100)}%` }}
+          />
+        </div>
+        <p className="mt-2 text-xs text-muted">
+          Usually ~35 seconds. Generated once, then saved.
         </p>
       </Card>
     );
@@ -110,7 +150,10 @@ export function ParcelBrief({ lotId }: { lotId: string }) {
   return (
     <div className="space-y-4">
       <Card>
-        <h3 className="text-sm font-semibold">AI risk brief</h3>
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 className="text-sm font-semibold">AI risk brief</h3>
+          {model ? <span className="font-mono text-[10px] text-muted">{model}</span> : null}
+        </div>
         <p className="mt-2 text-base leading-relaxed">{brief.headline}</p>
       </Card>
 

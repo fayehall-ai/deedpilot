@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, desc, eq, gte, sql, count } from "drizzle-orm";
 import { db } from "./db";
-import { auctions, counties, lots, ingestRuns } from "./db/schema";
+import { auctions, counties, lots, ingestRuns, dealAnalyses } from "./db/schema";
 
 /** Today in UTC as YYYY-MM-DD — sale dates are stored as plain dates. */
 function todayIso(): string {
@@ -84,6 +84,28 @@ export async function getLot(id: string) {
     .where(eq(lots.id, id))
     .limit(1);
   return row ?? null;
+}
+
+/**
+ * A previously generated brief for this lot and exact input set.
+ *
+ * Read on page render so a cached brief appears immediately instead of the
+ * component resetting to "Generate brief" and making the user pay 35 seconds
+ * again for something already bought and stored.
+ */
+export async function getCachedBrief(lotId: string, inputsHash: string) {
+  const [row] = await db
+    .select({ brief: dealAnalyses.brief, model: dealAnalyses.model })
+    .from(dealAnalyses)
+    .where(and(eq(dealAnalyses.lotId, lotId), eq(dealAnalyses.inputsHash, inputsHash)))
+    .limit(1);
+
+  if (!row?.brief) return null;
+  try {
+    return { brief: JSON.parse(row.brief), model: row.model };
+  } catch {
+    return null;
+  }
 }
 
 /** Headline counts for the landing page and the coverage report. */

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getLot } from "@/lib/queries";
+import { getCachedBrief, getLot } from "@/lib/queries";
+import { computeMaxBid } from "@/lib/deal/maxbid";
+import { briefInputsHash } from "@/lib/ai/brief";
 import { money, num, relativeDays, saleDate } from "@/lib/format";
 import { Breadcrumbs, Callout, Card, SaleTypeBadge, StatusBadge } from "@/components/ui";
 import { DealCalculator } from "@/components/deal-calculator";
@@ -29,6 +31,26 @@ export default async function LotPage(props: PageProps<"/lots/[id]">) {
 
   const openingBid = lot.openingBid === null ? undefined : Number(lot.openingBid);
   const assessedValue = lot.assessedValue === null ? undefined : Number(lot.assessedValue);
+
+  // Look for a brief already generated under the default assumptions — the
+  // same inputs the "Generate brief" button posts — so a reload shows the
+  // stored result instead of asking the user to buy it twice.
+  const cached = rule
+    ? await getCachedBrief(
+        lot.id,
+        briefInputsHash({
+          lot,
+          auction,
+          rule,
+          deal: computeMaxBid({
+            state: county.state,
+            saleType: auction.saleType as SaleType,
+            openingBid,
+            assessedValue,
+          }),
+        }),
+      ).catch(() => null)
+    : null;
 
   const gmaps =
     lot.latitude && lot.longitude
@@ -94,7 +116,12 @@ export default async function LotPage(props: PageProps<"/lots/[id]">) {
           />
 
           <div className="mt-6">
-            <ParcelBrief lotId={lot.id} />
+            <ParcelBrief
+              lotId={lot.id}
+              countyName={county.name}
+              initialBrief={cached?.brief ?? null}
+              initialModel={cached?.model ?? null}
+            />
           </div>
         </section>
 

@@ -7,7 +7,6 @@ import { resolveCountyRule } from "@/lib/atlas";
 import { computeMaxBid } from "@/lib/deal/maxbid";
 import {
   BriefUnavailableError,
-  BRIEF_MODEL,
   briefInputsHash,
   generateBrief,
   type BriefInput,
@@ -66,31 +65,32 @@ export async function POST(
     return NextResponse.json({
       cached: true,
       brief: JSON.parse(cached.brief),
+      model: cached.model,
       deal,
     });
   }
 
   try {
-    const brief = await generateBrief(input);
+    const { brief, model, usedFallback } = await generateBrief(input);
 
     await db
       .insert(dealAnalyses)
       .values({
         lotId: id,
         inputsHash,
-        model: BRIEF_MODEL,
+        model,
         maxBid: deal.maxBid === null ? null : String(deal.maxBid),
         arvEstimate: deal.arv.value === null ? null : String(deal.arv.value),
         totalCosts: String(deal.totalCosts),
         riskFlags: brief.riskFlags,
         brief: JSON.stringify(brief),
-        inputs: { ...body, recommendation: deal.recommendation },
+        inputs: { ...body, recommendation: deal.recommendation, usedFallback },
       })
       // A concurrent request for the same inputs may have won the race; its
       // brief is equally valid, so keep whichever landed first.
       .onConflictDoNothing({ target: [dealAnalyses.lotId, dealAnalyses.inputsHash] });
 
-    return NextResponse.json({ cached: false, brief, deal });
+    return NextResponse.json({ cached: false, brief, model, usedFallback, deal });
   } catch (e) {
     if (e instanceof BriefUnavailableError) {
       // The deterministic analysis is still valid and still useful — return it

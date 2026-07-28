@@ -1,8 +1,11 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { createHash } from "node:crypto";
+import {
+  NoProviderAvailableError,
+  runStructured,
+  configuredProviders,
+} from "./providers";
 import type { DealResult } from "../deal/maxbid";
 import type { ResolvedCountyRule } from "../atlas/types";
 import type { Lot, Auction } from "../db/schema";
@@ -15,9 +18,10 @@ import type { Lot, Auction } from "../db/schema";
  * surfaces risk. The model is given the computed figures as facts and told not
  * to produce its own. A hallucinated walk-away price is the one output that
  * could directly cost a subscriber money at auction.
+ *
+ * Provider choice lives in `./providers` (Grok primary, Claude fallback) — this
+ * module is provider-agnostic on purpose.
  */
-
-const MODEL = "claude-opus-5";
 
 const RiskFlagSchema = z.object({
   severity: z.enum(["critical", "high", "medium", "low"]),
@@ -68,6 +72,10 @@ export interface BriefInput {
  * Stable hash of everything that feeds the brief, so a cached analysis is
  * reused only when the inputs are genuinely identical. Changing your rehab
  * assumption produces a new brief rather than silently serving the old one.
+ *
+ * Deliberately excludes the model: which provider answered is an operational
+ * detail, and a valid brief for these inputs stays valid if the chain fails
+ * over. The producing model is recorded on the row instead.
  */
 export function briefInputsHash(input: BriefInput): string {
   const material = {
@@ -79,7 +87,6 @@ export function briefInputsHash(input: BriefInput): string {
     maxBid: input.deal.maxBid,
     totalCosts: input.deal.totalCosts,
     arv: input.deal.arv.value,
-    model: MODEL,
   };
   return createHash("sha256").update(JSON.stringify(material)).digest("hex").slice(0, 32);
 }
@@ -165,42 +172,35 @@ Write the brief.`;
 export class BriefUnavailableError extends Error {}
 
 /**
- * Generate a parcel brief. Throws `BriefUnavailableError` when the model
- * declines or no API key is configured — callers should render the
- * deterministic deal analysis without a narrative rather than failing the page.
+ * Generate a parcel brief through the provider chain (Grok, then Claude).
+ *
+ * Throws `BriefUnavailableError` when no provider is configured or every leg
+ * fails — callers render the deterministic deal analysis without a narrative
+ * rather than failing the page.
  */
-export async function generateBrief(input: BriefInput): Promise<ParcelBrief> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new BriefUnavailableError(
-      "ANTHROPIC_API_KEY is not set — deal analysis is available, AI briefs are not.",
-    );
+export async function generateBrief(
+  input: BriefInput,
+): Promise<{ brief: ParcelBrief; model: string; usedFallback: boolean }> {
+  try {
+    const result = await runStructured({
+      system: SYSTEM,
+      prompt: buildPrompt(input),
+      schema: BriefSchema,
+      schemaName: "parcel_brief",
+      maxTokens: 16000,
+    });
+    return {
+      brief: result.data,
+      model: result.model,
+      usedFallback: result.usedFallback,
+    };
+  } catch (e) {
+    if (e instanceof NoProviderAvailableError) {
+      throw new BriefUnavailableError(e.message);
+    }
+    throw e;
   }
-
-  const client = new Anthropic();
-
-  const response = await client.messages.parse({
-    model: MODEL,
-    max_tokens: 16000,
-    system: SYSTEM,
-    output_config: {
-      effort: "high",
-      format: zodOutputFormat(BriefSchema),
-    },
-    messages: [{ role: "user", content: buildPrompt(input) }],
-  });
-
-  // Safety classifiers can decline; check before reading content.
-  if (response.stop_reason === "refusal") {
-    throw new BriefUnavailableError(
-      `Model declined to produce a brief (${response.stop_details?.category ?? "unspecified"}).`,
-    );
-  }
-
-  if (!response.parsed_output) {
-    throw new BriefUnavailableError("Model response did not match the expected brief schema.");
-  }
-
-  return response.parsed_output;
 }
 
-export { MODEL as BRIEF_MODEL };
+/** Which providers are usable right now — surfaced on the coverage page. */
+export { configuredProviders };
