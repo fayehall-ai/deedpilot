@@ -1,0 +1,170 @@
+"use client";
+
+import { useState } from "react";
+import { Callout, Card } from "./ui";
+
+interface RiskFlag {
+  severity: "critical" | "high" | "medium" | "low";
+  title: string;
+  detail: string;
+}
+
+interface Brief {
+  headline: string;
+  riskFlags: RiskFlag[];
+  dueDiligence: string[];
+  unknowns: string[];
+  narrative: string;
+}
+
+const SEVERITY_COLOR: Record<RiskFlag["severity"], string> = {
+  critical: "var(--danger)",
+  high: "var(--danger)",
+  medium: "var(--warn)",
+  low: "var(--muted)",
+};
+
+/**
+ * On-demand AI risk brief.
+ *
+ * Generation is explicit rather than automatic: briefs cost money and take
+ * ~30s, and most people scanning a 200-lot sale want the deterministic numbers
+ * first and the narrative only on the handful they're serious about.
+ */
+export function ParcelBrief({ lotId }: { lotId: string }) {
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [brief, setBrief] = useState<Brief | null>(null);
+  const [error, setError] = useState<string>("");
+
+  async function generate() {
+    setState("loading");
+    setError("");
+    try {
+      const res = await fetch(`/api/lots/${lotId}/brief`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Could not generate a brief.");
+        setState("error");
+        return;
+      }
+      setBrief(data.brief);
+      setState("done");
+    } catch {
+      setError("Network error while generating the brief.");
+      setState("error");
+    }
+  }
+
+  if (state === "idle") {
+    return (
+      <Card>
+        <h3 className="text-sm font-semibold">AI risk brief</h3>
+        <p className="mt-1 text-sm leading-relaxed text-muted">
+          Reads this parcel against the county&apos;s rules and flags what could go wrong — surviving
+          liens, redemption exposure, title cost, and the facts we don&apos;t have. Takes about 30
+          seconds.
+        </p>
+        <button
+          onClick={generate}
+          className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-fg hover:opacity-90"
+        >
+          Generate brief
+        </button>
+      </Card>
+    );
+  }
+
+  if (state === "loading") {
+    return (
+      <Card>
+        <h3 className="text-sm font-semibold">AI risk brief</h3>
+        <p className="mt-2 animate-pulse text-sm text-muted">
+          Reading the parcel against {"…"} county statutes, lien survival, and title risk.
+        </p>
+      </Card>
+    );
+  }
+
+  if (state === "error") {
+    return (
+      <Callout tone="warn" title="Brief unavailable">
+        {error}
+        <div className="mt-2">
+          <button onClick={generate} className="text-sm underline">
+            Try again
+          </button>
+        </div>
+        <p className="mt-2 text-xs">
+          The max-bid analysis above is computed deterministically and is unaffected.
+        </p>
+      </Callout>
+    );
+  }
+
+  if (!brief) return null;
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <h3 className="text-sm font-semibold">AI risk brief</h3>
+        <p className="mt-2 text-base leading-relaxed">{brief.headline}</p>
+      </Card>
+
+      {brief.riskFlags.length > 0 && (
+        <Card>
+          <h3 className="mb-3 text-sm font-semibold">Risk flags</h3>
+          <ul className="space-y-3">
+            {brief.riskFlags.map((f) => (
+              <li key={f.title} className="border-l-2 pl-3" style={{ borderColor: SEVERITY_COLOR[f.severity] }}>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="text-[10px] font-medium uppercase tracking-wide"
+                    style={{ color: SEVERITY_COLOR[f.severity] }}
+                  >
+                    {f.severity}
+                  </span>
+                  <span className="text-sm font-medium">{f.title}</span>
+                </div>
+                <p className="mt-0.5 text-sm leading-relaxed text-muted">{f.detail}</p>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {brief.dueDiligence.length > 0 && (
+        <Card>
+          <h3 className="mb-2 text-sm font-semibold">Before you bid</h3>
+          <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted">
+            {brief.dueDiligence.map((d) => (
+              <li key={d}>{d}</li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {brief.unknowns.length > 0 && (
+        <Callout tone="warn" title="What we don't know">
+          <ul className="list-disc space-y-1 pl-4">
+            {brief.unknowns.map((u) => (
+              <li key={u}>{u}</li>
+            ))}
+          </ul>
+        </Callout>
+      )}
+
+      <Card>
+        <h3 className="mb-2 text-sm font-semibold">Analysis</h3>
+        <div className="space-y-3 text-sm leading-relaxed text-muted">
+          {brief.narrative.split(/\n\n+/).map((p, i) => (
+            <p key={i}>{p}</p>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}

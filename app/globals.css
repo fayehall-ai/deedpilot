@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/**
+ * DeedPilot design tokens.
+ *
+ * The palette is deliberately sober: this is a tool people use to decide how
+ * to spend tens of thousands of dollars, often live during an auction. Colour
+ * carries meaning here rather than decoration — the sale-type hues come from
+ * the original atlas so the map legend stays consistent, and the semantic
+ * colours are reserved for bid guidance (under / near / over your ceiling).
+ */
+
+:root {
+  --background: #fbfaf8;
+  --surface: #ffffff;
+  --surface-2: #f4f2ee;
+  --foreground: #1b1917;
+  --muted: #6d675f;
+  --border: #e3dfd8;
+
+  --accent: #1f4d3d;
+  --accent-fg: #ffffff;
+
+  /* Bid guidance. Load-bearing during a live auction. */
+  --ok: #2f6f4f;
+  --warn: #b8842f;
+  --danger: #a3342a;
+
+  /* Sale types — carried over from the Tax Sale Atlas legend. */
+  --type-lien: #2f6f4f;
+  --type-deed: #8a3b2f;
+  --type-redeemable: #b8842f;
+  --type-hybrid: #3f5c8a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #14130f;
+    --surface: #1c1a16;
+    --surface-2: #24211c;
+    --foreground: #f0ece5;
+    --muted: #a29b90;
+    --border: #34302a;
+
+    --accent: #4e9d7f;
+    --accent-fg: #0d1512;
+
+    --ok: #5cb98d;
+    --warn: #e0b45f;
+    --danger: #e0776c;
+
+    --type-lien: #5cb98d;
+    --type-deed: #d97a68;
+    --type-redeemable: #e0b45f;
+    --type-hybrid: #7f9fd4;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Money and parcel numbers line up in columns — tabular figures are not
+   cosmetic when you're scanning 200 lots for the one that's mispriced. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}

@@ -1,0 +1,464 @@
+/**
+ * DeedPilot database schema.
+ *
+ * Shape of the domain: a *county* holds *auctions*; an auction lists *lots*
+ * (parcels); a lot accrues *valuations* (scraped enrichment) and
+ * *deal analyses* (what the AI buddy concluded). Users build *bid sheets*
+ * against an auction and track outcomes.
+ *
+ * The rules atlas deliberately lives in code (lib/atlas), not here — it is
+ * authored, version-controlled research, and it powers statically generated
+ * SEO pages. Only *observed* data (auctions, lots, prices) lives in Postgres.
+ */
+
+import {
+  pgTable,
+  pgEnum,
+  text,
+  integer,
+  bigint,
+  numeric,
+  boolean,
+  timestamp,
+  jsonb,
+  uuid,
+  date,
+  index,
+  uniqueIndex,
+  primaryKey,
+} from "drizzle-orm/pg-core";
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+export const saleTypeEnum = pgEnum("sale_type", [
+  "Tax Lien",
+  "Tax Deed",
+  "Redeemable Deed",
+  "Hybrid",
+]);
+
+/** Where a sale is hosted. `county_site` covers one-off county portals/PDFs. */
+export const platformEnum = pgEnum("platform", [
+  "realtaxdeed", // RealAuction — most of Florida
+  "realforeclose", // RealAuction foreclosure/tax product
+  "govease",
+  "bid4assets",
+  "zeus",
+  "lienhub",
+  "grantstreet",
+  "taxsaleinfo", // Title Check LLC — most of Michigan
+  "mvba", // Texas delinquent-tax law firm sale lists
+  "lgbs", // Linebarger Goggan Blair & Sampson — Texas
+  "county_site",
+  "in_person",
+]);
+
+export const auctionStatusEnum = pgEnum("auction_status", [
+  "scheduled",
+  "live",
+  "closed",
+  "cancelled",
+  "postponed",
+]);
+
+export const lotStatusEnum = pgEnum("lot_status", [
+  "pending", // listed, not yet sold
+  "sold",
+  "redeemed", // owner paid before the sale
+  "cancelled",
+  "struck", // no bid; struck to the county/state
+  "withdrawn",
+]);
+
+export const planEnum = pgEnum("plan", ["free", "starter", "pro", "team"]);
+
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "trialing",
+  "active",
+  "past_due",
+  "canceled",
+  "incomplete",
+]);
+
+export const ingestStatusEnum = pgEnum("ingest_status", [
+  "running",
+  "ok",
+  "partial",
+  "failed",
+]);
+
+// ---------------------------------------------------------------------------
+// Geography
+// ---------------------------------------------------------------------------
+
+/**
+ * All 3,142 counties, seeded from the atlas. Exists in the DB (rather than
+ * only in code) so auctions and lots can foreign-key to a real row and so
+ * coverage/ingest state has somewhere to live.
+ */
+export const counties = pgTable(
+  "counties",
+  {
+    /** 5-digit FIPS — the canonical join key across the whole system. */
+    fips: text("fips").primaryKey(),
+    name: text("name").notNull(),
+    state: text("state").notNull(),
+    stateName: text("state_name").notNull(),
+    population: integer("population"),
+    /** True for the 5 states with parcel-level ingestion (FL/GA/TX/AZ/MI). */
+    covered: boolean("covered").notNull().default(false),
+    /** Which adapter services this county, when covered. */
+    platform: platformEnum("platform"),
+    /** Adapter-specific config: subdomain, portal URL, list page, selectors. */
+    adapterConfig: jsonb("adapter_config").$type<Record<string, unknown>>(),
+    lastIngestedAt: timestamp("last_ingested_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("counties_state_idx").on(t.state),
+    index("counties_covered_idx").on(t.covered),
+  ],
+);
+
+// ---------------------------------------------------------------------------
+// Auctions and lots
+// ---------------------------------------------------------------------------
+
+export const auctions = pgTable(
+  "auctions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    countyFips: text("county_fips")
+      .notNull()
+      .references(() => counties.fips),
+    platform: platformEnum("platform").notNull(),
+    saleType: saleTypeEnum("sale_type").notNull(),
+    /** The platform's own id for this sale — half of the dedupe key. */
+    externalId: text("external_id").notNull(),
+    title: text("title"),
+    saleDate: date("sale_date").notNull(),
+    /** Local start time as published, e.g. "10:00 AM ET". Prose, not parsed. */
+    startTime: text("start_time"),
+    status: auctionStatusEnum("status").notNull().default("scheduled"),
+    registrationDeadline: timestamp("registration_deadline", { withTimezone: true }),
+    depositDeadline: timestamp("deposit_deadline", { withTimezone: true }),
+    sourceUrl: text("source_url").notNull(),
+    lotCount: integer("lot_count").notNull().default(0),
+    /** Untouched payload from the source, for re-parsing without re-fetching. */
+    raw: jsonb("raw").$type<Record<string, unknown>>(),
+    firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("auctions_source_key").on(t.countyFips, t.platform, t.externalId),
+    index("auctions_date_idx").on(t.saleDate),
+    index("auctions_county_date_idx").on(t.countyFips, t.saleDate),
+    index("auctions_status_idx").on(t.status),
+  ],
+);
+
+/**
+ * A single parcel offered at an auction.
+ *
+ * Money is `numeric(14,2)` throughout — never float. Bids are compared,
+ * summed, and shown to users deciding how to spend real money.
+ */
+export const lots = pgTable(
+  "lots",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    auctionId: uuid("auction_id")
+      .notNull()
+      .references(() => auctions.id, { onDelete: "cascade" }),
+    countyFips: text("county_fips")
+      .notNull()
+      .references(() => counties.fips),
+
+    /** The platform's item id. */
+    externalId: text("external_id"),
+    /**
+     * Dedupe key within an auction: `parcelNumber ?? externalId`, computed by
+     * the ingest runner. An explicit column rather than a unique index over
+     * `parcel_number` directly, because Postgres treats NULLs as distinct —
+     * a source that omits parcel numbers would silently insert duplicates on
+     * every run.
+     */
+    dedupeKey: text("dedupe_key").notNull(),
+    /** Sequence within the sale — what the auctioneer calls out. */
+    lotNumber: text("lot_number"),
+    /** County parcel/APN identifier — the join key to assessor data. */
+    parcelNumber: text("parcel_number"),
+    /** Tax deed application or court case number, where applicable. */
+    caseNumber: text("case_number"),
+
+    addressLine: text("address_line"),
+    city: text("city"),
+    zip: text("zip"),
+    legalDescription: text("legal_description"),
+    latitude: numeric("latitude", { precision: 9, scale: 6 }),
+    longitude: numeric("longitude", { precision: 9, scale: 6 }),
+
+    openingBid: numeric("opening_bid", { precision: 14, scale: 2 }),
+    assessedValue: numeric("assessed_value", { precision: 14, scale: 2 }),
+    /** Total delinquent taxes driving the sale. */
+    taxesOwed: numeric("taxes_owed", { precision: 14, scale: 2 }),
+
+    landUse: text("land_use"),
+    acreage: numeric("acreage", { precision: 12, scale: 4 }),
+    buildingSqft: integer("building_sqft"),
+    yearBuilt: integer("year_built"),
+    ownerName: text("owner_name"),
+
+    status: lotStatusEnum("status").notNull().default("pending"),
+    soldAmount: numeric("sold_amount", { precision: 14, scale: 2 }),
+    soldAt: timestamp("sold_at", { withTimezone: true }),
+    /** Surplus over the taxes owed — the excess-proceeds claim opportunity. */
+    surplus: numeric("surplus", { precision: 14, scale: 2 }),
+
+    sourceUrl: text("source_url"),
+    raw: jsonb("raw").$type<Record<string, unknown>>(),
+    firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("lots_auction_dedupe_key").on(t.auctionId, t.dedupeKey),
+    index("lots_auction_idx").on(t.auctionId),
+    index("lots_county_idx").on(t.countyFips),
+    index("lots_parcel_idx").on(t.countyFips, t.parcelNumber),
+    index("lots_status_idx").on(t.status),
+  ],
+);
+
+/**
+ * Enrichment pulled from county assessor / GIS portals, kept separate from
+ * the auction listing so a re-scrape of either side never clobbers the other.
+ */
+export const lotValuations = pgTable(
+  "lot_valuations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    lotId: uuid("lot_id")
+      .notNull()
+      .references(() => lots.id, { onDelete: "cascade" }),
+    /** Which portal this came from, e.g. "fl-pinellas-pao". */
+    source: text("source").notNull(),
+    taxYear: integer("tax_year"),
+    assessedLand: numeric("assessed_land", { precision: 14, scale: 2 }),
+    assessedImprovement: numeric("assessed_improvement", { precision: 14, scale: 2 }),
+    assessedTotal: numeric("assessed_total", { precision: 14, scale: 2 }),
+    marketValue: numeric("market_value", { precision: 14, scale: 2 }),
+    /** Last arm's-length sale on record — the best free comp we get. */
+    lastSaleAmount: numeric("last_sale_amount", { precision: 14, scale: 2 }),
+    lastSaleDate: date("last_sale_date"),
+    homestead: boolean("homestead"),
+    zoning: text("zoning"),
+    floodZone: text("flood_zone"),
+    raw: jsonb("raw").$type<Record<string, unknown>>(),
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("lot_valuations_lot_source_key").on(t.lotId, t.source),
+    index("lot_valuations_lot_idx").on(t.lotId),
+  ],
+);
+
+// ---------------------------------------------------------------------------
+// Users, billing, entitlements
+// ---------------------------------------------------------------------------
+
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    name: text("name"),
+    stripeCustomerId: text("stripe_customer_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("users_email_key").on(t.email)],
+);
+
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    plan: planEnum("plan").notNull().default("free"),
+    status: subscriptionStatusEnum("status").notNull().default("active"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    stripePriceId: text("stripe_price_id"),
+    currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("subscriptions_user_key").on(t.userId),
+    index("subscriptions_stripe_idx").on(t.stripeSubscriptionId),
+  ],
+);
+
+/**
+ * Metered usage for plan limits (AI briefs on Starter, etc.), bucketed by
+ * calendar month so a reset is a new row rather than a cron job.
+ */
+export const usageCounters = pgTable(
+  "usage_counters",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** "YYYY-MM" */
+    period: text("period").notNull(),
+    metric: text("metric").notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.period, t.metric] })],
+);
+
+// ---------------------------------------------------------------------------
+// User workspace: watchlists, bid sheets, AI output
+// ---------------------------------------------------------------------------
+
+export const watchlistItems = pgTable(
+  "watchlist_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    lotId: uuid("lot_id")
+      .notNull()
+      .references(() => lots.id, { onDelete: "cascade" }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("watchlist_user_lot_key").on(t.userId, t.lotId),
+    index("watchlist_user_idx").on(t.userId),
+  ],
+);
+
+/** A user's plan for one auction: total budget plus per-lot ceilings. */
+export const bidSheets = pgTable(
+  "bid_sheets",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    auctionId: uuid("auction_id")
+      .notNull()
+      .references(() => auctions.id, { onDelete: "cascade" }),
+    name: text("name"),
+    /** Hard ceiling across the whole sale — the co-pilot warns against it. */
+    totalBudget: numeric("total_budget", { precision: 14, scale: 2 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("bid_sheets_user_auction_key").on(t.userId, t.auctionId)],
+);
+
+export const bidSheetItems = pgTable(
+  "bid_sheet_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bidSheetId: uuid("bid_sheet_id")
+      .notNull()
+      .references(() => bidSheets.id, { onDelete: "cascade" }),
+    lotId: uuid("lot_id")
+      .notNull()
+      .references(() => lots.id, { onDelete: "cascade" }),
+    /** The walk-away number. Never exceeded by the co-pilot's advice. */
+    maxBid: numeric("max_bid", { precision: 14, scale: 2 }),
+    priority: integer("priority").notNull().default(0),
+    notes: text("notes"),
+    /** What actually happened, filled in during or after the sale. */
+    outcome: text("outcome"),
+    wonAmount: numeric("won_amount", { precision: 14, scale: 2 }),
+  },
+  (t) => [
+    uniqueIndex("bid_sheet_items_sheet_lot_key").on(t.bidSheetId, t.lotId),
+    index("bid_sheet_items_sheet_idx").on(t.bidSheetId),
+  ],
+);
+
+/**
+ * A cached AI risk brief + max-bid recommendation for a lot.
+ *
+ * Keyed by lot and by an `inputsHash` of the deterministic inputs, so changing
+ * your target margin or rehab assumption produces a new analysis instead of
+ * silently reusing a stale one.
+ */
+export const dealAnalyses = pgTable(
+  "deal_analyses",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    lotId: uuid("lot_id")
+      .notNull()
+      .references(() => lots.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    inputsHash: text("inputs_hash").notNull(),
+    model: text("model").notNull(),
+    /** Deterministic maths from lib/deal — not model output. */
+    maxBid: numeric("max_bid", { precision: 14, scale: 2 }),
+    arvEstimate: numeric("arv_estimate", { precision: 14, scale: 2 }),
+    totalCosts: numeric("total_costs", { precision: 14, scale: 2 }),
+    /** Structured hazards: surviving liens, redemption exposure, occupancy. */
+    riskFlags: jsonb("risk_flags").$type<unknown[]>(),
+    /** Markdown narrative from the model. */
+    brief: text("brief"),
+    inputs: jsonb("inputs").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("deal_analyses_lot_inputs_key").on(t.lotId, t.inputsHash),
+    index("deal_analyses_lot_idx").on(t.lotId),
+  ],
+);
+
+// ---------------------------------------------------------------------------
+// Ingestion observability
+// ---------------------------------------------------------------------------
+
+/**
+ * One row per adapter run. Scraping 578 counties across 6 platforms breaks
+ * constantly and silently; without this table a county that quietly stopped
+ * returning lots looks identical to a county with no sale scheduled.
+ */
+export const ingestRuns = pgTable(
+  "ingest_runs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    adapter: text("adapter").notNull(),
+    countyFips: text("county_fips").references(() => counties.fips),
+    status: ingestStatusEnum("status").notNull().default("running"),
+    auctionsFound: integer("auctions_found").notNull().default(0),
+    lotsFound: integer("lots_found").notNull().default(0),
+    lotsChanged: integer("lots_changed").notNull().default(0),
+    /** Rows the judge rejected — a spike here means the source layout moved. */
+    rejected: integer("rejected").notNull().default(0),
+    /** Field-level fixes on kept rows; rises the same way, without data loss. */
+    repaired: integer("repaired").notNull().default(0),
+    error: text("error"),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    durationMs: bigint("duration_ms", { mode: "number" }),
+  },
+  (t) => [
+    index("ingest_runs_adapter_idx").on(t.adapter, t.startedAt),
+    index("ingest_runs_county_idx").on(t.countyFips, t.startedAt),
+  ],
+);
+
+export type County = typeof counties.$inferSelect;
+export type Auction = typeof auctions.$inferSelect;
+export type NewAuction = typeof auctions.$inferInsert;
+export type Lot = typeof lots.$inferSelect;
+export type NewLot = typeof lots.$inferInsert;
+export type LotValuation = typeof lotValuations.$inferSelect;
+export type User = typeof users.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type DealAnalysis = typeof dealAnalyses.$inferSelect;
+export type IngestRun = typeof ingestRuns.$inferSelect;
