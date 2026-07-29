@@ -40,3 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# Copilot Python env + runtime artifacts
+copilot/.venv/
+copilot/**/__pycache__/
+copilot/*.egg-info/
+copilot/data/runs/
+copilot/data/lessons.jsonl
