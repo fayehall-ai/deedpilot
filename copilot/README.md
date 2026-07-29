@@ -35,11 +35,14 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 
-# 3) Smoke tests
+# 3) Ensure historical outcomes seed + calibrated priors (no-op if present)
+deedpilot-copilot seed-history
+
+# 4) Smoke tests
 pytest -q
 
-# 4) One flywheel cycle
-deedpilot-copilot cycle
+# 5) One flywheel cycle
+DEEDPILOT_REFLECT_MODE=rules deedpilot-copilot cycle
 # or: python -m deedpilot_copilot.cli cycle
 ```
 
@@ -80,7 +83,7 @@ deedpilot-copilot cycle
 |-------|--------|
 | Trusted atlas + maxbid oracles | **Implemented** (TS + Python) |
 | Trajectory schema + critique | **Implemented** |
-| Simulator with redemption/QT sampling | **Implemented** (prior-based; needs historical calibration) |
+| Simulator with redemption/QT sampling | **Implemented** — historical JSONL + expert shrinkage |
 | Lesson memory + flywheel | **Implemented** |
 | Structured LLM reflection | **Implemented** — Grok primary / Claude fallback; rules fallback + safety merge |
 | Backtest harness | **Implemented** (synthetic) |
@@ -119,10 +122,46 @@ DEEDPILOT_REFLECT_MODE=rules deedpilot-copilot cycle
 deedpilot-copilot cycle
 ```
 
+## Historical outcomes → simulator noise
+
+The simulator no longer uses only hard-coded expert rates. It loads
+`data/historical_outcomes.jsonl`, fits per `(state, sale_type)` buckets, and
+**shrinks** empirical rates toward expert priors (`prior_strength=20`
+pseudo-counts) so small samples cannot dominate.
+
+| Artifact | Role |
+|----------|------|
+| `data/historical_outcomes.jsonl` | One outcome per line (`HistoricalOutcome`) |
+| `data/simulator_priors.json` | Fitted cache (rebuild anytime) |
+| `provenance` | `synthetic_seed` bootstrap vs `recorded` / `investor_log` real data |
+
+Noise calibrated from history:
+
+- **p_redeem** (Bernoulli draw)
+- **exit / ARV multiples** (p10/p50/p90 on ownership paths)
+- **quiet-title cost** and **holding months** (blended with statute ranges)
+- **surviving-lien rate** and magnitude
+- **rehab** prior when lot omits rehab
+
+```bash
+# Bootstrap seed (already shipped) or force regenerate
+deedpilot-copilot seed-history
+deedpilot-copilot seed-history --force
+
+# After appending real outcomes to the JSONL:
+deedpilot-copilot calibrate-priors
+deedpilot-copilot priors
+```
+
+Append real results as JSONL lines with `provenance: "recorded"` or
+`"investor_log"`. Override paths with `DEEDPILOT_HISTORICAL_OUTCOMES` /
+`DEEDPILOT_SIMULATOR_PRIORS` if needed.
+
 ## Next upgrades
 
 1. ~~Swap rule-based `reflect_on_batch` for a strong-model structured reflection call.~~ **Done**
-2. Load historical auction outcomes into the simulator noise model.
+2. ~~Load historical auction outcomes into the simulator noise model.~~ **Done** (seed + real-data path)
 3. LLM planner on the agent decide node (still oracle-bound for numbers).
 4. Add LangGraph persistence checkpointer when you wire multi-turn sessions.
 5. Preference pairs from human spot-checks for prompt optimization.
+6. Replace synthetic seed rows with county / investor recorded outcomes over time.

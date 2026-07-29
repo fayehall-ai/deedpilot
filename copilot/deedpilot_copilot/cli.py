@@ -1,4 +1,4 @@
-"""CLI: deedpilot-copilot cycle | backtest | lookup | maxbid"""
+"""CLI: deedpilot-copilot cycle | backtest | lookup | maxbid | priors | seed-history"""
 
 from __future__ import annotations
 
@@ -74,6 +74,49 @@ def cycle():
     """Run one self-improvement flywheel cycle on synthetic lots."""
     result = run_cycle(default_synthetic_lots())
     rprint(result)
+
+
+@app.command("seed-history")
+def seed_history(force: bool = typer.Option(False, help="Overwrite existing outcomes file")):
+    """Write synthetic seed historical outcomes and calibrate simulator priors."""
+    from .history import calibrate_priors, ensure_seed_outcomes, generate_seed_outcomes, write_outcomes
+
+    if force:
+        n = write_outcomes(generate_seed_outcomes())
+        priors = calibrate_priors(cache=True)
+        rprint({"wrote": n, "n_outcomes": priors.n_outcomes, "buckets": len(priors.buckets)})
+    else:
+        path = ensure_seed_outcomes(force=False)
+        from .history import get_priors, load_outcomes
+
+        outs = load_outcomes()
+        priors = get_priors(force_reload=True)
+        rprint(
+            {
+                "path": str(path),
+                "n_outcomes": len(outs),
+                "n_buckets": len(priors.buckets),
+                "provenance": priors.provenance_counts,
+            }
+        )
+
+
+@app.command("calibrate-priors")
+def calibrate_priors_cmd():
+    """Re-fit simulator noise model from data/historical_outcomes.jsonl."""
+    from .history import calibrate_priors, priors_path, priors_summary
+
+    priors = calibrate_priors(cache=True)
+    rprint(priors_summary(priors))
+    rprint({"priors_path": str(priors_path())})
+
+
+@app.command("priors")
+def priors_cmd():
+    """Show calibrated simulator prior buckets."""
+    from .history import get_priors, priors_summary
+
+    rprint(priors_summary(get_priors()))
 
 
 if __name__ == "__main__":

@@ -126,3 +126,61 @@ def test_reflect_on_batch_state_default_safety():
     lessons = reflect_on_batch([traj], use_llm=False)
     # May or may not fire depending on agent rationale; just ensure shape OK
     assert isinstance(lessons, list)
+
+
+def test_historical_priors_calibrate():
+    from deedpilot_copilot.history import (
+        calibrate_priors,
+        generate_seed_outcomes,
+        get_priors,
+        resolve_bucket,
+    )
+    from deedpilot_copilot.schemas import SaleType
+
+    priors = calibrate_priors(generate_seed_outcomes(seed=7), cache=False)
+    assert priors.n_outcomes >= 100
+    assert "TX|Redeemable Deed" in priors.buckets
+    tx = resolve_bucket(priors, "TX", SaleType.REDEEMABLE_DEED)
+    assert 0.05 < tx.p_redeem < 0.9
+    # Shrinkage: with finite n, p is between raw and expert (or equal if raw≈expert)
+    assert tx.p_redeem_raw is not None
+    lo = min(tx.p_redeem_raw, tx.expert_p_redeem) - 1e-6
+    hi = max(tx.p_redeem_raw, tx.expert_p_redeem) + 1e-6
+    assert lo <= tx.p_redeem <= hi
+
+    # Cached loader should work against on-disk seed
+    disk = get_priors(force_reload=True)
+    assert disk.n_outcomes > 0
+
+
+def test_simulator_uses_history_noise():
+    from deedpilot_copilot.simulator import base_p_redeem, simulate_outcome
+
+    p_hist, meta = base_p_redeem(
+        "TX", SaleType.REDEEMABLE_DEED, 12_000, 180_000, use_history=True
+    )
+    p_exp, meta_exp = base_p_redeem(
+        "TX", SaleType.REDEEMABLE_DEED, 12_000, 180_000, use_history=False
+    )
+    assert 0.02 <= p_hist <= 0.95
+    assert meta.get("source") in ("historical", "expert", "expert_fallback_error")
+    assert meta_exp.get("source") == "expert"
+    # History path should attach bucket meta when seed data is present
+    if meta.get("source") == "historical":
+        assert meta.get("n", 0) > 0
+        assert meta.get("bucket")
+
+    lot = Lot(
+        lot_id="hist-sim",
+        fips="48201",
+        state="TX",
+        opening_bid=12_000,
+        assessed_value=180_000,
+        rehab_cost=25_000,
+    )
+    out = simulate_outcome(
+        lot, 15_000, SaleType.REDEEMABLE_DEED, seed="hist-sim-1", use_history=True
+    )
+    assert out.cash_out == 15_000
+    assert "noise" in out.details
+    assert out.details["p_redeem_used"] > 0

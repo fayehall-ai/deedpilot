@@ -125,6 +125,81 @@ class SimulatedOutcome(BaseModel):
     details: dict[str, Any] = Field(default_factory=dict)
 
 
+class HistoricalOutcome(BaseModel):
+    """
+    One observed (or seed) auction path used to calibrate simulator noise.
+
+    Drop real investor/county outcomes into data/historical_outcomes.jsonl with
+    provenance='recorded' or 'investor_log'. Synthetic seed rows are labeled
+    provenance='synthetic_seed' and only bootstrap the model until real data
+    dominates via sample-size shrinkage.
+    """
+
+    id: str
+    state: str
+    fips: str | None = None
+    county_name: str | None = None
+    sale_type: SaleType
+    sale_date: str | None = None  # YYYY-MM-DD
+    opening_bid: float | None = None
+    winning_bid: float | None = None
+    assessed_value: float | None = None
+    arv_estimate: float | None = None
+    redeemed: bool
+    ownership_taken: bool
+    days_to_redeem: float | None = None
+    holding_months: float | None = None
+    quiet_title_cost: float | None = None
+    exit_price: float | None = None  # gross disposition when owned
+    profit_loss: float | None = None
+    surviving_liens: float | None = None
+    rehab_cost: float | None = None
+    penalty_rate: float | None = None
+    bid_to_arv: float | None = None  # winning_bid / arv when both known
+    provenance: Literal[
+        "recorded", "synthetic_seed", "investor_log", "inferred"
+    ] = "recorded"
+    source: str | None = None
+    notes: str = ""
+
+
+class NoiseBucket(BaseModel):
+    """Empirical + shrunk noise parameters for one (state, sale_type) bucket."""
+
+    key: str
+    state: str | None = None
+    sale_type: str | None = None
+    n: int = 0
+    n_redeemed: int = 0
+    p_redeem_raw: float | None = None
+    p_redeem: float  # shrunk toward expert prior
+    expert_p_redeem: float
+    # Ownership-path exit as fraction of ARV (p10/p50/p90)
+    exit_mult_p10: float = 0.72
+    exit_mult_p50: float = 0.85
+    exit_mult_p90: float = 0.95
+    holding_months_mean: float | None = None
+    holding_months_std: float | None = None
+    qt_cost_mean: float | None = None
+    qt_cost_std: float | None = None
+    lien_rate: float = 0.2  # P(surviving liens > 0) on ownership path
+    mean_lien_if_any: float = 4000.0
+    mean_rehab: float | None = None
+
+
+class SimulatorPriors(BaseModel):
+    """Fitted noise model consumed by predict_outcome / simulate_outcome."""
+
+    calibrated_at: str = Field(default_factory=utc_now)
+    n_outcomes: int = 0
+    provenance_counts: dict[str, int] = Field(default_factory=dict)
+    prior_strength: float = 20.0  # pseudo-counts for expert shrinkage
+    buckets: dict[str, NoiseBucket] = Field(default_factory=dict)
+    by_sale_type: dict[str, NoiseBucket] = Field(default_factory=dict)
+    global_bucket: NoiseBucket | None = None
+    source_path: str | None = None
+
+
 class ToolCallRecord(BaseModel):
     tool: str
     args: dict[str, Any]

@@ -1,8 +1,9 @@
 """
-Outcome simulator — samples redemption / ownership using statute tiers + priors.
+Outcome simulator — samples redemption / ownership using historical noise + priors.
 
 Fidelity is intentionally conservative. Real tax-deed outcomes are sparse/noisy;
-this module must never invent certainty.
+this module must never invent certainty. Historical outcomes (JSONL) calibrate
+the noise model with expert-prior shrinkage when sample size is small.
 """
 
 from __future__ import annotations
@@ -11,6 +12,17 @@ import hashlib
 import random
 from typing import Any
 
+from .history import (
+    apply_bid_arv_adjustment,
+    expert_p_redeem,
+    get_priors,
+    resolve_bucket,
+    sample_exit_mult,
+    sample_holding_months,
+    sample_qt_cost,
+    sample_rehab,
+    sample_surviving_liens,
+)
 from .maxbid import compute_maxbid
 from .schemas import DealInputs, Lot, PredictedOutcome, SaleType, SimulatedOutcome
 from .statute import statute_for
@@ -21,30 +33,44 @@ def _rng(seed: str) -> random.Random:
     return random.Random(int(h[:16], 16))
 
 
-def base_p_redeem(state: str, sale_type: SaleType, opening_bid: float | None, arv: float | None) -> float:
-    """Expert priors — calibrated loosely; flywheel adjusts via lessons."""
-    if sale_type == SaleType.TAX_LIEN:
-        return 0.72
-    if sale_type == SaleType.REDEEMABLE_DEED:
-        p = 0.38
-    elif sale_type == SaleType.TAX_DEED:
-        p = 0.12
-    else:
-        p = 0.25
+def base_p_redeem(
+    state: str,
+    sale_type: SaleType,
+    opening_bid: float | None,
+    arv: float | None,
+    *,
+    use_history: bool = True,
+) -> tuple[float, dict[str, Any]]:
+    """
+    Redemption probability + audit meta.
 
-    # Cheap opening relative to ARV → more likely owner walks (lower redeem)
-    if opening_bid and arv and arv > 0:
-        ratio = opening_bid / arv
-        if ratio < 0.05:
-            p *= 0.85
-        elif ratio > 0.35:
-            p = min(0.85, p * 1.25)
-    # State tweaks from atlas experience
-    if state in ("TX", "GA"):
-        p = min(0.9, p * 1.1)
-    if state == "MI":
-        p *= 0.7
-    return max(0.02, min(0.95, p))
+    When historical outcomes exist, use the shrunk empirical rate for
+    (state, sale_type), then apply bid/ARV structural adjustment.
+    Falls back to expert priors when history is empty.
+    """
+    meta: dict[str, Any] = {"source": "expert"}
+    if use_history:
+        try:
+            priors = get_priors()
+            bucket = resolve_bucket(priors, state, sale_type)
+            p = bucket.p_redeem
+            meta = {
+                "source": "historical" if bucket.n > 0 else "expert",
+                "bucket": bucket.key,
+                "n": bucket.n,
+                "p_redeem_raw": bucket.p_redeem_raw,
+                "expert_p_redeem": bucket.expert_p_redeem,
+                "prior_strength": priors.prior_strength,
+                "n_outcomes_total": priors.n_outcomes,
+            }
+        except Exception:  # noqa: BLE001 — never break simulation on history load
+            p = expert_p_redeem(state, sale_type)
+            meta = {"source": "expert_fallback_error"}
+    else:
+        p = expert_p_redeem(state, sale_type)
+
+    p = apply_bid_arv_adjustment(p, opening_bid, arv)
+    return max(0.02, min(0.95, p)), meta
 
 
 def predict_outcome(
@@ -52,6 +78,8 @@ def predict_outcome(
     bid_amount: float | None,
     sale_type: SaleType,
     lessons: list[dict[str, Any]] | None = None,
+    *,
+    use_history: bool = True,
 ) -> PredictedOutcome:
     if bid_amount is None or bid_amount <= 0:
         return PredictedOutcome(
@@ -72,10 +100,20 @@ def predict_outcome(
     )
     deal = compute_maxbid(inputs)
     arv = deal.arv_value or 0.0
-    p = base_p_redeem(lot.state, sale_type, lot.opening_bid, arv)
+    p, prior_meta = base_p_redeem(
+        lot.state, sale_type, lot.opening_bid, arv, use_history=use_history
+    )
 
     # Apply active lessons
-    notes = []
+    notes: list[str] = []
+    if prior_meta.get("source") == "historical":
+        notes.append(
+            f"p_redeem from history bucket {prior_meta.get('bucket')} "
+            f"n={prior_meta.get('n')} (shrunk)."
+        )
+    else:
+        notes.append("Expert prior p_redeem (no/insufficient history bucket).")
+
     for lesson in lessons or []:
         if not lesson.get("active", True):
             continue
@@ -98,7 +136,6 @@ def predict_outcome(
 
     # Ownership path: ARV - costs - bid roughly from deal projection
     if deal.max_bid is not None and deal.projected_profit is not None:
-        # scale profit if bid differs from max
         overpay = max(0.0, bid_amount - (deal.max_bid or 0))
         profit_if_own = deal.projected_profit - overpay
     else:
@@ -119,8 +156,10 @@ def simulate_outcome(
     sale_type: SaleType,
     seed: str | None = None,
     lessons: list[dict[str, Any]] | None = None,
+    *,
+    use_history: bool = True,
 ) -> SimulatedOutcome:
-    """Sample one Monte Carlo path for training / backtest."""
+    """Sample one Monte Carlo path for training / backtest (history-calibrated noise)."""
     if bid_amount is None or bid_amount <= 0:
         return SimulatedOutcome(
             redeemed=False,
@@ -134,7 +173,9 @@ def simulate_outcome(
             details={"action": "pass"},
         )
 
-    pred = predict_outcome(lot, bid_amount, sale_type, lessons)
+    pred = predict_outcome(
+        lot, bid_amount, sale_type, lessons, use_history=use_history
+    )
     rng = _rng(seed or f"{lot.lot_id}:{bid_amount}")
     redeemed = rng.random() < pred.p_redeem
 
@@ -143,29 +184,78 @@ def simulate_outcome(
     holding_months = 0.0
     penalty = 0.0
     cash_out = bid_amount
+    noise_meta: dict[str, Any] = {"history": False}
+
+    bucket = None
+    if use_history:
+        try:
+            priors = get_priors()
+            bucket = resolve_bucket(priors, lot.state, sale_type)
+            noise_meta = {
+                "history": True,
+                "bucket": bucket.key,
+                "n": bucket.n,
+                "exit_mult_p50": bucket.exit_mult_p50,
+                "lien_rate": bucket.lien_rate,
+                "n_outcomes_total": priors.n_outcomes,
+            }
+        except Exception as e:  # noqa: BLE001
+            noise_meta = {"history": False, "error": str(e)[:120]}
 
     if redeemed and statute and statute.get("redemption"):
         pen = statute["redemption"]["tiers"][0]["penalty"]
         penalty = bid_amount * pen
-        # Capital returned + penalty
         cash_in = bid_amount + penalty
         profit = penalty
         ownership = False
-        holding_months = rng.uniform(1, max(2, statute["redemption"]["maxDays"] / 30 / 2))
+        if bucket is not None:
+            holding_months = sample_holding_months(
+                bucket, statute, rng, redeemed=True
+            )
+        else:
+            holding_months = rng.uniform(
+                1, max(2, statute["redemption"]["maxDays"] / 30 / 2)
+            )
     elif redeemed:
         # Deed states with rare post-sale redeem — treat as break-even + small cost
         cash_in = bid_amount * 0.98
         profit = cash_in - cash_out
         ownership = False
+        holding_months = (
+            sample_holding_months(bucket, statute, rng, redeemed=True)
+            if bucket is not None
+            else rng.uniform(1, 4)
+        )
     else:
         ownership = True
-        if statute:
-            qt = statute["quietTitle"]
-            qt_cost = rng.uniform(qt["typicalLow"], qt["typicalHigh"])
-            holding_months = qt["typicalMonths"] + rng.uniform(0, 3)
+        if bucket is not None:
+            qt_cost = sample_qt_cost(bucket, statute, rng)
+            holding_months = sample_holding_months(
+                bucket, statute, rng, redeemed=False
+            )
+            liens = (
+                lot.surviving_liens
+                if lot.surviving_liens is not None
+                else sample_surviving_liens(bucket, rng)
+            )
+            rehab = sample_rehab(bucket, lot.rehab_cost, rng)
+            exit_mult = sample_exit_mult(bucket, rng)
+            noise_meta["exit_mult_drawn"] = round(exit_mult, 4)
+            noise_meta["liens_drawn"] = round(liens, 2)
+            noise_meta["rehab_drawn"] = round(rehab, 2)
         else:
-            qt_cost = rng.uniform(2000, 6000)
-            holding_months = rng.uniform(3, 9)
+            if statute:
+                qt = statute["quietTitle"]
+                qt_cost = rng.uniform(qt["typicalLow"], qt["typicalHigh"])
+                holding_months = qt["typicalMonths"] + rng.uniform(0, 3)
+            else:
+                qt_cost = rng.uniform(2000, 6000)
+                holding_months = rng.uniform(3, 9)
+            liens = lot.surviving_liens if lot.surviving_liens is not None else rng.choice(
+                [0, 0, 0, 2500, 8000]
+            )
+            rehab = lot.rehab_cost if lot.rehab_cost else rng.uniform(5000, 25000)
+            exit_mult = rng.uniform(0.72, 0.95)
 
         inputs = DealInputs(
             state=lot.state,
@@ -173,15 +263,16 @@ def simulate_outcome(
             opening_bid=lot.opening_bid,
             assessed_value=lot.assessed_value,
             arv_override=lot.arv_override,
-            rehab_cost=lot.rehab_cost or rng.uniform(5000, 25000),
-            surviving_liens=lot.surviving_liens or rng.choice([0, 0, 0, 2500, 8000]),
+            rehab_cost=rehab,
+            surviving_liens=liens,
             holding_months=holding_months,
         )
         deal = compute_maxbid(inputs)
         arv = deal.arv_value or bid_amount * 1.5
-        # Exit proceeds noisy around ARV net of costs
-        exit_net = arv * rng.uniform(0.72, 0.95) - qt_cost
+        # Exit proceeds from historical exit-mult distribution around ARV
+        exit_net = arv * exit_mult - qt_cost
         cash_in = max(0.0, exit_net)
+        # Remaining cost drag (rehab/liens already partly in deal.total_costs)
         profit = cash_in - cash_out - (deal.total_costs - qt_cost) * 0.5
 
     return SimulatedOutcome(
@@ -196,5 +287,7 @@ def simulate_outcome(
         details={
             "p_redeem_used": pred.p_redeem,
             "seed": seed,
+            "noise": noise_meta,
+            "prediction_notes": pred.notes,
         },
     )
