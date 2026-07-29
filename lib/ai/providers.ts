@@ -1,4 +1,7 @@
-import "server-only";
+// Deliberately not marked `server-only`: the ingestion CLI runs this under
+// plain tsx, outside any React server context, to extract parcels from county
+// PDFs. `server-only` throws there. The modules that must stay server-bound
+// (lib/ai/brief.ts, lib/queries.ts) carry the guard themselves.
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import Anthropic from "@anthropic-ai/sdk";

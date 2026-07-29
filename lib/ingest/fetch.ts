@@ -145,6 +145,63 @@ export async function politeFetch(
   });
 }
 
+/**
+ * Fetch binary content (PDFs). Separate from `politeFetch` because that one
+ * decodes the body as UTF-8 text, which silently corrupts every non-text byte
+ * — a PDF read through it parses as garbage rather than failing loudly.
+ *
+ * Shares the same policy checks and per-host rate limiting.
+ */
+export async function politeFetchBinary(
+  url: string,
+  opts: PoliteFetchOptions = {},
+): Promise<{ url: string; status: number; bytes: Uint8Array; contentType: string }> {
+  const host = new URL(url).hostname;
+
+  const policy = policyFor(host);
+  if (policy && policy.decision !== "allow" && !opts.underAgreement) {
+    throw new PolicyBlockedError(host, policy.decision, policy.reason);
+  }
+  if (!opts.underAgreement) {
+    const robots = await checkRobots(url, USER_AGENT);
+    if (!robots.allowed) {
+      throw new PolicyBlockedError(
+        host,
+        "robots_disallow",
+        `robots.txt disallows ${new URL(url).pathname} for ${USER_AGENT}`,
+      );
+    }
+  }
+
+  const delay = Math.max(
+    policy?.minDelayMs ?? 0,
+    isGovernmentSource(host) ? DEFAULT_DELAY_GOV_MS : DEFAULT_DELAY_MS,
+  );
+
+  return withHostLock(host, async () => {
+    const since = Date.now() - (lastRequestAt.get(host) ?? 0);
+    if (since < delay) await sleep(delay - since);
+
+    const res = await fetch(url, {
+      headers: {
+        "user-agent": USER_AGENT,
+        accept: "application/pdf,application/octet-stream,*/*",
+        ...opts.headers,
+      },
+      redirect: "follow",
+      signal: AbortSignal.timeout(opts.timeoutMs ?? 60_000),
+    });
+    lastRequestAt.set(host, Date.now());
+
+    return {
+      url: res.url || url,
+      status: res.status,
+      bytes: new Uint8Array(await res.arrayBuffer()),
+      contentType: res.headers.get("content-type") ?? "",
+    };
+  });
+}
+
 /** Convenience for JSON endpoints; throws on non-2xx or unparseable body. */
 export async function fetchJson<T = unknown>(
   url: string,
