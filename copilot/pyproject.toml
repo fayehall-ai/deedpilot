@@ -18,6 +18,7 @@ dev = ["pytest>=8.0"]
 
 [project.scripts]
 deedpilot-copilot = "deedpilot_copilot.cli:app"
+deedpilot-tools = "deedpilot_copilot.api:main"
 
 [build-system]
 requires = ["setuptools>=68"]

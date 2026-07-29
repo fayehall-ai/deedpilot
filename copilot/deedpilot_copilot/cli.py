@@ -18,10 +18,19 @@ app = typer.Typer(help="DeedPilot self-improving tax-deed copilot")
 
 
 @app.command("lookup")
-def lookup(fips: str):
-    """Trusted tool: lookup_atlas"""
-    r = lookup_atlas(fips)
-    rprint(r.model_dump())
+def lookup(
+    fips: Optional[str] = typer.Argument(None, help="County FIPS (SSCCC)"),
+    state: Optional[str] = typer.Option(None, help="USPS state, e.g. TX"),
+    county: Optional[str] = typer.Option(None, help="County name or slug"),
+):
+    """Trusted tool: lookup_atlas (fips or --state + --county)"""
+    from .atlas import resolve_atlas
+
+    if fips:
+        r = lookup_atlas(fips)
+    else:
+        r = resolve_atlas(state=state, county=county)
+    rprint(r.model_dump(by_alias=True))
 
 
 @app.command("maxbid")

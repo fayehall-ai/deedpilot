@@ -21,6 +21,54 @@ Flywheel
   batch trajectories → reflection lessons → memory → re-run → backtest gate
 ```
 
+## Trusted tools (highest-leverage surface)
+
+**Rule:** the LLM never invents a walk-away price or county statute facts.
+Import the callables, or hit FastAPI / Next.js — same contracts.
+
+### Python callables
+
+```python
+from deedpilot_copilot import lookup_atlas, compute_maxbid, DealInputs, resolve_atlas
+
+atlas = lookup_atlas("48201")
+# or: resolve_atlas(state="TX", county="harris")
+print(atlas.sale_type, atlas.is_state_default, atlas.as_of, atlas.sources)
+
+deal = compute_maxbid(
+    DealInputs(
+        state="TX",
+        sale_type="Redeemable Deed",  # or saleType= via camelCase dict
+        assessed_value=200_000,
+        rehab_cost=20_000,
+        opening_bid=10_000,
+    )
+)
+# dict form also works (JS-friendly keys):
+# compute_maxbid({"state":"TX","saleType":"Redeemable Deed","assessedValue":200000,...})
+print(deal.max_bid, deal.recommendation, deal.warnings)
+```
+
+### FastAPI (Python)
+
+```bash
+cd copilot && source .venv/bin/activate
+uvicorn deedpilot_copilot.api:app --reload --port 8090
+# or: deedpilot-tools
+# OpenAPI: http://localhost:8090/docs
+```
+
+```bash
+curl 'http://localhost:8090/tools/atlas?fips=48201'
+curl 'http://localhost:8090/tools/atlas?state=TX&county=harris'
+curl -X POST http://localhost:8090/tools/maxbid \
+  -H 'content-type: application/json' \
+  -d '{"state":"TX","saleType":"Redeemable Deed","assessedValue":200000,"rehabCost":20000,"openingBid":10000}'
+```
+
+Aliases: `/tools/lookup_atlas`, `/tools/compute_maxbid` (same handlers).
+Catalog: `GET /tools`.
+
 ## Setup
 
 From the DeedPilot repo root:
@@ -46,32 +94,25 @@ DEEDPILOT_REFLECT_MODE=rules deedpilot-copilot cycle
 # or: python -m deedpilot_copilot.cli cycle
 ```
 
-### HTTP tools (Next.js)
+### HTTP tools (Next.js product)
+
+Same semantics as the Python tools; used by the web app.
 
 ```bash
 # From deedpilot root
 npm run dev
 
-# Atlas
 curl 'http://localhost:3000/api/tools/atlas?fips=48201'
-
-# Maxbid
 curl -X POST http://localhost:3000/api/tools/maxbid \
   -H 'content-type: application/json' \
   -d '{"state":"TX","saleType":"Redeemable Deed","assessedValue":200000,"rehabCost":20000,"openingBid":10000}'
-```
-
-### FastAPI (Python)
-
-```bash
-cd copilot && source .venv/bin/activate
-uvicorn deedpilot_copilot.api:app --reload --port 8090
 ```
 
 ## CLI
 
 ```bash
 deedpilot-copilot lookup 48201
+deedpilot-copilot lookup --state TX --county harris
 deedpilot-copilot maxbid TX --sale-type "Redeemable Deed" --assessed 200000 --rehab 20000
 deedpilot-copilot run-lot 48201 TX 180000 --opening 12000 --rehab 25000
 deedpilot-copilot cycle
@@ -81,7 +122,7 @@ deedpilot-copilot cycle
 
 | Layer | Status |
 |-------|--------|
-| Trusted atlas + maxbid oracles | **Implemented** (TS + Python) |
+| Trusted atlas + maxbid oracles | **Implemented** — Python callables + FastAPI + Next `/api/tools/*` |
 | Trajectory schema + critique | **Implemented** |
 | Simulator with redemption/QT sampling | **Implemented** — historical JSONL + expert shrinkage |
 | Lesson memory + flywheel | **Implemented** |

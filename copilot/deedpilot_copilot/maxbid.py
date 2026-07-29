@@ -2,9 +2,19 @@
 Trusted oracle — Python port of lib/deal/maxbid.ts.
 
 Deterministic arithmetic only. The LLM never invents max_bid.
+
+>>> from deedpilot_copilot import compute_maxbid, DealInputs
+>>> r = compute_maxbid(DealInputs(
+...     state="TX", sale_type="Redeemable Deed",
+...     assessed_value=200_000, rehab_cost=20_000, opening_bid=10_000,
+... ))
+>>> r.recommendation in ("bid", "no-bid", "insufficient-data")
+True
 """
 
 from __future__ import annotations
+
+from typing import Any
 
 from .schemas import CostLine, DealInputs, DealResult
 from .statute import statute_for
@@ -21,8 +31,14 @@ def _round2(n: float) -> float:
     return round(n * 100) / 100
 
 
-def compute_maxbid(inputs: DealInputs) -> DealResult:
-    """Hard tool: walk-away price from statute + costs. Never LLM-generated."""
+def compute_maxbid(inputs: DealInputs | dict[str, Any]) -> DealResult:
+    """
+    Hard tool: walk-away price from statute + costs. Never LLM-generated.
+
+    Accepts a ``DealInputs`` model or a plain dict (snake_case or camelCase).
+    """
+    if isinstance(inputs, dict):
+        inputs = DealInputs.model_validate(inputs)
     statute = statute_for(inputs.state)
     warnings: list[str] = []
     target_margin = inputs.target_margin if inputs.target_margin is not None else DEFAULTS["target_margin"]
