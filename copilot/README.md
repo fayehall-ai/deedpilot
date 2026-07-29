@@ -81,9 +81,10 @@ deedpilot-copilot cycle
 | Trusted atlas + maxbid oracles | **Implemented** (TS + Python) |
 | Trajectory schema + critique | **Implemented** |
 | Simulator with redemption/QT sampling | **Implemented** (prior-based; needs historical calibration) |
-| Lesson memory + flywheel | **Implemented** (rule-based reflection stub) |
+| Lesson memory + flywheel | **Implemented** |
+| Structured LLM reflection | **Implemented** — Grok primary / Claude fallback; rules fallback + safety merge |
 | Backtest harness | **Implemented** (synthetic) |
-| LLM planner / Claude reflection | **Hook-ready** — replace `critique.reflect_on_batch` + agent decide node |
+| LLM planner (decide node) | **Hook-ready** — agent decide still scaffold; numbers stay oracle-only |
 | MCTS / world-model NN | **Not yet** — next phase |
 | Autonomous profitable bidding | **Not claimed** — co-pilot + simulation fidelity first |
 
@@ -94,9 +95,34 @@ deedpilot-copilot cycle
 3. When atlas falls back to state defaults, the rationale must say so explicitly.
 4. Promote flywheel changes only if backtest metrics do not regress.
 
+## LLM reflection
+
+`critique.reflect_on_batch` prefers a strong-model structured call (same lesson
+schema the flywheel already stores):
+
+| Env | Role |
+|-----|------|
+| `XAI_API_KEY` | Primary (Grok / `XAI_MODEL`, default `grok-4.5`) |
+| `ANTHROPIC_API_KEY` | Fallback |
+| `DEEDPILOT_REFLECT_MODE` | `auto` (default), `llm`, or `rules` |
+
+Keys are loaded from `deedpilot/.env.local` (or `.env`) automatically. When no
+key is set or the provider chain fails, reflection degrades to the deterministic
+rule engine. Hard safety lessons (oracle overbid, state-default disclosure) are
+always merged under successful LLM output.
+
+```bash
+# Offline / CI — rules only
+DEEDPILOT_REFLECT_MODE=rules deedpilot-copilot cycle
+
+# Live reflection (needs XAI or Anthropic key in .env.local)
+deedpilot-copilot cycle
+```
+
 ## Next upgrades
 
-1. Swap rule-based `reflect_on_batch` for a strong-model structured reflection call.
+1. ~~Swap rule-based `reflect_on_batch` for a strong-model structured reflection call.~~ **Done**
 2. Load historical auction outcomes into the simulator noise model.
-3. Add LangGraph persistence checkpointer when you wire multi-turn sessions.
-4. Preference pairs from human spot-checks for prompt optimization.
+3. LLM planner on the agent decide node (still oracle-bound for numbers).
+4. Add LangGraph persistence checkpointer when you wire multi-turn sessions.
+5. Preference pairs from human spot-checks for prompt optimization.

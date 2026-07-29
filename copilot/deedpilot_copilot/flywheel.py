@@ -113,8 +113,13 @@ def run_cycle(
         traj = agent.run_lot(lot, seed=lot.lot_id)
         trajectories.append(traj)
 
-    # Critique already on each traj; reflect batch
+    # Critique already on each traj; strong-model (or rules) structured reflection
     lesson_dicts = reflect_on_batch(trajectories)
+    reflection_source = None
+    if lesson_dicts:
+        reflection_source = lesson_dicts[0].get("source") or (
+            (lesson_dicts[0].get("reflection_meta") or {}).get("source")
+        )
     stored = []
     for ld in lesson_dicts:
         stored.append(
@@ -143,6 +148,7 @@ def run_cycle(
     payload = {
         "created_at": utc_now(),
         "n_lots": len(lots),
+        "reflection_source": reflection_source,
         "lessons": [s.model_dump() for s in stored],
         "metrics_before": metrics_before.model_dump(),
         "metrics_after": metrics_after.model_dump(),
@@ -156,4 +162,5 @@ def run_cycle(
         "metrics_before": metrics_before.model_dump(),
         "metrics_after": metrics_after.model_dump(),
         "lessons_added": len(stored),
+        "reflection_source": reflection_source,
     }
