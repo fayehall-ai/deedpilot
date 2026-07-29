@@ -6,7 +6,7 @@
  *   npm run ingest -- --all --limit 3
  */
 import "../lib/env";
-import { runAdapter } from "../lib/ingest/runner";
+import { runAdapter, runEnrichment } from "../lib/ingest/runner";
 import { ADAPTERS, getAdapter } from "../lib/ingest/adapters";
 
 function arg(name: string): string | undefined {
@@ -25,8 +25,38 @@ async function main() {
 
   if (names.length === 0) {
     console.error("Usage: npm run ingest -- --adapter <name> [--county FIPS] [--limit N] [--dry-run]");
+    console.error("       npm run ingest -- --adapter <name> --enrich [--limit N] [--refresh]");
     console.error(`Available adapters: ${ADAPTERS.map((a) => a.name).join(", ")}`);
     process.exit(1);
+  }
+
+  // Enrichment is a separate pass: one request per lot rather than one per
+  // catalog, so it is never bundled into a calendar refresh.
+  if (flag("enrich")) {
+    for (const name of names) {
+      const adapter = getAdapter(name!);
+      if (!adapter) {
+        console.error(`Unknown adapter: ${name}`);
+        process.exit(1);
+      }
+      if (!adapter.enrichLot) {
+        console.log(`${adapter.name}: no enrichment support, skipping`);
+        continue;
+      }
+
+      const s = await runEnrichment(adapter, {
+        limit,
+        refresh: flag("refresh"),
+        onProgress: (m) => console.log(m),
+      });
+
+      console.log(`\n=== ${s.adapter} enrichment ===`);
+      console.log(`attempted: ${s.attempted}`);
+      console.log(`enriched:  ${s.enriched}`);
+      console.log(`gone:      ${s.gone}  (pulled from the sale)`);
+      console.log(`failed:    ${s.failed}`);
+    }
+    process.exit(0);
   }
 
   for (const name of names) {

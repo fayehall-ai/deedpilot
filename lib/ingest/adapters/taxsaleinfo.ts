@@ -10,13 +10,13 @@
  * property reaches the auction, so there is no post-sale redemption and quiet
  * title is often unnecessary. The deal engine reflects that via statute.ts.
  *
- * Two things this adapter does not get, recorded here rather than hidden:
- *  - Parcel numbers are on each lot's detail page, not the catalog listing.
- *    Fetching 90+ detail pages per county across 100+ catalogs is thousands of
- *    requests against a site that has been generous about access, so lots are
- *    keyed by Title Check's own lot id and enriched later on demand.
- *  - "DNR" catalogs are Department of Natural Resources land sales — a
- *    different program from county tax foreclosure. They are skipped.
+ * The catalog listing carries only lot number, description, and minimum bid.
+ * Parcel number, SEV, and current tax live on each lot's detail page, which is
+ * one request per lot — so they are fetched by `enrichLot` in a separate pass
+ * rather than on every calendar refresh.
+ *
+ * "DNR" catalogs are Department of Natural Resources land sales — a different
+ * program from county tax foreclosure. They are skipped.
  */
 
 import * as cheerio from "cheerio";
@@ -27,6 +27,7 @@ import type {
   CountyBinding,
   DiscoveredAuction,
   DiscoveredLot,
+  LotEnrichment,
   SourceAdapter,
 } from "../types";
 
@@ -103,9 +104,20 @@ async function getCatalogRefs(): Promise<CatalogRef[]> {
   return catalogCache;
 }
 
+/**
+ * Title Check's own description of what SEV means, carried through verbatim
+ * because the staleness is the load-bearing part: the figure comes from the
+ * delinquent tax year that was foreclosed on, not from today.
+ */
+const SEV_NOTE =
+  "State Equalized Value — 50% of the property's value per the local assessor, taken from " +
+  "the delinquent tax year that was foreclosed upon. It is typically several years old and " +
+  "may not reflect current market value.";
+
 export const taxSaleInfoAdapter: SourceAdapter = {
   name: "mi-taxsaleinfo",
   platform: "taxsaleinfo",
+  valuationSource: "mi-taxsaleinfo-sev",
   description:
     "Title Check LLC auction catalogs for Michigan county tax foreclosure sales (tax-sale.info).",
 
@@ -214,5 +226,60 @@ export const taxSaleInfoAdapter: SourceAdapter = {
     });
 
     return lots;
+  },
+
+  /**
+   * Fetch one lot's detail page for parcel ID, SEV, and current tax.
+   *
+   * `/lot/show/id/N` 302s to `/lot/showPreview/id/N`; politeFetch follows it.
+   * A 404 means the lot was pulled from the sale between runs — that is a real
+   * outcome, not a parse failure, so it returns null rather than throwing.
+   */
+  async enrichLot(lot): Promise<LotEnrichment | null> {
+    if (!lot.externalId) return null;
+
+    const res = await politeFetch(`${BASE}/lot/showPreview/id/${lot.externalId}`);
+    if (res.status === 404) return null;
+    if (res.status < 200 || res.status >= 300) {
+      throw new Error(`HTTP ${res.status} for lot ${lot.externalId}`);
+    }
+
+    const $ = cheerio.load(res.body);
+    const text = $("body").text().replace(/\s+/g, " ");
+
+    // The page is prose with inline explanatory blurbs between the labels, so
+    // match each field up to the start of the next known label rather than
+    // assuming adjacency.
+    const grab = (re: RegExp) => text.match(re)?.[1]?.trim() || undefined;
+
+    const parcelNumber = grab(
+      /Parcel ID:\s*([0-9A-Za-z\-.\/ ]+?)\s*(?:State Equalized|SEV:|Address:|A legal|Parcel Information)/,
+    );
+    const assessedValue = parseMoney(grab(/SEV:\s*\$?([\d,]+\.?\d*)/));
+    const taxesOwed = parseMoney(grab(/Current Tax:\s*\$?([\d,]+\.?\d*)/));
+    const addressRaw = grab(
+      /Address:\s*([A-Z0-9][^|]{3,60}?)\s*(?:A legal|Legal Description|Parcel Information|PROPERTY DETAILS)/,
+    );
+    const legalDescription = grab(
+      /Legal Description:\s*(.+?)\s*(?:Parcel Information|PROPERTY DETAILS|Please Login)/,
+    );
+
+    // Nothing recognisable means the page shape moved — surface it rather than
+    // silently writing a row of nulls over good catalog data.
+    if (!parcelNumber && assessedValue === undefined && !addressRaw) {
+      throw new Error(
+        `lot ${lot.externalId}: no recognisable fields — detail page layout may have changed`,
+      );
+    }
+
+    return {
+      parcelNumber,
+      assessedValue,
+      assessedValueNote: assessedValue !== undefined ? SEV_NOTE : undefined,
+      taxesOwed,
+      addressLine: addressRaw,
+      legalDescription,
+      raw: { lotId: lot.externalId, parcelNumber, sev: assessedValue, taxesOwed },
+    };
   },
 };

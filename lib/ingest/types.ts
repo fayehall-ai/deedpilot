@@ -83,6 +83,28 @@ export interface DiscoveredLot {
   raw?: Record<string, unknown>;
 }
 
+/**
+ * Per-parcel detail fetched in a second pass, after the catalog listing.
+ *
+ * Separated from `DiscoveredLot` because it costs one request per lot: a
+ * catalog page yields ~90 lots in a single fetch, while enrichment is 90
+ * fetches. Worth it, but not something to run on every calendar refresh.
+ */
+export interface LotEnrichment {
+  parcelNumber?: string;
+  /** Assessor's value. Interpret against the state's assessment ratio. */
+  assessedValue?: number;
+  /** How stale the assessed figure is, in the source's own words. */
+  assessedValueNote?: string;
+  taxesOwed?: number;
+  addressLine?: string;
+  city?: string;
+  legalDescription?: string;
+  latitude?: number;
+  longitude?: number;
+  raw?: Record<string, unknown>;
+}
+
 export interface SourceAdapter {
   /** Stable identifier used in ingest_runs.adapter and in logs. */
   name: string;
@@ -99,4 +121,15 @@ export interface SourceAdapter {
   listAuctions(binding: CountyBinding): Promise<DiscoveredAuction[]>;
 
   listLots(auction: DiscoveredAuction): Promise<DiscoveredLot[]>;
+
+  /**
+   * Fetch per-parcel detail the catalog omits. Optional: sources that publish
+   * everything up front don't need it.
+   *
+   * `sourceKey` identifies the row in `lot_valuations`, so a re-run updates in
+   * place rather than accumulating duplicates.
+   */
+  enrichLot?(lot: { externalId: string | null; sourceUrl: string | null }): Promise<LotEnrichment | null>;
+  /** Stable identifier for this adapter's valuation rows. */
+  valuationSource?: string;
 }

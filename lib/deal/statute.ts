@@ -190,12 +190,15 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     closingCosts: 300,
     assessmentRatio: 0.5,
     assessmentBasis:
-      "Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, § 3); taxable value may be lower still.",
+      "Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, § 3); taxable value may be lower still. " +
+      "The SEV published with these auction listings is taken from the delinquent tax year that was foreclosed upon, so it is typically several years stale — " +
+      "in a rising market it understates current value, and in a falling one it overstates it.",
     statute: "MCL 211.78 et seq. (general property tax act, foreclosure)",
     asOf: "2026-07",
     sources: ["https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-211-78K"],
     caveats: [
       "Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean — quiet title is often unnecessary.",
+      "Valuations here derive from a stale SEV, not comps. Treat the computed ARV as a starting point and override it with real comparable sales before bidding at the ceiling.",
       "Rand v. Rand / Hall-era excess-proceeds rules mean former owners may claim surplus; this does not affect the buyer's title.",
     ],
   },
