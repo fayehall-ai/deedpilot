@@ -51,3 +51,6 @@ copilot/data/lessons.jsonl
 # Map history crawl artifacts
 copilot/data/crawl_cache/
 copilot/data/pdf_cache/
+# Improve-run JSON dumps (keep latest optional — full history is local)
+copilot/data/improve/
+copilot/data/pdf_cache/

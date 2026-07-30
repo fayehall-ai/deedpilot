@@ -14,11 +14,11 @@ from typing import Any
 
 from .atlas import lookup_atlas
 from .critique import deterministic_critique
+from .decide import decide
 from .history_guidance import guidance_for_lot
 from .maxbid import compute_maxbid
 from .memory import LessonMemory
 from .schemas import (
-    AgentAction,
     DealInputs,
     Lot,
     SaleType,
@@ -43,9 +43,12 @@ class DeedCopilotAgent:
         memory: LessonMemory | None = None,
         *,
         use_history: bool = True,
+        use_llm_decide: bool | None = None,
     ) -> None:
         self.memory = memory or LessonMemory()
         self.use_history = use_history
+        # None = DEEDPILOT_DECIDE_MODE auto (LLM if keys, else policy)
+        self.use_llm_decide = use_llm_decide
 
     def run_lot(self, lot: Lot, *, seed: str | None = None) -> Trajectory:
         traj = Trajectory(id=str(uuid.uuid4()), created_at=utc_now(), lot=lot)
@@ -160,72 +163,42 @@ class DeedCopilotAgent:
 
         total_buffer = buffer + hist_buffer
 
-        # 3) Decide (deterministic policy scaffold — LLM can replace this node)
+        # 3) Decide — LLM optional; always oracle-clamped (see decide.py)
         ceiling = _apply_buffer(deal.max_bid, total_buffer)
         opening = lot.opening_bid or 0.0
-
-        if deal.recommendation != "bid" or ceiling is None or ceiling <= 0:
-            action = AgentAction(
-                bid_amount=None,
-                pass_=True,
-                rationale=(
-                    f"Pass: oracle={deal.recommendation}. "
-                    + (
-                        "State default / not county-verified. "
-                        if atlas.is_state_default
-                        else ""
-                    )
-                    + "; ".join(deal.warnings[:2])
-                    + (
-                        f" History n={hist.n}." if hist is not None else ""
-                    )
+        action, decide_meta = decide(
+            lot=lot,
+            deal=deal,
+            atlas=atlas,
+            ceiling=ceiling,
+            opening=opening,
+            bid_frac=bid_frac,
+            total_buffer=total_buffer,
+            lesson_buffer=buffer,
+            hist_buffer=hist_buffer,
+            hist_notes=list(hist.notes) if hist else None,
+            hist_n=hist.n if hist else None,
+            hist_med=hist.median_winning_bid if hist else None,
+            comps_summary=list(hist.comps[:4]) if hist else None,
+            use_llm=self.use_llm_decide,
+        )
+        traj.tags.append(f"decide:{decide_meta.get('source', 'policy')}")
+        traj.tool_calls.append(
+            ToolCallRecord(
+                tool="decide",
+                args={"use_llm": self.use_llm_decide},
+                result_summary=(
+                    f"source={decide_meta.get('source')} "
+                    f"pass={action.pass_} bid={action.bid_amount} "
+                    f"clamped={decide_meta.get('clamped')}"
                 ),
-                risk_buffers={
-                    "lesson_buffer_usd": buffer,
-                    "history_buffer_usd": hist_buffer,
-                    "total_buffer_usd": total_buffer,
-                },
+                trusted=True,
             )
-        else:
-            # Bid between opening and history-scaled ceiling; never above oracle−buffer
-            target_ceiling = ceiling * bid_frac
-            if opening > 0 and opening < target_ceiling:
-                bid = min(target_ceiling, opening + 0.4 * (target_ceiling - opening))
-            else:
-                bid = target_ceiling
-            # Hard ceiling: oracle max after all buffers
-            if deal.max_bid is not None:
-                bid = min(bid, deal.max_bid - total_buffer)
-            bid = max(0.0, bid)
-            action = AgentAction(
-                bid_amount=round(bid, 2),
-                pass_=False,
-                rationale=(
-                    f"Bid ${bid:,.0f} under oracle ceiling ${ceiling:,.0f} "
-                    f"(raw maxBid ${deal.max_bid:,.0f} − buffers ${total_buffer:,.0f}; "
-                    f"history frac={bid_frac:.2f}). "
-                    f"Cite atlas asOf={atlas.as_of}; sources={len(atlas.sources)}. "
-                    + (
-                        "State default / not county-verified. "
-                        if atlas.is_state_default
-                        else "County research present. "
-                    )
-                    + (
-                        f"History n={hist.n} med sold={hist.median_winning_bid}. "
-                        if hist is not None
-                        else ""
-                    )
-                    + f"Growth priors: {[g.get('name') for g in atlas.growth_neighborhoods[:2]]}."
-                ),
-                risk_buffers={
-                    "lesson_buffer_usd": buffer,
-                    "history_buffer_usd": hist_buffer,
-                    "total_buffer_usd": total_buffer,
-                    "oracle_max_bid": deal.max_bid or 0,
-                    "history_bid_fraction": bid_frac,
-                    "history_n": float(hist.n) if hist else 0.0,
-                },
-            )
+        )
+        traj.reasoning_trace.append(
+            f"Decide via {decide_meta.get('source')}: "
+            f"{'pass' if action.pass_ else f'bid ${action.bid_amount}'}."
+        )
 
         traj.action = action
         traj.predicted_outcome = predict_outcome(

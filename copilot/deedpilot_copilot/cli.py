@@ -85,6 +85,68 @@ def cycle():
     rprint(result)
 
 
+@app.command("improve")
+def improve_cmd(
+    deep: bool = typer.Option(
+        False, "--deep", help="Also re-import deep history (slow network)"
+    ),
+    skip_cycle: bool = typer.Option(False, help="Skip flywheel reflect cycle"),
+    skip_backtest: bool = typer.Option(False, help="Skip historical backtest"),
+    backtest_limit: int = typer.Option(40, help="Historical lots to sample"),
+    backtest_state: Optional[str] = typer.Option("MI", help="Backtest state filter"),
+    reflect_mode: Optional[str] = typer.Option(
+        None, help="rules|llm|auto for DEEDPILOT_REFLECT_MODE"
+    ),
+    decide_mode: Optional[str] = typer.Option(
+        None, help="rules|llm|auto for DEEDPILOT_DECIDE_MODE"
+    ),
+):
+    """
+    Full self-improvement pass: priors → history index → flywheel → backtest.
+
+    This is the one command to run on a schedule so the copilot actually improves
+    over time (data + lessons + evaluation). Does not fine-tune model weights.
+    """
+    from .improve import run_improve
+
+    result = run_improve(
+        deep_import=deep,
+        skip_cycle=skip_cycle,
+        skip_backtest=skip_backtest,
+        backtest_limit=backtest_limit,
+        backtest_state=backtest_state,
+        reflect_mode=reflect_mode,
+        decide_mode=decide_mode,
+    )
+    rprint(
+        {
+            "report_path": result.get("report_path"),
+            "self_improving": result.get("self_improving"),
+            "priors": result.get("steps", {}).get("calibrate_priors"),
+            "index": result.get("steps", {}).get("history_index"),
+            "cycle": {
+                k: (result.get("steps", {}).get("flywheel_cycle") or {}).get(k)
+                for k in (
+                    "lessons_added",
+                    "reflection_source",
+                    "promoted",
+                    "run_path",
+                )
+            },
+            "backtest": {
+                k: (result.get("steps", {}).get("historical_backtest") or {}).get(k)
+                for k in (
+                    "n_sample",
+                    "n_bids",
+                    "n_passes",
+                    "n_over_oracle",
+                    "n_under_market",
+                )
+            },
+        }
+    )
+
+
 @app.command("seed-history")
 def seed_history(
     force: bool = typer.Option(False, help="Deprecated — synthetic seed disabled"),

@@ -164,6 +164,33 @@ DEEDPILOT_REFLECT_MODE=rules deedpilot-copilot cycle
 deedpilot-copilot cycle
 ```
 
+## Self-improvement pass (`improve`)
+
+One command updates priors, comps index, runs the flywheel (reflect → lessons),
+and scores the agent on historical lots:
+
+```bash
+# Fast local improve (no network re-import)
+DEEDPILOT_REFLECT_MODE=rules DEEDPILOT_DECIDE_MODE=rules \
+  deedpilot-copilot improve --backtest-limit 30
+
+# With live LLM reflection + decide (needs XAI_API_KEY or ANTHROPIC_API_KEY)
+deedpilot-copilot improve
+
+# Also refresh deep history first (slow)
+deedpilot-copilot improve --deep
+```
+
+| Env | Meaning |
+|-----|---------|
+| `DEEDPILOT_REFLECT_MODE` | `auto` / `llm` / `rules` — batch lesson reflection |
+| `DEEDPILOT_DECIDE_MODE` | `auto` / `llm` / `rules` — per-lot bid/pass (always oracle-clamped) |
+
+Reports: `copilot/data/improve/latest.json`.
+
+**Honest scope:** improves *data + lessons + evaluation*. Does not fine-tune weights.
+Schedule with cron, e.g. weekly `improve --deep` then daily `improve`.
+
 ## History → agent, comps UI, backtest
 
 Recorded outcomes are not just stored — they drive decisions and the lot page.

@@ -51,7 +51,9 @@ def test_agent_history_guided_never_over_oracle():
         rehab_cost=12_000,
         sale_type=SaleType.TAX_DEED,
     )
-    traj = DeedCopilotAgent(use_history=True).run_lot(lot, seed="hist-g2")
+    traj = DeedCopilotAgent(use_history=True, use_llm_decide=False).run_lot(
+        lot, seed="hist-g2"
+    )
     assert "history_guided" in traj.tags or any(
         "History" in x for x in traj.reasoning_trace
     )

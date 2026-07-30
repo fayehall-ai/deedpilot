@@ -106,7 +106,8 @@ def run_cycle(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     memory = LessonMemory()
-    agent = DeedCopilotAgent(memory=memory)
+    # Decide mode from DEEDPILOT_DECIDE_MODE (auto/llm/rules); history on by default
+    agent = DeedCopilotAgent(memory=memory, use_history=True)
 
     trajectories: list[Trajectory] = []
     for lot in lots:
@@ -135,7 +136,7 @@ def run_cycle(
         )
 
     # Second pass with updated memory (scaffold improvement)
-    agent2 = DeedCopilotAgent(memory=memory)
+    agent2 = DeedCopilotAgent(memory=memory, use_history=True)
     trajectories2 = [agent2.run_lot(lot, seed=lot.lot_id + "-v2") for lot in lots]
 
     metrics_before = run_backtest(trajectories)
