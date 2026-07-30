@@ -1,0 +1,20 @@
+{
+  "policy": "temporal",
+  "cut_val": "2024-01-01",
+  "cut_test": "2025-01-01",
+  "exclude_quarantined": true,
+  "created_at": "2026-07-30T03:41:58.877746+00:00",
+  "counts": {
+    "train": 81756,
+    "val": 1693,
+    "test": 2008,
+    "excluded": 6751
+  },
+  "digests": {
+    "train": "d85431108dad59b9",
+    "val": "dc80abb220447a3b",
+    "test": "4234a7ad0eb1a695",
+    "excluded": "51f95fd77233cb12"
+  },
+  "note": "Temporal split. Undated rows are excluded because they cannot be ordered against the cut dates."
+}

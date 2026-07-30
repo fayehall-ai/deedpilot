@@ -193,6 +193,11 @@ class NoiseBucket(BaseModel):
     p_redeem_raw: float | None = None
     p_redeem: float  # shrunk toward expert prior
     expert_p_redeem: float
+    #: Rows whose ``redeemed`` flag is a real observation (see labels.py). This —
+    #: not ``n`` — is the denominator behind p_redeem, and the weight used when
+    #: shrinking toward the expert prior. When 0, p_redeem *is* the expert prior.
+    n_redemption_observed: int = 0
+    p_redeem_source: Literal["observed", "expert"] = "expert"
     # Ownership-path exit as fraction of ARV (p10/p50/p90)
     exit_mult_p10: float = 0.72
     exit_mult_p50: float = 0.85
@@ -217,6 +222,13 @@ class SimulatorPriors(BaseModel):
     by_sale_type: dict[str, NoiseBucket] = Field(default_factory=dict)
     global_bucket: NoiseBucket | None = None
     source_path: str | None = None
+    #: Rows dropped before fitting, and why (labels.label_summary output).
+    label_summary: dict[str, Any] = Field(default_factory=dict)
+    n_quarantined: int = 0
+    #: Fields the corpus does not observe at all, so they come from statute /
+    #: expert ranges rather than data. Reported so nothing looks fitted when it
+    #: is not.
+    unobserved_fields: list[str] = Field(default_factory=list)
 
 
 class ToolCallRecord(BaseModel):

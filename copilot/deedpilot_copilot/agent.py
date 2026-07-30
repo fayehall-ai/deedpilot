@@ -26,6 +26,7 @@ from .schemas import (
     Trajectory,
     utc_now,
 )
+from .search import optimize_bid
 from .simulator import predict_outcome, simulate_outcome
 
 
@@ -33,6 +34,12 @@ def _apply_buffer(max_bid: float | None, buffer_usd: float) -> float | None:
     if max_bid is None:
         return None
     return max(0.0, max_bid - buffer_usd)
+
+
+def _sale_year(lot: Lot) -> int | None:
+    """Sale year from lot metadata, for the clearing-price model's time trend."""
+    raw = str(lot.metadata.get("sale_date") or lot.metadata.get("saleDate") or "")
+    return int(raw[:4]) if raw[:4].isdigit() else None
 
 
 class DeedCopilotAgent:
@@ -166,6 +173,40 @@ class DeedCopilotAgent:
         # 3) Decide — LLM optional; always oracle-clamped (see decide.py)
         ceiling = _apply_buffer(deal.max_bid, total_buffer)
         opening = lot.opening_bid or 0.0
+
+        # 2c) Risk-adjusted bid search over the clearing-price model. Supplies
+        # the bid the deterministic policy will use; the ceiling still binds.
+        plan = None
+        search_bid = None
+        search_note = None
+        try:
+            plan = optimize_bid(
+                lot, deal, sale_type, ceiling=ceiling, year=_sale_year(lot)
+            )
+            search_bid = plan.bid
+            if plan.quantiles and plan.quantiles.n_train:
+                search_note = (
+                    f"search p_win={plan.p_win:.0%} vs {plan.quantiles.group} "
+                    f"(n={plan.quantiles.n_train})"
+                )
+            else:
+                search_note = "search (no clearing-price model for this geography)"
+            traj.tags.append("bid_search")
+            traj.tool_calls.append(
+                ToolCallRecord(
+                    tool="optimize_bid",
+                    args={"ceiling": ceiling, "risk_aversion": plan.risk_aversion},
+                    result_summary=(
+                        f"bid={plan.bid} pass={plan.pass_} pWin={plan.p_win} "
+                        f"ev={plan.expected_value} group="
+                        f"{plan.quantiles.group if plan.quantiles else None}"
+                    ),
+                    trusted=True,
+                )
+            )
+            traj.reasoning_trace.extend(plan.rationale)
+        except Exception as e:  # noqa: BLE001 — search is an optimisation, not a gate
+            traj.reasoning_trace.append(f"Bid search unavailable: {e}")
         action, decide_meta = decide(
             lot=lot,
             deal=deal,
@@ -181,6 +222,8 @@ class DeedCopilotAgent:
             hist_med=hist.median_winning_bid if hist else None,
             comps_summary=list(hist.comps[:4]) if hist else None,
             use_llm=self.use_llm_decide,
+            search_bid=search_bid,
+            search_note=search_note,
         )
         traj.tags.append(f"decide:{decide_meta.get('source', 'policy')}")
         traj.tool_calls.append(

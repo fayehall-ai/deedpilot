@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from .history import get_priors, load_outcomes, outcomes_path, real_outcomes_only, resolve_bucket
+from .labels import classify
 from .schemas import HistoricalOutcome, Lot, SaleType, utc_now
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -63,8 +64,23 @@ class HistoryGuidance:
     comps: list[dict[str, Any]]
 
 
+def _usable_rows(rows: list[HistoricalOutcome]) -> list[HistoricalOutcome]:
+    """
+    Drop rows we cannot vouch for before anything reaches a user.
+
+    Without this the lot page offers a $42 "comparable sale" scraped out of an
+    Arizona statute heading, and $287k Maryland premium bids next to $4k
+    Michigan deeds. A bad comp is worse than no comp — it anchors a bidder.
+    """
+    return [o for o in rows if not classify(o).quarantined]
+
+
 def _comp_dict(o: HistoricalOutcome) -> dict[str, Any]:
+    lab = classify(o)
     return {
+        "priceKind": lab.price_kind.value,
+        "priceComparable": lab.price_usable,
+        "disposition": lab.disposition.value,
         "id": o.id,
         "state": o.state,
         "fips": o.fips,
@@ -104,7 +120,9 @@ def find_comparables(
     the subject lot's economics.
     """
     st = sale_type.value if isinstance(sale_type, SaleType) else sale_type
-    rows = real_outcomes_only(outcomes if outcomes is not None else load_outcomes())
+    rows = _usable_rows(
+        real_outcomes_only(outcomes if outcomes is not None else load_outcomes())
+    )
     pool = [
         o
         for o in rows
@@ -164,11 +182,20 @@ def guidance_for_lot(
     - Thin n → small buffer, rely on expert prior notes.
     """
     key = _key(lot.state, sale_type)
-    rows = real_outcomes_only(outcomes if outcomes is not None else load_outcomes())
+    rows = _usable_rows(
+        real_outcomes_only(outcomes if outcomes is not None else load_outcomes())
+    )
+    # Only comparable clearing prices may set the median that steers bid
+    # aggressiveness. Illinois tax amounts and Maryland premium bids are real
+    # numbers measuring something else, and averaging them in produces a
+    # "market price" that no auction ever cleared at.
     bucket_rows = [
         o
         for o in rows
-        if o.state == lot.state and o.sale_type == sale_type and o.winning_bid is not None
+        if o.state == lot.state
+        and o.sale_type == sale_type
+        and o.winning_bid is not None
+        and classify(o).price_usable
     ]
     notes: list[str] = []
 
@@ -275,29 +302,30 @@ def build_history_index(
     comps_per_bucket: int = 24,
 ) -> dict[str, Any]:
     """Build compact index for Next.js + API."""
-    rows = real_outcomes_only(load_outcomes())
+    rows = _usable_rows(real_outcomes_only(load_outcomes()))
     by: dict[str, list[HistoricalOutcome]] = defaultdict(list)
     for o in rows:
         by[_key(o.state, o.sale_type)].append(o)
 
     buckets: dict[str, Any] = {}
     for key, group in sorted(by.items()):
-        wins = sorted(float(o.winning_bid) for o in group if o.winning_bid)
+        # Price statistics come only from comparable clearing prices.
+        priced = [o for o in group if o.winning_bid and classify(o).price_usable]
+        wins = sorted(float(o.winning_bid) for o in priced)
         ratios = sorted(
             o.winning_bid / o.assessed_value
-            for o in group
-            if o.winning_bid and o.assessed_value and o.assessed_value > 0
+            for o in priced
+            if o.assessed_value and o.assessed_value > 0
         )
         n_redeemed = sum(1 for o in group if o.redeemed)
         n_owned = sum(1 for o in group if o.ownership_taken)
         # Sample comps: prefer with winning_bid, recent sale_date
-        with_bid = [o for o in group if o.winning_bid is not None]
+        with_bid = [o for o in priced]
         with_bid.sort(key=lambda o: o.sale_date or "", reverse=True)
+        # No topping up from non-comparable rows. A bucket with no clearing
+        # prices (Illinois, where the dollar figure is the tax owed) shows no
+        # comps rather than padding the list with a different quantity.
         comps = [_comp_dict(o) for o in with_bid[:comps_per_bucket]]
-        if len(comps) < min(8, comps_per_bucket):
-            # fill with redeemed-only etc
-            rest = [o for o in group if o not in with_bid][: comps_per_bucket - len(comps)]
-            comps.extend(_comp_dict(o) for o in rest)
 
         state, sale_type = key.split("|", 1)
         try:
@@ -311,6 +339,10 @@ def build_history_index(
             "state": state,
             "saleType": sale_type,
             "n": len(group),
+            #: Rows whose price is a comparable clearing price. When this is 0,
+            #: the median/percentile fields below are null and the UI must not
+            #: present market context for this bucket.
+            "nComparablePrices": len(priced),
             "nWithWinningBid": len(wins),
             "nRedeemed": n_redeemed,
             "nOwnershipTaken": n_owned,
