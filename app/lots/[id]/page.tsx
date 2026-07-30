@@ -8,6 +8,7 @@ import { money, num, relativeDays, saleDate } from "@/lib/format";
 import { Breadcrumbs, Callout, Card, SaleTypeBadge, StatusBadge } from "@/components/ui";
 import { DealCalculator } from "@/components/deal-calculator";
 import { ParcelBrief } from "@/components/parcel-brief";
+import { HistoricalComps } from "@/components/historical-comps";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
 import type { SaleType } from "@/lib/atlas/types";
 
@@ -170,6 +171,14 @@ export default async function LotPage(props: PageProps<"/lots/[id]">) {
               Full county profile →
             </Link>
           </Card>
+
+          <HistoricalComps
+            state={county.state}
+            saleType={auction.saleType}
+            assessedValue={assessedValue}
+            openingBid={openingBid}
+            fips={county.fips}
+          />
 
           {rule?.survivingLiens ? (
             <Callout tone="danger" title="Liens that survive">

@@ -164,6 +164,25 @@ DEEDPILOT_REFLECT_MODE=rules deedpilot-copilot cycle
 deedpilot-copilot cycle
 ```
 
+## History → agent, comps UI, backtest
+
+Recorded outcomes are not just stored — they drive decisions and the lot page.
+
+| Surface | How |
+|---------|-----|
+| **Agent** | `history_guidance` adds buffers + bid fraction; never above oracle maxbid |
+| **Simulator** | `p_redeem` / noise from calibrated priors |
+| **Lot page** | `HistoricalComps` sidebar (from `history_index.json`) |
+| **API** | `GET /api/tools/comparables?state=MI&saleType=Tax%20Deed&assessedValue=80000` |
+| **Backtest** | `deedpilot-copilot backtest-history --limit 80` |
+
+```bash
+# After import-history --deep:
+deedpilot-copilot build-history-index
+deedpilot-copilot comparables MI --sale-type "Tax Deed" --assessed 80000
+deedpilot-copilot backtest-history --limit 40 --state MI
+```
+
 ## Minimal historical-lot simulator
 
 Replay a recorded auction row, or re-sample redemption / ownership costs while

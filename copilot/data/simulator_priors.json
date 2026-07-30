@@ -1,8 +1,8 @@
 {
-  "calibrated_at": "2026-07-30T02:47:30.659900+00:00",
-  "n_outcomes": 92170,
+  "calibrated_at": "2026-07-30T02:57:28.921589+00:00",
+  "n_outcomes": 92208,
   "provenance_counts": {
-    "recorded": 92170
+    "recorded": 92208
   },
   "prior_strength": 20.0,
   "buckets": {
@@ -70,7 +70,7 @@
       "key": "IL|Tax Lien",
       "state": "IL",
       "sale_type": "Tax Lien",
-      "n": 70101,
+      "n": 70139,
       "n_redeemed": 0,
       "p_redeem_raw": 0.0,
       "p_redeem": 0.02,
@@ -332,7 +332,7 @@
       "key": "*|Tax Lien",
       "state": null,
       "sale_type": "Tax Lien",
-      "n": 72627,
+      "n": 72665,
       "n_redeemed": 0,
       "p_redeem_raw": 0.0,
       "p_redeem": 0.02,
@@ -353,7 +353,7 @@
     "key": "*|*",
     "state": null,
     "sale_type": null,
-    "n": 92170,
+    "n": 92208,
     "n_redeemed": 1404,
     "p_redeem_raw": 0.0152,
     "p_redeem": 0.02,

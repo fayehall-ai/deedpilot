@@ -14,6 +14,7 @@ from typing import Any
 
 from .atlas import lookup_atlas
 from .critique import deterministic_critique
+from .history_guidance import guidance_for_lot
 from .maxbid import compute_maxbid
 from .memory import LessonMemory
 from .schemas import (
@@ -37,8 +38,14 @@ def _apply_buffer(max_bid: float | None, buffer_usd: float) -> float | None:
 class DeedCopilotAgent:
     """Research co-pilot: atlas + maxbid are oracles; agent chooses bid/pass."""
 
-    def __init__(self, memory: LessonMemory | None = None) -> None:
+    def __init__(
+        self,
+        memory: LessonMemory | None = None,
+        *,
+        use_history: bool = True,
+    ) -> None:
         self.memory = memory or LessonMemory()
+        self.use_history = use_history
 
     def run_lot(self, lot: Lot, *, seed: str | None = None) -> Trajectory:
         traj = Trajectory(id=str(uuid.uuid4()), created_at=utc_now(), lot=lot)
@@ -108,11 +115,53 @@ class DeedCopilotAgent:
         )
         traj.reasoning_trace.append(
             f"Oracle maxBid={deal.max_bid} recommendation={deal.recommendation} "
-            f"warnings={len(deal.warnings)}. Buffer=${buffer:,.0f} from lessons."
+            f"warnings={len(deal.warnings)}. Lesson buffer=${buffer:,.0f}."
         )
 
+        # 2b) Historical market guidance (never overrides oracle numbers)
+        hist = None
+        hist_buffer = 0.0
+        bid_frac = 0.9
+        if self.use_history:
+            try:
+                hist = guidance_for_lot(
+                    lot, sale_type, oracle_max_bid=deal.max_bid
+                )
+                hist_buffer = float(hist.suggested_buffer_usd or 0.0)
+                bid_frac = float(hist.bid_fraction_of_ceiling or 0.9)
+                traj.tags.append("history_guided")
+                traj.tool_calls.append(
+                    ToolCallRecord(
+                        tool="history_guidance",
+                        args={"key": hist.key, "n": hist.n},
+                        result_summary=(
+                            f"n={hist.n} p_redeem={hist.p_redeem} "
+                            f"med_win={hist.median_winning_bid} "
+                            f"buffer=+${hist_buffer:,.0f} frac={bid_frac}"
+                        ),
+                        trusted=True,
+                    )
+                )
+                traj.reasoning_trace.append(
+                    "History: " + " ".join(hist.notes[:3])
+                    if hist.notes
+                    else f"History: n={hist.n} for {hist.key}."
+                )
+                if hist.comps:
+                    top = hist.comps[0]
+                    traj.reasoning_trace.append(
+                        f"Comp: {top.get('county') or top.get('state')} "
+                        f"sold ${top.get('winningBid')} "
+                        f"(assessed {top.get('assessedValue')}) "
+                        f"id={top.get('id')}"
+                    )
+            except Exception as e:  # noqa: BLE001 — never block agent on history
+                traj.reasoning_trace.append(f"History guidance unavailable: {e}")
+
+        total_buffer = buffer + hist_buffer
+
         # 3) Decide (deterministic policy scaffold — LLM can replace this node)
-        ceiling = _apply_buffer(deal.max_bid, buffer)
+        ceiling = _apply_buffer(deal.max_bid, total_buffer)
         opening = lot.opening_bid or 0.0
 
         if deal.recommendation != "bid" or ceiling is None or ceiling <= 0:
@@ -127,38 +176,68 @@ class DeedCopilotAgent:
                         else ""
                     )
                     + "; ".join(deal.warnings[:2])
+                    + (
+                        f" History n={hist.n}." if hist is not None else ""
+                    )
                 ),
-                risk_buffers={"lesson_buffer_usd": buffer},
+                risk_buffers={
+                    "lesson_buffer_usd": buffer,
+                    "history_buffer_usd": hist_buffer,
+                    "total_buffer_usd": total_buffer,
+                },
             )
         else:
-            # Bid midpoint of opening and ceiling when there is room
-            if opening > 0 and opening < ceiling:
-                bid = min(ceiling, opening + 0.4 * (ceiling - opening))
+            # Bid between opening and history-scaled ceiling; never above oracle−buffer
+            target_ceiling = ceiling * bid_frac
+            if opening > 0 and opening < target_ceiling:
+                bid = min(target_ceiling, opening + 0.4 * (target_ceiling - opening))
             else:
-                bid = ceiling * 0.9
+                bid = target_ceiling
+            # Hard ceiling: oracle max after all buffers
+            if deal.max_bid is not None:
+                bid = min(bid, deal.max_bid - total_buffer)
+            bid = max(0.0, bid)
             action = AgentAction(
                 bid_amount=round(bid, 2),
                 pass_=False,
                 rationale=(
                     f"Bid ${bid:,.0f} under oracle ceiling ${ceiling:,.0f} "
-                    f"(raw maxBid ${deal.max_bid:,.0f} − buffer ${buffer:,.0f}). "
+                    f"(raw maxBid ${deal.max_bid:,.0f} − buffers ${total_buffer:,.0f}; "
+                    f"history frac={bid_frac:.2f}). "
                     f"Cite atlas asOf={atlas.as_of}; sources={len(atlas.sources)}. "
                     + (
                         "State default / not county-verified. "
                         if atlas.is_state_default
                         else "County research present. "
                     )
+                    + (
+                        f"History n={hist.n} med sold={hist.median_winning_bid}. "
+                        if hist is not None
+                        else ""
+                    )
                     + f"Growth priors: {[g.get('name') for g in atlas.growth_neighborhoods[:2]]}."
                 ),
-                risk_buffers={"lesson_buffer_usd": buffer, "oracle_max_bid": deal.max_bid or 0},
+                risk_buffers={
+                    "lesson_buffer_usd": buffer,
+                    "history_buffer_usd": hist_buffer,
+                    "total_buffer_usd": total_buffer,
+                    "oracle_max_bid": deal.max_bid or 0,
+                    "history_bid_fraction": bid_frac,
+                    "history_n": float(hist.n) if hist else 0.0,
+                },
             )
 
         traj.action = action
         traj.predicted_outcome = predict_outcome(
-            lot, action.bid_amount, sale_type, lessons
+            lot, action.bid_amount, sale_type, lessons, use_history=self.use_history
         )
         traj.simulated_or_real_outcome = simulate_outcome(
-            lot, action.bid_amount, sale_type, seed=seed or traj.id, lessons=lessons
+            lot,
+            action.bid_amount,
+            sale_type,
+            seed=seed or traj.id,
+            lessons=lessons,
+            use_history=self.use_history,
         )
         traj.profit_loss = traj.simulated_or_real_outcome.profit_loss
         traj.critique = deterministic_critique(traj)

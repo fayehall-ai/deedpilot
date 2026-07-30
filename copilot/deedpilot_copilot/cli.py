@@ -233,6 +233,64 @@ def priors_cmd():
     rprint(priors_summary(get_priors()))
 
 
+@app.command("build-history-index")
+def build_history_index_cmd():
+    """Build compact history_index.json for the web app + comps API."""
+    from .history_guidance import DEFAULT_INDEX_PATH, build_history_index
+
+    idx = build_history_index()
+    rprint(
+        {
+            "path": str(DEFAULT_INDEX_PATH),
+            "n_outcomes": idx.get("nOutcomes"),
+            "n_buckets": idx.get("nBuckets"),
+            "built_at": idx.get("builtAt"),
+        }
+    )
+
+
+@app.command("comparables")
+def comparables_cmd(
+    state: str,
+    sale_type: str = "Tax Deed",
+    assessed: Optional[float] = None,
+    opening: Optional[float] = None,
+    limit: int = 10,
+):
+    """List historical comps for a state/sale type (from recorded outcomes)."""
+    from .history_guidance import find_comparables
+    from .schemas import SaleType as ST
+
+    try:
+        st = ST(sale_type)
+    except ValueError:
+        st = sale_type  # type: ignore[assignment]
+    comps = find_comparables(
+        state=state.upper(),
+        sale_type=st,
+        assessed_value=assessed,
+        opening_bid=opening,
+        limit=limit,
+    )
+    rprint(comps)
+
+
+@app.command("backtest-history")
+def backtest_history_cmd(
+    limit: int = typer.Option(60, help="Number of historical lots to sample"),
+    state: Optional[str] = typer.Option(None, help="Filter state e.g. MI"),
+    sale_type: Optional[str] = typer.Option(None, help='Filter e.g. "Tax Deed"'),
+):
+    """Run agent on recorded historical lots; score vs oracle + market."""
+    from .backtest_historical import run_historical_backtest
+
+    result = run_historical_backtest(limit=limit, state=state, sale_type=sale_type)
+    # Compact summary for CLI
+    summary = {k: v for k, v in result.items() if k != "comparisons"}
+    summary["sample_comparisons"] = result.get("comparisons", [])[:5]
+    rprint(summary)
+
+
 @app.command("simulate")
 def simulate_cmd(
     outcome_id: Optional[str] = typer.Argument(
