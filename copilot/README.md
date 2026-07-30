@@ -223,11 +223,16 @@ decision. Both splits are Michigan and California only.
    `assert_no_leakage` at the top of anything that fits.
 7. A default is not an observation. If a source does not publish an outcome,
    that row does not enter the numerator *or* the denominator.
+8. A source with no label rule contributes no rows. `archivist.import_batch`
+   refuses the whole batch rather than importing the labelled part, so adding a
+   source stays a reviewed code change. See `docs/agent-architecture.md`.
 
 ## Evaluation commands
 
 ```bash
 deedpilot-copilot labels                 # what the corpus observes, by source
+deedpilot-copilot corpus                 # per-source: how much is actually fittable
+deedpilot-copilot archive rows.jsonl     # dry-run import; refuses unlabelled sources
 deedpilot-copilot splits                 # frozen temporal split + counts
 deedpilot-copilot world-model            # fit on train, score val + test
 deedpilot-copilot evaluate --split test  # policy comparison vs recorded prices

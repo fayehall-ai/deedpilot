@@ -132,10 +132,28 @@ on the same morning.
 
 Imports results after auctions close. Every source must ship with its label rule
 in `labels.py` — what its price column means, what its disposition flags observe
-— or its rows quarantine by default and never reach a fitted parameter.
+— or the batch is refused.
 
 This is the agent that caused the problem described above, and the redesign is
 entirely about making that failure impossible rather than about importing faster.
+`copilot/deedpilot_copilot/archivist.py` enforces it:
+
+- **An unlabelled source stops the batch.** Not "imports the labelled 90% and
+  drops the rest" — that leaves unexplained gaps that later read as real market
+  signal. `import_batch(strict=True)` raises `UnlabelledSourceError` naming the
+  sources and pointing at `labels.py`.
+- **Quarantined rows are excluded but retainable.** Maryland's 2,524 premium
+  bids become usable the moment someone works out the field mapping, so
+  `allow_quarantined=True` keeps them in the corpus without letting them reach a
+  fitted parameter.
+- **Structural checks are thin on purpose.** Negative bids, a row that is both
+  redeemed and ownership-taken, an unparseable date. The Archivist's job is not
+  to second-guess a county's published figures, only to refuse rows that cannot
+  mean anything.
+- **`corpus_report()` leads with what is fittable, not with the row count.**
+  `deedpilot-copilot corpus` prints price-usable and redemption-observed counts
+  per source rule, so "92,208 rows" can never again be quoted as if it were
+  92,208 usable observations.
 
 ### 4. Source Prospector — discovery
 
@@ -184,3 +202,36 @@ Each step unblocks the next.
    stranded behind missing statutory parameters.
 5. **Outcome Archivist** — last, because it is only safe once sources are known
    and their semantics are stated.
+
+## Commands
+
+```bash
+npm run scout -- --plan                  # today's queue; no network, no writes
+npm run scout -- --plan --backlog        # counties with a live source, no parser
+npm run scout -- --dry-run --max 5       # crawl and judge, write nothing
+npm run prospect -- --dry-run            # candidate plan for the registry
+npm run prospect -- --state MI --limit 5 # verify a handful, live
+npm run cartographer -- --gaps           # which states cannot be priced
+npm run cartographer -- --state IL --pr  # draft proposals, open a PR
+
+deedpilot-copilot corpus                 # what fraction of the corpus is fittable
+deedpilot-copilot archive rows.jsonl     # dry-run import; refuses unlabelled sources
+```
+
+## Status
+
+| Piece | State |
+|---|---|
+| Sale calendar | 21 states scheduled (4 statutory, 17 typical), 30 unresearched, 3 county overrides |
+| Source Prospector | 194 candidates across 152 researched counties, 164 hosts, 98 government |
+| Auction Scout | Scheduling, backoff, re-crawl intervals, coverage accounting |
+| Statute Cartographer | Drafting + validation + PR flow; IL and CA drafted and awaiting review |
+| Outcome Archivist | Admission control enforcing label rules |
+| Generic adapter | **Not built.** 2,169 counties nationally have a due window and no parser. |
+
+The last row is the honest remaining gap. The Scout reports it as an actionable
+backlog rather than a silent miss, and the Georgia adapter — a per-county
+registry with HTML parsing and LLM PDF transcription — is the template for
+clearing it. What that generalisation needs per state now exists:
+`resolveCountyRule` supplies sale type and redemption prose, `resolveSaleSchedule`
+supplies the timing.

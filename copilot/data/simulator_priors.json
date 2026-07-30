@@ -1,8 +1,8 @@
 {
-  "calibrated_at": "2026-07-30T04:25:35.641184+00:00",
-  "n_outcomes": 87841,
+  "calibrated_at": "2026-07-30T20:23:21.411674+00:00",
+  "n_outcomes": 87879,
   "provenance_counts": {
-    "recorded": 87841
+    "recorded": 87879
   },
   "prior_strength": 20.0,
   "buckets": {
@@ -32,7 +32,7 @@
       "key": "IL|Tax Lien",
       "state": "IL",
       "sale_type": "Tax Lien",
-      "n": 70071,
+      "n": 70109,
       "n_redeemed": 0,
       "p_redeem_raw": null,
       "p_redeem": 0.72,
@@ -100,7 +100,7 @@
       "key": "*|Tax Lien",
       "state": null,
       "sale_type": "Tax Lien",
-      "n": 70071,
+      "n": 70109,
       "n_redeemed": 0,
       "p_redeem_raw": null,
       "p_redeem": 0.72,
@@ -123,7 +123,7 @@
     "key": "*|*",
     "state": null,
     "sale_type": null,
-    "n": 87841,
+    "n": 87879,
     "n_redeemed": 0,
     "p_redeem_raw": 0.0,
     "p_redeem": 0.02,
@@ -143,12 +143,12 @@
   },
   "source_path": "/Users/fayehall/deedpilot/copilot/data/historical_outcomes.jsonl",
   "label_summary": {
-    "n_rows": 92170,
+    "n_rows": 92208,
     "n_redemption_observed": 17156,
     "n_price_usable": 17770,
     "n_quarantined": 4329,
     "by_rule": {
-      "il_cook_bid_down": 70071,
+      "il_cook_bid_down": 70109,
       "mi_titlecheck_sold": 17156,
       "md_howard_premium_bid": 2524,
       "ca_sandiego_cured_pre_sale": 1404,
@@ -156,12 +156,12 @@
       "map_crawl": 401
     },
     "by_disposition": {
-      "sold_to_investor": 90365,
+      "sold_to_investor": 90403,
       "cured_pre_sale": 1404,
       "unknown": 401
     },
     "by_price_kind": {
-      "tax_amount_bid_down": 70071,
+      "tax_amount_bid_down": 70109,
       "clearing_price": 17770,
       "premium_bid": 2524,
       "unknown": 1805
