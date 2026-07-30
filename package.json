@@ -11,7 +11,9 @@
     "db:seed": "tsx scripts/seed-counties.ts",
     "db:studio": "drizzle-kit studio",
     "ingest": "tsx scripts/ingest.ts",
-    "export:atlas": "tsx scripts/export-atlas-for-copilot.ts"
+    "export:atlas": "tsx scripts/export-atlas-for-copilot.ts",
+    "scout": "tsx scripts/scout.ts",
+    "prospect": "tsx scripts/prospect.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

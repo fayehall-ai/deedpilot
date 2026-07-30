@@ -102,8 +102,31 @@ Pulls upcoming auctions and lots into Postgres.
 The important design change is *when* it fires. Polling 3,142 counties uniformly
 is expensive and mostly returns nothing, because a given county sells once a
 month or once a year. Driven from the sale calendar it instead crawls a window
-around each county's known sale dates, turning a continuous national poll into a
-few hundred targeted crawls a week.
+around each county's known sale dates.
+
+Two mechanisms produce the saving, and it is worth separating them because the
+first is much weaker than it looks:
+
+- **Window membership** — only crawl counties inside a listing or results
+  window. Measured over a simulated year this is worth 2–3×, not the order of
+  magnitude one might assume. A Texas county sells every month with a 21-day
+  notice period, so it is legitimately in a window most of the time.
+- **Re-crawl interval** — being inside a window is not a reason to fetch daily.
+  A listing posts weeks ahead and barely changes until parcels start getting
+  pulled for late payment near the sale, so the interval is weekly by default and
+  tightens to daily in the last three days.
+
+Together, measured across 25 counties per confidence tier over 365 simulated
+days: **5.6× fewer fetches for statutory schedules, 13× for typical, 6.4× for
+unresearched**, against daily polling of the same counties.
+
+One trap worth recording, because it produced exactly zero saving until it was
+measured: sweep dates for counties with no known schedule must be anchored to a
+fixed epoch, not to the query date. Derived from "today", every window slides
+with the caller, every day falls inside one, and an `irregular` county gets
+polled daily by a system that believes it is being clever. A per-county phase
+offset also staggers the sweeps so 2,900 unscheduled counties do not all come due
+on the same morning.
 
 ### 3. Outcome Archivist — provenance-first
 
@@ -153,7 +176,8 @@ output only after that output has been reviewed and merged.
 Each step unblocks the next.
 
 1. **Sale calendar** — the scheduling primitive. Without it the scout polls
-   blind, so this is what makes national coverage affordable.
+   blind, so this is what makes national coverage affordable (measured 5.6–13×
+   fewer fetches; see the Scout section).
 2. **Source Prospector** — over the counties the calendar says are active.
 3. **Auction Scout** — scaled onto that registry, fired by that calendar.
 4. **Statute Cartographer** — Illinois and California first, where the data is

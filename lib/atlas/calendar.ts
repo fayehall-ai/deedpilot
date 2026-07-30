@@ -454,6 +454,22 @@ const SWEEP_INTERVAL_DAYS: Record<SaleCadence, number> = {
   irregular: 90,
 };
 
+/** Fixed anchor for sweep recurrence. Arbitrary but must never move. */
+const SWEEP_EPOCH = Date.UTC(2020, 0, 1);
+
+/**
+ * Deterministic per-county offset into the sweep cycle.
+ *
+ * Spreads unscheduled counties across the interval instead of having every one
+ * of them come due on the same day. Stable across processes — same county, same
+ * phase, forever — so a restart does not reshuffle the whole crawl plan.
+ */
+function sweepPhase(fips: string, interval: number): number {
+  let h = 0;
+  for (let i = 0; i < fips.length; i++) h = (h * 31 + fips.charCodeAt(i)) | 0;
+  return Math.abs(h) % interval;
+}
+
 /**
  * Project the next `count` sale windows for a county.
  *
@@ -497,8 +513,20 @@ export function nextSaleWindows(
     }
     dates.sort((a, b) => a.getTime() - b.getTime());
   } else {
-    const interval = SWEEP_INTERVAL_DAYS[schedule.cadence] ?? 90;
-    for (let i = 0; i < count; i++) dates.push(addDays(from, interval * (i + 1)));
+    // Sweep dates must be anchored to a fixed epoch, never to the query date.
+    // Deriving them from `from` makes every window slide with the caller, so
+    // every day falls inside one and an "irregular" county ends up polled daily
+    // — precisely what the calendar exists to avoid.
+    //
+    // The per-county phase offset also staggers the sweeps, so 2,900 unscheduled
+    // counties do not all come due on the same morning.
+    const interval = SWEEP_INTERVAL_DAYS[schedule.cadence];
+    const phase = sweepPhase(fips, interval);
+    const elapsed = Math.floor((from.getTime() - SWEEP_EPOCH) / MS_PER_DAY);
+    const k = Math.ceil((elapsed - phase) / interval);
+    for (let i = 0; i < count; i++) {
+      dates.push(new Date(SWEEP_EPOCH + (phase + (k + i) * interval) * MS_PER_DAY));
+    }
   }
 
   return dates.slice(0, count).map((d) => ({
