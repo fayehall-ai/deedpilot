@@ -86,28 +86,133 @@ def cycle():
 
 
 @app.command("seed-history")
-def seed_history(force: bool = typer.Option(False, help="Overwrite existing outcomes file")):
-    """Write synthetic seed historical outcomes and calibrate simulator priors."""
-    from .history import calibrate_priors, ensure_seed_outcomes, generate_seed_outcomes, write_outcomes
+def seed_history(
+    force: bool = typer.Option(False, help="Deprecated — synthetic seed disabled"),
+):
+    """Deprecated: synthetic history is disabled. Use import-history instead."""
+    rprint(
+        {
+            "error": "synthetic_seed_disabled",
+            "hint": "Run: deedpilot-copilot import-history --years 2023,2024,2025",
+        }
+    )
+    raise typer.Exit(code=1)
 
-    if force:
-        n = write_outcomes(generate_seed_outcomes())
-        priors = calibrate_priors(cache=True)
-        rprint({"wrote": n, "n_outcomes": priors.n_outcomes, "buckets": len(priors.buckets)})
-    else:
-        path = ensure_seed_outcomes(force=False)
-        from .history import get_priors, load_outcomes
 
-        outs = load_outcomes()
-        priors = get_priors(force_reload=True)
+@app.command("import-history")
+def import_history_cmd(
+    years: str = typer.Option(
+        "2023,2024,2025",
+        help="Comma-separated years of MI past auctions to import",
+    ),
+    max_auctions: Optional[int] = typer.Option(
+        None, help="Cap auctions per year (smoke tests)"
+    ),
+    include_unsold: bool = typer.Option(
+        False, help="Keep unsold/minimum-bid-only lots"
+    ),
+    from_db: bool = typer.Option(
+        False, help="Also export sold/redeemed lots from DATABASE_URL"
+    ),
+    from_map: bool = typer.Option(
+        False,
+        "--from-map",
+        help="Crawl auction/tax links from tax-deed-map county research (all researched counties)",
+    ),
+    map_root: Optional[str] = typer.Option(
+        None, help="Path to tax-deed-map repo (for re-export of county_sources.json)"
+    ),
+    max_counties: Optional[int] = typer.Option(
+        None, help="Cap counties when using --from-map (smoke)"
+    ),
+    skip_mi_specialized: bool = typer.Option(
+        False, help="With --from-map, skip full MI tax-sale.info re-import"
+    ),
+    deep: bool = typer.Option(
+        False,
+        "--deep",
+        help="Deep multi-state import: expanded MI years, Cook/Howard open data, CA sale PDFs",
+    ),
+    replace: bool = typer.Option(
+        True, help="Replace JSONL (drop synthetic); false merges with existing real rows"
+    ),
+):
+    """
+    Import *real* historical outcomes.
+
+    Default: Michigan Title Check past sales.
+    --from-map: walk tax-deed-map COUNTY_DATA links nationwide (policy-aware).
+    --deep: government open-data APIs + expanded archives (Cook IL, Howard MD, SD/OC CA, MI 2018–2026).
+    """
+    import os
+    import subprocess
+    from pathlib import Path
+
+    from .llm import load_env
+
+    load_env()
+
+    if deep:
+        from .deep_history import deep_import_all
+
+        year_list = [int(y.strip()) for y in years.split(",") if y.strip()]
+        # If user left default 2023-2025, expand for deep mode
+        if year_list == [2023, 2024, 2025]:
+            year_list = list(range(2018, 2027))
+        report = deep_import_all(mi_years=year_list, progress=True)
+        rprint({"mode": "deep", **report})
+        return
+
+    if from_map:
+        # Ensure county_sources.json is fresh from the map
+        export_script = (
+            Path(__file__).resolve().parent.parent / "scripts" / "export_county_sources.mjs"
+        )
+        cmd = ["node", str(export_script)]
+        if map_root:
+            cmd += ["--map", map_root]
+        elif Path("/Users/fayehall/tax-deed-map").is_dir():
+            cmd += ["--map", "/Users/fayehall/tax-deed-map"]
+        try:
+            subprocess.run(cmd, check=True)
+        except Exception as e:  # noqa: BLE001
+            rprint({"export_warning": str(e)})
+
+        from .map_history_crawl import crawl_county_sources
+
+        year_list = [int(y.strip()) for y in years.split(",") if y.strip()]
+        report = crawl_county_sources(
+            max_counties=max_counties,
+            include_specialized_mi=not skip_mi_specialized,
+            mi_years=year_list,
+            progress=True,
+        )
         rprint(
             {
-                "path": str(path),
-                "n_outcomes": len(outs),
-                "n_buckets": len(priors.buckets),
-                "provenance": priors.provenance_counts,
+                "mode": "from_map",
+                "merged_n": report.get("merged_n"),
+                "stats": report.get("stats"),
+                "priors": report.get("priors"),
+                "report": str(
+                    Path(__file__).resolve().parent.parent / "data" / "map_crawl_report.json"
+                ),
             }
         )
+        return
+
+    from .ingest_real_history import rebuild_real_history
+
+    year_list = [int(y.strip()) for y in years.split(",") if y.strip()]
+    db_url = os.environ.get("DATABASE_URL") if from_db else None
+    result = rebuild_real_history(
+        years=year_list,
+        max_auctions_per_year=max_auctions,
+        include_unsold=include_unsold,
+        database_url=db_url,
+        replace=replace,
+        calibrate=True,
+    )
+    rprint(result)
 
 
 @app.command("calibrate-priors")
@@ -126,6 +231,66 @@ def priors_cmd():
     from .history import get_priors, priors_summary
 
     rprint(priors_summary(get_priors()))
+
+
+@app.command("simulate")
+def simulate_cmd(
+    outcome_id: Optional[str] = typer.Argument(
+        None, help="Historical outcome id (e.g. seed-tx-0001)"
+    ),
+    mode: str = typer.Option(
+        "replay",
+        help="replay | sample | costs_only",
+    ),
+    n: int = typer.Option(1, "--n", "-n", help="Monte Carlo paths when mode is sample/costs_only"),
+    state: Optional[str] = typer.Option(None, "--state", help="Filter batch replay by state"),
+    list_ids: bool = typer.Option(False, "--list", help="List historical outcome ids"),
+    seed: Optional[str] = typer.Option(None, "--seed", help="RNG seed string"),
+    bid: Optional[float] = typer.Option(None, "--bid", help="Override bid / cash out"),
+):
+    """
+    Minimal historical-lot simulator.
+
+    replay  — lock recorded redemption + costs
+    sample  — re-draw redemption and ownership costs from noise model
+    costs_only — lock redemption flag; re-draw ownership costs only
+    """
+    from .historical_sim import (
+        batch_replay,
+        list_outcomes,
+        monte_carlo_historical,
+        simulate_historical,
+    )
+
+    if list_ids:
+        rows = list_outcomes(state=state, limit=50)
+        rprint([{"id": r.id, "state": r.state, "redeemed": r.redeemed} for r in rows])
+        return
+
+    if outcome_id is None:
+        # Aggregate replay of seed history
+        summary = batch_replay(state=state, limit=None)
+        rprint(summary)
+        return
+
+    if mode not in ("replay", "sample", "costs_only"):
+        raise typer.BadParameter("mode must be replay | sample | costs_only")
+
+    if mode == "replay" or n <= 1:
+        out = simulate_historical(
+            outcome_id, mode=mode, seed=seed, bid_amount=bid  # type: ignore[arg-type]
+        )
+        rprint(out.model_dump())
+    else:
+        rprint(
+            monte_carlo_historical(
+                outcome_id,
+                n=n,
+                mode=mode if mode != "replay" else "sample",  # type: ignore[arg-type]
+                seed=seed,
+                bid_amount=bid,
+            )
+        )
 
 
 if __name__ == "__main__":

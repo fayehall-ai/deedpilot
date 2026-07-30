@@ -47,3 +47,7 @@ copilot/**/__pycache__/
 copilot/*.egg-info/
 copilot/data/runs/
 copilot/data/lessons.jsonl
+
+# Map history crawl artifacts
+copilot/data/crawl_cache/
+copilot/data/pdf_cache/

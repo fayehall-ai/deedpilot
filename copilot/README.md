@@ -83,8 +83,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 
-# 3) Ensure historical outcomes seed + calibrated priors (no-op if present)
-deedpilot-copilot seed-history
+# 3) Import *real* historical auction outcomes (MI Title Check past sales)
+deedpilot-copilot import-history --years 2023,2024,2025
 
 # 4) Smoke tests
 pytest -q
@@ -125,6 +125,7 @@ deedpilot-copilot cycle
 | Trusted atlas + maxbid oracles | **Implemented** — Python callables + FastAPI + Next `/api/tools/*` |
 | Trajectory schema + critique | **Implemented** |
 | Simulator with redemption/QT sampling | **Implemented** — historical JSONL + expert shrinkage |
+| Historical lot replay / sample sim | **Implemented** — `historical_sim` + CLI/API |
 | Lesson memory + flywheel | **Implemented** |
 | Structured LLM reflection | **Implemented** — Grok primary / Claude fallback; rules fallback + safety merge |
 | Backtest harness | **Implemented** (synthetic) |
@@ -163,46 +164,103 @@ DEEDPILOT_REFLECT_MODE=rules deedpilot-copilot cycle
 deedpilot-copilot cycle
 ```
 
-## Historical outcomes → simulator noise
+## Minimal historical-lot simulator
 
-The simulator no longer uses only hard-coded expert rates. It loads
-`data/historical_outcomes.jsonl`, fits per `(state, sale_type)` buckets, and
-**shrinks** empirical rates toward expert priors (`prior_strength=20`
-pseudo-counts) so small samples cannot dominate.
+Replay a recorded auction row, or re-sample redemption / ownership costs while
+keeping that lot’s bid-time economics (opening, ARV, winning bid).
+
+| Mode | Behavior |
+|------|----------|
+| `replay` | Lock observed redeemed flag + recorded costs / P&L |
+| `sample` | Monte Carlo: draw redemption *and* QT/liens/rehab/exit from noise model |
+| `costs_only` | Lock redemption; re-draw ownership costs only |
+
+```python
+from deedpilot_copilot.historical_sim import (
+    replay_historical,
+    sample_historical,
+    monte_carlo_historical,
+    lot_from_historical,
+    get_outcome,
+)
+
+h = get_outcome("seed-tx-0001")  # or any id from data/historical_outcomes.jsonl
+lot = lot_from_historical(h)     # agent inputs
+actual = replay_historical(h)    # ground-truth path
+alt = sample_historical(h, mode="sample", seed="what-if-1")
+stats = monte_carlo_historical(h, n=200, mode="sample")
+```
+
+```bash
+deedpilot-copilot simulate --list
+deedpilot-copilot simulate seed-tx-0001 --mode replay
+deedpilot-copilot simulate seed-tx-0001 --mode sample -n 100
+deedpilot-copilot simulate              # batch replay summary
+```
+
+HTTP: `GET /simulate/historical`, `POST /simulate/historical`
+`{"outcome_id":"...","mode":"sample","n":100}`.
+
+## Real historical outcomes → simulator noise
+
+**Synthetic seed data is disabled.** The simulator calibrates only from
+`provenance=recorded|investor_log|inferred` rows.
+
+### Current source of truth
+
+| Source | What we get | Command |
+|--------|-------------|---------|
+| **Deep multi-state** (open data + archives + PDFs) | Cook IL Socrata, Howard MD, San Diego sale PDFs, MI 2018–2026 Title Check | `import-history --deep` |
+| **tax-deed-map county links** | Walk auction/tax URLs; extract sold prices when published | `import-history --from-map` |
+| **Michigan Title Check** | Past auction sold lots | `import-history` (default years) |
+| DeedPilot Postgres `lots` (optional) | `sold` / `redeemed` when ingest filled them | `--from-db` |
+
+The map has **~1,010 researched counties** (Census pop 50k+ LA-depth research in
+`tax-deed-map/data/county-data.js`), not 50k separate counties (the US has ~3,142).
+Unresearched counties inherit **state** defaults and usually have **no** per-county
+auction URL — the crawl indexes every URL that *is* in county research (~2k hosts).
+
+Policy: `tax-sale.info` is allow-listed in `lib/ingest/policy.ts` (robots-permissive,
+2s+ delay). RealAuction hosts stay blocked without agreement.
+
+**Honest limits of public auction results**
+
+| Field | Available today? |
+|-------|------------------|
+| Winning bid / sold price | Yes (MI past sales) |
+| County, sale date, tax deed type | Yes |
+| Post-sale owner redemption | **No** for public past-sale pages — MI deeds have none by statute; TX/GA redeemable post-sale needs investor logs |
+| Exit sale / rehab / QT actuals | **Not** on auction host — still sampled from statute/expert noise until logged |
+| SEV / assessed on past cards | Often missing on result cards (enrich later) |
+
+```bash
+# Deep multi-state (recommended): open data + MI archive + CA sale PDFs
+deedpilot-copilot import-history --deep
+
+# Map link crawl (all researched county URLs; long; lower yield)
+deedpilot-copilot import-history --from-map --map-root /path/to/tax-deed-map
+
+# MI-only (Title Check past auctions)
+deedpilot-copilot import-history --years 2018,2019,2020,2021,2022,2023,2024,2025
+
+deedpilot-copilot priors
+# Reports: data/deep_import_report.json, data/map_crawl_report.json
+```
 
 | Artifact | Role |
 |----------|------|
-| `data/historical_outcomes.jsonl` | One outcome per line (`HistoricalOutcome`) |
-| `data/simulator_priors.json` | Fitted cache (rebuild anytime) |
-| `provenance` | `synthetic_seed` bootstrap vs `recorded` / `investor_log` real data |
+| `data/historical_outcomes.jsonl` | Real outcomes only (`provenance=recorded`) |
+| `data/simulator_priors.json` | Fitted cache from those rows |
+| `deedpilot_copilot/ingest_real_history.py` | Importers |
 
-Noise calibrated from history:
-
-- **p_redeem** (Bernoulli draw)
-- **exit / ARV multiples** (p10/p50/p90 on ownership paths)
-- **quiet-title cost** and **holding months** (blended with statute ranges)
-- **surviving-lien rate** and magnitude
-- **rehab** prior when lot omits rehab
-
-```bash
-# Bootstrap seed (already shipped) or force regenerate
-deedpilot-copilot seed-history
-deedpilot-copilot seed-history --force
-
-# After appending real outcomes to the JSONL:
-deedpilot-copilot calibrate-priors
-deedpilot-copilot priors
-```
-
-Append real results as JSONL lines with `provenance: "recorded"` or
-`"investor_log"`. Override paths with `DEEDPILOT_HISTORICAL_OUTCOMES` /
-`DEEDPILOT_SIMULATOR_PRIORS` if needed.
+Investor dispositions (exit price, rehab, QT, post-sale redeem in TX/GA) should be
+appended as JSONL with `provenance: "investor_log"`.
 
 ## Next upgrades
 
 1. ~~Swap rule-based `reflect_on_batch` for a strong-model structured reflection call.~~ **Done**
-2. ~~Load historical auction outcomes into the simulator noise model.~~ **Done** (seed + real-data path)
-3. LLM planner on the agent decide node (still oracle-bound for numbers).
-4. Add LangGraph persistence checkpointer when you wire multi-turn sessions.
-5. Preference pairs from human spot-checks for prompt optimization.
-6. Replace synthetic seed rows with county / investor recorded outcomes over time.
+2. ~~Load historical auction outcomes into the simulator noise model.~~ **Done** (real MI sales; synthetic removed)
+3. Expand real history: TX/GA sold lists + investor disposition logs (exit/rehab/redeem)
+4. LLM planner on the agent decide node (still oracle-bound for numbers).
+5. Add LangGraph persistence checkpointer when you wire multi-turn sessions.
+6. Preference pairs from human spot-checks for prompt optimization.

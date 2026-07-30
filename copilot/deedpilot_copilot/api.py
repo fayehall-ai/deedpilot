@@ -128,6 +128,70 @@ def agent_run_lot(body: AgentBody):
     return traj.model_dump(by_alias=True)
 
 
+class SimulateBody(BaseModel):
+    model_config = {"populate_by_name": True}
+
+    outcome_id: str = Field(..., alias="outcomeId", description="Id from historical_outcomes.jsonl")
+    mode: str = Field("replay", description="replay | sample | costs_only")
+    seed: str | None = None
+    bid_amount: float | None = Field(None, alias="bidAmount")
+    n: int = Field(1, ge=1, le=5000, description="Monte Carlo paths (sample modes)")
+
+
+@app.post("/simulate/historical", tags=["simulator"])
+def simulate_historical_endpoint(body: SimulateBody) -> dict[str, Any]:
+    """Replay or sample paths for one historical lot."""
+    from .historical_sim import monte_carlo_historical, simulate_historical
+
+    mode = body.mode
+    if mode not in ("replay", "sample", "costs_only"):
+        raise HTTPException(400, "mode must be replay | sample | costs_only")
+    try:
+        if mode != "replay" and body.n > 1:
+            return monte_carlo_historical(
+                body.outcome_id,
+                n=body.n,
+                mode=mode,  # type: ignore[arg-type]
+                seed=body.seed,
+                bid_amount=body.bid_amount,
+            )
+        out = simulate_historical(
+            body.outcome_id,
+            mode=mode,  # type: ignore[arg-type]
+            seed=body.seed,
+            bid_amount=body.bid_amount,
+        )
+        return out.model_dump()
+    except KeyError as e:
+        raise HTTPException(404, str(e)) from e
+
+
+@app.get("/simulate/historical", tags=["simulator"])
+def list_historical_for_sim(
+    state: str | None = None,
+    limit: int = Query(20, ge=1, le=200),
+) -> dict[str, Any]:
+    """List historical outcome ids available to the simulator."""
+    from .historical_sim import list_outcomes
+
+    rows = list_outcomes(state=state, limit=limit)
+    return {
+        "n": len(rows),
+        "outcomes": [
+            {
+                "id": r.id,
+                "state": r.state,
+                "fips": r.fips,
+                "saleType": r.sale_type.value,
+                "redeemed": r.redeemed,
+                "winningBid": r.winning_bid,
+                "provenance": r.provenance,
+            }
+            for r in rows
+        ],
+    }
+
+
 def main() -> None:
     import uvicorn
 

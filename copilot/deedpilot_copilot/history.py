@@ -274,7 +274,7 @@ def get_priors(*, force_reload: bool = False) -> SimulatorPriors:
     Return calibrated priors (cached in-process).
 
     Prefer cached simulator_priors.json; if missing/stale vs outcomes file,
-    recalibrate from historical_outcomes.jsonl.
+    recalibrate from historical_outcomes.jsonl using **non-synthetic** rows only.
     """
     global _CACHED, _CACHED_MTIME
 
@@ -294,11 +294,19 @@ def get_priors(*, force_reload: bool = False) -> SimulatorPriors:
     if p_path.exists() and p_mtime >= o_mtime and not force_reload:
         priors = load_priors(p_path)
         if priors is not None:
-            _CACHED = priors
-            _CACHED_MTIME = max(o_mtime, p_mtime)
-            return priors
+            # Reject caches still built only on synthetic seed
+            prov = priors.provenance_counts or {}
+            if prov.get("synthetic_seed") and not any(
+                prov.get(k) for k in ("recorded", "investor_log", "inferred")
+            ):
+                pass  # fall through to recalibrate
+            else:
+                _CACHED = priors
+                _CACHED_MTIME = max(o_mtime, p_mtime)
+                return priors
 
-    priors = calibrate_priors(path=o_path if o_path.exists() else None, cache=True)
+    real = real_outcomes_only(load_outcomes(o_path) if o_path.exists() else [])
+    priors = calibrate_priors(real, cache=True)
     _CACHED = priors
     _CACHED_MTIME = max(
         o_path.stat().st_mtime if o_path.exists() else 0.0,
@@ -469,10 +477,10 @@ _SEED_SPECS: list[dict[str, Any]] = [
 
 def generate_seed_outcomes(*, seed: int = 42) -> list[HistoricalOutcome]:
     """
-    Build a deterministic synthetic seed corpus for calibration structure.
+    **Deprecated.** Synthetic outcomes are not used by the product path.
 
-    Rates track expert priors with mild state variation. Replace / append with
-    provenance=recorded rows as real auction results arrive.
+    Kept only for offline unit tests of shrinkage math. Prefer
+    ``deedpilot-copilot import-history`` for real Title Check / DB rows.
     """
     import random
 
@@ -558,10 +566,32 @@ def generate_seed_outcomes(*, seed: int = 42) -> list[HistoricalOutcome]:
 
 
 def ensure_seed_outcomes(*, force: bool = False) -> Path:
-    """Write seed JSONL if missing (or force regenerate)."""
+    """
+    Deprecated synthetic bootstrap.
+
+    Real history must be imported via ``import_michigan_past_years`` /
+    ``deedpilot-copilot import-history``. This no longer writes synthetic rows.
+    """
     path = outcomes_path()
-    if path.exists() and not force and path.stat().st_size > 0:
-        return path
-    n = write_outcomes(generate_seed_outcomes())
-    calibrate_priors(cache=True)
-    return path if n else path
+    if force:
+        raise RuntimeError(
+            "Synthetic seed generation is disabled. "
+            "Use: deedpilot-copilot import-history --years 2023,2024,2025"
+        )
+    if not path.exists() or path.stat().st_size == 0:
+        raise FileNotFoundError(
+            f"No historical outcomes at {path}. "
+            "Import real data: deedpilot-copilot import-history"
+        )
+    # Drop any leftover synthetic rows in place
+    rows = [o for o in load_outcomes(path) if o.provenance != "synthetic_seed"]
+    if len(rows) != len(load_outcomes(path)):
+        write_outcomes(rows, path)
+        calibrate_priors(rows, cache=True)
+    return path
+
+
+def real_outcomes_only(outcomes: list[HistoricalOutcome] | None = None) -> list[HistoricalOutcome]:
+    """Filter to provenance recorded / investor_log / inferred (no synthetic)."""
+    rows = outcomes if outcomes is not None else load_outcomes()
+    return [o for o in rows if o.provenance != "synthetic_seed"]

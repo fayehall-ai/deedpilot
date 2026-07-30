@@ -1,0 +1,801 @@
+{
+  "finished_at": "2026-07-30T02:29:04Z",
+  "n_counties_in_index": 1010,
+  "n_counties_crawled": 1010,
+  "stats": {
+    "hosts_seen": 2043,
+    "urls_fetched": 5572,
+    "urls_skipped_policy": 38,
+    "urls_failed": 1057,
+    "pages_with_sold": 32,
+    "outcomes_extracted_this_run": 401,
+    "by_state": {
+      "NY": 151,
+      "CA": 142,
+      "WI": 40,
+      "IL": 30,
+      "OH": 17,
+      "OR": 9,
+      "SC": 5,
+      "NC": 2,
+      "PA": 2,
+      "MD": 1,
+      "AZ": 1,
+      "CO": 1
+    },
+    "by_host": {
+      "collarcityauctions.com": 120,
+      "placer.ca.gov": 106,
+      "treasurer.danecounty.gov": 40,
+      "sonomacounty.gov": 36,
+      "brzostek.com": 31,
+      "mcleancountyil.gov": 30,
+      "hamiltoncountyauditor.org": 15,
+      "lanecountyor.gov": 7,
+      "spartanburgcounty.gov": 5,
+      "tax.alamancecountync.gov": 2,
+      "westmorelandcountypa.gov": 2,
+      "cuyahogacounty.gov": 1,
+      "dat.maryland.gov": 1,
+      "azleg.gov": 1,
+      "josephinecounty.gov": 1,
+      "oregonlegislature.gov": 1,
+      "broomfield.org": 1,
+      "lakecountyohio.gov": 1
+    },
+    "errors": [],
+    "n_discovered_past_urls": 1870
+  },
+  "merged_n": 6963,
+  "priors": {
+    "n_outcomes": 6963,
+    "buckets": 13,
+    "provenance_counts": {
+      "recorded": 6963
+    }
+  },
+  "sample_pages": [
+    {
+      "fips": "06089",
+      "url": "http://www.bid4assets.com/Shasta",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "12113",
+      "url": "http://www.santarosa.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12001",
+      "url": "https://alachua.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12005",
+      "url": "https://bay.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "45015",
+      "url": "https://berkeleycountysc.gov/dept/delinquent-tax-collector",
+      "host": "berkeleycountysc.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "12011",
+      "url": "https://broward.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12017",
+      "url": "https://citrus.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12019",
+      "url": "https://clay.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "36035",
+      "url": "https://collarcityauctions.com/servlet/Search.do?auctionId=1226",
+      "sold_hits": 84,
+      "kept": 40
+    },
+    {
+      "fips": "53015",
+      "url": "https://cowlitz.realauction.com",
+      "host": "cowlitz.realauction.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+    },
+    {
+      "fips": "39035",
+      "url": "https://cuyahogacounty.gov/treasury/delinquency/tax-lien-certificate-sales",
+      "sold_hits": 1,
+      "kept": 1
+    },
+    {
+      "fips": "17037",
+      "url": "https://dekalbcounty.org/departments/treasurer-collector/frequently-asked-questions/delinquent-tax-sale-information",
+      "host": "dekalbcounty.org",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "12031",
+      "url": "https://duval.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12033",
+      "url": "https://escambia.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12035",
+      "url": "https://flagler.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12055",
+      "url": "https://highlands.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12057",
+      "url": "https://hillsborough.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12061",
+      "url": "https://indianriver.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "29097",
+      "url": "https://jaspercountycollector.com/taxsale.php",
+      "host": "jaspercountycollector.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "16055",
+      "url": "https://kootenai.id.realforeclose.com",
+      "skipped": "requires_agreement",
+      "reason": "Same RealAuction platform policy as realtaxdeed.com."
+    },
+    {
+      "fips": "50007",
+      "url": "https://legislature.vermont.gov/statutes/fullchapter/32/133",
+      "host": "legislature.vermont.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "50011",
+      "url": "https://legislature.vermont.gov/statutes/section/32/133/05252",
+      "host": "legislature.vermont.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "12085",
+      "url": "https://martin.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12087",
+      "url": "https://monroe.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12089",
+      "url": "https://nassau.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "29145",
+      "url": "https://newtoncountycollector.com/taxsale.php",
+      "host": "newtoncountycollector.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "13217",
+      "url": "https://newtoncountytax.com/property_tax/tax-sales",
+      "host": "newtoncountytax.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "12095",
+      "url": "https://orange.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12101",
+      "url": "https://pasco.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "29165",
+      "url": "https://plattecountycollector.com",
+      "host": "plattecountycollector.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "18035",
+      "url": "https://properties.sriservices.com",
+      "host": "properties.sriservices.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+    },
+    {
+      "fips": "18127",
+      "url": "https://properties.sriservices.com/countyDetail?stateName=IN&countyName=Porter",
+      "host": "properties.sriservices.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+    },
+    {
+      "fips": "18005",
+      "url": "https://properties.sriservices.com/properties?state=IN&county=Bartholomew",
+      "host": "properties.sriservices.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+    },
+    {
+      "fips": "12107",
+      "url": "https://putnam.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "12115",
+      "url": "https://sarasota.realtaxdeed.com",
+      "skipped": "requires_agreement",
+      "reason": "RealAuction robots Disallow:/ \u2014 prefer county clerk of record."
+    },
+    {
+      "fips": "21209",
+      "url": "https://scottcountyclerk.com",
+      "host": "scottcountyclerk.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "42003",
+      "url": "https://sheriffalleghenycounty.com/sheriffs-sales",
+      "host": "sheriffalleghenycounty.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "12111",
+      "url": "https://stlucie.realforeclose.com",
+      "skipped": "requires_agreement",
+      "reason": "Same RealAuction platform policy as realtaxdeed.com."
+    },
+    {
+      "fips": "36103",
+      "url": "https://suffolk.ny.realforeclose.com",
+      "skipped": "requires_agreement",
+      "reason": "Same RealAuction platform policy as realtaxdeed.com."
+    },
+    {
+      "fips": "29213",
+      "url": "https://taneycountycollector.com/taxsaledel.php",
+      "host": "taneycountycollector.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "48453",
+      "url": "https://travis.texas.realforeclose.com",
+      "skipped": "requires_agreement",
+      "reason": "Same RealAuction platform policy as realtaxdeed.com."
+    },
+    {
+      "fips": "55025",
+      "url": "https://treasurer.danecounty.gov/taxdeedauction",
+      "sold_hits": 121,
+      "kept": 40
+    },
+    {
+      "fips": "12131",
+      "url": "https://walton.realforeclose.com",
+      "skipped": "requires_agreement",
+      "reason": "Same RealAuction platform policy as realtaxdeed.com."
+    },
+    {
+      "fips": "26163",
+      "url": "https://waynecountytreasurermi.com",
+      "host": "waynecountytreasurermi.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "17001",
+      "url": "https://www.adamscountyil.gov/government/departments/treasurer/tax-sale",
+      "host": "adamscountyil.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "36001",
+      "url": "https://www.albanycoauction.com",
+      "host": "albanycoauction.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "fips": "48029",
+      "url": "https://www.bexar.org/DocumentCenter/View/2370/Sheriff-Tax-Sale-Manual-English",
+      "host": "bexar.org",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "status": 200,
+      "content_type": "application/pdf",
+      "error": "pdf_not_parsed"
+    },
+    {
+      "fips": "42011",
+      "url": "https://www.bid4assets.com",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "22019",
+      "url": "https://www.bid4assets.com/CPSOSheriff",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "53011",
+      "url": "https://www.bid4assets.com/ClarkWA",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "53045",
+      "url": "https://www.bid4assets.com/Mason",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "12091",
+      "url": "https://www.bid4assets.com/OkaloosaFLTax/listings",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06059",
+      "url": "https://www.bid4assets.com/Orange",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06079",
+      "url": "https://www.bid4assets.com/SLO",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06097",
+      "url": "https://www.bid4assets.com/Sonoma",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06101",
+      "url": "https://www.bid4assets.com/Sutter",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06109",
+      "url": "https://www.bid4assets.com/Tuolumne",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "42037",
+      "url": "https://www.bid4assets.com/columbiapaupset",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "16011",
+      "url": "https://www.bid4assets.com/county-tax-sales",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06017",
+      "url": "https://www.bid4assets.com/eldorado",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "53033",
+      "url": "https://www.bid4assets.com/kingres",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "32019",
+      "url": "https://www.bid4assets.com/lyon",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "42101",
+      "url": "https://www.bid4assets.com/philataxsales",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06077",
+      "url": "https://www.bid4assets.com/sanjoaquin",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06085",
+      "url": "https://www.bid4assets.com/santaclara",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06001",
+      "url": "https://www.bid4assets.com/storefront/AlamedaMar26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06007",
+      "url": "https://www.bid4assets.com/storefront/ButteJun26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "32510",
+      "url": "https://www.bid4assets.com/storefront/CarsonCityApr26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "32007",
+      "url": "https://www.bid4assets.com/storefront/ElkoNVApr26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06025",
+      "url": "https://www.bid4assets.com/storefront/ImperialFeb26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06039",
+      "url": "https://www.bid4assets.com/storefront/MaderaMay26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06053",
+      "url": "https://www.bid4assets.com/storefront/MontereyMar26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "32023",
+      "url": "https://www.bid4assets.com/storefront/NyeNVMay26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06065",
+      "url": "https://www.bid4assets.com/storefront/RiversideCountyApr25",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06087",
+      "url": "https://www.bid4assets.com/storefront/SantaCruzJun26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06099",
+      "url": "https://www.bid4assets.com/storefront/StanislausMay26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06111",
+      "url": "https://www.bid4assets.com/storefront/VenturaCAMar26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "53077",
+      "url": "https://www.bid4assets.com/storefront/YakimaDec25",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "06113",
+      "url": "https://www.bid4assets.com/storefront/YoloMay26",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "53073",
+      "url": "https://www.bid4assets.com/whatcomtaxsale",
+      "host": "bid4assets.com",
+      "decision": "allow",
+      "reason": "Public listings; rate-limit conservatively.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "47011",
+      "url": "https://www.bradleycountytn.gov/clerk-and-master",
+      "host": "bradleycountytn.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "48039",
+      "url": "https://www.brazoriacountytx.gov/departments/tax-office/property-taxes/sheriff-sale-tax-resales",
+      "host": "brazoriacountytx.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "12009",
+      "url": "https://www.brevard.realforeclose.com",
+      "skipped": "requires_agreement",
+      "reason": "Same RealAuction platform policy as realtaxdeed.com."
+    },
+    {
+      "fips": "13029",
+      "url": "https://www.bryancountyga.gov/government/departments-h-z/tax-commissioner/tax-sale-information",
+      "host": "bryancountyga.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "36045",
+      "url": "https://www.brzostek.com",
+      "sold_hits": 4,
+      "kept": 4
+    },
+    {
+      "fips": "29031",
+      "url": "https://www.capecounty.us/collectors-office",
+      "host": "capecounty.us",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "27019",
+      "url": "https://www.carvercountymn.gov/departments/property-finance/property-tax/tax-forfeiture-sale",
+      "host": "carvercountymn.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "38017",
+      "url": "https://www.casscountynd.gov/residents/property-taxes",
+      "host": "casscountynd.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "36009",
+      "url": "https://www.cattcoauction.com",
+      "host": "cattcoauction.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "fips": "12015",
+      "url": "https://www.charlotte.realforeclose.com",
+      "skipped": "requires_agreement",
+      "reason": "Same RealAuction platform policy as realtaxdeed.com."
+    },
+    {
+      "fips": "37037",
+      "url": "https://www.chathamcountync.gov/government/departments-programs-i-z/tax-administration/tax-foreclosure-sales",
+      "host": "chathamcountync.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "29043",
+      "url": "https://www.christiancountycollector.com/taxsale3.php",
+      "host": "christiancountycollector.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "22017",
+      "url": "https://www.civicsource.com",
+      "host": "civicsource.com",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "32003",
+      "url": "https://www.clarkcountynv.gov/government/elected_officials/county_treasurer",
+      "host": "clarkcountynv.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 404"
+    },
+    {
+      "fips": "13063",
+      "url": "https://www.claytoncountyga.gov/government/tax-commissioner",
+      "host": "claytoncountyga.gov",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 307"
+    },
+    {
+      "fips": "51015",
+      "url": "https://www.co.augusta.va.us/government/departments-and-offices/treasurer",
+      "host": "co.augusta.va.us",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "28049",
+      "url": "https://www.co.hinds.ms.us/pgs/taxsalefiles.asp",
+      "host": "co.hinds.ms.us",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [Errno 54] Connection reset by peer>"
+    },
+    {
+      "fips": "48265",
+      "url": "https://www.co.kerr.tx.us",
+      "host": "co.kerr.tx.us",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1081)>"
+    },
+    {
+      "fips": "55105",
+      "url": "https://www.co.rock.wi.us",
+      "host": "co.rock.wi.us",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "HTTP 403"
+    },
+    {
+      "fips": "55111",
+      "url": "https://www.co.sauk.wi.us/treasurer/sauk-county-properties-sale-offer-purchase",
+      "host": "co.sauk.wi.us",
+      "decision": "allow",
+      "reason": "No explicit policy \u2014 default polite allow; still respect robots.txt.",
+      "error": "Remote end closed connection without response"
+    }
+  ]
+}
