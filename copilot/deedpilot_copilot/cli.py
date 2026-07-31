@@ -422,6 +422,63 @@ def labels_cmd():
     rprint(label_summary(load_outcomes()))
 
 
+@app.command("corpus")
+def corpus_cmd():
+    """Per-source accounting: how much of the corpus is actually fittable."""
+    from .archivist import corpus_report
+
+    r = corpus_report()
+    rprint(
+        f"[bold]{r['n_rows']}[/bold] rows | "
+        f"price-usable [bold]{r['n_price_usable']}[/bold] ({r['share_price_usable']:.0%}) | "
+        f"redemption-observed [bold]{r['n_redemption_observed']}[/bold] "
+        f"({r['share_redemption_observed']:.0%})"
+    )
+    for e in r["by_rule"]:
+        rprint(
+            f"  {e['rule']:28s} n={e['n']:6d} price={e['price_usable']:6d} "
+            f"redeem={e['redemption_observed']:6d} quarantined={e['quarantined']:5d} "
+            f"[{e['price_kind']}]"
+        )
+    rprint(f"\n[dim]{r['note']}[/dim]")
+
+
+@app.command("archive")
+def archive_cmd(
+    path: str = typer.Argument(..., help="JSONL of candidate HistoricalOutcome rows"),
+    write: bool = typer.Option(False, help="Actually append (default is a dry run)"),
+    keep_quarantined: bool = typer.Option(
+        False, help="Store classified-but-unusable rows for later reclassification"
+    ),
+    lenient: bool = typer.Option(
+        False, help="Report unlabelled sources instead of refusing the batch"
+    ),
+):
+    """
+    Import past-sale outcomes, refusing any source without a label rule.
+
+    A new source stops the batch until labels.py states what its price and
+    disposition fields observe — that check is why Illinois' 70k non-observations
+    cannot happen twice.
+    """
+    from pathlib import Path
+
+    from .archivist import UnlabelledSourceError, import_batch, load_jsonl
+
+    rows = load_jsonl(Path(path))
+    try:
+        report = import_batch(
+            rows,
+            dry_run=not write,
+            allow_quarantined=keep_quarantined,
+            strict=not lenient,
+        )
+    except UnlabelledSourceError as e:
+        rprint(f"[red]Refused:[/red] {e}")
+        raise typer.Exit(code=1)
+    rprint(report)
+
+
 @app.command("splits")
 def splits_cmd(
     rebuild: bool = typer.Option(False, help="Re-freeze the split (changes the manifest)"),

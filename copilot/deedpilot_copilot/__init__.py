@@ -16,6 +16,7 @@ from .atlas import (
     reload_atlas,
     resolve_atlas,
 )
+from .archivist import UnlabelledSourceError, admit, corpus_report, import_batch
 from .evaluate import evaluate_policies, promotion_gate
 from .labels import Disposition, PriceKind, classify, label_summary
 from .maxbid import compute_maxbid
@@ -38,11 +39,15 @@ __all__ = [
     "Lot",
     "PriceKind",
     "SaleType",
+    "UnlabelledSourceError",
+    "admit",
     "assert_no_leakage",
     "atlas_meta",
     "classify",
     "compute_maxbid",
+    "corpus_report",
     "evaluate_policies",
+    "import_batch",
     "get_split_rows",
     "label_summary",
     "list_researched_fips",
