@@ -11,7 +11,8 @@
  * `politeFetch` enforces per-host delays and many counties share a host.
  */
 import "../lib/env";
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import { ALL_COUNTIES } from "../lib/atlas";
 import {
   buildRegistry,
@@ -68,6 +69,7 @@ async function main() {
   }
 
   const registry = buildRegistry(results);
+  mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, JSON.stringify(registry, null, 2));
   const cov = registryCoverage(registry);
   console.log(

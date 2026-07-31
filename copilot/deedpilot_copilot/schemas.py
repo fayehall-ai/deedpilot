@@ -47,6 +47,11 @@ class DealInputs(BaseModel):
 
     state: str
     sale_type: SaleType = Field(alias="saleType")
+    #: 5-digit county FIPS. Optional, but it matters where a county departs from
+    #: its state's assessment ratio — Cook County assesses residential at 10%
+    #: against Illinois' statutory 33 1/3%, so omitting it there overstates the
+    #: property threefold.
+    fips: str | None = None
     opening_bid: float | None = Field(None, alias="openingBid")
     assessed_value: float | None = Field(None, alias="assessedValue")
     arv_override: float | None = Field(None, alias="arvOverride")

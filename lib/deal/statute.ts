@@ -27,6 +27,35 @@ export interface RedemptionTier {
   penalty: number;
 }
 
+/**
+ * Auctions where bidders compete by lowering the penalty rate, not raising the
+ * price.
+ *
+ * Illinois is the case that forced this to exist. Statute caps the penalty at
+ * 18% per six-month period, and a naive reading makes an Illinois lien look like
+ * a 36%/year instrument. In the 64,526 recorded Cook County sales we hold, the
+ * rate actually cleared at a **median of 0% and a mean of 1.88%** — 81% of liens
+ * were bid all the way down to zero. Institutional buyers take these for the
+ * deed remainder, not the interest.
+ *
+ * So the statutory cap is the best case and the observed median is the base
+ * case, and the two must not be conflated. Pricing a lien at the cap overstates
+ * its return by an order of magnitude — the mirror image of counting absent
+ * redemption data as observed non-redemption.
+ */
+export interface BidDownPenalty {
+  /** Statutory ceiling bidders compete down from. */
+  statutoryMax: number;
+  /** Median rate actually cleared, as a fraction. */
+  observedMedian: number;
+  observedMean: number;
+  /** Recorded sales behind those figures. */
+  n: number;
+  /** Where the observation came from — not the statute. */
+  observedSource: string;
+  note: string;
+}
+
 export interface StatuteParams {
   state: string;
   saleType: SaleType;
@@ -37,6 +66,11 @@ export interface StatuteParams {
     maxDays: number;
     /** Property classes that get the longer window, in plain language. */
     extendedFor?: string;
+    /**
+     * Present only where the penalty is set by bidding rather than by statute.
+     * When set, `tiers` describe the legal ceiling and this describes the market.
+     */
+    bidDown?: BidDownPenalty;
   } | null;
   /**
    * Typical cost to obtain insurable title, in dollars. A tax deed is not a
@@ -60,6 +94,27 @@ export interface StatuteParams {
   assessmentRatio: number;
   /** How that ratio is set, for the "where did this number come from" panel. */
   assessmentBasis: string;
+  /**
+   * Counties that depart from the state ratio, keyed by 5-digit FIPS.
+   *
+   * Illinois assesses at 33⅓% of fair cash value statewide — except Cook
+   * County, which runs a classified system under home rule at roughly 10% for
+   * residential. Cook is also the source of 70,109 of our historical rows, so
+   * applying the statewide ratio there would misvalue the single largest block
+   * of data we have by a factor of three.
+   */
+  countyAssessmentRatios?: Record<string, { ratio: number; basis: string }>;
+  /**
+   * Warning attached whenever ARV is *derived* from an assessed value in this
+   * state, because the ratio is legally right but practically misleading.
+   *
+   * California is the case: statute requires assessment at full cash value, so
+   * the ratio is honestly 1.0 — but Proposition 13 freezes the base year and
+   * factors it forward at up to 2%/yr, so a long-held parcel's assessed value
+   * can sit far below what it would sell for. A 1.0 ratio is not a licence to
+   * treat assessed value as an appraisal.
+   */
+  derivedArvCaveat?: string;
   statute: string;
   /** YYYY-MM this entry was last verified. */
   asOf: string;
@@ -202,10 +257,123 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "Rand v. Rand / Hall-era excess-proceeds rules mean former owners may claim surplus; this does not affect the buyer's title.",
     ],
   },
+
+  IL: {
+    state: "IL",
+    saleType: "Tax Lien",
+    redemption: {
+      // 35 ILCS 200/21-355. The statutory ceiling is 18% per six-month period,
+      // which compounds to 90% over the extended 30-month window. These tiers
+      // are the legal maximum and are almost never what a bidder receives —
+      // see `bidDown` below before quoting any of them as a return.
+      tiers: [
+        { throughDays: 182, penalty: 0.18 },
+        { throughDays: 365, penalty: 0.36 },
+        { throughDays: 547, penalty: 0.54 },
+        { throughDays: 730, penalty: 0.72 },
+        { throughDays: 912, penalty: 0.9 },
+      ],
+      maxDays: 912,
+      extendedFor:
+        "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
+      bidDown: {
+        statutoryMax: 0.18,
+        observedMedian: 0.0,
+        observedMean: 0.0188,
+        n: 64526,
+        observedSource:
+          "https://datacatalog.cookcountyil.gov/resource/55ju-2fs9.json (Cook County annual tax sale, winning_bid_percent)",
+        note:
+          "81.4% of recorded Cook County liens cleared at a 0% penalty bid. Institutional " +
+          "buyers take these for the deed remainder rather than the interest, so expected " +
+          "return on the redemption path is close to zero and the real thesis is acquisition.",
+      },
+    },
+    quietTitle: {
+      typicalLow: 2000,
+      typicalHigh: 5500,
+      typicalMonths: 6,
+      required: true,
+    },
+    closingCosts: 350,
+    assessmentRatio: 0.3333,
+    assessmentBasis:
+      "35 ILCS 200/9-145: property outside Cook County is assessed at 33⅓% of fair cash value.",
+    countyAssessmentRatios: {
+      // Cook runs a classified system under home rule rather than the statutory
+      // one-third. Residential is the class our parcels overwhelmingly fall in.
+      "17031": {
+        ratio: 0.1,
+        basis:
+          "Cook County Classification Ordinance: Class 2 residential is assessed at 10% of market value, not the statutory 33⅓%.",
+      },
+    },
+    statute: "35 ILCS 200, Art. 21 (sale and redemption); Art. 22 (tax deed)",
+    asOf: "2026-07",
+    sources: [
+      "https://www.ilga.gov/legislation/ilcs/ilcs5.asp?ActID=596&ChapterID=8",
+      "https://www.ilga.gov/legislation/ilcs/documents/003502000K21-355.htm",
+      "https://www.ilga.gov/legislation/ilcs/documents/003502000K9-145.htm",
+      "https://datacatalog.cookcountyil.gov/resource/55ju-2fs9.json",
+    ],
+    caveats: [
+      "The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens — price an Illinois lien on the acquisition thesis, not the interest.",
+      "Cook County assesses residential at ~10% of market value, not the statutory 33⅓%. The county override above handles this; parcels in other Illinois counties use the statutory ratio.",
+      "Title is perfected by petition for tax deed under Art. 22 rather than a classic quiet-title action. The cost and duration here are market practice for that proceeding plus any curative work an insurer requires, and are not fixed by statute.",
+      "Redemption runs 24 months for most property and 30 months only for an owner-occupied principal residence of 1–6 units. Commercial, industrial and vacant non-residential stay at 24.",
+      "Cook also runs a scavenger sale for long-delinquent parcels under different minimum-bid rules (35 ILCS 200/21-145 et seq.) that this entry does not model.",
+    ],
+  },
+
+  CA: {
+    state: "CA",
+    saleType: "Tax Deed",
+    // The owner's right to redeem ends at 5pm on the last business day before
+    // the sale, so a California tax deed carries no post-sale redemption at all.
+    redemption: null,
+    quietTitle: {
+      typicalLow: 2500,
+      typicalHigh: 6000,
+      typicalMonths: 6,
+      required: false,
+    },
+    closingCosts: 250,
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "Cal. Rev. & Tax. Code § 401: property is assessed at full cash value, so the statutory ratio is 1.0.",
+    derivedArvCaveat:
+      "California assesses at full cash value, but Proposition 13 fixes the base year and factors it forward at up to 2%/yr. On a long-held parcel the assessed value can sit far below market, so an ARV derived from it understates the property — get comparable sales before bidding.",
+    statute: "Cal. Rev. & Tax. Code §§ 3691–3731 (tax-defaulted property sales)",
+    asOf: "2026-07",
+    sources: [
+      "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=RTC&sectionNum=401",
+      "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=RTC&sectionNum=3691",
+      "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=RTC&sectionNum=3711",
+      "https://www.boe.ca.gov/proptaxes/prop13.htm",
+    ],
+    caveats: [
+      "No post-sale redemption. The owner's right ends at 5pm on the last business day before the sale, so the deed conveys without that overhang.",
+      "Proposition 13 means assessed value systematically understates market value on long-held parcels. Do not treat a ratio-derived ARV as an appraisal in California.",
+      "RTC § 3711 makes the tax deed presumptively valid, so quiet title is optional rather than required — but most title insurers still want it before writing a policy.",
+      "Some non-residential commercial property reaches power-to-sell after 3 years of default rather than the usual 5 (RTC § 3691).",
+      "Recorded San Diego sale lists mark pre-sale cures as 'REDEEMED'. That is the owner paying before the auction, not a post-sale redemption, and it is quarantined in the copilot's label rules.",
+    ],
+  },
 };
 
 export function statuteFor(state: string): StatuteParams | null {
   return STATUTE_PARAMS[state] ?? null;
+}
+
+/**
+ * States the deal engine can price, derived rather than listed.
+ *
+ * Hardcoded copies of this list went stale the moment IL and CA were added,
+ * leaving user-facing warnings naming five states while the engine priced
+ * seven. Read it from the map.
+ */
+export function coveredStateList(): string[] {
+  return Object.keys(STATUTE_PARAMS).sort();
 }
 
 /** Whether the deal engine can produce numbers for this state at all. */
