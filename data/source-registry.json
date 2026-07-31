@@ -1,62 +1,337 @@
 {
-  "builtAt": "2026-07-31T02:46:39.431Z",
-  "nCounties": 70,
-  "nVerified": 6,
-  "nGaps": 64,
+  "builtAt": "2026-07-31T16:11:43.742Z",
+  "nCounties": 132,
+  "nVerified": 94,
+  "nGaps": 39,
   "counties": {
-    "12031": {
+    "10001": {
+      "state": "DE",
+      "county": "Kent",
+      "sources": [
+        {
+          "fips": "10001",
+          "state": "DE",
+          "url": "https://www.kentcountyde.gov/My-Government/Departments/Sheriffs-Office",
+          "host": "www.kentcountyde.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 1,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "redemption period",
+            "sheriff sale",
+            "monition sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "10003": {
+      "state": "DE",
+      "county": "New Castle",
+      "sources": [
+        {
+          "fips": "10003",
+          "state": "DE",
+          "url": "https://www.newcastlede.gov/172/Sheriff-Sales",
+          "host": "www.newcastlede.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "foreclosure auction",
+            "sheriff sale",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "10005": {
+      "state": "DE",
+      "county": "Sussex",
+      "sources": [
+        {
+          "fips": "10005",
+          "state": "DE",
+          "url": "https://www.sussexcountyde.gov/sheriff-sales",
+          "host": "www.sussexcountyde.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "tax sale",
+            "sheriff sale",
+            "monition sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "11001": {
+      "state": "DC",
+      "county": "District of Columbia",
+      "sources": [],
+      "isGap": true
+    },
+    "12001": {
       "state": "FL",
-      "county": "Duval",
+      "county": "Alachua",
       "sources": [],
       "isGap": true
     },
-    "12115": {
+    "12013": {
       "state": "FL",
-      "county": "Sarasota",
-      "sources": [],
-      "isGap": true
+      "county": "Calhoun",
+      "sources": [
+        {
+          "fips": "12013",
+          "state": "FL",
+          "url": "https://calhouncounty.org/revenue/index.html",
+          "host": "calhouncounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "13009": {
+    "12015": {
+      "state": "FL",
+      "county": "Charlotte",
+      "sources": [
+        {
+          "fips": "12015",
+          "state": "FL",
+          "url": "https://taxcollector.charlottecountyfl.gov/delinquent-tax",
+          "host": "taxcollector.charlottecountyfl.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.93,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "bidder registration",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13001": {
       "state": "GA",
-      "county": "Baldwin",
+      "county": "Appling",
       "sources": [],
       "isGap": true
     },
-    "13113": {
-      "state": "GA",
-      "county": "Fayette",
+    "15001": {
+      "state": "HI",
+      "county": "Hawaii",
       "sources": [],
       "isGap": true
     },
-    "13241": {
-      "state": "GA",
-      "county": "Rabun",
+    "15009": {
+      "state": "HI",
+      "county": "Maui",
+      "sources": [
+        {
+          "fips": "15009",
+          "state": "HI",
+          "url": "https://www.mauicounty.gov/1748/Delinquent-Tax-Accounts",
+          "host": "www.mauicounty.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "16001": {
+      "state": "ID",
+      "county": "Ada",
       "sources": [],
       "isGap": true
     },
-    "13261": {
-      "state": "GA",
-      "county": "Sumter",
-      "sources": [],
-      "isGap": true
+    "16003": {
+      "state": "ID",
+      "county": "Adams",
+      "sources": [
+        {
+          "fips": "16003",
+          "state": "ID",
+          "url": "https://www.co.adams.id.us/departments/treasurer",
+          "host": "www.co.adams.id.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "tax deed sale",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "17045": {
+    "16005": {
+      "state": "ID",
+      "county": "Bannock",
+      "sources": [
+        {
+          "fips": "16005",
+          "state": "ID",
+          "url": "https://www.bannockcounty.gov/treasurer/",
+          "host": "www.bannockcounty.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17001": {
       "state": "IL",
-      "county": "Edgar",
+      "county": "Adams",
       "sources": [],
       "isGap": true
     },
-    "17051": {
+    "17005": {
       "state": "IL",
-      "county": "Fayette",
-      "sources": [],
-      "isGap": true
+      "county": "Bond",
+      "sources": [
+        {
+          "fips": "17005",
+          "state": "IL",
+          "url": "https://bondcountyil.gov/treasurer/tax-sale-information/",
+          "host": "bondcountyil.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "17077": {
+    "17013": {
       "state": "IL",
-      "county": "Jackson",
-      "sources": [],
-      "isGap": true
+      "county": "Calhoun",
+      "sources": [
+        {
+          "fips": "17013",
+          "state": "IL",
+          "url": "https://calhouncounty.org/revenue/index.html",
+          "host": "calhouncounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17017": {
+      "state": "IL",
+      "county": "Cass",
+      "sources": [
+        {
+          "fips": "17017",
+          "state": "IL",
+          "url": "https://co.cass.il.us/elected-officials/county-treasurercollector",
+          "host": "co.cass.il.us",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17021": {
+      "state": "IL",
+      "county": "Christian",
+      "sources": [
+        {
+          "fips": "17021",
+          "state": "IL",
+          "url": "https://www.christiancountyil.gov/treasurer/",
+          "host": "www.christiancountyil.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "17163": {
       "state": "IL",
@@ -81,87 +356,92 @@
       ],
       "isGap": false
     },
-    "18053": {
+    "18001": {
       "state": "IN",
-      "county": "Grant",
+      "county": "Adams",
       "sources": [],
       "isGap": true
     },
-    "18059": {
+    "18019": {
       "state": "IN",
-      "county": "Hancock",
+      "county": "Clark",
+      "sources": [
+        {
+          "fips": "18019",
+          "state": "IN",
+          "url": "https://co.clark.in.us/index.php/clark-county-indiana-government/clark-county-treasurer-s-office",
+          "host": "co.clark.in.us",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "19001": {
+      "state": "IA",
+      "county": "Adair",
       "sources": [],
       "isGap": true
     },
-    "18131": {
-      "state": "IN",
-      "county": "Pulaski",
-      "sources": [],
-      "isGap": true
+    "19011": {
+      "state": "IA",
+      "county": "Benton",
+      "sources": [
+        {
+          "fips": "19011",
+          "state": "IA",
+          "url": "https://bentoncountyia.gov/treasurer/tax_sales/",
+          "host": "bentoncountyia.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "18157": {
-      "state": "IN",
-      "county": "Tippecanoe",
-      "sources": [],
-      "isGap": true
-    },
-    "18169": {
-      "state": "IN",
-      "county": "Wabash",
-      "sources": [],
-      "isGap": true
-    },
-    "21077": {
-      "state": "KY",
-      "county": "Gallatin",
-      "sources": [],
-      "isGap": true
-    },
-    "21187": {
-      "state": "KY",
-      "county": "Owen",
-      "sources": [],
-      "isGap": true
-    },
-    "21209": {
-      "state": "KY",
-      "county": "Scott",
-      "sources": [],
-      "isGap": true
-    },
-    "22003": {
-      "state": "LA",
+    "20001": {
+      "state": "KS",
       "county": "Allen",
       "sources": [],
       "isGap": true
     },
-    "22007": {
-      "state": "LA",
-      "county": "Assumption",
+    "21001": {
+      "state": "KY",
+      "county": "Adair",
       "sources": [],
       "isGap": true
     },
-    "22009": {
+    "22001": {
       "state": "LA",
-      "county": "Avoyelles",
+      "county": "Acadia",
       "sources": [],
       "isGap": true
     },
-    "22017": {
-      "state": "LA",
-      "county": "Caddo",
-      "sources": [],
-      "isGap": true
-    },
-    "23009": {
+    "23001": {
       "state": "ME",
-      "county": "Hancock",
+      "county": "Androscoggin",
       "sources": [],
       "isGap": true
     },
-    "23013": {
-      "state": "ME",
-      "county": "Knox",
+    "24001": {
+      "state": "MD",
+      "county": "Allegany",
       "sources": [],
       "isGap": true
     },
@@ -188,59 +468,771 @@
       ],
       "isGap": false
     },
-    "25021": {
+    "25001": {
       "state": "MA",
-      "county": "Norfolk",
+      "county": "Barnstable",
       "sources": [],
       "isGap": true
     },
-    "26077": {
+    "26001": {
       "state": "MI",
-      "county": "Kalamazoo",
+      "county": "Alcona",
       "sources": [],
       "isGap": true
     },
-    "26137": {
+    "26003": {
       "state": "MI",
-      "county": "Otsego",
-      "sources": [],
-      "isGap": true
+      "county": "Alger",
+      "sources": [
+        {
+          "fips": "26003",
+          "state": "MI",
+          "url": "https://algercounty.gov/departments/treasurer/delinquent-taxes-forfeiture-and-foreclosure/",
+          "host": "algercounty.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "27103": {
+    "26011": {
+      "state": "MI",
+      "county": "Arenac",
+      "sources": [
+        {
+          "fips": "26011",
+          "state": "MI",
+          "url": "https://arenaccountymi.gov/Treasurer/",
+          "host": "arenaccountymi.gov",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "26017": {
+      "state": "MI",
+      "county": "Bay",
+      "sources": [
+        {
+          "fips": "26017",
+          "state": "MI",
+          "url": "https://baycountymi.gov/courts_law/sheriff/mortgage_foreclosure_sales.php",
+          "host": "baycountymi.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "foreclosure auction",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "26023": {
+      "state": "MI",
+      "county": "Branch",
+      "sources": [
+        {
+          "fips": "26023",
+          "state": "MI",
+          "url": "https://branchcounty.gov/",
+          "host": "branchcounty.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "27001": {
       "state": "MN",
-      "county": "Nicollet",
+      "county": "Aitkin",
       "sources": [],
       "isGap": true
     },
-    "28029": {
+    "28001": {
       "state": "MS",
-      "county": "Copiah",
+      "county": "Adams",
       "sources": [],
       "isGap": true
     },
-    "29135": {
+    "28013": {
+      "state": "MS",
+      "county": "Calhoun",
+      "sources": [
+        {
+          "fips": "28013",
+          "state": "MS",
+          "url": "https://calhouncounty.org/revenue/index.html",
+          "host": "calhouncounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29001": {
       "state": "MO",
-      "county": "Moniteau",
+      "county": "Adair",
       "sources": [],
       "isGap": true
     },
-    "29197": {
-      "state": "MO",
-      "county": "Schuyler",
+    "30001": {
+      "state": "MT",
+      "county": "Beaverhead",
       "sources": [],
       "isGap": true
     },
-    "31071": {
+    "30009": {
+      "state": "MT",
+      "county": "Carbon",
+      "sources": [
+        {
+          "fips": "30009",
+          "state": "MT",
+          "url": "https://carboncounty.com/",
+          "host": "carboncounty.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "30011": {
+      "state": "MT",
+      "county": "Carter",
+      "sources": [
+        {
+          "fips": "30011",
+          "state": "MT",
+          "url": "https://cartercountymt.gov/departments/treasurer.php",
+          "host": "cartercountymt.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "31001": {
       "state": "NE",
-      "county": "Garfield",
+      "county": "Adams",
       "sources": [],
       "isGap": true
     },
-    "34007": {
-      "state": "NJ",
-      "county": "Camden",
+    "31011": {
+      "state": "NE",
+      "county": "Boone",
+      "sources": [
+        {
+          "fips": "31011",
+          "state": "NE",
+          "url": "https://boonecountyne.gov/treasurer-office/public-tax-sale-information/",
+          "host": "boonecountyne.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "31013": {
+      "state": "NE",
+      "county": "Box Butte",
+      "sources": [
+        {
+          "fips": "31013",
+          "state": "NE",
+          "url": "https://boxbuttecountyne.gov/treasurer-office/public-tax-sale-information/",
+          "host": "boxbuttecountyne.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "32001": {
+      "state": "NV",
+      "county": "Churchill",
       "sources": [],
       "isGap": true
+    },
+    "32005": {
+      "state": "NV",
+      "county": "Douglas",
+      "sources": [
+        {
+          "fips": "32005",
+          "state": "NV",
+          "url": "https://douglascountynv.gov/i-want-to/learn_about___/properties_available_at_a_tax_sale",
+          "host": "douglascountynv.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "33001": {
+      "state": "NH",
+      "county": "Belknap",
+      "sources": [],
+      "isGap": true
+    },
+    "34001": {
+      "state": "NJ",
+      "county": "Atlantic",
+      "sources": [],
+      "isGap": true
+    },
+    "34005": {
+      "state": "NJ",
+      "county": "Burlington",
+      "sources": [
+        {
+          "fips": "34005",
+          "state": "NJ",
+          "url": "https://co.burlington.nj.us/169/Sheriffs-Sales-Foreclosures",
+          "host": "co.burlington.nj.us",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "34009": {
+      "state": "NJ",
+      "county": "Cape May",
+      "sources": [
+        {
+          "fips": "34009",
+          "state": "NJ",
+          "url": "https://capemaycountynj.gov/1363/Sheriffs-Sale",
+          "host": "capemaycountynj.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "34019": {
+      "state": "NJ",
+      "county": "Hunterdon",
+      "sources": [
+        {
+          "fips": "34019",
+          "state": "NJ",
+          "url": "https://co.hunterdon.nj.us/428/Sheriffs-Sales",
+          "host": "co.hunterdon.nj.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "minimum/opening bid",
+            "redemption period",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35001": {
+      "state": "NM",
+      "county": "Bernalillo",
+      "sources": [
+        {
+          "fips": "35001",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35003": {
+      "state": "NM",
+      "county": "Catron",
+      "sources": [
+        {
+          "fips": "35003",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35005": {
+      "state": "NM",
+      "county": "Chaves",
+      "sources": [
+        {
+          "fips": "35005",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35006": {
+      "state": "NM",
+      "county": "Cibola",
+      "sources": [
+        {
+          "fips": "35006",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35007": {
+      "state": "NM",
+      "county": "Colfax",
+      "sources": [
+        {
+          "fips": "35007",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35009": {
+      "state": "NM",
+      "county": "Curry",
+      "sources": [
+        {
+          "fips": "35009",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35011": {
+      "state": "NM",
+      "county": "De Baca",
+      "sources": [
+        {
+          "fips": "35011",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35013": {
+      "state": "NM",
+      "county": "Doña Ana",
+      "sources": [
+        {
+          "fips": "35013",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35015": {
+      "state": "NM",
+      "county": "Eddy",
+      "sources": [
+        {
+          "fips": "35015",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35017": {
+      "state": "NM",
+      "county": "Grant",
+      "sources": [
+        {
+          "fips": "35017",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35019": {
+      "state": "NM",
+      "county": "Guadalupe",
+      "sources": [
+        {
+          "fips": "35019",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35021": {
+      "state": "NM",
+      "county": "Harding",
+      "sources": [
+        {
+          "fips": "35021",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35023": {
+      "state": "NM",
+      "county": "Hidalgo",
+      "sources": [
+        {
+          "fips": "35023",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35025": {
+      "state": "NM",
+      "county": "Lea",
+      "sources": [
+        {
+          "fips": "35025",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36001": {
+      "state": "NY",
+      "county": "Albany",
+      "sources": [],
+      "isGap": true
+    },
+    "36005": {
+      "state": "NY",
+      "county": "Bronx",
+      "sources": [
+        {
+          "fips": "36005",
+          "state": "NY",
+          "url": "https://www.nyc.gov/site/finance/property/property-lien-sales.page",
+          "host": "www.nyc.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "tax lien sale",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36007": {
+      "state": "NY",
+      "county": "Broome",
+      "sources": [
+        {
+          "fips": "36007",
+          "state": "NY",
+          "url": "https://broomecountyny.gov/realprop",
+          "host": "broomecountyny.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "36031": {
       "state": "NY",
@@ -265,59 +1257,105 @@
       ],
       "isGap": false
     },
-    "37021": {
+    "37001": {
       "state": "NC",
-      "county": "Buncombe",
+      "county": "Alamance",
+      "sources": [
+        {
+          "fips": "37001",
+          "state": "NC",
+          "url": "https://tax.alamancecountync.gov/pay-online/",
+          "host": "tax.alamancecountync.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37003": {
+      "state": "NC",
+      "county": "Alexander",
       "sources": [],
       "isGap": true
     },
-    "37027": {
-      "state": "NC",
-      "county": "Caldwell",
-      "sources": [],
-      "isGap": true
-    },
-    "37171": {
-      "state": "NC",
-      "county": "Surry",
-      "sources": [],
-      "isGap": true
-    },
-    "38005": {
+    "38001": {
       "state": "ND",
-      "county": "Benson",
+      "county": "Adams",
       "sources": [],
       "isGap": true
     },
-    "39011": {
+    "38015": {
+      "state": "ND",
+      "county": "Burleigh",
+      "sources": [
+        {
+          "fips": "38015",
+          "state": "ND",
+          "url": "https://www.burleigh.gov/departments/auditortreasurer/delinquent-tax-property/",
+          "host": "www.burleigh.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39001": {
       "state": "OH",
-      "county": "Auglaize",
+      "county": "Adams",
       "sources": [],
       "isGap": true
     },
-    "39093": {
-      "state": "OH",
-      "county": "Lorain",
-      "sources": [],
-      "isGap": true
-    },
-    "39109": {
-      "state": "OH",
-      "county": "Miami",
-      "sources": [],
-      "isGap": true
-    },
-    "40085": {
+    "40001": {
       "state": "OK",
-      "county": "Love",
+      "county": "Adair",
       "sources": [],
       "isGap": true
     },
-    "40105": {
-      "state": "OK",
-      "county": "Nowata",
+    "41001": {
+      "state": "OR",
+      "county": "Baker",
       "sources": [],
       "isGap": true
+    },
+    "41017": {
+      "state": "OR",
+      "county": "Deschutes",
+      "sources": [
+        {
+          "fips": "41017",
+          "state": "OR",
+          "url": "https://co.deschutes.or.us/739/Property-Tax-Collection---Foreclosure-In",
+          "host": "co.deschutes.or.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "41039": {
       "state": "OR",
@@ -343,65 +1381,174 @@
       ],
       "isGap": false
     },
-    "42075": {
+    "42001": {
       "state": "PA",
-      "county": "Lebanon",
+      "county": "Adams",
       "sources": [],
       "isGap": true
     },
-    "42089": {
+    "42011": {
       "state": "PA",
-      "county": "Monroe",
+      "county": "Berks",
+      "sources": [
+        {
+          "fips": "42011",
+          "state": "PA",
+          "url": "https://co.berks.pa.us/departments/tax-claim-bureau/delinquent-tax-search",
+          "host": "co.berks.pa.us",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "44001": {
+      "state": "RI",
+      "county": "Bristol",
       "sources": [],
       "isGap": true
     },
-    "42129": {
-      "state": "PA",
-      "county": "Westmoreland",
+    "45001": {
+      "state": "SC",
+      "county": "Abbeville",
       "sources": [],
       "isGap": true
     },
-    "46057": {
+    "45009": {
+      "state": "SC",
+      "county": "Bamberg",
+      "sources": [
+        {
+          "fips": "45009",
+          "state": "SC",
+          "url": "https://bambergcountysc.gov/tax-services/delinquent-tax-office",
+          "host": "bambergcountysc.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "45017": {
+      "state": "SC",
+      "county": "Calhoun",
+      "sources": [
+        {
+          "fips": "45017",
+          "state": "SC",
+          "url": "https://calhouncounty.org/revenue/index.html",
+          "host": "calhouncounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "45019": {
+      "state": "SC",
+      "county": "Charleston",
+      "sources": [
+        {
+          "fips": "45019",
+          "state": "SC",
+          "url": "https://www.charlestoncounty.org/departments/delinquent-tax/tax-sale.php",
+          "host": "www.charlestoncounty.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "46003": {
       "state": "SD",
-      "county": "Hamlin",
+      "county": "Aurora",
       "sources": [],
       "isGap": true
     },
-    "46137": {
-      "state": "SD",
-      "county": "Ziebach",
-      "sources": [],
-      "isGap": true
-    },
-    "47079": {
+    "47013": {
       "state": "TN",
-      "county": "Henry",
-      "sources": [],
-      "isGap": true
+      "county": "Campbell",
+      "sources": [
+        {
+          "fips": "47013",
+          "state": "TN",
+          "url": "https://campbellcountytn.gov/elected-officials/trustee/",
+          "host": "campbellcountytn.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "48029": {
-      "state": "TX",
-      "county": "Bexar",
-      "sources": [],
-      "isGap": true
-    },
-    "48039": {
-      "state": "TX",
-      "county": "Brazoria",
-      "sources": [],
-      "isGap": true
-    },
-    "48107": {
-      "state": "TX",
-      "county": "Crosby",
-      "sources": [],
-      "isGap": true
-    },
-    "48275": {
-      "state": "TX",
-      "county": "Knox",
-      "sources": [],
-      "isGap": true
+    "47019": {
+      "state": "TN",
+      "county": "Carter",
+      "sources": [
+        {
+          "fips": "47019",
+          "state": "TN",
+          "url": "https://cartercountytn.gov/government/elected_officials/county_trustee.php",
+          "host": "cartercountytn.gov",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "48453": {
       "state": "TX",
@@ -427,23 +1574,193 @@
       ],
       "isGap": false
     },
-    "51051": {
-      "state": "VA",
-      "county": "Dickenson",
-      "sources": [],
-      "isGap": true
+    "49007": {
+      "state": "UT",
+      "county": "Carbon",
+      "sources": [
+        {
+          "fips": "49007",
+          "state": "UT",
+          "url": "https://carboncounty.com/",
+          "host": "carboncounty.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "53065": {
+    "49011": {
+      "state": "UT",
+      "county": "Davis",
+      "sources": [
+        {
+          "fips": "49011",
+          "state": "UT",
+          "url": "https://daviscountyutah.gov/controller/tax-administration-group/tax-sale/delinquent-tax-sale",
+          "host": "daviscountyutah.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "49015": {
+      "state": "UT",
+      "county": "Emery",
+      "sources": [
+        {
+          "fips": "49015",
+          "state": "UT",
+          "url": "https://emerycounty.com/",
+          "host": "emerycounty.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "53005": {
       "state": "WA",
-      "county": "Stevens",
-      "sources": [],
-      "isGap": true
+      "county": "Benton",
+      "sources": [
+        {
+          "fips": "53005",
+          "state": "WA",
+          "url": "https://co.benton.wa.us/government/elected_officials/treasurer/foreclosure_and_distraint.php",
+          "host": "co.benton.wa.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "tax sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "54031": {
+    "53007": {
+      "state": "WA",
+      "county": "Chelan",
+      "sources": [
+        {
+          "fips": "53007",
+          "state": "WA",
+          "url": "https://co.chelan.wa.us/treasurer/pages/foreclosure-general-information",
+          "host": "co.chelan.wa.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "54013": {
       "state": "WV",
-      "county": "Hardy",
-      "sources": [],
-      "isGap": true
+      "county": "Calhoun",
+      "sources": [
+        {
+          "fips": "54013",
+          "state": "WV",
+          "url": "https://calhouncounty.org/revenue/index.html",
+          "host": "calhouncounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "55013": {
+      "state": "WI",
+      "county": "Burnett",
+      "sources": [
+        {
+          "fips": "55013",
+          "state": "WI",
+          "url": "https://burnettcountywi.gov/CivicAlerts.aspx?AID=646",
+          "host": "burnettcountywi.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "55019": {
+      "state": "WI",
+      "county": "Clark",
+      "sources": [
+        {
+          "fips": "55019",
+          "state": "WI",
+          "url": "https://www.clarkcountywi.gov/sheriffsales",
+          "host": "www.clarkcountywi.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "55079": {
       "state": "WI",
@@ -470,63 +1787,705 @@
       ],
       "isGap": false
     },
-    "55113": {
-      "state": "WI",
-      "county": "Sawyer",
-      "sources": [],
-      "isGap": true
+    "56003": {
+      "state": "WY",
+      "county": "Big Horn",
+      "sources": [
+        {
+          "fips": "56003",
+          "state": "WY",
+          "url": "https://bighorncountywy.gov/departments/treasurer/tax-sale-rules-and-registration",
+          "host": "bighorncountywy.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax lien sale",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "06037": {
-      "state": "CA",
-      "county": "Los Angeles",
-      "sources": [],
-      "isGap": true
+    "56007": {
+      "state": "WY",
+      "county": "Carbon",
+      "sources": [
+        {
+          "fips": "56007",
+          "state": "WY",
+          "url": "https://carboncountywy.gov/1161/Tax-Sale-Information",
+          "host": "carboncountywy.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "06111": {
-      "state": "CA",
-      "county": "Ventura",
-      "sources": [],
-      "isGap": true
+    "56021": {
+      "state": "WY",
+      "county": "Laramie",
+      "sources": [
+        {
+          "fips": "56021",
+          "state": "WY",
+          "url": "https://www.laramiecountywy.gov/County-Government/Elected-Officials/County-Treasurer/Tax-Sale",
+          "host": "www.laramiecountywy.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "01073": {
-      "state": "AL",
-      "county": "Jefferson",
-      "sources": [],
-      "isGap": true
+    "04001": {
+      "state": "AZ",
+      "county": "Apache",
+      "sources": [
+        {
+          "fips": "04001",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "08059": {
+    "04003": {
+      "state": "AZ",
+      "county": "Cochise",
+      "sources": [
+        {
+          "fips": "04003",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08003": {
       "state": "CO",
-      "county": "Jefferson",
-      "sources": [],
-      "isGap": true
+      "county": "Alamosa",
+      "sources": [
+        {
+          "fips": "08003",
+          "state": "CO",
+          "url": "https://alamosacounty.org/198/Treasurer-Public-Trustee",
+          "host": "alamosacounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.65,
+          "signals": [
+            "tax lien sale",
+            "tax sale",
+            "foreclosure auction",
+            "certificate of purchase",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "06053": {
-      "state": "CA",
-      "county": "Monterey",
-      "sources": [],
-      "isGap": true
+    "09003": {
+      "state": "CT",
+      "county": "Hartford",
+      "sources": [
+        {
+          "fips": "09003",
+          "state": "CT",
+          "url": "https://www.hartfordct.gov/Government/Departments/Tax",
+          "host": "www.hartfordct.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "05051": {
-      "state": "AR",
-      "county": "Garland",
-      "sources": [],
-      "isGap": true
+    "02020": {
+      "state": "AK",
+      "county": "Anchorage",
+      "sources": [
+        {
+          "fips": "02020",
+          "state": "AK",
+          "url": "https://www.muni.org/Departments/hlb/Pages/RESForeclosedProperties.aspx",
+          "host": "www.muni.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "01005": {
-      "state": "AL",
-      "county": "Barbour",
-      "sources": [],
-      "isGap": true
+    "04005": {
+      "state": "AZ",
+      "county": "Coconino",
+      "sources": [
+        {
+          "fips": "04005",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "05077": {
-      "state": "AR",
-      "county": "Lee",
-      "sources": [],
-      "isGap": true
+    "04007": {
+      "state": "AZ",
+      "county": "Gila",
+      "sources": [
+        {
+          "fips": "04007",
+          "state": "AZ",
+          "url": "https://gilacountyaz.gov/government/treasurer/index.php",
+          "host": "gilacountyaz.gov",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        },
+        {
+          "fips": "04007",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
-    "08065": {
+    "04009": {
+      "state": "AZ",
+      "county": "Graham",
+      "sources": [
+        {
+          "fips": "04009",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04011": {
+      "state": "AZ",
+      "county": "Greenlee",
+      "sources": [
+        {
+          "fips": "04011",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04012": {
+      "state": "AZ",
+      "county": "La Paz",
+      "sources": [
+        {
+          "fips": "04012",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08007": {
       "state": "CO",
-      "county": "Lake",
+      "county": "Archuleta",
+      "sources": [
+        {
+          "fips": "08007",
+          "state": "CO",
+          "url": "https://www.archuletacounty.gov/county-government/elected-offices/treasurer/tax-lien-sale/",
+          "host": "www.archuletacounty.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04013": {
+      "state": "AZ",
+      "county": "Maricopa",
+      "sources": [
+        {
+          "fips": "04013",
+          "state": "AZ",
+          "url": "https://treasurer.maricopa.gov/",
+          "host": "treasurer.maricopa.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "delinquent tax",
+            "certificate of purchase",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04015": {
+      "state": "AZ",
+      "county": "Mohave",
+      "sources": [
+        {
+          "fips": "04015",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04017": {
+      "state": "AZ",
+      "county": "Navajo",
+      "sources": [
+        {
+          "fips": "04017",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08013": {
+      "state": "CO",
+      "county": "Boulder",
+      "sources": [
+        {
+          "fips": "08013",
+          "state": "CO",
+          "url": "https://bouldercounty.gov/property-and-land/treasurer/taxes/tax-lien-sale/",
+          "host": "bouldercounty.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax lien sale",
+            "struck off"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "02090": {
+      "state": "AK",
+      "county": "Fairbanks North Star",
+      "sources": [
+        {
+          "fips": "02090",
+          "state": "AK",
+          "url": "https://www.fnsb.gov/169/Tax-Foreclosure",
+          "host": "www.fnsb.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05013": {
+      "state": "AR",
+      "county": "Calhoun",
+      "sources": [
+        {
+          "fips": "05013",
+          "state": "AR",
+          "url": "https://calhouncounty.org/revenue/index.html",
+          "host": "calhouncounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04019": {
+      "state": "AZ",
+      "county": "Pima",
+      "sources": [
+        {
+          "fips": "04019",
+          "state": "AZ",
+          "url": "https://www.to.pima.gov/taxLienSale/",
+          "host": "www.to.pima.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase",
+            "bidder registration",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01015": {
+      "state": "AL",
+      "county": "Calhoun",
+      "sources": [
+        {
+          "fips": "01015",
+          "state": "AL",
+          "url": "https://calhouncountyal.gov/revenue/index.html",
+          "host": "calhouncountyal.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04021": {
+      "state": "AZ",
+      "county": "Pinal",
+      "sources": [
+        {
+          "fips": "04021",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08015": {
+      "state": "CO",
+      "county": "Chaffee",
+      "sources": [
+        {
+          "fips": "08015",
+          "state": "CO",
+          "url": "https://chaffeecounty.org/departments/treasurer/index.php",
+          "host": "chaffeecounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax lien sale",
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04023": {
+      "state": "AZ",
+      "county": "Santa Cruz",
+      "sources": [
+        {
+          "fips": "04023",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04025": {
+      "state": "AZ",
+      "county": "Yavapai",
+      "sources": [
+        {
+          "fips": "04025",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "04027": {
+      "state": "AZ",
+      "county": "Yuma",
+      "sources": [
+        {
+          "fips": "04027",
+          "state": "AZ",
+          "url": "https://www.govease.com/",
+          "host": "www.govease.com",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "02013": {
+      "state": "AK",
+      "county": "Aleutians East",
+      "sources": [],
+      "isGap": true
+    },
+    "01001": {
+      "state": "AL",
+      "county": "Autauga",
+      "sources": [],
+      "isGap": true
+    },
+    "05001": {
+      "state": "AR",
+      "county": "Arkansas",
+      "sources": [],
+      "isGap": true
+    },
+    "06001": {
+      "state": "CA",
+      "county": "Alameda",
+      "sources": [],
+      "isGap": true
+    },
+    "08001": {
+      "state": "CO",
+      "county": "Adams",
+      "sources": [],
+      "isGap": true
+    },
+    "09001": {
+      "state": "CT",
+      "county": "Fairfield",
       "sources": [],
       "isGap": true
     }
