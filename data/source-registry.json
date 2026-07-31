@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T16:50:03.893Z",
-  "nCounties": 522,
-  "nVerified": 109,
-  "nGaps": 414,
+  "builtAt": "2026-07-31T16:51:51.691Z",
+  "nCounties": 542,
+  "nVerified": 111,
+  "nGaps": 432,
   "counties": {
     "10001": {
       "state": "DE",
@@ -405,6 +405,12 @@
       "sources": [],
       "isGap": true
     },
+    "16023": {
+      "state": "ID",
+      "county": "Butte",
+      "sources": [],
+      "isGap": true
+    },
     "17001": {
       "state": "IL",
       "county": "Adams",
@@ -555,6 +561,12 @@
       "sources": [],
       "isGap": true
     },
+    "17027": {
+      "state": "IL",
+      "county": "Clinton",
+      "sources": [],
+      "isGap": true
+    },
     "17163": {
       "state": "IL",
       "county": "St. Clair",
@@ -654,6 +666,12 @@
         }
       ],
       "isGap": false
+    },
+    "18021": {
+      "state": "IN",
+      "county": "Clay",
+      "sources": [],
+      "isGap": true
     },
     "19001": {
       "state": "IA",
@@ -793,6 +811,12 @@
       "sources": [],
       "isGap": true
     },
+    "20019": {
+      "state": "KS",
+      "county": "Chautauqua",
+      "sources": [],
+      "isGap": true
+    },
     "21001": {
       "state": "KY",
       "county": "Adair",
@@ -844,6 +868,12 @@
     "21017": {
       "state": "KY",
       "county": "Bourbon",
+      "sources": [],
+      "isGap": true
+    },
+    "21019": {
+      "state": "KY",
+      "county": "Boyd",
       "sources": [],
       "isGap": true
     },
@@ -901,6 +931,12 @@
       "sources": [],
       "isGap": true
     },
+    "22019": {
+      "state": "LA",
+      "county": "Calcasieu",
+      "sources": [],
+      "isGap": true
+    },
     "23001": {
       "state": "ME",
       "county": "Androscoggin",
@@ -952,6 +988,12 @@
     "23017": {
       "state": "ME",
       "county": "Oxford",
+      "sources": [],
+      "isGap": true
+    },
+    "23019": {
+      "state": "ME",
+      "county": "Penobscot",
       "sources": [],
       "isGap": true
     },
@@ -1032,6 +1074,12 @@
       ],
       "isGap": false
     },
+    "24023": {
+      "state": "MD",
+      "county": "Garrett",
+      "sources": [],
+      "isGap": true
+    },
     "25001": {
       "state": "MA",
       "county": "Barnstable",
@@ -1083,6 +1131,12 @@
     "25017": {
       "state": "MA",
       "county": "Middlesex",
+      "sources": [],
+      "isGap": true
+    },
+    "25019": {
+      "state": "MA",
+      "county": "Nantucket",
       "sources": [],
       "isGap": true
     },
@@ -1232,6 +1286,12 @@
       "sources": [],
       "isGap": true
     },
+    "26027": {
+      "state": "MI",
+      "county": "Cass",
+      "sources": [],
+      "isGap": true
+    },
     "27001": {
       "state": "MN",
       "county": "Aitkin",
@@ -1283,6 +1343,12 @@
     "27017": {
       "state": "MN",
       "county": "Carlton",
+      "sources": [],
+      "isGap": true
+    },
+    "27019": {
+      "state": "MN",
+      "county": "Carver",
       "sources": [],
       "isGap": true
     },
@@ -1365,6 +1431,12 @@
       "sources": [],
       "isGap": true
     },
+    "28021": {
+      "state": "MS",
+      "county": "Claiborne",
+      "sources": [],
+      "isGap": true
+    },
     "29001": {
       "state": "MO",
       "county": "Adair",
@@ -1416,6 +1488,12 @@
     "29017": {
       "state": "MO",
       "county": "Bollinger",
+      "sources": [],
+      "isGap": true
+    },
+    "29019": {
+      "state": "MO",
+      "county": "Boone",
       "sources": [],
       "isGap": true
     },
@@ -1516,6 +1594,12 @@
     "30021": {
       "state": "MT",
       "county": "Dawson",
+      "sources": [],
+      "isGap": true
+    },
+    "30023": {
+      "state": "MT",
+      "county": "Deer Lodge",
       "sources": [],
       "isGap": true
     },
@@ -1624,6 +1708,30 @@
           "state": "NE",
           "url": "https://burtcountyne.gov/treasurer-office/public-tax-sale-information/",
           "host": "burtcountyne.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "31023": {
+      "state": "NE",
+      "county": "Butler",
+      "sources": [
+        {
+          "fips": "31023",
+          "state": "NE",
+          "url": "https://butlercountyne.gov/treasurer-office/public-tax-sale-information/",
+          "host": "butlercountyne.gov",
           "origin": "link_followed",
           "kind": "results",
           "isGovernment": true,
@@ -1770,6 +1878,12 @@
       "sources": [],
       "isGap": true
     },
+    "33019": {
+      "state": "NH",
+      "county": "Sullivan",
+      "sources": [],
+      "isGap": true
+    },
     "34001": {
       "state": "NJ",
       "county": "Atlantic",
@@ -1891,6 +2005,12 @@
     "34023": {
       "state": "NJ",
       "county": "Middlesex",
+      "sources": [],
+      "isGap": true
+    },
+    "34025": {
+      "state": "NJ",
+      "county": "Monmouth",
       "sources": [],
       "isGap": true
     },
@@ -2444,6 +2564,31 @@
       ],
       "isGap": false
     },
+    "35041": {
+      "state": "NM",
+      "county": "Roosevelt",
+      "sources": [
+        {
+          "fips": "35041",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "36001": {
       "state": "NY",
       "county": "Albany",
@@ -2663,6 +2808,12 @@
       "sources": [],
       "isGap": true
     },
+    "37021": {
+      "state": "NC",
+      "county": "Buncombe",
+      "sources": [],
+      "isGap": true
+    },
     "38001": {
       "state": "ND",
       "county": "Adams",
@@ -2737,6 +2888,12 @@
     "38019": {
       "state": "ND",
       "county": "Cavalier",
+      "sources": [],
+      "isGap": true
+    },
+    "38021": {
+      "state": "ND",
+      "county": "Dickey",
       "sources": [],
       "isGap": true
     },

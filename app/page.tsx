@@ -49,9 +49,10 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <dl className="mt-14 grid gap-6 border-t border-border pt-8 sm:grid-cols-4">
+          <dl className="mt-14 grid gap-6 border-t border-border pt-8 sm:grid-cols-5">
             <HeroStat label="Counties mapped" value={num(ALL_COUNTIES.length)} />
             <HeroStat label="Researched in depth" value={num(Object.keys(COUNTY_DATA).length)} />
+            <HeroStat label="States with inventory" value={num(stats.byState.length)} />
             <HeroStat label="Upcoming auctions" value={num(stats.upcomingAuctions)} />
             <HeroStat label="Lots tracked" value={num(stats.totalLots)} />
           </dl>
@@ -94,7 +95,7 @@ export default async function HomePage() {
           <h2 className="text-2xl font-semibold tracking-tight">Where we have live inventory</h2>
           <p className="mt-2 max-w-2xl leading-relaxed text-muted">
             The rules atlas is national. Parcel-level auction data is deliberately deep rather than
-            wide — these five states carry the bulk of U.S. tax deed volume.
+            wide — we are actively expanding live inventory beyond the original high-volume states via the source registry and generic extraction.
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
