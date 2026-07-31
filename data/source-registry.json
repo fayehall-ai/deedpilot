@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T18:26:34.861Z",
-  "nCounties": 193,
+  "builtAt": "2026-07-31T18:27:46.927Z",
+  "nCounties": 233,
   "nVerified": 116,
-  "nGaps": 78,
+  "nGaps": 118,
   "counties": {
     "10001": {
       "state": "DE",
@@ -98,6 +98,12 @@
       "sources": [],
       "isGap": true
     },
+    "12005": {
+      "state": "FL",
+      "county": "Bay",
+      "sources": [],
+      "isGap": true
+    },
     "12013": {
       "state": "FL",
       "county": "Calhoun",
@@ -161,6 +167,12 @@
       "sources": [],
       "isGap": true
     },
+    "13005": {
+      "state": "GA",
+      "county": "Bacon",
+      "sources": [],
+      "isGap": true
+    },
     "15001": {
       "state": "HI",
       "county": "Hawaii",
@@ -170,6 +182,12 @@
     "15003": {
       "state": "HI",
       "county": "Honolulu",
+      "sources": [],
+      "isGap": true
+    },
+    "15005": {
+      "state": "HI",
+      "county": "Kalawao",
       "sources": [],
       "isGap": true
     },
@@ -255,6 +273,12 @@
       "sources": [],
       "isGap": true
     },
+    "16009": {
+      "state": "ID",
+      "county": "Benewah",
+      "sources": [],
+      "isGap": true
+    },
     "17001": {
       "state": "IL",
       "county": "Adams",
@@ -289,6 +313,12 @@
         }
       ],
       "isGap": false
+    },
+    "17007": {
+      "state": "IL",
+      "county": "Boone",
+      "sources": [],
+      "isGap": true
     },
     "17013": {
       "state": "IL",
@@ -398,6 +428,12 @@
       "sources": [],
       "isGap": true
     },
+    "18005": {
+      "state": "IN",
+      "county": "Bartholomew",
+      "sources": [],
+      "isGap": true
+    },
     "18019": {
       "state": "IN",
       "county": "Clark",
@@ -430,6 +466,12 @@
     "19003": {
       "state": "IA",
       "county": "Adams",
+      "sources": [],
+      "isGap": true
+    },
+    "19005": {
+      "state": "IA",
+      "county": "Allamakee",
       "sources": [],
       "isGap": true
     },
@@ -469,6 +511,12 @@
       "sources": [],
       "isGap": true
     },
+    "20005": {
+      "state": "KS",
+      "county": "Atchison",
+      "sources": [],
+      "isGap": true
+    },
     "21001": {
       "state": "KY",
       "county": "Adair",
@@ -478,6 +526,12 @@
     "21003": {
       "state": "KY",
       "county": "Allen",
+      "sources": [],
+      "isGap": true
+    },
+    "21005": {
+      "state": "KY",
+      "county": "Anderson",
       "sources": [],
       "isGap": true
     },
@@ -493,6 +547,12 @@
       "sources": [],
       "isGap": true
     },
+    "22005": {
+      "state": "LA",
+      "county": "Ascension",
+      "sources": [],
+      "isGap": true
+    },
     "23001": {
       "state": "ME",
       "county": "Androscoggin",
@@ -505,6 +565,12 @@
       "sources": [],
       "isGap": true
     },
+    "23005": {
+      "state": "ME",
+      "county": "Cumberland",
+      "sources": [],
+      "isGap": true
+    },
     "24001": {
       "state": "MD",
       "county": "Allegany",
@@ -514,6 +580,12 @@
     "24003": {
       "state": "MD",
       "county": "Anne Arundel",
+      "sources": [],
+      "isGap": true
+    },
+    "24005": {
+      "state": "MD",
+      "county": "Baltimore",
       "sources": [],
       "isGap": true
     },
@@ -552,6 +624,12 @@
       "sources": [],
       "isGap": true
     },
+    "25005": {
+      "state": "MA",
+      "county": "Bristol",
+      "sources": [],
+      "isGap": true
+    },
     "26001": {
       "state": "MI",
       "county": "Alcona",
@@ -584,6 +662,12 @@
     "26005": {
       "state": "MI",
       "county": "Allegan",
+      "sources": [],
+      "isGap": true
+    },
+    "26007": {
+      "state": "MI",
+      "county": "Alpena",
       "sources": [],
       "isGap": true
     },
@@ -668,6 +752,12 @@
       "sources": [],
       "isGap": true
     },
+    "27005": {
+      "state": "MN",
+      "county": "Becker",
+      "sources": [],
+      "isGap": true
+    },
     "28001": {
       "state": "MS",
       "county": "Adams",
@@ -677,6 +767,12 @@
     "28003": {
       "state": "MS",
       "county": "Alcorn",
+      "sources": [],
+      "isGap": true
+    },
+    "28005": {
+      "state": "MS",
+      "county": "Amite",
       "sources": [],
       "isGap": true
     },
@@ -714,6 +810,12 @@
     "29003": {
       "state": "MO",
       "county": "Andrew",
+      "sources": [],
+      "isGap": true
+    },
+    "29005": {
+      "state": "MO",
+      "county": "Atchison",
       "sources": [],
       "isGap": true
     },
@@ -1693,6 +1795,12 @@
       "sources": [],
       "isGap": true
     },
+    "36003": {
+      "state": "NY",
+      "county": "Allegany",
+      "sources": [],
+      "isGap": true
+    },
     "36005": {
       "state": "NY",
       "county": "Bronx",
@@ -1863,15 +1971,33 @@
       "sources": [],
       "isGap": true
     },
+    "39003": {
+      "state": "OH",
+      "county": "Allen",
+      "sources": [],
+      "isGap": true
+    },
     "40001": {
       "state": "OK",
       "county": "Adair",
       "sources": [],
       "isGap": true
     },
+    "40003": {
+      "state": "OK",
+      "county": "Alfalfa",
+      "sources": [],
+      "isGap": true
+    },
     "41001": {
       "state": "OR",
       "county": "Baker",
+      "sources": [],
+      "isGap": true
+    },
+    "41003": {
+      "state": "OR",
+      "county": "Benton",
       "sources": [],
       "isGap": true
     },
@@ -1928,6 +2054,12 @@
       "sources": [],
       "isGap": true
     },
+    "42003": {
+      "state": "PA",
+      "county": "Allegheny",
+      "sources": [],
+      "isGap": true
+    },
     "42011": {
       "state": "PA",
       "county": "Berks",
@@ -1981,9 +2113,21 @@
       "sources": [],
       "isGap": true
     },
+    "44003": {
+      "state": "RI",
+      "county": "Kent",
+      "sources": [],
+      "isGap": true
+    },
     "45001": {
       "state": "SC",
       "county": "Abbeville",
+      "sources": [],
+      "isGap": true
+    },
+    "45003": {
+      "state": "SC",
+      "county": "Aiken",
       "sources": [],
       "isGap": true
     },
@@ -2091,9 +2235,21 @@
       "sources": [],
       "isGap": true
     },
+    "46005": {
+      "state": "SD",
+      "county": "Beadle",
+      "sources": [],
+      "isGap": true
+    },
     "47001": {
       "state": "TN",
       "county": "Anderson",
+      "sources": [],
+      "isGap": true
+    },
+    "47003": {
+      "state": "TN",
+      "county": "Bedford",
       "sources": [],
       "isGap": true
     },
@@ -2172,6 +2328,12 @@
       "sources": [],
       "isGap": true
     },
+    "48003": {
+      "state": "TX",
+      "county": "Andrews",
+      "sources": [],
+      "isGap": true
+    },
     "48453": {
       "state": "TX",
       "county": "Travis",
@@ -2199,6 +2361,12 @@
     "49001": {
       "state": "UT",
       "county": "Beaver",
+      "sources": [],
+      "isGap": true
+    },
+    "49003": {
+      "state": "UT",
+      "county": "Box Elder",
       "sources": [],
       "isGap": true
     },
@@ -2326,15 +2494,33 @@
       "sources": [],
       "isGap": true
     },
+    "50003": {
+      "state": "VT",
+      "county": "Bennington",
+      "sources": [],
+      "isGap": true
+    },
     "51001": {
       "state": "VA",
       "county": "Accomack",
       "sources": [],
       "isGap": true
     },
+    "51003": {
+      "state": "VA",
+      "county": "Albemarle",
+      "sources": [],
+      "isGap": true
+    },
     "53001": {
       "state": "WA",
       "county": "Adams",
+      "sources": [],
+      "isGap": true
+    },
+    "53003": {
+      "state": "WA",
+      "county": "Asotin",
       "sources": [],
       "isGap": true
     },
@@ -2390,6 +2576,12 @@
       "sources": [],
       "isGap": true
     },
+    "54003": {
+      "state": "WV",
+      "county": "Berkeley",
+      "sources": [],
+      "isGap": true
+    },
     "54013": {
       "state": "WV",
       "county": "Calhoun",
@@ -2418,6 +2610,12 @@
     "55001": {
       "state": "WI",
       "county": "Adams",
+      "sources": [],
+      "isGap": true
+    },
+    "55003": {
+      "state": "WI",
+      "county": "Ashland",
       "sources": [],
       "isGap": true
     },
@@ -2520,6 +2718,12 @@
         }
       ],
       "isGap": false
+    },
+    "56005": {
+      "state": "WY",
+      "county": "Campbell",
+      "sources": [],
+      "isGap": true
     },
     "56007": {
       "state": "WY",
@@ -3256,6 +3460,42 @@
     "09005": {
       "state": "CT",
       "county": "Litchfield",
+      "sources": [],
+      "isGap": true
+    },
+    "02050": {
+      "state": "AK",
+      "county": "Bethel",
+      "sources": [],
+      "isGap": true
+    },
+    "01005": {
+      "state": "AL",
+      "county": "Barbour",
+      "sources": [],
+      "isGap": true
+    },
+    "05005": {
+      "state": "AR",
+      "county": "Baxter",
+      "sources": [],
+      "isGap": true
+    },
+    "06005": {
+      "state": "CA",
+      "county": "Amador",
+      "sources": [],
+      "isGap": true
+    },
+    "08009": {
+      "state": "CO",
+      "county": "Baca",
+      "sources": [],
+      "isGap": true
+    },
+    "09007": {
+      "state": "CT",
+      "county": "Middlesex",
       "sources": [],
       "isGap": true
     }
