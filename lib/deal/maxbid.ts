@@ -18,11 +18,18 @@
  */
 
 import type { SaleType } from "../atlas/types";
-import { statuteFor, type StatuteParams } from "./statute";
+import { coveredStateList, statuteFor, type StatuteParams } from "./statute";
 
 export interface DealInputs {
   state: string;
   saleType: SaleType;
+  /**
+   * 5-digit county FIPS. Optional, but supplying it matters where a county
+   * departs from its state's assessment ratio — Cook County assesses
+   * residential at 10% against Illinois' statutory 33⅓%, so omitting it there
+   * overstates the property threefold.
+   */
+  fips?: string;
 
   /** From the auction listing. */
   openingBid?: number;
@@ -68,6 +75,23 @@ export interface RedemptionOutlook {
   annualisedBestCase: number;
   extendedFor?: string;
   note: string;
+  /**
+   * Where the penalty is set by bidding rather than statute, what the market
+   * actually pays.
+   *
+   * `flatPenalty` above is the legal ceiling. In Illinois that ceiling is 18%
+   * per six-month period and the observed clearing rate across 64,526 recorded
+   * Cook County liens is a 0% median. Quoting the ceiling as the expected
+   * return overstates it by roughly an order of magnitude.
+   */
+  marketPenalty?: {
+    observedMedian: number;
+    observedMean: number;
+    n: number;
+    penaltyAtMaxBidObserved: number;
+    source: string;
+    note: string;
+  };
 }
 
 export type Recommendation = "bid" | "no-bid" | "insufficient-data";
@@ -78,7 +102,17 @@ export interface DealResult {
   recommendation: Recommendation;
   confidence: "high" | "medium" | "low";
 
-  arv: { value: number | null; basis: string; derived: boolean };
+  arv: {
+    value: number | null;
+    basis: string;
+    derived: boolean;
+    /**
+     * True when a county-specific assessment ratio replaced the state default.
+     * Surfaced so the UI can show which ratio produced the valuation rather
+     * than implying the statewide one always applies.
+     */
+    countyOverride?: boolean;
+  };
   costs: CostLine[];
   totalCosts: number;
   /** Profit at exactly `maxBid`, by construction equal to margin × ARV. */
@@ -111,7 +145,7 @@ function round2(n: number): number {
 function deriveArv(
   inputs: DealInputs,
   statute: StatuteParams | null,
-): { value: number | null; basis: string; derived: boolean } {
+): { value: number | null; basis: string; derived: boolean; countyOverride?: boolean } {
   if (inputs.arvOverride !== undefined && inputs.arvOverride > 0) {
     return {
       value: inputs.arvOverride,
@@ -136,14 +170,25 @@ function deriveArv(
     };
   }
 
+  // A county override beats the state ratio. Cook County assesses residential
+  // at 10% against Illinois' statutory 33⅓%; using the state figure there
+  // triples the implied market value of the largest block of parcels we hold.
+  const override = inputs.fips
+    ? statute.countyAssessmentRatios?.[inputs.fips]
+    : undefined;
+  const ratio = override?.ratio ?? statute.assessmentRatio;
+  const basis = override?.basis ?? statute.assessmentBasis;
+
   return {
-    value: inputs.assessedValue / statute.assessmentRatio,
+    value: inputs.assessedValue / ratio,
     basis: `Assessed ${inputs.assessedValue.toLocaleString("en-US", {
       style: "currency",
       currency: "USD",
       maximumFractionDigits: 0,
-    })} ÷ ${statute.assessmentRatio} assessment ratio. ${statute.assessmentBasis}`,
+    })} ÷ ${ratio} assessment ratio. ${basis}`,
     derived: true,
+    /** True when a county-specific ratio replaced the state default. */
+    countyOverride: override !== undefined,
   };
 }
 
@@ -157,7 +202,8 @@ export function computeMaxBid(inputs: DealInputs): DealResult {
 
   if (!statute) {
     warnings.push(
-      `${inputs.state} is outside the five states with verified statutory parameters (FL, GA, TX, AZ, MI). ` +
+      `${inputs.state} is outside the states with verified statutory parameters ` +
+        `(${coveredStateList().join(", ")}). ` +
         `Costs and redemption terms are not modelled — treat any figure here as unverified.`,
     );
   }
@@ -260,6 +306,22 @@ export function computeMaxBid(inputs: DealInputs): DealResult {
     );
   }
 
+  // A ratio can be legally correct and still produce a misleading ARV.
+  // California assesses at full cash value, so its ratio is honestly 1.0 — but
+  // Proposition 13 freezes the base year, so a long-held parcel's assessed
+  // value can sit far under market and the derived ARV understates it.
+  if (arv.derived && statute?.derivedArvCaveat) {
+    warnings.push(statute.derivedArvCaveat);
+  }
+  if (arv.derived && statute?.countyAssessmentRatios && !arv.countyOverride) {
+    const counties = Object.keys(statute.countyAssessmentRatios);
+    warnings.push(
+      `${inputs.state} has ${counties.length} count${counties.length === 1 ? "y" : "ies"} ` +
+        `on a different assessment ratio (${counties.join(", ")}). No FIPS was supplied, so the ` +
+        `statewide ratio was used — pass \`fips\` if this parcel is in one of them.`,
+    );
+  }
+
   const totalCosts = round2(costs.reduce((n, c) => n + c.amount, 0));
 
   // --- The ceiling -------------------------------------------------------
@@ -284,6 +346,27 @@ export function computeMaxBid(inputs: DealInputs): DealResult {
           ? `${inputs.state} sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after ${statute.redemption.maxDays} days.`
           : `A ${(firstTier.penalty * 100).toFixed(0)}% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem.`,
     };
+
+    const bidDown = statute.redemption.bidDown;
+    if (bidDown) {
+      redemption.marketPenalty = {
+        observedMedian: bidDown.observedMedian,
+        observedMean: bidDown.observedMean,
+        n: bidDown.n,
+        penaltyAtMaxBidObserved: round2(Math.max(maxBid, 0) * bidDown.observedMedian),
+        source: bidDown.observedSource,
+        note: bidDown.note,
+      };
+      // The ceiling is not the expectation, and a bidder reading only the
+      // headline penalty would price this instrument an order of magnitude
+      // wrong. Surface it as a warning, not a footnote.
+      warnings.push(
+        `${inputs.state} bids the penalty DOWN from ${(bidDown.statutoryMax * 100).toFixed(0)}%. ` +
+          `Across ${bidDown.n.toLocaleString()} recorded sales the rate cleared at a ` +
+          `${(bidDown.observedMedian * 100).toFixed(0)}% median (${(bidDown.observedMean * 100).toFixed(2)}% mean). ` +
+          `Do not underwrite this on the statutory rate.`,
+      );
+    }
   }
 
   // --- Recommendation ----------------------------------------------------

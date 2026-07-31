@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Any
 
 from .schemas import CostLine, DealInputs, DealResult
-from .statute import statute_for
+from .statute import STATUTE_PARAMS, statute_for
 
 DEFAULTS = {
     "target_margin": 0.3,
@@ -41,6 +41,7 @@ def compute_maxbid(inputs: DealInputs | dict[str, Any]) -> DealResult:
         inputs = DealInputs.model_validate(inputs)
     statute = statute_for(inputs.state)
     warnings: list[str] = []
+    county_override = False
     target_margin = inputs.target_margin if inputs.target_margin is not None else DEFAULTS["target_margin"]
     selling_cost_rate = (
         inputs.selling_cost_rate
@@ -54,16 +55,24 @@ def compute_maxbid(inputs: DealInputs | dict[str, Any]) -> DealResult:
         arv_basis = "User comparable-sales estimate."
         derived = False
     elif inputs.assessed_value is not None and inputs.assessed_value > 0 and statute:
-        arv_value = inputs.assessed_value / statute["assessmentRatio"]
+        # A county override beats the state ratio. Cook County assesses
+        # residential at 10% against Illinois' statutory 33 1/3%; using the
+        # state figure there triples the implied market value.
+        override = (statute.get("countyAssessmentRatios") or {}).get(inputs.fips or "")
+        ratio = override["ratio"] if override else statute["assessmentRatio"]
+        basis = override["basis"] if override else statute["assessmentBasis"]
+        county_override = override is not None
+        arv_value = inputs.assessed_value / ratio
         arv_basis = (
-            f"Assessed {inputs.assessed_value:,.0f} ÷ {statute['assessmentRatio']} "
-            f"assessment ratio. {statute['assessmentBasis']}"
+            f"Assessed {inputs.assessed_value:,.0f} ÷ {ratio} "
+            f"assessment ratio. {basis}"
         )
         derived = True
     else:
         if not statute:
             warnings.append(
-                f"{inputs.state} is outside covered statutes (FL, GA, TX, AZ, MI). "
+                f"{inputs.state} is outside covered statutes "
+                f"({', '.join(sorted(STATUTE_PARAMS))}). "
                 "Costs and redemption are not fully modelled."
             )
         return DealResult(
@@ -172,6 +181,20 @@ def compute_maxbid(inputs: DealInputs | dict[str, Any]) -> DealResult:
     if inputs.surviving_liens is None and statute and statute.get("caveats"):
         warnings.append("Surviving liens assumed $0. " + statute["caveats"][0])
 
+    # A ratio can be legally correct and still produce a misleading ARV.
+    # California assesses at full cash value, so its ratio is honestly 1.0 —
+    # but Proposition 13 freezes the base year, so a long-held parcel's assessed
+    # value can sit far under market and the derived ARV understates it.
+    if derived and statute and statute.get("derivedArvCaveat"):
+        warnings.append(statute["derivedArvCaveat"])
+    if derived and statute and statute.get("countyAssessmentRatios") and not county_override:
+        counties = sorted(statute["countyAssessmentRatios"])
+        warnings.append(
+            f"{inputs.state} has {len(counties)} county/counties on a different "
+            f"assessment ratio ({', '.join(counties)}). No FIPS was supplied, so the "
+            f"statewide ratio was used — pass fips if this parcel is in one of them."
+        )
+
     total_costs = _round2(sum(c.amount for c in costs))
     max_bid = _round2(arv_value * (1 - target_margin) - total_costs)
     projected_profit = _round2(arv_value * target_margin)
@@ -193,6 +216,30 @@ def compute_maxbid(inputs: DealInputs | dict[str, Any]) -> DealResult:
                 else f"A {first['penalty'] * 100:.0f}% flat penalty applies on redemption."
             ),
         }
+
+        bid_down = red.get("bidDown")
+        if bid_down:
+            # `flatPenalty` above is the legal ceiling. Where bidders compete by
+            # lowering the rate, the ceiling is the best case and the observed
+            # median is the base case; conflating them overstates the return by
+            # roughly an order of magnitude.
+            redemption["marketPenalty"] = {
+                "observedMedian": bid_down["observedMedian"],
+                "observedMean": bid_down["observedMean"],
+                "n": bid_down["n"],
+                "penaltyAtMaxBidObserved": _round2(
+                    max(max_bid, 0) * bid_down["observedMedian"]
+                ),
+                "source": bid_down["observedSource"],
+                "note": bid_down["note"],
+            }
+            warnings.append(
+                f"{inputs.state} bids the penalty DOWN from "
+                f"{bid_down['statutoryMax'] * 100:.0f}%. Across {bid_down['n']:,} recorded "
+                f"sales the rate cleared at a {bid_down['observedMedian'] * 100:.0f}% median "
+                f"({bid_down['observedMean'] * 100:.2f}% mean). Do not underwrite this on "
+                f"the statutory rate."
+            )
 
     recommendation: str = "bid"
     if max_bid <= 0:
