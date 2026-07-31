@@ -422,6 +422,16 @@ def labels_cmd():
     rprint(label_summary(load_outcomes()))
 
 
+@app.command("export-status")
+def export_status_cmd():
+    """Write data/status.json for the product's /status page."""
+    from .status import export_status
+
+    path = export_status()
+    rprint(f"Wrote {path}")
+    rprint("[dim]Commit it — the Next.js route reads this file at request time.[/dim]")
+
+
 @app.command("corpus")
 def corpus_cmd():
     """Per-source accounting: how much of the corpus is actually fittable."""

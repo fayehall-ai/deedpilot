@@ -4,7 +4,7 @@
  */
 import { computeMaxBid } from "../deal/maxbid";
 import { getComparables } from "./comparables";
-import { computeSuggestedBid, computeSuggestedBidWithIndex } from "./suggested-bid";
+import { computeSuggestedBid } from "./suggested-bid";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) throw new Error(msg);
@@ -42,7 +42,18 @@ const s = computeSuggestedBid({
   },
 });
 
-const sApi = computeSuggestedBidWithIndex({
+// Compose what suggested-bid.server does, without importing it: that module
+// carries `server-only`, which throws outside a Server Component.
+const apiComps = getComparables({
+  state: "MI",
+  saleType: "Tax Deed",
+  assessedValue: 80000,
+  openingBid: 5000,
+  limit: 1,
+});
+const sApi = computeSuggestedBid({
+  historyBucket: apiComps.bucket,
+  historyKey: apiComps.key,
   state: "MI",
   saleType: "Tax Deed",
   openingBid: 5000,

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { computeMaxBid, type DealInputs } from "@/lib/deal/maxbid";
 import { computeSuggestedBid } from "@/lib/history/suggested-bid";
-import type { HistoryBucket } from "@/lib/history/comparables";
+import type { HistoryBucket } from "@/lib/history/types";
 import { money, percent } from "@/lib/format";
 import { AssumedTag, Callout } from "./ui";
 import type { SaleType } from "@/lib/atlas/types";
