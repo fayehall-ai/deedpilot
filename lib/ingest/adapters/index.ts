@@ -3,16 +3,16 @@ import { georgiaAdapter } from "./georgia";
 import { genericAdapter } from "./generic";
 import { lgbsAdapter } from "./lgbs";
 import { taxSaleInfoAdapter } from "./taxsaleinfo";
+import { floridaAdapter } from "./florida";
 
 /**
- * Order is precedence. `buildAdapterIndex` gives the first adapter to claim a
- * county the binding, so bespoke parsers come first and the registry-driven
- * generic one picks up everything they do not cover.
+ * Order is precedence. Bespoke first, generic last.
  */
 export const ADAPTERS: SourceAdapter[] = [
   lgbsAdapter,
   taxSaleInfoAdapter,
   georgiaAdapter,
+  floridaAdapter,
   genericAdapter,
 ];
 
