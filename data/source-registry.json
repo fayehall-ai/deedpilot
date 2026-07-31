@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T18:36:21.089Z",
-  "nCounties": 283,
-  "nVerified": 117,
-  "nGaps": 167,
+  "builtAt": "2026-07-31T18:38:17.100Z",
+  "nCounties": 313,
+  "nVerified": 118,
+  "nGaps": 196,
   "counties": {
     "10001": {
       "state": "DE",
@@ -107,6 +107,12 @@
     "12007": {
       "state": "FL",
       "county": "Bradford",
+      "sources": [],
+      "isGap": true
+    },
+    "12009": {
+      "state": "FL",
+      "county": "Brevard",
       "sources": [],
       "isGap": true
     },
@@ -1009,6 +1015,12 @@
       "sources": [],
       "isGap": true
     },
+    "31007": {
+      "state": "NE",
+      "county": "Banner",
+      "sources": [],
+      "isGap": true
+    },
     "31011": {
       "state": "NE",
       "county": "Boone",
@@ -1146,6 +1158,12 @@
       "sources": [],
       "isGap": true
     },
+    "32009": {
+      "state": "NV",
+      "county": "Esmeralda",
+      "sources": [],
+      "isGap": true
+    },
     "33001": {
       "state": "NH",
       "county": "Belknap",
@@ -1161,6 +1179,12 @@
     "33005": {
       "state": "NH",
       "county": "Cheshire",
+      "sources": [],
+      "isGap": true
+    },
+    "33007": {
+      "state": "NH",
+      "county": "Coos",
       "sources": [],
       "isGap": true
     },
@@ -1227,6 +1251,12 @@
         }
       ],
       "isGap": false
+    },
+    "34011": {
+      "state": "NJ",
+      "county": "Cumberland",
+      "sources": [],
+      "isGap": true
     },
     "34019": {
       "state": "NJ",
@@ -1952,6 +1982,31 @@
       ],
       "isGap": false
     },
+    "35051": {
+      "state": "NM",
+      "county": "Sierra",
+      "sources": [
+        {
+          "fips": "35051",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "36001": {
       "state": "NY",
       "county": "Albany",
@@ -2013,6 +2068,12 @@
     "36009": {
       "state": "NY",
       "county": "Cattaraugus",
+      "sources": [],
+      "isGap": true
+    },
+    "36011": {
+      "state": "NY",
+      "county": "Cayuga",
       "sources": [],
       "isGap": true
     },
@@ -2129,6 +2190,12 @@
       "sources": [],
       "isGap": true
     },
+    "38007": {
+      "state": "ND",
+      "county": "Billings",
+      "sources": [],
+      "isGap": true
+    },
     "38015": {
       "state": "ND",
       "county": "Burleigh",
@@ -2170,6 +2237,12 @@
       "sources": [],
       "isGap": true
     },
+    "39007": {
+      "state": "OH",
+      "county": "Ashtabula",
+      "sources": [],
+      "isGap": true
+    },
     "40001": {
       "state": "OK",
       "county": "Adair",
@@ -2188,6 +2261,12 @@
       "sources": [],
       "isGap": true
     },
+    "40007": {
+      "state": "OK",
+      "county": "Beaver",
+      "sources": [],
+      "isGap": true
+    },
     "41001": {
       "state": "OR",
       "county": "Baker",
@@ -2203,6 +2282,12 @@
     "41005": {
       "state": "OR",
       "county": "Clackamas",
+      "sources": [],
+      "isGap": true
+    },
+    "41007": {
+      "state": "OR",
+      "county": "Clatsop",
       "sources": [],
       "isGap": true
     },
@@ -2271,6 +2356,12 @@
       "sources": [],
       "isGap": true
     },
+    "42007": {
+      "state": "PA",
+      "county": "Beaver",
+      "sources": [],
+      "isGap": true
+    },
     "42011": {
       "state": "PA",
       "county": "Berks",
@@ -2336,6 +2427,12 @@
       "sources": [],
       "isGap": true
     },
+    "44007": {
+      "state": "RI",
+      "county": "Providence",
+      "sources": [],
+      "isGap": true
+    },
     "45001": {
       "state": "SC",
       "county": "Abbeville",
@@ -2351,6 +2448,12 @@
     "45005": {
       "state": "SC",
       "county": "Allendale",
+      "sources": [],
+      "isGap": true
+    },
+    "45007": {
+      "state": "SC",
+      "county": "Anderson",
       "sources": [],
       "isGap": true
     },
@@ -2470,6 +2573,12 @@
       "sources": [],
       "isGap": true
     },
+    "46009": {
+      "state": "SD",
+      "county": "Bon Homme",
+      "sources": [],
+      "isGap": true
+    },
     "47001": {
       "state": "TN",
       "county": "Anderson",
@@ -2485,6 +2594,12 @@
     "47005": {
       "state": "TN",
       "county": "Benton",
+      "sources": [],
+      "isGap": true
+    },
+    "47007": {
+      "state": "TN",
+      "county": "Bledsoe",
       "sources": [],
       "isGap": true
     },
@@ -2575,6 +2690,12 @@
       "sources": [],
       "isGap": true
     },
+    "48007": {
+      "state": "TX",
+      "county": "Aransas",
+      "sources": [],
+      "isGap": true
+    },
     "48453": {
       "state": "TX",
       "county": "Travis",
@@ -2639,6 +2760,12 @@
         }
       ],
       "isGap": false
+    },
+    "49009": {
+      "state": "UT",
+      "county": "Daggett",
+      "sources": [],
+      "isGap": true
     },
     "49011": {
       "state": "UT",
@@ -2753,6 +2880,12 @@
       "sources": [],
       "isGap": true
     },
+    "50007": {
+      "state": "VT",
+      "county": "Chittenden",
+      "sources": [],
+      "isGap": true
+    },
     "51001": {
       "state": "VA",
       "county": "Accomack",
@@ -2768,6 +2901,12 @@
     "51005": {
       "state": "VA",
       "county": "Alleghany",
+      "sources": [],
+      "isGap": true
+    },
+    "51007": {
+      "state": "VA",
+      "county": "Amelia",
       "sources": [],
       "isGap": true
     },
@@ -2835,6 +2974,12 @@
       "sources": [],
       "isGap": true
     },
+    "53011": {
+      "state": "WA",
+      "county": "Clark",
+      "sources": [],
+      "isGap": true
+    },
     "54001": {
       "state": "WV",
       "county": "Barbour",
@@ -2850,6 +2995,12 @@
     "54005": {
       "state": "WV",
       "county": "Boone",
+      "sources": [],
+      "isGap": true
+    },
+    "54007": {
+      "state": "WV",
+      "county": "Braxton",
       "sources": [],
       "isGap": true
     },
@@ -2893,6 +3044,12 @@
     "55005": {
       "state": "WI",
       "county": "Barron",
+      "sources": [],
+      "isGap": true
+    },
+    "55007": {
+      "state": "WI",
+      "county": "Bayfield",
       "sources": [],
       "isGap": true
     },
@@ -3030,6 +3187,12 @@
     "56009": {
       "state": "WY",
       "county": "Converse",
+      "sources": [],
+      "isGap": true
+    },
+    "56011": {
+      "state": "WY",
+      "county": "Crook",
       "sources": [],
       "isGap": true
     },
@@ -3815,6 +3978,42 @@
     "09009": {
       "state": "CT",
       "county": "New Haven",
+      "sources": [],
+      "isGap": true
+    },
+    "02068": {
+      "state": "AK",
+      "county": "Denali",
+      "sources": [],
+      "isGap": true
+    },
+    "01009": {
+      "state": "AL",
+      "county": "Blount",
+      "sources": [],
+      "isGap": true
+    },
+    "05009": {
+      "state": "AR",
+      "county": "Boone",
+      "sources": [],
+      "isGap": true
+    },
+    "06009": {
+      "state": "CA",
+      "county": "Calaveras",
+      "sources": [],
+      "isGap": true
+    },
+    "08014": {
+      "state": "CO",
+      "county": "Broomfield",
+      "sources": [],
+      "isGap": true
+    },
+    "09011": {
+      "state": "CT",
+      "county": "New London",
       "sources": [],
       "isGap": true
     }
