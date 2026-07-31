@@ -147,6 +147,22 @@ function departmentRank(hay: string): number {
   return 0;
 }
 
+/**
+ * Approximate registrable domain, enough to tell "same county" from "off-site".
+ *
+ * Government hosts use multi-label public suffixes (`co.boulder.co.us`,
+ * `dallascounty.tx.us`), so a naive last-two-labels rule collapses every county
+ * in a state to `co.us` and would let a crawl wander between them. Treating
+ * `.us` as needing three labels handles that without shipping a full public
+ * suffix list for a same-site check.
+ */
+export function registrableDomain(hostname: string): string {
+  const parts = hostname.toLowerCase().replace(/^www\./, "").split(".");
+  if (parts.length <= 2) return parts.join(".");
+  const keep = parts.at(-1) === "us" ? 3 : 2;
+  return parts.slice(-keep).join(".");
+}
+
 export type LinkTier = "direct" | "department";
 
 /**
@@ -177,9 +193,16 @@ export function discoveryLinks(
       return;
     }
     if (abs === pageUrl || abs.endsWith(".pdf")) return;
-    // Stay on the county's own site; outbound links are vendors and social.
+    // Stay on the county's own estate, but by registrable domain rather than
+    // exact hostname. County departments routinely live on their own subdomain —
+    // Los Angeles publishes its tax sale at ttc.lacounty.gov and links there
+    // from lacounty.gov — so an exact-hostname rule discards precisely the link
+    // that leads to the sale while still doing its real job of keeping out
+    // vendors and social media.
     try {
-      if (new URL(abs).hostname !== new URL(pageUrl).hostname) return;
+      if (registrableDomain(new URL(abs).hostname) !== registrableDomain(new URL(pageUrl).hostname)) {
+        return;
+      }
     } catch {
       return;
     }
