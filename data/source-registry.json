@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T18:27:46.927Z",
-  "nCounties": 233,
-  "nVerified": 116,
-  "nGaps": 118,
+  "builtAt": "2026-07-31T18:28:30.863Z",
+  "nCounties": 243,
+  "nVerified": 117,
+  "nGaps": 127,
   "counties": {
     "10001": {
       "state": "DE",
@@ -831,6 +831,12 @@
       "sources": [],
       "isGap": true
     },
+    "30005": {
+      "state": "MT",
+      "county": "Blaine",
+      "sources": [],
+      "isGap": true
+    },
     "30009": {
       "state": "MT",
       "county": "Carbon",
@@ -886,6 +892,12 @@
     "31003": {
       "state": "NE",
       "county": "Antelope",
+      "sources": [],
+      "isGap": true
+    },
+    "31005": {
+      "state": "NE",
+      "county": "Arthur",
       "sources": [],
       "isGap": true
     },
@@ -1020,6 +1032,12 @@
       ],
       "isGap": false
     },
+    "32007": {
+      "state": "NV",
+      "county": "Elko",
+      "sources": [],
+      "isGap": true
+    },
     "33001": {
       "state": "NH",
       "county": "Belknap",
@@ -1029,6 +1047,12 @@
     "33003": {
       "state": "NH",
       "county": "Carroll",
+      "sources": [],
+      "isGap": true
+    },
+    "33005": {
+      "state": "NH",
+      "county": "Cheshire",
       "sources": [],
       "isGap": true
     },
@@ -1066,6 +1090,12 @@
         }
       ],
       "isGap": false
+    },
+    "34007": {
+      "state": "NJ",
+      "county": "Camden",
+      "sources": [],
+      "isGap": true
     },
     "34009": {
       "state": "NJ",
@@ -1789,6 +1819,31 @@
       ],
       "isGap": false
     },
+    "35049": {
+      "state": "NM",
+      "county": "Santa Fe",
+      "sources": [
+        {
+          "fips": "35049",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "36001": {
       "state": "NY",
       "county": "Albany",
@@ -1846,6 +1901,12 @@
         }
       ],
       "isGap": false
+    },
+    "36009": {
+      "state": "NY",
+      "county": "Cattaraugus",
+      "sources": [],
+      "isGap": true
     },
     "36019": {
       "state": "NY",
@@ -1930,6 +1991,12 @@
       "sources": [],
       "isGap": true
     },
+    "37007": {
+      "state": "NC",
+      "county": "Anson",
+      "sources": [],
+      "isGap": true
+    },
     "38001": {
       "state": "ND",
       "county": "Adams",
@@ -1939,6 +2006,12 @@
     "38003": {
       "state": "ND",
       "county": "Barnes",
+      "sources": [],
+      "isGap": true
+    },
+    "38005": {
+      "state": "ND",
+      "county": "Benson",
       "sources": [],
       "isGap": true
     },
@@ -1974,6 +2047,12 @@
     "39003": {
       "state": "OH",
       "county": "Allen",
+      "sources": [],
+      "isGap": true
+    },
+    "39005": {
+      "state": "OH",
+      "county": "Ashland",
       "sources": [],
       "isGap": true
     },
