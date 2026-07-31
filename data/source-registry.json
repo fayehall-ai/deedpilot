@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T18:19:51.229Z",
-  "nCounties": 163,
+  "builtAt": "2026-07-31T18:21:23.757Z",
+  "nCounties": 173,
   "nVerified": 115,
-  "nGaps": 49,
+  "nGaps": 59,
   "counties": {
     "10001": {
       "state": "DE",
@@ -92,6 +92,12 @@
       "sources": [],
       "isGap": true
     },
+    "12003": {
+      "state": "FL",
+      "county": "Baker",
+      "sources": [],
+      "isGap": true
+    },
     "12013": {
       "state": "FL",
       "county": "Calhoun",
@@ -149,9 +155,21 @@
       "sources": [],
       "isGap": true
     },
+    "13003": {
+      "state": "GA",
+      "county": "Atkinson",
+      "sources": [],
+      "isGap": true
+    },
     "15001": {
       "state": "HI",
       "county": "Hawaii",
+      "sources": [],
+      "isGap": true
+    },
+    "15003": {
+      "state": "HI",
+      "county": "Honolulu",
       "sources": [],
       "isGap": true
     },
@@ -230,6 +248,12 @@
         }
       ],
       "isGap": false
+    },
+    "16007": {
+      "state": "ID",
+      "county": "Bear Lake",
+      "sources": [],
+      "isGap": true
     },
     "17001": {
       "state": "IL",
@@ -388,6 +412,12 @@
     "19001": {
       "state": "IA",
       "county": "Adair",
+      "sources": [],
+      "isGap": true
+    },
+    "19003": {
+      "state": "IA",
+      "county": "Adams",
       "sources": [],
       "isGap": true
     },
@@ -3057,6 +3087,36 @@
     "02016": {
       "state": "AK",
       "county": "Aleutians West",
+      "sources": [],
+      "isGap": true
+    },
+    "01003": {
+      "state": "AL",
+      "county": "Baldwin",
+      "sources": [],
+      "isGap": true
+    },
+    "05003": {
+      "state": "AR",
+      "county": "Ashley",
+      "sources": [],
+      "isGap": true
+    },
+    "06003": {
+      "state": "CA",
+      "county": "Alpine",
+      "sources": [],
+      "isGap": true
+    },
+    "08005": {
+      "state": "CO",
+      "county": "Arapahoe",
+      "sources": [],
+      "isGap": true
+    },
+    "09005": {
+      "state": "CT",
+      "county": "Litchfield",
       "sources": [],
       "isGap": true
     }
