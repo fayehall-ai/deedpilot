@@ -1,30 +1,32 @@
 /**
- * Florida workaround adapter (stub).
+ * Florida placeholder adapter.
  *
- * RealAuction is policy-blocked. This is a minimal placeholder so it doesn't
- * break the scout/ingest pipeline. Real FL coverage should come through
- * generic-county once prospector populates good direct county sources.
+ * RealAuction hosts most of Florida's tax deed sales and publishes
+ * `User-agent: * / Disallow: /`, so it stays policy-blocked. Real Florida
+ * coverage comes through `generic-county` once the Prospector finds the county
+ * clerks, who are the legal publishers of these lists.
+ *
+ * This exists so Florida is a named, empty adapter rather than an unexplained
+ * absence — the same reason blocked counties appear on /coverage instead of
+ * silently missing. It returns nothing, and that is the honest answer today.
  */
-import type { CountyBinding, SourceAdapter } from "../types";
+import type { CountyBinding, DiscoveredAuction, DiscoveredLot, SourceAdapter } from "../types";
 
 export const floridaAdapter: SourceAdapter = {
   name: "fl-counties",
   platform: "county_site",
-  description: "Placeholder for Florida direct sources (RealAuction avoided).",
+  description:
+    "Florida placeholder — RealAuction is policy-blocked; coverage arrives via generic-county once clerk sources are verified.",
 
-  async discover() {
-    return [] as any;
+  async discoverCounties(): Promise<CountyBinding[]> {
+    return [];
   },
 
-  async discoverCounties() {
-    return [] as any;
+  async listAuctions(): Promise<DiscoveredAuction[]> {
+    return [];
   },
 
-  async listAuctions() {
-    return [] as any;
-  },
-
-  async listLots() {
-    return [] as any;
+  async listLots(): Promise<DiscoveredLot[]> {
+    return [];
   },
 };

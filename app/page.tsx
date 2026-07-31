@@ -15,6 +15,15 @@ export default async function HomePage() {
     byState: [] as { state: string; counties: number; auctions: number; lots: number }[],
   }));
 
+  // States with parcels a bidder can actually act on today, biggest first.
+  const withInventory = stats.byState.filter((b) => b.lots > 0).slice(0, 10);
+  // Auctions on the calendar whose parcel list has not published yet. Arizona's
+  // lien sale is annual in February; Georgia's lists arrive days before a
+  // first-Tuesday courthouse sale. Counting these as coverage would overstate
+  // it, and hiding them would understate the pipeline — so they get a line.
+  const scheduledOnly = stats.byState.filter((b) => b.lots === 0 && b.auctions > 0);
+  const scheduledAuctions = scheduledOnly.reduce((n, b) => n + b.auctions, 0);
+
   return (
     <div>
       {/* --- Hero --------------------------------------------------------- */}
@@ -98,24 +107,38 @@ export default async function HomePage() {
             wide — we are actively expanding live inventory beyond the original high-volume states via the source registry and generic extraction.
           </p>
 
+          {/*
+            Driven by what is actually in the database, not by COVERED_STATES.
+            The hardcoded five hid real coverage: the generic adapter had put
+            186 lots into New Mexico and the page could not show them, because
+            NM is not one of the original five. A coverage surface that cannot
+            report coverage is worse than no coverage surface.
+          */}
           <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {COVERED_STATES.map((s) => {
-              const row = stats.byState.find((b) => b.state === s);
-              return (
-                <Link
-                  key={s}
-                  href={`/auctions?state=${s}`}
-                  className="rounded-xl border border-border bg-surface p-4 transition-colors hover:border-accent"
-                >
-                  <div className="font-medium">{STATE_NAMES[s]}</div>
-                  <div className="tnum mt-2 text-2xl font-semibold">{num(row?.lots ?? 0)}</div>
-                  <div className="text-xs text-muted">
-                    lots · {num(row?.auctions ?? 0)} auctions
-                  </div>
-                </Link>
-              );
-            })}
+            {withInventory.map((row) => (
+              <Link
+                key={row.state}
+                href={`/auctions?state=${row.state}`}
+                className="rounded-xl border border-border bg-surface p-4 transition-colors hover:border-accent"
+              >
+                <div className="font-medium">{STATE_NAMES[row.state] ?? row.state}</div>
+                <div className="tnum mt-2 text-2xl font-semibold">{num(row.lots)}</div>
+                <div className="text-xs text-muted">
+                  lots · {num(row.auctions)} auctions
+                </div>
+              </Link>
+            ))}
           </div>
+
+          {scheduledOnly.length ? (
+            <p className="mt-4 text-sm text-muted">
+              <span className="tnum font-medium text-fg">{num(scheduledAuctions)}</span> further
+              auctions are on the calendar across{" "}
+              <span className="tnum font-medium text-fg">{num(scheduledOnly.length)}</span> states —{" "}
+              {scheduledOnly.map((b) => STATE_NAMES[b.state] ?? b.state).join(", ")} — with no parcel
+              list published yet.
+            </p>
+          ) : null}
 
           <p className="mt-4 text-xs text-muted">
             A state showing zero has no sale currently published, or its ingestion is still being
