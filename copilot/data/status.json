@@ -1,0 +1,311 @@
+{
+  "generatedAt": "2026-07-31T03:02:01.548194+00:00",
+  "corpus": {
+    "nRows": 92208,
+    "nPriceUsable": 17770,
+    "nRedemptionObserved": 17156,
+    "sharePriceUsable": 0.1927,
+    "byRule": [
+      {
+        "rule": "il_cook_bid_down",
+        "n": 70109,
+        "price_usable": 0,
+        "redemption_observed": 0,
+        "quarantined": 0,
+        "price_kind": "tax_amount_bid_down",
+        "disposition": "sold_to_investor",
+        "reason": "Illinois annual tax sale is bid down on the penalty rate, not price; winning_bid is the delinquent tax amount. Sale is observed; subsequent redemption is not published."
+      },
+      {
+        "rule": "mi_titlecheck_sold",
+        "n": 17156,
+        "price_usable": 17156,
+        "redemption_observed": 17156,
+        "quarantined": 0,
+        "price_kind": "clearing_price",
+        "disposition": "sold_to_investor",
+        "reason": "Michigan foreclosure auction clearing price. Redemption is extinguished at the foreclosure judgment, so redeemed=False is a statutory observation rather than a missing value."
+      },
+      {
+        "rule": "md_howard_premium_bid",
+        "n": 2524,
+        "price_usable": 0,
+        "redemption_observed": 0,
+        "quarantined": 2524,
+        "price_kind": "premium_bid",
+        "disposition": "sold_to_investor",
+        "reason": "Maryland high-bid-premium structure; recorded bid_amount is ~42x the opening bid at the median, so it is not a comparable clearing price. Quarantined pending a field-mapping review."
+      },
+      {
+        "rule": "ca_sandiego_cured_pre_sale",
+        "n": 1404,
+        "price_usable": 0,
+        "redemption_observed": 0,
+        "quarantined": 1404,
+        "price_kind": "unknown",
+        "disposition": "cured_pre_sale",
+        "reason": "Owner cured before the sale \u2014 parcel never sold to an investor. Counting these as redemptions conflates pre-sale cures with post-sale redemption, which is a different event with different economics."
+      },
+      {
+        "rule": "ca_county_sold",
+        "n": 614,
+        "price_usable": 614,
+        "redemption_observed": 0,
+        "quarantined": 0,
+        "price_kind": "clearing_price",
+        "disposition": "sold_to_investor",
+        "reason": "County final report of sale \u2014 competitive dollar clearing price."
+      },
+      {
+        "rule": "map_crawl",
+        "n": 401,
+        "price_usable": 0,
+        "redemption_observed": 0,
+        "quarantined": 401,
+        "price_kind": "unknown",
+        "disposition": "unknown",
+        "reason": "Map-crawl regex extraction over an arbitrary county page; known false positives (statute section numbers parsed as prices)."
+      }
+    ],
+    "note": "Row count is not the useful number. A source with no label rule contributes nothing, and a source whose price is a tax amount rather than a clearing price contributes no price signal however many rows it has."
+  },
+  "priors": {
+    "buckets": [
+      {
+        "key": "IL|Tax Lien",
+        "state": "IL",
+        "saleType": "Tax Lien",
+        "n": 70109,
+        "nObserved": 0,
+        "pRedeem": 0.72,
+        "expertPRedeem": 0.72,
+        "source": "expert"
+      },
+      {
+        "key": "MI|Tax Deed",
+        "state": "MI",
+        "saleType": "Tax Deed",
+        "n": 17156,
+        "nObserved": 17156,
+        "pRedeem": 0.02,
+        "expertPRedeem": 0.084,
+        "source": "observed"
+      },
+      {
+        "key": "CA|Tax Deed",
+        "state": "CA",
+        "saleType": "Tax Deed",
+        "n": 614,
+        "nObserved": 0,
+        "pRedeem": 0.12,
+        "expertPRedeem": 0.12,
+        "source": "expert"
+      }
+    ],
+    "unobservedFields": [
+      "exit_price",
+      "profit_loss",
+      "quiet_title_cost",
+      "holding_months",
+      "rehab_cost",
+      "days_to_redeem",
+      "arv_estimate"
+    ],
+    "nQuarantined": 4329
+  },
+  "splits": {
+    "policy": {
+      "cutVal": "2024-01-01",
+      "cutTest": "2025-01-01"
+    },
+    "counts": {
+      "train": 81756,
+      "val": 1693,
+      "test": 2008,
+      "excluded": 6751
+    },
+    "clearingPrice": {
+      "train": 11647,
+      "val": 1693,
+      "test": 2008,
+      "excluded": 2422
+    }
+  },
+  "worldModel": {
+    "fitted": true,
+    "nTrain": 11647,
+    "nCounties": 78,
+    "states": [
+      "CA",
+      "MI"
+    ],
+    "yearSlope": 0.040802,
+    "levels": [
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      0.75,
+      0.9,
+      0.95
+    ],
+    "val": {
+      "n": 1693,
+      "coverage": {
+        "p5": 0.0555,
+        "p10": 0.0886,
+        "p25": 0.2168,
+        "p50": 0.4495,
+        "p75": 0.6858,
+        "p90": 0.8535,
+        "p95": 0.9173
+      },
+      "target_coverage": {
+        "p5": 0.05,
+        "p10": 0.1,
+        "p25": 0.25,
+        "p50": 0.5,
+        "p75": 0.75,
+        "p90": 0.9,
+        "p95": 0.95
+      },
+      "mean_abs_coverage_error": 0.0349,
+      "mean_pinball_loss": 7548.16,
+      "baseline_global_pinball_loss": 8233.87,
+      "pinball_improvement_vs_global": 0.0833,
+      "county_group_hit_rate": 0.9545
+    },
+    "test": {
+      "n": 2008,
+      "coverage": {
+        "p5": 0.0393,
+        "p10": 0.0712,
+        "p25": 0.1947,
+        "p50": 0.4218,
+        "p75": 0.6887,
+        "p90": 0.8496,
+        "p95": 0.9133
+      },
+      "target_coverage": {
+        "p5": 0.05,
+        "p10": 0.1,
+        "p25": 0.25,
+        "p50": 0.5,
+        "p75": 0.75,
+        "p90": 0.9,
+        "p95": 0.95
+      },
+      "mean_abs_coverage_error": 0.0459,
+      "mean_pinball_loss": 8381.31,
+      "baseline_global_pinball_loss": 9008.86,
+      "pinball_improvement_vs_global": 0.0697,
+      "county_group_hit_rate": 0.9612
+    }
+  },
+  "policies": {
+    "val": {
+      "always_pass": {
+        "nBid": 0,
+        "nWon": 0,
+        "winRate": 0.0,
+        "meanBid": 0.0,
+        "meanOverpay": 0.0,
+        "totalSurplus": 0.0,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      },
+      "opening_only": {
+        "nBid": 6,
+        "nWon": 5,
+        "winRate": 0.8333,
+        "meanBid": 2786.67,
+        "meanOverpay": 2506.39,
+        "totalSurplus": 31357.95,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      },
+      "oracle_ceiling": {
+        "nBid": 1496,
+        "nWon": 1023,
+        "winRate": 0.6838,
+        "meanBid": 20631.42,
+        "meanOverpay": 16642.26,
+        "totalSurplus": 12923352.92,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      },
+      "fixed_fraction_0.90": {
+        "nBid": 1496,
+        "nWon": 981,
+        "winRate": 0.6557,
+        "meanBid": 18568.28,
+        "meanOverpay": 15042.83,
+        "totalSurplus": 14654932.63,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      },
+      "search": {
+        "nBid": 1496,
+        "nWon": 772,
+        "winRate": 0.516,
+        "meanBid": 7977.75,
+        "meanOverpay": 6144.48,
+        "totalSurplus": 20052593.05,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      }
+    },
+    "test": {
+      "always_pass": {
+        "nBid": 0,
+        "nWon": 0,
+        "winRate": 0.0,
+        "meanBid": 0.0,
+        "meanOverpay": 0.0,
+        "totalSurplus": 0.0,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      },
+      "opening_only": {
+        "nBid": 41,
+        "nWon": 41,
+        "winRate": 1.0,
+        "meanBid": 2787.22,
+        "meanOverpay": 1853.74,
+        "totalSurplus": 278979.19,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      },
+      "oracle_ceiling": {
+        "nBid": 1783,
+        "nWon": 1180,
+        "winRate": 0.6618,
+        "meanBid": 18553.37,
+        "meanOverpay": 15301.53,
+        "totalSurplus": 14060220.32,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      },
+      "fixed_fraction_0.90": {
+        "nBid": 1783,
+        "nWon": 1134,
+        "winRate": 0.636,
+        "meanBid": 16698.04,
+        "meanOverpay": 13761.06,
+        "totalSurplus": 15985831.41,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      },
+      "search": {
+        "nBid": 1783,
+        "nWon": 864,
+        "winRate": 0.4846,
+        "meanBid": 7455.4,
+        "meanOverpay": 5834.3,
+        "totalSurplus": 21052763.29,
+        "cvar10": 0.0,
+        "oracleViolations": 0
+      }
+    }
+  }
+}

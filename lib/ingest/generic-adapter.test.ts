@@ -164,3 +164,38 @@ main()
     console.error(e);
     process.exit(1);
   });
+
+// --- department ranking ------------------------------------------------------
+// Regression: Boulder County's homepage offers five assessor links before the
+// treasurer. Following document order spent the entire crawl budget in the
+// wrong office and found nothing; the assessor values property, the treasurer
+// sells it.
+{
+  const { discoveryLinks } = require("./parse") as typeof import("./parse");
+  const county = cheerio.load(`
+    <a href="/departments/assessor/">Assessor</a>
+    <a href="/property-and-land/assessor/appeals/">Assessor Appeals</a>
+    <a href="/property-and-land/assessor/assessment/">Assessment</a>
+    <a href="/departments/clerk/">Clerk and Recorder</a>
+    <a href="/property-and-land/treasurer/">Treasurer</a>`);
+  const { department } = discoveryLinks(county, "https://bouldercounty.gov/");
+  assert(
+    department[0].includes("treasurer"),
+    `treasurer must rank first, got ${department[0]}`,
+  );
+  assert(
+    department.at(-1)!.includes("assessor"),
+    "assessor ranks last — it values property, it does not sell it",
+  );
+
+  // A direct sale link outranks every department link.
+  const direct = cheerio.load(`
+    <a href="/treasurer/">Treasurer</a>
+    <a href="/treasurer/tax-lien-sale/">Tax Lien Sale</a>`);
+  const d2 = discoveryLinks(direct, "https://x.gov/");
+  assert(d2.direct.length === 1 && d2.direct[0].includes("tax-lien-sale"), "direct link found");
+
+  // Off-site links are not followed — those are vendors and social media.
+  const offsite = cheerio.load(`<a href="https://facebook.com/treasurer">Treasurer</a>`);
+  assert(discoveryLinks(offsite, "https://x.gov/").department.length === 0, "stays on-site");
+}

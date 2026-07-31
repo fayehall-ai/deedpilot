@@ -11,7 +11,7 @@
  */
 
 import type { DealResult } from "@/lib/deal/maxbid";
-import type { HistoryBucket } from "@/lib/history/comparables";
+import type { HistoryBucket } from "@/lib/history/types";
 
 export interface SuggestedBidInput {
   state: string;
@@ -278,27 +278,4 @@ export function computeSuggestedBid(input: SuggestedBidInput): SuggestedBidResul
     vsMedianSold:
       g.medWin != null ? Math.round((bid - g.medWin) * 100) / 100 : null,
   };
-}
-
-/** Server/API helper: load bucket via history index then compute. */
-export function computeSuggestedBidWithIndex(
-  input: Omit<SuggestedBidInput, "historyBucket" | "historyKey">,
-): SuggestedBidResult {
-  // Lazy require keeps this file free of top-level Node fs for client bundles
-  // that only import computeSuggestedBid.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { getComparables } = require("./comparables") as typeof import("./comparables");
-  const comps = getComparables({
-    state: input.state,
-    saleType: input.saleType,
-    assessedValue: input.assessedValue,
-    openingBid: input.openingBid,
-    fips: input.fips,
-    limit: 1,
-  });
-  return computeSuggestedBid({
-    ...input,
-    historyBucket: comps.bucket,
-    historyKey: comps.key,
-  });
 }

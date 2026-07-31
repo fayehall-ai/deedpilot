@@ -245,6 +245,40 @@ deedpilot-copilot archive rows.jsonl     # dry-run import; refuses unlabelled so
 | Outcome Archivist | Admission control enforcing label rules |
 | Generic adapter | Registry-driven; adapter backlog now 0 |
 
+### Measured: URL-pattern discovery does not scale
+
+Generating county hostnames from conventions (`co.<name>.<st>.us`,
+`<name>county.gov`) and probing them was built to cover the 2,647 counties with
+no researched link. It gave every county a candidate, and on a **population-
+stratified sample of 70 counties it resolved 9%**:
+
+| Stratum | Resolved |
+|---|---|
+| Largest decile by population | 5/20 — 25% |
+| Middle 40% | 1/25 — 4% |
+| Smallest half | 0/25 — **0%** |
+| **Population-weighted** | **13%** |
+
+Roughly 60% of rejections are `fetch_failed` — the generated hostname simply
+does not exist. The rest resolve to a site with no reachable sale page.
+
+This is worth recording because hand-picked checks say the opposite. Boulder,
+Cuyahoga, Maricopa, Harris, Miami-Dade, King, Pima and DeKalb all resolve, and a
+list like that reads as a working system. It is selection bias: those are large
+counties, chosen partly *because* they had already worked. The stratified sample
+is the honest number, and it says pattern probing works for a minority of large
+counties and essentially not at all below the median.
+
+**What the tail actually needs is a county directory dataset** (NACo or
+equivalent) — knowing the hostnames rather than guessing them. No amount of
+crawler tuning substitutes for it, and the four real bugs fixed along the way
+(front-door stop, assessor-over-treasurer ranking, multiplying depth, rejected
+subdomains) each improved the pipeline without moving this number much.
+
+Population-weighted coverage is also the metric to track rather than county
+count: a subscriber cares about the markets they can bid in, and rural counties
+with no web presence are frequently markets nobody bids in.
+
 ### Where the bottleneck moved
 
 The generic adapter closed the "we cannot parse this" gap. What made per-county

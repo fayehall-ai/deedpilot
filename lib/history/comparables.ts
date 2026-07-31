@@ -6,63 +6,19 @@
  * from copilot/data/history_index.json (recorded outcomes only).
  */
 
+// Server-only by construction: the client boundary is enforced by keeping the
+// shared shapes in ./types and the index-backed helper in ./suggested-bid.server.
 import { readFileSync, existsSync } from "fs";
 import path from "path";
+import type {
+  ComparablesResult,
+  HistoryBucket,
+  HistoryComp,
+  HistoryIndex,
+} from "./types";
 
-export interface HistoryComp {
-  id: string;
-  state: string;
-  fips?: string | null;
-  county?: string | null;
-  saleType: string;
-  saleDate?: string | null;
-  openingBid?: number | null;
-  winningBid?: number | null;
-  assessedValue?: number | null;
-  arvEstimate?: number | null;
-  bidToAssessed?: number | null;
-  redeemed?: boolean;
-  ownershipTaken?: boolean;
-  source?: string | null;
-  provenance?: string;
-}
+export type { ComparablesResult, HistoryBucket, HistoryComp, HistoryIndex };
 
-export interface HistoryBucket {
-  state: string;
-  saleType: string;
-  n: number;
-  nWithWinningBid: number;
-  /**
-   * Rows whose winning bid is a comparable clearing price. Absent on indexes
-   * built before label semantics landed, hence optional.
-   */
-  nComparablePrices?: number;
-  nRedeemed: number;
-  nOwnershipTaken: number;
-  pRedeem: number | null;
-  medianWinningBid: number | null;
-  p25WinningBid: number | null;
-  p75WinningBid: number | null;
-  medianBidToAssessed: number | null;
-  comps: HistoryComp[];
-}
-
-export interface HistoryIndex {
-  builtAt: string;
-  sourcePath: string;
-  nOutcomes: number;
-  nBuckets: number;
-  buckets: Record<string, HistoryBucket>;
-}
-
-export interface ComparablesResult {
-  key: string;
-  bucket: HistoryBucket | null;
-  comps: HistoryComp[];
-  nOutcomesTotal: number;
-  builtAt: string | null;
-  note: string;
-}
 
 const INDEX_CANDIDATES = [
   path.join(process.cwd(), "copilot/data/history_index.json"),

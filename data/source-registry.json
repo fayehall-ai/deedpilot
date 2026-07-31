@@ -1,29 +1,79 @@
 {
-  "builtAt": "2026-07-31T01:52:20.668Z",
-  "nCounties": 12,
-  "nVerified": 5,
-  "nGaps": 7,
+  "builtAt": "2026-07-31T02:46:39.431Z",
+  "nCounties": 70,
+  "nVerified": 6,
+  "nGaps": 64,
   "counties": {
-    "10001": {
-      "state": "DE",
-      "county": "Kent",
+    "12031": {
+      "state": "FL",
+      "county": "Duval",
+      "sources": [],
+      "isGap": true
+    },
+    "12115": {
+      "state": "FL",
+      "county": "Sarasota",
+      "sources": [],
+      "isGap": true
+    },
+    "13009": {
+      "state": "GA",
+      "county": "Baldwin",
+      "sources": [],
+      "isGap": true
+    },
+    "13113": {
+      "state": "GA",
+      "county": "Fayette",
+      "sources": [],
+      "isGap": true
+    },
+    "13241": {
+      "state": "GA",
+      "county": "Rabun",
+      "sources": [],
+      "isGap": true
+    },
+    "13261": {
+      "state": "GA",
+      "county": "Sumter",
+      "sources": [],
+      "isGap": true
+    },
+    "17045": {
+      "state": "IL",
+      "county": "Edgar",
+      "sources": [],
+      "isGap": true
+    },
+    "17051": {
+      "state": "IL",
+      "county": "Fayette",
+      "sources": [],
+      "isGap": true
+    },
+    "17077": {
+      "state": "IL",
+      "county": "Jackson",
+      "sources": [],
+      "isGap": true
+    },
+    "17163": {
+      "state": "IL",
+      "county": "St. Clair",
       "sources": [
         {
-          "fips": "10001",
-          "state": "DE",
-          "url": "https://www.kentcountyde.gov/My-Government/Departments/Sheriffs-Office",
-          "host": "www.kentcountyde.gov",
-          "origin": "atlas",
-          "kind": "results",
-          "isGovernment": true,
-          "confidence": 1,
+          "fips": "17163",
+          "state": "IL",
+          "url": "https://stclaircounty.org/Offices/27",
+          "host": "stclaircounty.org",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.5,
           "signals": [
-            "tax sale",
-            "foreclosure auction",
-            "minimum/opening bid",
-            "redemption period",
-            "sheriff sale",
-            "monition sale"
+            "delinquent tax",
+            "foreclosure auction"
           ],
           "verifiedOn": "2026-07-31",
           "httpStatus": 200
@@ -31,22 +81,344 @@
       ],
       "isGap": false
     },
-    "10003": {
-      "state": "DE",
-      "county": "New Castle",
+    "18053": {
+      "state": "IN",
+      "county": "Grant",
+      "sources": [],
+      "isGap": true
+    },
+    "18059": {
+      "state": "IN",
+      "county": "Hancock",
+      "sources": [],
+      "isGap": true
+    },
+    "18131": {
+      "state": "IN",
+      "county": "Pulaski",
+      "sources": [],
+      "isGap": true
+    },
+    "18157": {
+      "state": "IN",
+      "county": "Tippecanoe",
+      "sources": [],
+      "isGap": true
+    },
+    "18169": {
+      "state": "IN",
+      "county": "Wabash",
+      "sources": [],
+      "isGap": true
+    },
+    "21077": {
+      "state": "KY",
+      "county": "Gallatin",
+      "sources": [],
+      "isGap": true
+    },
+    "21187": {
+      "state": "KY",
+      "county": "Owen",
+      "sources": [],
+      "isGap": true
+    },
+    "21209": {
+      "state": "KY",
+      "county": "Scott",
+      "sources": [],
+      "isGap": true
+    },
+    "22003": {
+      "state": "LA",
+      "county": "Allen",
+      "sources": [],
+      "isGap": true
+    },
+    "22007": {
+      "state": "LA",
+      "county": "Assumption",
+      "sources": [],
+      "isGap": true
+    },
+    "22009": {
+      "state": "LA",
+      "county": "Avoyelles",
+      "sources": [],
+      "isGap": true
+    },
+    "22017": {
+      "state": "LA",
+      "county": "Caddo",
+      "sources": [],
+      "isGap": true
+    },
+    "23009": {
+      "state": "ME",
+      "county": "Hancock",
+      "sources": [],
+      "isGap": true
+    },
+    "23013": {
+      "state": "ME",
+      "county": "Knox",
+      "sources": [],
+      "isGap": true
+    },
+    "24021": {
+      "state": "MD",
+      "county": "Frederick",
       "sources": [
         {
-          "fips": "10003",
-          "state": "DE",
-          "url": "https://www.newcastlede.gov/172/Sheriff-Sales",
-          "host": "www.newcastlede.gov",
-          "origin": "atlas",
+          "fips": "24021",
+          "state": "MD",
+          "url": "https://frederickcountymd.gov/69/Treasury",
+          "host": "frederickcountymd.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax lien sale",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "25021": {
+      "state": "MA",
+      "county": "Norfolk",
+      "sources": [],
+      "isGap": true
+    },
+    "26077": {
+      "state": "MI",
+      "county": "Kalamazoo",
+      "sources": [],
+      "isGap": true
+    },
+    "26137": {
+      "state": "MI",
+      "county": "Otsego",
+      "sources": [],
+      "isGap": true
+    },
+    "27103": {
+      "state": "MN",
+      "county": "Nicollet",
+      "sources": [],
+      "isGap": true
+    },
+    "28029": {
+      "state": "MS",
+      "county": "Copiah",
+      "sources": [],
+      "isGap": true
+    },
+    "29135": {
+      "state": "MO",
+      "county": "Moniteau",
+      "sources": [],
+      "isGap": true
+    },
+    "29197": {
+      "state": "MO",
+      "county": "Schuyler",
+      "sources": [],
+      "isGap": true
+    },
+    "31071": {
+      "state": "NE",
+      "county": "Garfield",
+      "sources": [],
+      "isGap": true
+    },
+    "34007": {
+      "state": "NJ",
+      "county": "Camden",
+      "sources": [],
+      "isGap": true
+    },
+    "36031": {
+      "state": "NY",
+      "county": "Essex",
+      "sources": [
+        {
+          "fips": "36031",
+          "state": "NY",
+          "url": "https://essexcountyny.gov/county-treasurer/",
+          "host": "essexcountyny.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37021": {
+      "state": "NC",
+      "county": "Buncombe",
+      "sources": [],
+      "isGap": true
+    },
+    "37027": {
+      "state": "NC",
+      "county": "Caldwell",
+      "sources": [],
+      "isGap": true
+    },
+    "37171": {
+      "state": "NC",
+      "county": "Surry",
+      "sources": [],
+      "isGap": true
+    },
+    "38005": {
+      "state": "ND",
+      "county": "Benson",
+      "sources": [],
+      "isGap": true
+    },
+    "39011": {
+      "state": "OH",
+      "county": "Auglaize",
+      "sources": [],
+      "isGap": true
+    },
+    "39093": {
+      "state": "OH",
+      "county": "Lorain",
+      "sources": [],
+      "isGap": true
+    },
+    "39109": {
+      "state": "OH",
+      "county": "Miami",
+      "sources": [],
+      "isGap": true
+    },
+    "40085": {
+      "state": "OK",
+      "county": "Love",
+      "sources": [],
+      "isGap": true
+    },
+    "40105": {
+      "state": "OK",
+      "county": "Nowata",
+      "sources": [],
+      "isGap": true
+    },
+    "41039": {
+      "state": "OR",
+      "county": "Lane",
+      "sources": [
+        {
+          "fips": "41039",
+          "state": "OR",
+          "url": "https://lanecountyor.gov/how_do_i/view/civil_foreclosure_-_real_and_personal_property_sales",
+          "host": "lanecountyor.gov",
+          "origin": "link_followed",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.88,
+          "confidence": 0.75,
           "signals": [
             "foreclosure auction",
-            "sheriff sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "42075": {
+      "state": "PA",
+      "county": "Lebanon",
+      "sources": [],
+      "isGap": true
+    },
+    "42089": {
+      "state": "PA",
+      "county": "Monroe",
+      "sources": [],
+      "isGap": true
+    },
+    "42129": {
+      "state": "PA",
+      "county": "Westmoreland",
+      "sources": [],
+      "isGap": true
+    },
+    "46057": {
+      "state": "SD",
+      "county": "Hamlin",
+      "sources": [],
+      "isGap": true
+    },
+    "46137": {
+      "state": "SD",
+      "county": "Ziebach",
+      "sources": [],
+      "isGap": true
+    },
+    "47079": {
+      "state": "TN",
+      "county": "Henry",
+      "sources": [],
+      "isGap": true
+    },
+    "48029": {
+      "state": "TX",
+      "county": "Bexar",
+      "sources": [],
+      "isGap": true
+    },
+    "48039": {
+      "state": "TX",
+      "county": "Brazoria",
+      "sources": [],
+      "isGap": true
+    },
+    "48107": {
+      "state": "TX",
+      "county": "Crosby",
+      "sources": [],
+      "isGap": true
+    },
+    "48275": {
+      "state": "TX",
+      "county": "Knox",
+      "sources": [],
+      "isGap": true
+    },
+    "48453": {
+      "state": "TX",
+      "county": "Travis",
+      "sources": [
+        {
+          "fips": "48453",
+          "state": "TX",
+          "url": "https://tax-office.traviscountytx.gov/properties/foreclosed",
+          "host": "tax-office.traviscountytx.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
             "bidder registration"
           ],
           "verifiedOn": "2026-07-31",
@@ -55,96 +427,42 @@
       ],
       "isGap": false
     },
-    "10005": {
-      "state": "DE",
-      "county": "Sussex",
+    "51051": {
+      "state": "VA",
+      "county": "Dickenson",
       "sources": [],
       "isGap": true
     },
-    "12011": {
-      "state": "FL",
-      "county": "Broward",
+    "53065": {
+      "state": "WA",
+      "county": "Stevens",
       "sources": [],
       "isGap": true
     },
-    "12086": {
-      "state": "FL",
-      "county": "Miami-Dade",
+    "54031": {
+      "state": "WV",
+      "county": "Hardy",
       "sources": [],
       "isGap": true
     },
-    "12099": {
-      "state": "FL",
-      "county": "Palm Beach",
-      "sources": [],
-      "isGap": true
-    },
-    "13067": {
-      "state": "GA",
-      "county": "Cobb",
+    "55079": {
+      "state": "WI",
+      "county": "Milwaukee",
       "sources": [
         {
-          "fips": "13067",
-          "state": "GA",
-          "url": "https://www.cobbtax.gov/property/tax_sale/index.php",
-          "host": "www.cobbtax.gov",
-          "origin": "atlas",
-          "kind": "results",
-          "isGovernment": true,
-          "confidence": 0.8,
-          "signals": [
-            "delinquent tax",
-            "tax sale",
-            "minimum/opening bid"
-          ],
-          "verifiedOn": "2026-07-31",
-          "httpStatus": 200
-        }
-      ],
-      "isGap": false
-    },
-    "13121": {
-      "state": "GA",
-      "county": "Fulton",
-      "sources": [
-        {
-          "fips": "13121",
-          "state": "GA",
-          "url": "https://www.fultoncountyga.gov/inside-fulton-county/fulton-county-departments/sheriff/tax-sales",
-          "host": "www.fultoncountyga.gov",
+          "fips": "55079",
+          "state": "WI",
+          "url": "https://county.milwaukee.gov/EN/Treasurer/Foreclosed-Property-Sales",
+          "host": "county.milwaukee.gov",
           "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
           "confidence": 0.85,
           "signals": [
-            "tax sale",
-            "minimum/opening bid"
-          ],
-          "verifiedOn": "2026-07-31",
-          "httpStatus": 200
-        }
-      ],
-      "isGap": false
-    },
-    "13135": {
-      "state": "GA",
-      "county": "Gwinnett",
-      "sources": [
-        {
-          "fips": "13135",
-          "state": "GA",
-          "url": "https://www.gwinnetttaxcommissioner.com/property-tax/delinquent_tax/tax-liens-tax-sales",
-          "host": "www.gwinnetttaxcommissioner.com",
-          "origin": "atlas",
-          "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.58,
-          "signals": [
             "delinquent tax",
             "tax sale",
             "foreclosure auction",
-            "minimum/opening bid",
-            "bidder registration"
+            "sheriff sale"
           ],
           "verifiedOn": "2026-07-31",
           "httpStatus": 200
@@ -152,21 +470,63 @@
       ],
       "isGap": false
     },
-    "15001": {
-      "state": "HI",
-      "county": "Hawaii",
+    "55113": {
+      "state": "WI",
+      "county": "Sawyer",
       "sources": [],
       "isGap": true
     },
-    "15003": {
-      "state": "HI",
-      "county": "Honolulu",
+    "06037": {
+      "state": "CA",
+      "county": "Los Angeles",
       "sources": [],
       "isGap": true
     },
-    "15009": {
-      "state": "HI",
-      "county": "Maui",
+    "06111": {
+      "state": "CA",
+      "county": "Ventura",
+      "sources": [],
+      "isGap": true
+    },
+    "01073": {
+      "state": "AL",
+      "county": "Jefferson",
+      "sources": [],
+      "isGap": true
+    },
+    "08059": {
+      "state": "CO",
+      "county": "Jefferson",
+      "sources": [],
+      "isGap": true
+    },
+    "06053": {
+      "state": "CA",
+      "county": "Monterey",
+      "sources": [],
+      "isGap": true
+    },
+    "05051": {
+      "state": "AR",
+      "county": "Garland",
+      "sources": [],
+      "isGap": true
+    },
+    "01005": {
+      "state": "AL",
+      "county": "Barbour",
+      "sources": [],
+      "isGap": true
+    },
+    "05077": {
+      "state": "AR",
+      "county": "Lee",
+      "sources": [],
+      "isGap": true
+    },
+    "08065": {
+      "state": "CO",
+      "county": "Lake",
       "sources": [],
       "isGap": true
     }

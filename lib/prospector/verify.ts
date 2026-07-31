@@ -11,9 +11,11 @@
  * A model's own confidence number is not evidence and is deliberately not used.
  */
 
+import * as cheerio from "cheerio";
 import { z } from "zod";
 import { NoProviderAvailableError, runStructured } from "../ai/providers";
 import { PolicyBlockedError, politeFetch } from "../ingest/fetch";
+import { discoveryLinks } from "../ingest/parse";
 import { isGovernmentSource } from "../ingest/policy";
 import type {
   RejectedCandidate,
@@ -130,10 +132,32 @@ empty page indefinitely.`;
  * ordinary failure modes: a policy block and a dead link are both results worth
  * recording, because they explain a coverage gap.
  */
+/**
+ * Shared, mutable fetch allowance for one county.
+ *
+ * Depth alone does not bound work — it multiplies. A depth-2 crawl following
+ * six links, each following three more, is up to 108 fetches for one county;
+ * at the polite delay a government host deserves that is minutes per county and
+ * a national run never finishes. The budget is the actual limit, and it is
+ * shared across the whole recursion rather than reset per branch.
+ */
+export interface FetchBudget {
+  remaining: number;
+}
+
+export function newBudget(n = 12): FetchBudget {
+  return { remaining: n };
+}
+
 export async function verifyCandidate(
   candidate: SourceCandidate,
-  opts: { useLlm?: boolean } = {},
+  opts: { useLlm?: boolean; depth?: number; budget?: FetchBudget } = {},
 ): Promise<VerifiedSource | RejectedCandidate> {
+  const budget = opts.budget ?? newBudget();
+  if (budget.remaining <= 0) {
+    return { ...candidate, reason: "fetch_failed", detail: "county fetch budget exhausted" };
+  }
+  budget.remaining--;
   const host = (() => {
     try {
       return new URL(candidate.url).hostname;
@@ -148,7 +172,17 @@ export async function verifyCandidate(
 
   let res;
   try {
-    res = await politeFetch(candidate.url, { attempts: 2, timeoutMs: 20_000 });
+    // Probing an unknown domain is not the same as fetching a known source.
+    // Two attempts at a 20s timeout is right for a county we depend on and
+    // ruinous for a guessed hostname: a handful of dead guesses per county
+    // turns a national run from hours into days, and nearly all of that time is
+    // spent waiting on hosts that were never going to answer. A real county
+    // site responds in under three seconds.
+    const probe = candidate.origin === "platform_pattern" || candidate.origin === "link_followed";
+    res = await politeFetch(candidate.url, {
+      attempts: probe ? 1 : 2,
+      timeoutMs: probe ? 8_000 : 20_000,
+    });
   } catch (e) {
     if (e instanceof PolicyBlockedError) {
       return {
@@ -174,12 +208,41 @@ export async function verifyCandidate(
   // A government host is preferred but does not exempt a page from having to be
   // about tax sales — a county homepage is a .gov and sells nothing.
   if (score < MIN_VOCAB_SCORE) {
+    // A generated county domain resolves to a homepage — exactly the page that
+    // *should* fail this check, and also the page most likely to link to the
+    // sale. Crawl inward rather than rejecting: the domains were never the
+    // problem, stopping at the front door was.
+    //
+    // Budgeted at two hops because that is the real shape of a county site:
+    // homepage → Treasurer → Tax Sale. Direct links are tried first at every
+    // depth, so a site that names the sale in its nav costs one fetch.
+    const depth = opts.depth ?? 2;
+    if (depth > 0) {
+      const $ = cheerio.load(res.body);
+      const { direct, department } = discoveryLinks($, candidate.url);
+      // Department links only earn a hop when we still have budget beyond it.
+      const toFollow = [...direct.slice(0, 3), ...(depth > 1 ? department.slice(0, 2) : [])];
+
+      for (const link of toFollow) {
+        if (budget.remaining <= 0) break;
+        const followed = await verifyCandidate(
+          {
+            ...candidate,
+            url: link,
+            origin: "link_followed",
+            label: `${candidate.label} → ${link.split("/").slice(3).join("/").slice(0, 40)}`,
+          },
+          { ...opts, depth: depth - 1, budget },
+        );
+        if (!("reason" in followed)) return followed;
+      }
+    }
     return {
       ...candidate,
       reason: "not_tax_sale_content",
       detail: `vocabulary score ${score} below ${MIN_VOCAB_SCORE}${
         signals.length ? ` (matched: ${signals.join(", ")})` : ""
-      }`,
+      }${depth > 0 ? `; crawled ${depth} hop(s) inward, no sale page found` : ""}`,
     };
   }
 

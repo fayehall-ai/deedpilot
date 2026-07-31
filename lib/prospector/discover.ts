@@ -28,18 +28,7 @@ const LINK_FIELDS: { field: keyof CountyRule; label: string }[] = [
   { field: "gisMap", label: "GIS map" },
 ];
 
-/**
- * Hosts that publish for many counties in a state.
- *
- * Deliberately not a URL template per county: guessing county-specific paths
- * produces 404s at scale and hammers government servers for nothing. These are
- * entry points the verifier can follow links from.
- */
-const STATE_PLATFORMS: Record<string, { url: string; label: string }[]> = {
-  MI: [{ url: "https://www.tax-sale.info/", label: "Title Check statewide auction host" }],
-  TX: [{ url: "https://taxsales.lgbs.com/", label: "LGBS statewide sale listings" }],
-  AZ: [{ url: "https://www.govease.com/", label: "GovEase lien auction platform" }],
-};
+import { countyDomainPatterns, statewideCandidatesFor } from "./candidates";
 
 function isHttp(url: string | undefined): url is string {
   if (!url) return false;
@@ -52,12 +41,18 @@ function isHttp(url: string | undefined): url is string {
 }
 
 /**
- * Candidate URLs for one county, deduplicated, atlas-first.
+ * Candidate URLs for one county, deduplicated, in descending order of trust:
+ * researched atlas links, then statewide publishers, then generated county
+ * domains.
  *
- * Returns an empty array for a county with no researched links and no state
- * platform — that is a real gap, and reporting it as such is the point.
+ * `includePatterns` is off by default because generated domains are *probes*,
+ * not known sources — most will not resolve, and callers doing a cheap pass
+ * should not pay for them. The national discovery run turns them on.
  */
-export function candidatesFor(fips: string): SourceCandidate[] {
+export function candidatesFor(
+  fips: string,
+  opts: { includePatterns?: boolean } = {},
+): SourceCandidate[] {
   const county = getCounty(fips);
   if (!county) return [];
 
@@ -84,8 +79,19 @@ export function candidatesFor(fips: string): SourceCandidate[] {
     }
   }
 
-  for (const p of STATE_PLATFORMS[county.state] ?? []) {
-    push(p.url, "platform_pattern", p.label);
+  // Statewide publishers: one URL serving every county in the state. Highest
+  // leverage available — Arkansas, West Virginia and New Mexico each run their
+  // sales centrally, and West Virginia's is a results page.
+  for (const c of statewideCandidatesFor(county)) {
+    push(c.url, c.origin, c.label);
+  }
+
+  // Generated county domains. These are homepages, not sale pages, so they only
+  // become sources via the two-stage discovery in `verify.ts`.
+  if (opts.includePatterns) {
+    for (const url of countyDomainPatterns(county)) {
+      push(url, "platform_pattern", "generated county domain (probe)");
+    }
   }
 
   return out;
