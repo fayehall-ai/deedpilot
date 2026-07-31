@@ -19,7 +19,7 @@ import type {
   SourceRegistry,
   VerifiedSource,
 } from "./types";
-import { verifyCandidate } from "./verify";
+import { newBudget, verifyCandidate } from "./verify";
 
 export * from "./types";
 export { candidatesFor, countiesWithAtlasLinks } from "./discover";
@@ -52,6 +52,10 @@ function rank(s: VerifiedSource, preferKind?: VerifiedSource["kind"]): number {
 
 export interface ProspectOptions {
   useLlm?: boolean;
+  /** Probe generated county domains. Off by default — most will not resolve. */
+  includePatterns?: boolean;
+  /** Total fetches allowed for this county across all candidates and hops. */
+  fetchBudget?: number;
   /** Stop after this many candidates per county. */
   maxCandidates?: number;
   /** Report intent without fetching anything. */
@@ -82,7 +86,9 @@ export async function prospectCounty(
     };
   }
 
-  const candidates = candidatesFor(fips).slice(0, opts.maxCandidates ?? 8);
+  const candidates = candidatesFor(fips, {
+    includePatterns: opts.includePatterns,
+  }).slice(0, opts.maxCandidates ?? 8);
 
   if (opts.dryRun) {
     return {
@@ -103,11 +109,23 @@ export async function prospectCounty(
 
   const verified: VerifiedSource[] = [];
   const rejected: RejectedCandidate[] = [];
+  // One allowance for the whole county, shared across every candidate and every
+  // hop, so a county with many generated domains cannot cost more than one with
+  // a single researched link.
+  const budget = newBudget(opts.fetchBudget ?? 12);
 
   for (const candidate of candidates) {
-    const result = await verifyCandidate(candidate, { useLlm: opts.useLlm });
-    if ("reason" in result) rejected.push(result);
-    else verified.push(result);
+    const result = await verifyCandidate(candidate, { useLlm: opts.useLlm, budget });
+    if (budget.remaining <= 0 && "reason" in result) { rejected.push(result); break; }
+    // One good government source is enough; probing the remaining generated
+    // domains for a county we have already resolved is pure waste.
+    if (!("reason" in result)) {
+      verified.push(result);
+      if (result.isGovernment && result.confidence >= 0.7) break;
+      continue;
+    }
+    rejected.push(result);
+    continue;
   }
 
   verified.sort((a, b) => rank(b) - rank(a));

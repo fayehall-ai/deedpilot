@@ -14,7 +14,9 @@
     "export:atlas": "tsx scripts/export-atlas-for-copilot.ts",
     "scout": "tsx scripts/scout.ts",
     "prospect": "tsx scripts/prospect.ts",
-    "cartographer": "tsx scripts/cartographer.ts"
+    "cartographer": "tsx scripts/cartographer.ts",
+    "prospect:national": "tsx scripts/prospect-national.ts",
+    "crawl:results": "tsx scripts/crawl-results.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

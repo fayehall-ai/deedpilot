@@ -115,31 +115,101 @@ export function pdfLinks($: cheerio.CheerioAPI, pageUrl: string): string[] {
   return [...new Set(out)];
 }
 
+/** Link text that points straight at a sale list. */
+const DIRECT_LINKS =
+  /(tax\s*sale|delinquent|foreclos|tax\s*certificate|tax\s*lien|tax\s*deed|sheriff'?s?\s+sale|properties?\s+for\s+sale|upcoming\s+auction|land\s+sale)/i;
+
 /**
- * Links that look like they lead to the actual sale list.
+ * Departments that might lead to the sale, ranked by who actually runs it.
  *
- * Many county landing pages carry no parcels themselves and link to a
- * "Current Tax Sale List" page. Following one hop finds those without a
- * per-county rule for every jurisdiction in the country.
+ * Ranking rather than document order matters more than it looks. Boulder
+ * County's homepage offers five assessor links before it offers the treasurer,
+ * and taking the first three found nothing — the **assessor values property,
+ * the treasurer sells it**. A crawl that follows page order spends its whole
+ * budget in the wrong office.
  */
-export function listPageLinks($: cheerio.CheerioAPI, pageUrl: string): string[] {
-  const out: string[] = [];
+const DEPARTMENT_RANKS: { term: RegExp; rank: number }[] = [
+  { term: /treasurer/i, rank: 10 },
+  { term: /tax\s*collector/i, rank: 10 },
+  { term: /tax\s*commissioner/i, rank: 10 },
+  { term: /revenue\s*commissi/i, rank: 9 },
+  { term: /trustee/i, rank: 8 }, // Tennessee's collector
+  { term: /property\s*(and|&)?\s*(land|tax)/i, rank: 7 },
+  { term: /\btaxes?\b/i, rank: 6 },
+  { term: /auditor/i, rank: 5 },
+  { term: /sheriff/i, rank: 4 },
+  { term: /clerk/i, rank: 3 },
+  { term: /assessor/i, rank: 1 },
+];
+
+function departmentRank(hay: string): number {
+  for (const { term, rank } of DEPARTMENT_RANKS) if (term.test(hay)) return rank;
+  return 0;
+}
+
+export type LinkTier = "direct" | "department";
+
+/**
+ * Links worth following, split by how close they are to the sale list.
+ *
+ * Callers follow `direct` first and only spend a second hop on `department`,
+ * which keeps a national crawl to a few fetches per county rather than a full
+ * site walk.
+ */
+export function discoveryLinks(
+  $: cheerio.CheerioAPI,
+  pageUrl: string,
+): { direct: string[]; department: string[] } {
+  const direct: string[] = [];
+  const ranked: { url: string; rank: number }[] = [];
+
   $("a[href]").each((_, a) => {
     const label = $(a).text().replace(/\s+/g, " ").trim();
     const href = $(a).attr("href");
-    if (!href || !label) return;
-    if (EXCLUDE_LINKS.test(`${label} ${href}`)) return;
-    if (!/(tax\s*sale|delinquent|auction|parcel|properties?\s+for\s+sale|upcoming)/i.test(label)) {
+    if (!href || !label || label.length > 80) return;
+    const hay = `${label} ${href}`;
+    if (EXCLUDE_LINKS.test(hay)) return;
+
+    let abs: string;
+    try {
+      abs = new URL(href, pageUrl).toString();
+    } catch {
       return;
     }
+    if (abs === pageUrl || abs.endsWith(".pdf")) return;
+    // Stay on the county's own site; outbound links are vendors and social.
     try {
-      const abs = new URL(href, pageUrl).toString();
-      if (abs !== pageUrl && !abs.endsWith(".pdf")) out.push(abs);
+      if (new URL(abs).hostname !== new URL(pageUrl).hostname) return;
     } catch {
-      /* malformed href — skip */
+      return;
     }
+
+    if (DIRECT_LINKS.test(hay)) {
+      direct.push(abs);
+      return;
+    }
+    const rank = departmentRank(hay);
+    if (rank > 0) ranked.push({ url: abs, rank });
   });
-  return [...new Set(out)].slice(0, 5);
+
+  const department: string[] = [];
+  const seen = new Set<string>();
+  for (const { url } of ranked.sort((a, b) => b.rank - a.rank)) {
+    if (seen.has(url)) continue;
+    seen.add(url);
+    department.push(url);
+  }
+
+  return {
+    direct: [...new Set(direct)].slice(0, 5),
+    department: department.slice(0, 5),
+  };
+}
+
+/** Backwards-compatible single list — direct links first. */
+export function listPageLinks($: cheerio.CheerioAPI, pageUrl: string): string[] {
+  const { direct, department } = discoveryLinks($, pageUrl);
+  return [...direct, ...department].slice(0, 5);
 }
 
 /** Extract text from a PDF at `url`. Policy-gated like every other fetch. */
