@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T18:14:44.453Z",
-  "nCounties": 123,
+  "builtAt": "2026-07-31T18:17:13.875Z",
+  "nCounties": 143,
   "nVerified": 114,
-  "nGaps": 10,
+  "nGaps": 30,
   "counties": {
     "10001": {
       "state": "DE",
@@ -178,6 +178,12 @@
       ],
       "isGap": false
     },
+    "16001": {
+      "state": "ID",
+      "county": "Ada",
+      "sources": [],
+      "isGap": true
+    },
     "16003": {
       "state": "ID",
       "county": "Adams",
@@ -224,6 +230,12 @@
         }
       ],
       "isGap": false
+    },
+    "17001": {
+      "state": "IL",
+      "county": "Adams",
+      "sources": [],
+      "isGap": true
     },
     "17005": {
       "state": "IL",
@@ -344,6 +356,12 @@
       ],
       "isGap": false
     },
+    "18001": {
+      "state": "IN",
+      "county": "Adams",
+      "sources": [],
+      "isGap": true
+    },
     "18019": {
       "state": "IN",
       "county": "Clark",
@@ -366,6 +384,12 @@
         }
       ],
       "isGap": false
+    },
+    "19001": {
+      "state": "IA",
+      "county": "Adair",
+      "sources": [],
+      "isGap": true
     },
     "19011": {
       "state": "IA",
@@ -391,6 +415,36 @@
       ],
       "isGap": false
     },
+    "20001": {
+      "state": "KS",
+      "county": "Allen",
+      "sources": [],
+      "isGap": true
+    },
+    "21001": {
+      "state": "KY",
+      "county": "Adair",
+      "sources": [],
+      "isGap": true
+    },
+    "22001": {
+      "state": "LA",
+      "county": "Acadia",
+      "sources": [],
+      "isGap": true
+    },
+    "23001": {
+      "state": "ME",
+      "county": "Androscoggin",
+      "sources": [],
+      "isGap": true
+    },
+    "24001": {
+      "state": "MD",
+      "county": "Allegany",
+      "sources": [],
+      "isGap": true
+    },
     "24021": {
       "state": "MD",
       "county": "Frederick",
@@ -413,6 +467,18 @@
         }
       ],
       "isGap": false
+    },
+    "25001": {
+      "state": "MA",
+      "county": "Barnstable",
+      "sources": [],
+      "isGap": true
+    },
+    "26001": {
+      "state": "MI",
+      "county": "Alcona",
+      "sources": [],
+      "isGap": true
     },
     "26003": {
       "state": "MI",
@@ -506,6 +572,18 @@
       ],
       "isGap": false
     },
+    "27001": {
+      "state": "MN",
+      "county": "Aitkin",
+      "sources": [],
+      "isGap": true
+    },
+    "28001": {
+      "state": "MS",
+      "county": "Adams",
+      "sources": [],
+      "isGap": true
+    },
     "28013": {
       "state": "MS",
       "county": "Calhoun",
@@ -530,6 +608,18 @@
         }
       ],
       "isGap": false
+    },
+    "29001": {
+      "state": "MO",
+      "county": "Adair",
+      "sources": [],
+      "isGap": true
+    },
+    "30001": {
+      "state": "MT",
+      "county": "Beaverhead",
+      "sources": [],
+      "isGap": true
     },
     "30009": {
       "state": "MT",
@@ -576,6 +666,12 @@
         }
       ],
       "isGap": false
+    },
+    "31001": {
+      "state": "NE",
+      "county": "Adams",
+      "sources": [],
+      "isGap": true
     },
     "31011": {
       "state": "NE",
@@ -695,6 +791,18 @@
         }
       ],
       "isGap": false
+    },
+    "33001": {
+      "state": "NH",
+      "county": "Belknap",
+      "sources": [],
+      "isGap": true
+    },
+    "34001": {
+      "state": "NJ",
+      "county": "Atlantic",
+      "sources": [],
+      "isGap": true
     },
     "34005": {
       "state": "NJ",
@@ -1507,6 +1615,18 @@
         }
       ],
       "isGap": false
+    },
+    "37003": {
+      "state": "NC",
+      "county": "Alexander",
+      "sources": [],
+      "isGap": true
+    },
+    "38001": {
+      "state": "ND",
+      "county": "Adams",
+      "sources": [],
+      "isGap": true
     },
     "38015": {
       "state": "ND",
