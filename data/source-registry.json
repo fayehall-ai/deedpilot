@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T18:31:10.412Z",
-  "nCounties": 263,
+  "builtAt": "2026-07-31T18:31:53.306Z",
+  "nCounties": 243,
   "nVerified": 117,
-  "nGaps": 147,
+  "nGaps": 127,
   "counties": {
     "10001": {
       "state": "DE",
@@ -2068,12 +2068,6 @@
       "sources": [],
       "isGap": true
     },
-    "40005": {
-      "state": "OK",
-      "county": "Atoka",
-      "sources": [],
-      "isGap": true
-    },
     "41001": {
       "state": "OR",
       "county": "Baker",
@@ -2083,12 +2077,6 @@
     "41003": {
       "state": "OR",
       "county": "Benton",
-      "sources": [],
-      "isGap": true
-    },
-    "41005": {
-      "state": "OR",
-      "county": "Clackamas",
       "sources": [],
       "isGap": true
     },
@@ -2151,12 +2139,6 @@
       "sources": [],
       "isGap": true
     },
-    "42005": {
-      "state": "PA",
-      "county": "Armstrong",
-      "sources": [],
-      "isGap": true
-    },
     "42011": {
       "state": "PA",
       "county": "Berks",
@@ -2216,12 +2198,6 @@
       "sources": [],
       "isGap": true
     },
-    "44005": {
-      "state": "RI",
-      "county": "Newport",
-      "sources": [],
-      "isGap": true
-    },
     "45001": {
       "state": "SC",
       "county": "Abbeville",
@@ -2231,12 +2207,6 @@
     "45003": {
       "state": "SC",
       "county": "Aiken",
-      "sources": [],
-      "isGap": true
-    },
-    "45005": {
-      "state": "SC",
-      "county": "Allendale",
       "sources": [],
       "isGap": true
     },
@@ -2350,12 +2320,6 @@
       "sources": [],
       "isGap": true
     },
-    "46007": {
-      "state": "SD",
-      "county": "Bennett",
-      "sources": [],
-      "isGap": true
-    },
     "47001": {
       "state": "TN",
       "county": "Anderson",
@@ -2365,12 +2329,6 @@
     "47003": {
       "state": "TN",
       "county": "Bedford",
-      "sources": [],
-      "isGap": true
-    },
-    "47005": {
-      "state": "TN",
-      "county": "Benton",
       "sources": [],
       "isGap": true
     },
@@ -2455,12 +2413,6 @@
       "sources": [],
       "isGap": true
     },
-    "48005": {
-      "state": "TX",
-      "county": "Angelina",
-      "sources": [],
-      "isGap": true
-    },
     "48453": {
       "state": "TX",
       "county": "Travis",
@@ -2494,12 +2446,6 @@
     "49003": {
       "state": "UT",
       "county": "Box Elder",
-      "sources": [],
-      "isGap": true
-    },
-    "49005": {
-      "state": "UT",
-      "county": "Cache",
       "sources": [],
       "isGap": true
     },
@@ -2633,12 +2579,6 @@
       "sources": [],
       "isGap": true
     },
-    "50005": {
-      "state": "VT",
-      "county": "Caledonia",
-      "sources": [],
-      "isGap": true
-    },
     "51001": {
       "state": "VA",
       "county": "Accomack",
@@ -2648,12 +2588,6 @@
     "51003": {
       "state": "VA",
       "county": "Albemarle",
-      "sources": [],
-      "isGap": true
-    },
-    "51005": {
-      "state": "VA",
-      "county": "Alleghany",
       "sources": [],
       "isGap": true
     },
@@ -2715,12 +2649,6 @@
       ],
       "isGap": false
     },
-    "53009": {
-      "state": "WA",
-      "county": "Clallam",
-      "sources": [],
-      "isGap": true
-    },
     "54001": {
       "state": "WV",
       "county": "Barbour",
@@ -2730,12 +2658,6 @@
     "54003": {
       "state": "WV",
       "county": "Berkeley",
-      "sources": [],
-      "isGap": true
-    },
-    "54005": {
-      "state": "WV",
-      "county": "Boone",
       "sources": [],
       "isGap": true
     },
@@ -2773,12 +2695,6 @@
     "55003": {
       "state": "WI",
       "county": "Ashland",
-      "sources": [],
-      "isGap": true
-    },
-    "55005": {
-      "state": "WI",
-      "county": "Barron",
       "sources": [],
       "isGap": true
     },
@@ -2912,12 +2828,6 @@
         }
       ],
       "isGap": false
-    },
-    "56009": {
-      "state": "WY",
-      "county": "Converse",
-      "sources": [],
-      "isGap": true
     },
     "56021": {
       "state": "WY",
@@ -3665,36 +3575,6 @@
     "09007": {
       "state": "CT",
       "county": "Middlesex",
-      "sources": [],
-      "isGap": true
-    },
-    "02060": {
-      "state": "AK",
-      "county": "Bristol Bay",
-      "sources": [],
-      "isGap": true
-    },
-    "01007": {
-      "state": "AL",
-      "county": "Bibb",
-      "sources": [],
-      "isGap": true
-    },
-    "05007": {
-      "state": "AR",
-      "county": "Benton",
-      "sources": [],
-      "isGap": true
-    },
-    "06007": {
-      "state": "CA",
-      "county": "Butte",
-      "sources": [],
-      "isGap": true
-    },
-    "08011": {
-      "state": "CO",
-      "county": "Bent",
       "sources": [],
       "isGap": true
     }
