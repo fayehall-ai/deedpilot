@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T18:25:28.068Z",
-  "nCounties": 183,
-  "nVerified": 115,
-  "nGaps": 69,
+  "builtAt": "2026-07-31T18:26:34.861Z",
+  "nCounties": 193,
+  "nVerified": 116,
+  "nGaps": 78,
   "counties": {
     "10001": {
       "state": "DE",
@@ -674,6 +674,12 @@
       "sources": [],
       "isGap": true
     },
+    "28003": {
+      "state": "MS",
+      "county": "Alcorn",
+      "sources": [],
+      "isGap": true
+    },
     "28013": {
       "state": "MS",
       "county": "Calhoun",
@@ -705,9 +711,21 @@
       "sources": [],
       "isGap": true
     },
+    "29003": {
+      "state": "MO",
+      "county": "Andrew",
+      "sources": [],
+      "isGap": true
+    },
     "30001": {
       "state": "MT",
       "county": "Beaverhead",
+      "sources": [],
+      "isGap": true
+    },
+    "30003": {
+      "state": "MT",
+      "county": "Big Horn",
       "sources": [],
       "isGap": true
     },
@@ -760,6 +778,12 @@
     "31001": {
       "state": "NE",
       "county": "Adams",
+      "sources": [],
+      "isGap": true
+    },
+    "31003": {
+      "state": "NE",
+      "county": "Antelope",
       "sources": [],
       "isGap": true
     },
@@ -865,6 +889,12 @@
       "sources": [],
       "isGap": true
     },
+    "32003": {
+      "state": "NV",
+      "county": "Clark",
+      "sources": [],
+      "isGap": true
+    },
     "32005": {
       "state": "NV",
       "county": "Douglas",
@@ -894,9 +924,21 @@
       "sources": [],
       "isGap": true
     },
+    "33003": {
+      "state": "NH",
+      "county": "Carroll",
+      "sources": [],
+      "isGap": true
+    },
     "34001": {
       "state": "NJ",
       "county": "Atlantic",
+      "sources": [],
+      "isGap": true
+    },
+    "34003": {
+      "state": "NJ",
+      "county": "Bergen",
       "sources": [],
       "isGap": true
     },
@@ -1620,6 +1662,31 @@
       ],
       "isGap": false
     },
+    "35047": {
+      "state": "NM",
+      "county": "San Miguel",
+      "sources": [
+        {
+          "fips": "35047",
+          "state": "NM",
+          "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
+          "host": "www.tax.newmexico.gov",
+          "origin": "platform_pattern",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "36001": {
       "state": "NY",
       "county": "Albany",
@@ -1749,9 +1816,21 @@
       "sources": [],
       "isGap": true
     },
+    "37005": {
+      "state": "NC",
+      "county": "Alleghany",
+      "sources": [],
+      "isGap": true
+    },
     "38001": {
       "state": "ND",
       "county": "Adams",
+      "sources": [],
+      "isGap": true
+    },
+    "38003": {
+      "state": "ND",
+      "county": "Barnes",
       "sources": [],
       "isGap": true
     },
