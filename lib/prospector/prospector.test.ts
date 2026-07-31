@@ -157,3 +157,52 @@ asyncChecks().then(() => {
     govShare: cov.govShare,
   });
 });
+
+// --- candidate generation (the fix for 2,647 zero-candidate counties) --------
+{
+  const { countyDomainPatterns, countySlugForHost, statewideCandidatesFor, statewideCoverage } =
+    require("./candidates") as typeof import("./candidates");
+  const { getCounty, ALL_COUNTIES } = require("../atlas") as typeof import("../atlas");
+  const { newBudget, verifyCandidate } = require("./verify") as typeof import("./verify");
+
+  // Slugs drop the governance suffix; Louisiana has parishes, Alaska boroughs.
+  assert(countySlugForHost("St. Louis County") === "stlouis", "county suffix and punctuation dropped");
+  assert(countySlugForHost("Orleans Parish") === "orleans", "parish dropped");
+  assert(countySlugForHost("Juneau City and Borough") === "juneau", "borough dropped");
+
+  const boulder = getCounty("08013")!;
+  const pats = countyDomainPatterns(boulder);
+  assert(pats.some((p) => p.includes("bouldercounty.gov")), "generates the real Boulder domain");
+  assert(pats.some((p) => p.includes("co.boulder.co.us")), "generates the classic co.X.st.us form");
+  assert(new Set(pats).size === pats.length, "patterns are deduplicated");
+
+  // Every county must now have at least one candidate — that was the blocker.
+  let zero = 0;
+  for (const c of ALL_COUNTIES) if (!candidatesFor(c.fips, { includePatterns: true }).length) zero++;
+  assert(zero === 0, `${zero} counties still have no candidate at all`);
+
+  // Statewide publishers, and the scoping that stops NYC being offered to Buffalo.
+  const arkansas = statewideCandidatesFor(getCounty("05001")!);
+  assert(arkansas.some((c) => c.url.includes("cosl.org")), "Arkansas gets the statewide publisher");
+
+  const bronx = statewideCandidatesFor(getCounty("36005")!);
+  const erie = statewideCandidatesFor(getCounty("36029")!);
+  assert(bronx.some((c) => c.url.includes("nyc.gov")), "a borough gets the NYC lien sale");
+  assert(!erie.some((c) => c.url.includes("nyc.gov")), "Buffalo must not be sent to the NYC sale");
+
+  assert(
+    statewideCoverage().some((s) => s.state === "WV" && s.results),
+    "West Virginia's statewide source is flagged as publishing results",
+  );
+
+  // The fetch budget is shared, not per-branch: depth multiplies, budget bounds.
+  const budget = newBudget(1);
+  assert(budget.remaining === 1, "budget starts full");
+  verifyCandidate(
+    { fips: "00000", state: "XX", url: "https://example.invalid/", origin: "atlas", label: "t" },
+    { budget },
+  ).then((r) => {
+    assert("reason" in r, "an invalid host is rejected");
+    assert(budget.remaining === 0, "the attempt was charged to the shared budget");
+  });
+}

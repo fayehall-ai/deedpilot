@@ -172,7 +172,17 @@ export async function verifyCandidate(
 
   let res;
   try {
-    res = await politeFetch(candidate.url, { attempts: 2, timeoutMs: 20_000 });
+    // Probing an unknown domain is not the same as fetching a known source.
+    // Two attempts at a 20s timeout is right for a county we depend on and
+    // ruinous for a guessed hostname: a handful of dead guesses per county
+    // turns a national run from hours into days, and nearly all of that time is
+    // spent waiting on hosts that were never going to answer. A real county
+    // site responds in under three seconds.
+    const probe = candidate.origin === "platform_pattern" || candidate.origin === "link_followed";
+    res = await politeFetch(candidate.url, {
+      attempts: probe ? 1 : 2,
+      timeoutMs: probe ? 8_000 : 20_000,
+    });
   } catch (e) {
     if (e instanceof PolicyBlockedError) {
       return {
