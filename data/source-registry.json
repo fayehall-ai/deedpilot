@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T18:21:23.757Z",
-  "nCounties": 173,
+  "builtAt": "2026-07-31T18:22:07.234Z",
+  "nCounties": 183,
   "nVerified": 115,
-  "nGaps": 59,
+  "nGaps": 69,
   "counties": {
     "10001": {
       "state": "DE",
@@ -261,6 +261,12 @@
       "sources": [],
       "isGap": true
     },
+    "17003": {
+      "state": "IL",
+      "county": "Alexander",
+      "sources": [],
+      "isGap": true
+    },
     "17005": {
       "state": "IL",
       "county": "Bond",
@@ -386,6 +392,12 @@
       "sources": [],
       "isGap": true
     },
+    "18003": {
+      "state": "IN",
+      "county": "Allen",
+      "sources": [],
+      "isGap": true
+    },
     "18019": {
       "state": "IN",
       "county": "Clark",
@@ -451,9 +463,21 @@
       "sources": [],
       "isGap": true
     },
+    "20003": {
+      "state": "KS",
+      "county": "Anderson",
+      "sources": [],
+      "isGap": true
+    },
     "21001": {
       "state": "KY",
       "county": "Adair",
+      "sources": [],
+      "isGap": true
+    },
+    "21003": {
+      "state": "KY",
+      "county": "Allen",
       "sources": [],
       "isGap": true
     },
@@ -463,15 +487,33 @@
       "sources": [],
       "isGap": true
     },
+    "22003": {
+      "state": "LA",
+      "county": "Allen",
+      "sources": [],
+      "isGap": true
+    },
     "23001": {
       "state": "ME",
       "county": "Androscoggin",
       "sources": [],
       "isGap": true
     },
+    "23003": {
+      "state": "ME",
+      "county": "Aroostook",
+      "sources": [],
+      "isGap": true
+    },
     "24001": {
       "state": "MD",
       "county": "Allegany",
+      "sources": [],
+      "isGap": true
+    },
+    "24003": {
+      "state": "MD",
+      "county": "Anne Arundel",
       "sources": [],
       "isGap": true
     },
@@ -504,6 +546,12 @@
       "sources": [],
       "isGap": true
     },
+    "25003": {
+      "state": "MA",
+      "county": "Berkshire",
+      "sources": [],
+      "isGap": true
+    },
     "26001": {
       "state": "MI",
       "county": "Alcona",
@@ -532,6 +580,12 @@
         }
       ],
       "isGap": false
+    },
+    "26005": {
+      "state": "MI",
+      "county": "Allegan",
+      "sources": [],
+      "isGap": true
     },
     "26011": {
       "state": "MI",
@@ -605,6 +659,12 @@
     "27001": {
       "state": "MN",
       "county": "Aitkin",
+      "sources": [],
+      "isGap": true
+    },
+    "27003": {
+      "state": "MN",
+      "county": "Anoka",
       "sources": [],
       "isGap": true
     },
