@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { computeMaxBid, type DealInputs } from "@/lib/deal/maxbid";
+import { computeSuggestedBid } from "@/lib/history/suggested-bid";
+import type { HistoryBucket } from "@/lib/history/comparables";
 import { money, percent } from "@/lib/format";
 import { AssumedTag, Callout } from "./ui";
 import type { SaleType } from "@/lib/atlas/types";
@@ -13,17 +15,27 @@ import type { SaleType } from "@/lib/atlas/types";
  * statutory data, so dragging the margin slider recomputes instantly with no
  * round trip. The model never sees these inputs — the walk-away number is
  * deterministic by design.
+ *
+ * History-guided suggested bid is recomputed from the same inputs and is
+ * always ≤ maxBid (oracle ceiling).
  */
 export function DealCalculator({
   state,
   saleType,
   openingBid,
   assessedValue,
+  fips,
+  historyBucket = null,
+  historyKey,
 }: {
   state: string;
   saleType: SaleType;
   openingBid?: number;
   assessedValue?: number;
+  fips?: string;
+  /** Server-loaded history bucket (no fs on the client). */
+  historyBucket?: HistoryBucket | null;
+  historyKey?: string;
 }) {
   const [arvOverride, setArvOverride] = useState<string>("");
   const [rehab, setRehab] = useState<string>("");
@@ -44,12 +56,46 @@ export function DealCalculator({
     return computeMaxBid(inputs);
   }, [state, saleType, openingBid, assessedValue, arvOverride, rehab, liens, margin]);
 
+  const suggestion = useMemo(() => {
+    return computeSuggestedBid({
+      state,
+      saleType,
+      openingBid,
+      assessedValue,
+      fips,
+      historyBucket,
+      historyKey,
+      deal: {
+        maxBid: result.maxBid,
+        recommendation: result.recommendation,
+        bidRoom: result.bidRoom,
+        projectedProfit: result.projectedProfit,
+      },
+    });
+  }, [
+    state,
+    saleType,
+    openingBid,
+    assessedValue,
+    fips,
+    historyBucket,
+    historyKey,
+    result,
+  ]);
+
   const tone =
     result.recommendation === "no-bid"
       ? "var(--danger)"
       : result.recommendation === "insufficient-data"
         ? "var(--muted)"
         : "var(--ok)";
+
+  const suggestTone =
+    suggestion.action === "pass"
+      ? "var(--danger)"
+      : suggestion.action === "insufficient-data"
+        ? "var(--muted)"
+        : "var(--accent)";
 
   return (
     <div className="space-y-5">
@@ -96,6 +142,81 @@ export function DealCalculator({
           Confidence: <span className="capitalize text-foreground">{result.confidence}</span>
           {result.arv.derived ? " — ARV derived from assessed value, not comps." : ""}
         </div>
+      </div>
+
+      {/* --- History-guided suggestion (always ≤ maxBid) --------------- */}
+      <div
+        className="rounded-xl border border-border bg-surface p-5"
+        style={{ borderColor: suggestTone }}
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="text-xs uppercase tracking-wide text-muted">
+              History-guided suggestion
+            </div>
+            <div className="tnum mt-1 text-3xl font-semibold" style={{ color: suggestTone }}>
+              {suggestion.action === "bid" && suggestion.suggestedBid != null
+                ? money(suggestion.suggestedBid)
+                : suggestion.action === "pass"
+                  ? "Pass"
+                  : "—"}
+            </div>
+          </div>
+          {suggestion.action === "bid" &&
+          suggestion.suggestedBid != null &&
+          result.maxBid != null ? (
+            <div className="text-right text-xs text-muted">
+              <div>
+                Under max by{" "}
+                <span className="tnum font-medium text-foreground">
+                  {money(suggestion.headroomVsMaxBid)}
+                </span>
+              </div>
+              {suggestion.withinOracle ? (
+                <div className="mt-0.5 font-medium" style={{ color: "var(--ok)" }}>
+                  ≤ oracle maxBid
+                </div>
+              ) : (
+                <div className="mt-0.5 font-medium" style={{ color: "var(--danger)" }}>
+                  Oracle violation (should not happen)
+                </div>
+              )}
+            </div>
+          ) : null}
+        </div>
+
+        <p className="mt-2 text-sm text-muted">
+          {suggestion.action === "bid"
+            ? "Co-pilot target using recorded auction history. Never above your maximum bid."
+            : suggestion.action === "pass"
+              ? "History + oracle say stay out or wait — do not chase."
+              : "Add assessed value or ARV so the oracle can price a ceiling."}
+        </p>
+
+        <div className="mt-3 grid gap-2 border-t border-border pt-3 text-xs sm:grid-cols-3">
+          <div>
+            <div className="text-muted">History sample</div>
+            <div className="tnum font-medium">{suggestion.historyN || "—"}</div>
+          </div>
+          <div>
+            <div className="text-muted">Median sold</div>
+            <div className="tnum font-medium">{money(suggestion.medianWinningBid)}</div>
+          </div>
+          <div>
+            <div className="text-muted">p(redeem) prior</div>
+            <div className="tnum font-medium">
+              {suggestion.pRedeem != null ? percent(suggestion.pRedeem, 0) : "—"}
+            </div>
+          </div>
+        </div>
+
+        {suggestion.notes.length > 0 ? (
+          <ul className="mt-3 list-disc space-y-1 pl-4 text-xs text-muted">
+            {suggestion.notes.slice(0, 3).map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
+        ) : null}
       </div>
 
       {/* --- Inputs ------------------------------------------------------ */}

@@ -32,6 +32,11 @@ export interface HistoryBucket {
   saleType: string;
   n: number;
   nWithWinningBid: number;
+  /**
+   * Rows whose winning bid is a comparable clearing price. Absent on indexes
+   * built before label semantics landed, hence optional.
+   */
+  nComparablePrices?: number;
   nRedeemed: number;
   nOwnershipTaken: number;
   pRedeem: number | null;

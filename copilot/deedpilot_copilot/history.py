@@ -15,6 +15,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
 
+from .labels import classify, label_summary, redemption_observed_rows
 from .schemas import (
     HistoricalOutcome,
     NoiseBucket,
@@ -131,10 +132,18 @@ def _fit_group(
     prior_strength: float,
 ) -> NoiseBucket:
     n = len(rows)
-    n_red = sum(1 for r in rows if r.redeemed)
-    p_raw = (n_red / n) if n else None
+
+    # p_redeem may only be fitted on rows where `redeemed` is a real observation.
+    # Most sources publish which parcels sold and never revisit them, so a False
+    # there is a default, not a non-redemption. Weighting the shrinkage by the
+    # full row count let 70k Cook County liens with no follow-up outvote the
+    # expert prior and drive IL Tax Lien to p_redeem=0.02.
+    obs = redemption_observed_rows(rows)
+    n_obs = len(obs)
+    n_red = sum(1 for r in obs if r.redeemed)
+    p_raw = (n_red / n_obs) if n_obs else None
     p_exp = expert_p_redeem(state, sale_type)
-    p = _shrink(p_raw if p_raw is not None else p_exp, n, p_exp, prior_strength)
+    p = _shrink(p_raw if p_raw is not None else p_exp, n_obs, p_exp, prior_strength)
 
     # Exit multiples: exit_price / arv on ownership paths
     exit_mults: list[float] = []
@@ -175,6 +184,8 @@ def _fit_group(
         sale_type=sale_type,
         n=n,
         n_redeemed=n_red,
+        n_redemption_observed=n_obs,
+        p_redeem_source="observed" if n_obs else "expert",
         p_redeem_raw=round(p_raw, 4) if p_raw is not None else None,
         p_redeem=round(max(0.02, min(0.95, p)), 4),
         expert_p_redeem=round(p_exp, 4),
@@ -195,6 +206,29 @@ def _fit_group(
     )
 
 
+#: Ownership-path economics the simulator needs but public auction results do
+#: not publish. Tracked explicitly so a fitted-looking prior is never mistaken
+#: for one backed by data.
+_OWNERSHIP_PATH_FIELDS = (
+    "exit_price",
+    "profit_loss",
+    "quiet_title_cost",
+    "holding_months",
+    "rehab_cost",
+    "days_to_redeem",
+    "arv_estimate",
+)
+
+
+def unobserved_fields(outcomes: list[HistoricalOutcome]) -> list[str]:
+    """Which ownership-path fields no row in the corpus populates."""
+    return [
+        f
+        for f in _OWNERSHIP_PATH_FIELDS
+        if not any(getattr(o, f, None) is not None for o in outcomes)
+    ]
+
+
 def calibrate_priors(
     outcomes: list[HistoricalOutcome] | None = None,
     *,
@@ -203,7 +237,15 @@ def calibrate_priors(
     cache: bool = True,
 ) -> SimulatorPriors:
     """Fit SimulatorPriors from historical outcomes and optionally cache JSON."""
-    outcomes = outcomes if outcomes is not None else load_outcomes(path)
+    all_rows = outcomes if outcomes is not None else load_outcomes(path)
+
+    # Drop rows whose semantics we cannot vouch for (map-crawl regex hits,
+    # pre-sale cures recorded as redemptions, Maryland premium bids that are 42x
+    # the opening). Keeping them would inflate n while contributing noise.
+    summary = label_summary(all_rows)
+    outcomes = [o for o in all_rows if not classify(o).quarantined]
+    n_quarantined = len(all_rows) - len(outcomes)
+
     by_state_sale: dict[tuple[str, str], list[HistoricalOutcome]] = defaultdict(list)
     by_sale: dict[str, list[HistoricalOutcome]] = defaultdict(list)
     provenance = Counter()
@@ -245,6 +287,9 @@ def calibrate_priors(
         by_sale_type=by_sale_type,
         global_bucket=global_bucket,
         source_path=str(path or outcomes_path()),
+        label_summary=summary,
+        n_quarantined=n_quarantined,
+        unobserved_fields=unobserved_fields(outcomes),
     )
     if cache:
         save_priors(priors)
@@ -328,10 +373,18 @@ def resolve_bucket(
     if st in priors.by_sale_type and priors.by_sale_type[st].n > 0:
         return priors.by_sale_type[st]
     if priors.global_bucket and priors.global_bucket.n > 0:
-        # Overlay expert p for this state/sale even if using global exit noise
+        # Overlay the expert p for this state/sale even when borrowing global
+        # exit noise. The redemption counters must be cleared with it: the global
+        # bucket's observations belong to other states, and carrying them across
+        # would report a Texas redemption rate as "observed on 17k rows" when
+        # every one of those rows is Michigan.
         gb = priors.global_bucket.model_copy()
         gb.p_redeem = expert_p_redeem(state, st)
         gb.expert_p_redeem = expert_p_redeem(state, st)
+        gb.n_redeemed = 0
+        gb.n_redemption_observed = 0
+        gb.p_redeem_raw = None
+        gb.p_redeem_source = "expert"
         gb.state = state
         gb.sale_type = st
         gb.key = key

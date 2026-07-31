@@ -58,6 +58,13 @@ lib/ai/         Claude risk briefs. Given the computed numbers as facts and
                 told not to produce its own.
 
 lib/db/         Drizzle schema. Only *observed* data lives here.
+
+copilot/        Python co-pilot: the oracles as callables, a clearing-price
+                world model fitted on recorded sales, a risk-adjusted bid
+                search, and the self-improvement flywheel. See copilot/README.md
+                — especially "What the corpus actually observes", which is the
+                honest accounting of what 92k recorded rows do and do not
+                support.
 ```
 
 ### The division that matters
@@ -125,9 +132,11 @@ pricing page and the server-side gate alike.
   defined; nothing is wired to Stripe and no route is gated.
 - **Live auction-day co-pilot.** The research half ships; the real-time bidding
   sidebar does not.
-- **FL, GA, AZ adapters.** FL needs 67 county-clerk sources (RealAuction is
-  policy-blocked); GA is mostly in-person courthouse sales with no live feed;
-  AZ is annual February lien auctions.
+- **FL and AZ adapters.** FL needs 67 county-clerk sources (RealAuction is
+  policy-blocked); AZ is annual February lien auctions. The GA adapter exists
+  (`lib/ingest/adapters/georgia.ts`, LLM extraction over unstructured county
+  sources) but is not yet in the live ingest rotation — GA is mostly in-person
+  courthouse sales with no live feed.
 - **Assessor enrichment.** `lot_valuations` is modelled but unpopulated, so
   Michigan lots have no assessed value and ARV can't be derived there.
 - **Interactive atlas map.** TopoJSON for all 3,142 counties is in

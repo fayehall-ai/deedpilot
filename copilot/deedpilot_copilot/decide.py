@@ -59,6 +59,10 @@ Hard rules (non-negotiable):
 4. When is_state_default is true, say "state default / not county-verified" in rationale.
 5. Prefer pass when data is thin (insufficient-data) or opening already above ceiling.
 6. Use history guidance (median sold, p_redeem, comps) only as market context — not as max_bid.
+7. search_recommended_bid comes from a risk-adjusted optimiser scored on held-out
+   sales, where it cut mean overpay ~57% against a fixed fraction of the ceiling.
+   Treat it as the default. Depart from it only for a reason you can state, and
+   bid above it only when the comps clearly show the room pays more.
 
 Output only via the schema. Be concise and concrete in rationale.
 """
@@ -88,8 +92,18 @@ def policy_decide(
     hist_med: float | None = None,
     lesson_buffer: float = 0.0,
     hist_buffer: float = 0.0,
+    search_bid: float | None = None,
+    search_note: str | None = None,
 ) -> AgentAction:
-    """Deterministic decide (fallback and tests)."""
+    """
+    Deterministic decide (fallback and tests).
+
+    When ``search_bid`` is supplied, the bid comes from the risk-adjusted
+    optimiser in ``search.py`` — already bounded by the ceiling — instead of the
+    fixed ``bid_frac`` heuristic. On held-out sales the optimiser cut mean
+    overpay by ~57% against the fraction rule, so the heuristic survives only as
+    the no-price-model fallback.
+    """
     if deal.recommendation != "bid" or ceiling is None or ceiling <= 0:
         return AgentAction(
             bid_amount=None,
@@ -111,11 +125,16 @@ def policy_decide(
             },
         )
 
-    target_ceiling = ceiling * bid_frac
-    if opening > 0 and opening < target_ceiling:
-        bid = min(target_ceiling, opening + 0.4 * (target_ceiling - opening))
+    if search_bid is not None and search_bid > 0:
+        bid = min(search_bid, ceiling)
+        sizing = search_note or "risk-adjusted bid search"
     else:
-        bid = target_ceiling
+        target_ceiling = ceiling * bid_frac
+        if opening > 0 and opening < target_ceiling:
+            bid = min(target_ceiling, opening + 0.4 * (target_ceiling - opening))
+        else:
+            bid = target_ceiling
+        sizing = f"history frac={bid_frac:.2f}"
     if deal.max_bid is not None:
         bid = min(bid, deal.max_bid - total_buffer)
     bid = max(0.0, bid)
@@ -126,7 +145,7 @@ def policy_decide(
         rationale=(
             f"Bid ${bid:,.0f} under oracle ceiling ${ceiling:,.0f} "
             f"(raw maxBid ${deal.max_bid:,.0f} − buffers ${total_buffer:,.0f}; "
-            f"history frac={bid_frac:.2f}). "
+            f"{sizing}). "
             f"Cite atlas asOf={atlas.as_of if atlas else None}; "
             f"sources={len(atlas.sources) if atlas else 0}. "
             + (
@@ -268,6 +287,8 @@ def llm_decide(
     hist_n: int | None = None,
     hist_med: float | None = None,
     comps_summary: list[dict[str, Any]] | None = None,
+    search_bid: float | None = None,
+    search_note: str | None = None,
 ) -> DecideProposal:
     """Call Grok→Claude for a structured decide proposal (not yet clamped)."""
     from .llm import run_structured
@@ -308,6 +329,10 @@ def llm_decide(
         "history_n": hist_n,
         "history_median_winning_bid": hist_med,
         "comps": (comps_summary or [])[:4],
+        # The optimiser's answer, given as the reference point. It beat the fixed
+        # fraction rule on held-out sales, so departing from it needs a reason.
+        "search_recommended_bid": search_bid,
+        "search_note": search_note,
     }
 
     import json
@@ -342,6 +367,8 @@ def decide(
     hist_med: float | None = None,
     comps_summary: list[dict[str, Any]] | None = None,
     use_llm: bool | None = None,
+    search_bid: float | None = None,
+    search_note: str | None = None,
 ) -> tuple[AgentAction, dict[str, Any]]:
     """
     Decide bid/pass. Prefer LLM when keys available; always clamp to oracle.
@@ -364,6 +391,8 @@ def decide(
             hist_med=hist_med,
             lesson_buffer=lesson_buffer,
             hist_buffer=hist_buffer,
+            search_bid=search_bid,
+            search_note=search_note,
         )
         meta["source"] = "policy_oracle_pass"
         return action, meta
@@ -380,6 +409,8 @@ def decide(
         hist_med=hist_med,
         lesson_buffer=lesson_buffer,
         hist_buffer=hist_buffer,
+        search_bid=search_bid,
+        search_note=search_note,
     )
 
     if not _want_llm(use_llm):
@@ -406,6 +437,8 @@ def decide(
             hist_n=hist_n,
             hist_med=hist_med,
             comps_summary=comps_summary,
+            search_bid=search_bid,
+            search_note=search_note,
         )
         action = clamp_action_to_oracle(
             proposal,

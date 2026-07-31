@@ -192,6 +192,114 @@ def list_historical_for_sim(
     }
 
 
+class SuggestBidBody(BaseModel):
+    """Inputs for the risk-adjusted bid search."""
+
+    state: str
+    sale_type: str = Field("Tax Deed", alias="saleType")
+    fips: str | None = None
+    county_name: str | None = Field(None, alias="countyName")
+    assessed_value: float | None = Field(None, alias="assessedValue")
+    opening_bid: float | None = Field(None, alias="openingBid")
+    rehab_cost: float | None = Field(None, alias="rehabCost")
+    year: int | None = None
+    risk_aversion: float | None = Field(None, alias="riskAversion")
+
+    model_config = {"populate_by_name": True}
+
+
+@app.post("/tools/suggest_bid", tags=["trusted-tools"])
+def tool_suggest_bid(body: SuggestBidBody) -> dict[str, Any]:
+    """
+    What to bid, and the odds it clears.
+
+    The bid is bounded by compute_maxbid and never exceeds it; the win
+    probability comes from the county's recorded clearing-price distribution.
+    """
+    from .schemas import SaleType
+    from .search import DEFAULT_RISK_AVERSION, explain_plan, optimize_bid
+
+    try:
+        st = SaleType(body.sale_type)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=f"bad saleType: {e}") from e
+
+    lot = Lot(
+        lot_id="api",
+        fips=body.fips or "",
+        state=body.state,
+        county_name=body.county_name,
+        opening_bid=body.opening_bid,
+        assessed_value=body.assessed_value,
+        rehab_cost=body.rehab_cost,
+        sale_type=st,
+    )
+    deal = compute_maxbid(
+        DealInputs(
+            state=body.state,
+            sale_type=st,
+            assessed_value=body.assessed_value,
+            opening_bid=body.opening_bid,
+            rehab_cost=body.rehab_cost,
+        )
+    )
+    plan = optimize_bid(
+        lot,
+        deal,
+        st,
+        year=body.year,
+        risk_aversion=(
+            body.risk_aversion if body.risk_aversion is not None else DEFAULT_RISK_AVERSION
+        ),
+    )
+    return {
+        "plan": explain_plan(plan),
+        "oracle": {"maxBid": deal.max_bid, "recommendation": deal.recommendation},
+    }
+
+
+@app.get("/model/clearing_price", tags=["world-model"])
+def model_clearing_price(
+    state: str = Query(...),
+    fips: str | None = Query(None),
+    county_name: str | None = Query(None, alias="countyName"),
+    year: int | None = Query(None),
+) -> dict[str, Any]:
+    """Predicted clearing-price quantiles for a geography."""
+    from .world_model import get_model, predict_quantiles
+
+    model = get_model()
+    if model is None:
+        raise HTTPException(
+            status_code=503,
+            detail="No world model fitted. Run: deedpilot-copilot world-model",
+        )
+    q = predict_quantiles(
+        model, state=state, fips=fips, county_name=county_name, year=year
+    )
+    return q.model_dump()
+
+
+@app.get("/eval/policies", tags=["evaluation"])
+def eval_policies(
+    split: str = Query("val", pattern="^(val|test)$"),
+    limit: int | None = Query(None),
+) -> dict[str, Any]:
+    """Bid-policy comparison on a held-out split against recorded prices."""
+    from .evaluate import evaluate_policies
+
+    return evaluate_policies(split, limit=limit)  # type: ignore[arg-type]
+
+
+@app.get("/data/labels", tags=["evaluation"])
+def data_labels() -> dict[str, Any]:
+    """What the corpus observes, by source rule — including what is quarantined."""
+    from .history import load_outcomes
+    from .labels import label_summary
+
+    return label_summary(load_outcomes())
+
+
 def main() -> None:
     import uvicorn
 

@@ -413,5 +413,97 @@ def simulate_cmd(
         )
 
 
+@app.command("labels")
+def labels_cmd():
+    """What the corpus actually observes, by source rule."""
+    from .history import load_outcomes
+    from .labels import label_summary
+
+    rprint(label_summary(load_outcomes()))
+
+
+@app.command("splits")
+def splits_cmd(
+    rebuild: bool = typer.Option(False, help="Re-freeze the split (changes the manifest)"),
+    cut_val: str = typer.Option("2024-01-01"),
+    cut_test: str = typer.Option("2025-01-01"),
+):
+    """Frozen temporal train/val/test split over the historical corpus."""
+    from .splits import build_splits, splits_summary
+
+    if rebuild:
+        build_splits(cut_val=cut_val, cut_test=cut_test, rebuild=True)
+    rprint(splits_summary())
+
+
+@app.command("world-model")
+def world_model_cmd():
+    """Fit the clearing-price model on train; score on val and test."""
+    from .world_model import train_and_evaluate
+
+    rprint(train_and_evaluate())
+
+
+@app.command("evaluate")
+def evaluate_cmd(
+    split: str = typer.Option("val", help="val | test — never train"),
+    limit: Optional[int] = typer.Option(None),
+):
+    """Compare bid policies against recorded clearing prices on held-out sales."""
+    from .evaluate import evaluate_policies
+
+    report = evaluate_policies(split, limit=limit)  # type: ignore[arg-type]
+    rows = report["results"]
+    rprint(f"[bold]{report['split']}[/bold] n={report['n_rows']}")
+    for name, r in rows.items():
+        if not r["n_bid"]:
+            continue
+        rprint(
+            f"  {name:22s} win={r['win_rate']:.3f} "
+            f"mean_bid=${r['mean_bid']:,.0f} "
+            f"overpay=${r['mean_overpay_when_won']:,.0f} "
+            f"surplus=${r['total_surplus']:,.0f} "
+            f"violations={r['n_oracle_violations']}"
+        )
+    rprint(f"  ranking: {report['ranking_by_total_surplus']}")
+
+
+@app.command("suggest-bid")
+def suggest_bid_cmd(
+    state: str,
+    fips: Optional[str] = typer.Option(None),
+    county: Optional[str] = typer.Option(None),
+    sale_type: str = typer.Option("Tax Deed"),
+    assessed: Optional[float] = typer.Option(None),
+    opening: Optional[float] = typer.Option(None),
+    rehab: Optional[float] = typer.Option(None),
+    year: Optional[int] = typer.Option(None),
+):
+    """Risk-adjusted bid for one lot: what to bid, and the odds it clears."""
+    from .search import explain_plan, optimize_bid
+
+    st = SaleType(sale_type)
+    lot = Lot(
+        lot_id="cli",
+        fips=fips or "",
+        state=state,
+        county_name=county,
+        opening_bid=opening,
+        assessed_value=assessed,
+        rehab_cost=rehab,
+        sale_type=st,
+    )
+    deal = compute_maxbid(
+        DealInputs(
+            state=state,
+            sale_type=st,
+            assessed_value=assessed,
+            opening_bid=opening,
+            rehab_cost=rehab,
+        )
+    )
+    rprint(explain_plan(optimize_bid(lot, deal, st, year=year)))
+
+
 if __name__ == "__main__":
     app()

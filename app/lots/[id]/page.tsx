@@ -10,6 +10,7 @@ import { DealCalculator } from "@/components/deal-calculator";
 import { ParcelBrief } from "@/components/parcel-brief";
 import { HistoricalComps } from "@/components/historical-comps";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
+import { getComparables } from "@/lib/history/comparables";
 import type { SaleType } from "@/lib/atlas/types";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,16 @@ export default async function LotPage(props: PageProps<"/lots/[id]">) {
 
   const openingBid = lot.openingBid === null ? undefined : Number(lot.openingBid);
   const assessedValue = lot.assessedValue === null ? undefined : Number(lot.assessedValue);
+
+  // History bucket for client-side suggested bid (oracle-capped)
+  const history = getComparables({
+    state: county.state,
+    saleType: auction.saleType,
+    assessedValue,
+    openingBid,
+    fips: county.fips,
+    limit: 1,
+  });
 
   // Look for a brief already generated under the default assumptions — the
   // same inputs the "Generate brief" button posts — so a reload shows the
@@ -114,6 +125,9 @@ export default async function LotPage(props: PageProps<"/lots/[id]">) {
             saleType={auction.saleType as SaleType}
             openingBid={openingBid}
             assessedValue={assessedValue}
+            fips={county.fips}
+            historyBucket={history.bucket}
+            historyKey={history.key}
           />
 
           <div className="mt-6">
