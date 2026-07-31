@@ -90,9 +90,25 @@ per day. A continuously-running statute agent is a category error: it would spen
 money re-deriving facts that did not change, and its errors are the only errors
 in this system that a user cannot see.
 
-Coverage today is 5 states (FL, GA, TX, AZ, MI) against an atlas that markets 50
-states and DC, which is why `compute_maxbid` returns `insufficient-data` for
-Illinois and California — where 78% of the historical corpus lives.
+Coverage is 7 states (AZ, CA, FL, GA, IL, MI, TX) against an atlas that markets
+50 states and DC, so `compute_maxbid` still returns `insufficient-data` for 44.
+
+Illinois and California were the first two drafted, and reviewing them is the
+argument for this design rather than an illustration of it. Both proposals
+passed validation, and both contained an error that would have been worse than
+the gap they filled:
+
+- The Illinois draft gave the statutory 33⅓% assessment ratio and flagged in its
+  own uncertainty note that Cook County does not use it — Cook runs a classified
+  system nearer 10%. Cook is also 70,109 of our historical rows.
+- It gave the penalty as 18%, the statutory ceiling. Checked against our own
+  data, the rate cleared at a **0% median across 64,526 recorded Cook sales**;
+  81.4% were bid all the way to zero. Pricing the lien at the cap overstates its
+  return by an order of magnitude.
+
+Neither is something code can catch. Both were caught by reading the citations
+and cross-checking against recorded outcomes, which is exactly the work the human
+gate exists to make someone do.
 
 ### 2. Auction Scout — constantly running, event-driven
 
@@ -225,13 +241,28 @@ deedpilot-copilot archive rows.jsonl     # dry-run import; refuses unlabelled so
 | Sale calendar | 21 states scheduled (4 statutory, 17 typical), 30 unresearched, 3 county overrides |
 | Source Prospector | 194 candidates across 152 researched counties, 164 hosts, 98 government |
 | Auction Scout | Scheduling, backoff, re-crawl intervals, coverage accounting |
-| Statute Cartographer | Drafting + validation + PR flow; IL and CA drafted and awaiting review |
+| Statute Cartographer | Drafting + validation + PR flow; IL and CA reviewed and promoted |
 | Outcome Archivist | Admission control enforcing label rules |
-| Generic adapter | **Not built.** 2,169 counties nationally have a due window and no parser. |
+| Generic adapter | Registry-driven; adapter backlog now 0 |
 
-The last row is the honest remaining gap. The Scout reports it as an actionable
-backlog rather than a silent miss, and the Georgia adapter — a per-county
-registry with HTML parsing and LLM PDF transcription — is the template for
-clearing it. What that generalisation needs per state now exists:
-`resolveCountyRule` supplies sale type and redemption prose, `resolveSaleSchedule`
-supplies the timing.
+### Where the bottleneck moved
+
+The generic adapter closed the "we cannot parse this" gap. What made per-county
+adapters seem necessary was that each one hardcoded three things it had no other
+way to know, and all three are now supplied:
+
+| Hardcoded in a bespoke adapter | Now comes from |
+|---|---|
+| where the county publishes | the Prospector's source registry |
+| when it sells | `resolveSaleSchedule` |
+| what instrument it sells | `resolveCountyRule` |
+
+What remained was parsing, and parsing was never county-specific — a table of
+parcels looks the same in Ohio as in Georgia. Registration order is precedence,
+so the bespoke adapters keep the counties they cover and the generic one takes
+everything else.
+
+The remaining gap is **`no_source`: 2,165 counties nationally have a crawl window
+open and no verified source of record**. That is the Prospector's backlog, not
+the adapter's, and it is a far more tractable shape of problem: a crawl to run
+rather than thousands of parsers to write.

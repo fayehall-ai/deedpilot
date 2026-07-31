@@ -105,6 +105,7 @@ robots-permissive, and they sit behind no platform ToS.
 |---|---|
 | Rules atlas | 50 states + DC, 3,142 counties |
 | Researched in depth | 152 counties (sources + check dates) |
+| Priceable (statutory params) | AZ, CA, FL, GA, IL, MI, TX — `lib/deal/statute.ts` |
 | Parcel-level target | FL, GA, TX, AZ, MI — 578 counties |
 | **Ingesting today** | **TX (28 counties) · MI (74 counties)** |
 

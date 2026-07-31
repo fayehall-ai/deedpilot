@@ -187,8 +187,12 @@ assert(uncitedRender.includes("UNCITED"), "an uncited field is marked in the ren
 
 const covered = coveredStates();
 const uncovered = uncoveredStates();
-assert(covered.length === 5, `expected 5 covered states, got ${covered.length}`);
-assert(uncovered.includes("IL") && uncovered.includes("CA"), "IL and CA are the priority gaps");
+assert(covered.length === 7, `expected 7 covered states, got ${covered.length}`);
+// IL and CA were the first two drafted and have since been reviewed and
+// promoted, so they must no longer appear as gaps.
+assert(covered.includes("IL") && covered.includes("CA"), "IL and CA are now priceable");
+assert(!uncovered.includes("IL") && !uncovered.includes("CA"), "and are no longer gaps");
+assert(uncovered.length === 44, `expected 44 remaining gaps, got ${uncovered.length}`);
 assert(
   !covered.some((s) => uncovered.includes(s)),
   "covered and uncovered must be disjoint",

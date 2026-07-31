@@ -26,9 +26,9 @@
  */
 
 import * as cheerio from "cheerio";
-import { politeFetch, politeFetchBinary } from "../fetch";
-import { parseMoney } from "../judge";
+import { politeFetch } from "../fetch";
 import { extractLots, NoProviderAvailableError } from "../extract";
+import { parseHtmlTable, pdfLinks, pdfToText } from "../parse";
 import { findCountyByName } from "../../atlas";
 import type {
   CountyBinding,
@@ -77,125 +77,9 @@ export function nextFirstTuesday(from = new Date()): string {
 }
 
 /** Header keywords that mark a table as an actual sale listing. */
-const PARCEL_HEADERS = /parcel|map\s*#|property|owner|defendant|bid|amount\s*due|address/i;
-/** Headers that mark a table we must NOT ingest as upcoming inventory. */
-const EXCLUDE_HEADERS = /excess\s*funds|overbid|surplus|claim|sold\s*date|past\s*sale/i;
 
-/**
- * Parse an HTML table into lots when the page has one. Returns null when no
- * table on the page looks like a sale listing, so the caller can fall through
- * to the PDF/LLM route rather than treating an empty parse as "no sale".
- */
-function parseHtmlTable($: cheerio.CheerioAPI, sourceUrl: string): DiscoveredLot[] | null {
-  let best: DiscoveredLot[] | null = null;
 
-  $("table").each((_, table) => {
-    const headerText = $(table).find("th").text().replace(/\s+/g, " ");
-    if (!PARCEL_HEADERS.test(headerText)) return;
-    if (EXCLUDE_HEADERS.test(headerText)) return;
 
-    const headers = $(table)
-      .find("th")
-      .map((__, th) => $(th).text().replace(/\s+/g, " ").trim().toLowerCase())
-      .get();
-
-    const col = (re: RegExp) => headers.findIndex((h) => re.test(h));
-    const iParcel = col(/parcel|map/);
-    const iOwner = col(/owner|defendant|name/);
-    const iAddr = col(/address|location|situs/);
-    const iBid = col(/bid|amount|due|total/);
-
-    if (iParcel === -1 && iOwner === -1) return;
-
-    const rows: DiscoveredLot[] = [];
-    $(table)
-      .find("tr")
-      .each((__, tr) => {
-        const cells = $(tr)
-          .find("td")
-          .map((___, td) => $(td).text().replace(/\s+/g, " ").trim())
-          .get();
-        if (cells.length === 0) return;
-
-        const parcelNumber = iParcel >= 0 ? cells[iParcel] : undefined;
-        const ownerName = iOwner >= 0 ? cells[iOwner] : undefined;
-        if (!parcelNumber && !ownerName) return;
-
-        rows.push({
-          parcelNumber: parcelNumber || undefined,
-          ownerName: ownerName || undefined,
-          addressLine: iAddr >= 0 ? cells[iAddr] || undefined : undefined,
-          openingBid: iBid >= 0 ? parseMoney(cells[iBid]) : undefined,
-          sourceUrl,
-          raw: { source: "html-table", cells },
-        });
-      });
-
-    if (rows.length && (!best || rows.length > best.length)) best = rows;
-  });
-
-  return best;
-}
-
-/**
- * Absolute URLs of PDFs linked from the page.
- *
- * Resolves against `<base href>` when the document declares one. Cobb does,
- * and ignoring it turns every relative link into a 404 against the wrong
- * directory — a silent "county has no list" that is actually a parsing bug.
- */
-function pdfLinks($: cheerio.CheerioAPI, pageUrl: string): string[] {
-  const base = $("base[href]").attr("href");
-  let resolveAgainst = pageUrl;
-  if (base) {
-    try {
-      resolveAgainst = new URL(base, pageUrl).toString();
-    } catch {
-      /* malformed base — fall back to the page URL */
-    }
-  }
-
-  const out: string[] = [];
-  $('a[href*=".pdf" i]').each((_, a) => {
-    const href = $(a).attr("href");
-    if (!href) return;
-    const label = `${$(a).text()} ${href}`;
-    // Excess-funds lists are past sales; brochures explain procedure. Counties
-    // also link a literal "there are no tax sale parcels at this time" PDF.
-    if (/excess|surplus|overbid|brochure|faq|instruction|guide|kiosk|no tax sale/i.test(label)) {
-      return;
-    }
-    try {
-      out.push(new URL(href, resolveAgainst).toString());
-    } catch {
-      /* malformed href — skip */
-    }
-  });
-  return [...new Set(out)];
-}
-
-async function pdfToText(url: string): Promise<string> {
-  const res = await politeFetchBinary(url);
-  if (res.status < 200 || res.status >= 300) throw new Error(`HTTP ${res.status} for ${url}`);
-  if (res.bytes.length === 0) throw new Error(`empty body for ${url}`);
-
-  // pdf-parse v2 exports a PDFParse class, not a default function. Imported
-  // lazily so its Node-only dependencies stay out of the Next client graph.
-  const { PDFParse } = (await import("pdf-parse")) as unknown as {
-    PDFParse: new (opts: { data: Uint8Array }) => {
-      getText(): Promise<{ text?: string }>;
-      destroy(): Promise<void>;
-    };
-  };
-
-  const parser = new PDFParse({ data: res.bytes });
-  try {
-    const parsed = await parser.getText();
-    return parsed.text ?? "";
-  } finally {
-    await parser.destroy().catch(() => {});
-  }
-}
 
 export const georgiaAdapter: SourceAdapter = {
   name: "ga-counties",

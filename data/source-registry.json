@@ -1,0 +1,174 @@
+{
+  "builtAt": "2026-07-31T01:52:20.668Z",
+  "nCounties": 12,
+  "nVerified": 5,
+  "nGaps": 7,
+  "counties": {
+    "10001": {
+      "state": "DE",
+      "county": "Kent",
+      "sources": [
+        {
+          "fips": "10001",
+          "state": "DE",
+          "url": "https://www.kentcountyde.gov/My-Government/Departments/Sheriffs-Office",
+          "host": "www.kentcountyde.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 1,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "redemption period",
+            "sheriff sale",
+            "monition sale"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "10003": {
+      "state": "DE",
+      "county": "New Castle",
+      "sources": [
+        {
+          "fips": "10003",
+          "state": "DE",
+          "url": "https://www.newcastlede.gov/172/Sheriff-Sales",
+          "host": "www.newcastlede.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "foreclosure auction",
+            "sheriff sale",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "10005": {
+      "state": "DE",
+      "county": "Sussex",
+      "sources": [],
+      "isGap": true
+    },
+    "12011": {
+      "state": "FL",
+      "county": "Broward",
+      "sources": [],
+      "isGap": true
+    },
+    "12086": {
+      "state": "FL",
+      "county": "Miami-Dade",
+      "sources": [],
+      "isGap": true
+    },
+    "12099": {
+      "state": "FL",
+      "county": "Palm Beach",
+      "sources": [],
+      "isGap": true
+    },
+    "13067": {
+      "state": "GA",
+      "county": "Cobb",
+      "sources": [
+        {
+          "fips": "13067",
+          "state": "GA",
+          "url": "https://www.cobbtax.gov/property/tax_sale/index.php",
+          "host": "www.cobbtax.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13121": {
+      "state": "GA",
+      "county": "Fulton",
+      "sources": [
+        {
+          "fips": "13121",
+          "state": "GA",
+          "url": "https://www.fultoncountyga.gov/inside-fulton-county/fulton-county-departments/sheriff/tax-sales",
+          "host": "www.fultoncountyga.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13135": {
+      "state": "GA",
+      "county": "Gwinnett",
+      "sources": [
+        {
+          "fips": "13135",
+          "state": "GA",
+          "url": "https://www.gwinnetttaxcommissioner.com/property-tax/delinquent_tax/tax-liens-tax-sales",
+          "host": "www.gwinnetttaxcommissioner.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "15001": {
+      "state": "HI",
+      "county": "Hawaii",
+      "sources": [],
+      "isGap": true
+    },
+    "15003": {
+      "state": "HI",
+      "county": "Honolulu",
+      "sources": [],
+      "isGap": true
+    },
+    "15009": {
+      "state": "HI",
+      "county": "Maui",
+      "sources": [],
+      "isGap": true
+    }
+  }
+}
