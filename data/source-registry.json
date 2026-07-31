@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-07-31T18:38:17.100Z",
-  "nCounties": 313,
+  "builtAt": "2026-07-31T18:39:06.742Z",
+  "nCounties": 323,
   "nVerified": 118,
-  "nGaps": 196,
+  "nGaps": 206,
   "counties": {
     "10001": {
       "state": "DE",
@@ -191,6 +191,12 @@
       "sources": [],
       "isGap": true
     },
+    "13009": {
+      "state": "GA",
+      "county": "Baldwin",
+      "sources": [],
+      "isGap": true
+    },
     "15001": {
       "state": "HI",
       "county": "Hawaii",
@@ -309,6 +315,12 @@
       "sources": [],
       "isGap": true
     },
+    "16013": {
+      "state": "ID",
+      "county": "Blaine",
+      "sources": [],
+      "isGap": true
+    },
     "17001": {
       "state": "IL",
       "county": "Adams",
@@ -353,6 +365,12 @@
     "17009": {
       "state": "IL",
       "county": "Brown",
+      "sources": [],
+      "isGap": true
+    },
+    "17011": {
+      "state": "IL",
+      "county": "Bureau",
       "sources": [],
       "isGap": true
     },
@@ -476,6 +494,12 @@
       "sources": [],
       "isGap": true
     },
+    "18009": {
+      "state": "IN",
+      "county": "Blackford",
+      "sources": [],
+      "isGap": true
+    },
     "18019": {
       "state": "IN",
       "county": "Clark",
@@ -520,6 +544,12 @@
     "19007": {
       "state": "IA",
       "county": "Appanoose",
+      "sources": [],
+      "isGap": true
+    },
+    "19009": {
+      "state": "IA",
+      "county": "Audubon",
       "sources": [],
       "isGap": true
     },
@@ -571,6 +601,12 @@
       "sources": [],
       "isGap": true
     },
+    "20009": {
+      "state": "KS",
+      "county": "Barton",
+      "sources": [],
+      "isGap": true
+    },
     "21001": {
       "state": "KY",
       "county": "Adair",
@@ -595,6 +631,12 @@
       "sources": [],
       "isGap": true
     },
+    "21009": {
+      "state": "KY",
+      "county": "Barren",
+      "sources": [],
+      "isGap": true
+    },
     "22001": {
       "state": "LA",
       "county": "Acadia",
@@ -616,6 +658,12 @@
     "22007": {
       "state": "LA",
       "county": "Assumption",
+      "sources": [],
+      "isGap": true
+    },
+    "22009": {
+      "state": "LA",
+      "county": "Avoyelles",
       "sources": [],
       "isGap": true
     },
@@ -667,6 +715,12 @@
       "sources": [],
       "isGap": true
     },
+    "24011": {
+      "state": "MD",
+      "county": "Caroline",
+      "sources": [],
+      "isGap": true
+    },
     "24021": {
       "state": "MD",
       "county": "Frederick",
@@ -711,6 +765,12 @@
     "25007": {
       "state": "MA",
       "county": "Dukes",
+      "sources": [],
+      "isGap": true
+    },
+    "25009": {
+      "state": "MA",
+      "county": "Essex",
       "sources": [],
       "isGap": true
     },
