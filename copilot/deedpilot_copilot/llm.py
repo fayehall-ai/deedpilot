@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -82,12 +83,34 @@ def load_env(*, override: bool = False) -> None:
                 os.environ[key] = val
 
 
+def _has_key(name: str) -> bool:
+    """
+    A key that is present but empty is not a configured provider.
+
+    ANTHROPIC_API_KEY was set to "" in .env.local, so the chain reported Claude
+    as available, called it, and surfaced "all providers failed" — which reads as
+    an outage rather than a missing key.
+    """
+    return bool((os.environ.get(name) or "").strip())
+
+
+def _use_grok() -> bool:
+    """
+    Grok stays primary; DEEDPILOT_DISABLE_GROK=1 drops it without a code change.
+
+    Worth having as a flag: when the xAI account hit its spending limit it
+    returned 403 on every call and took reflection, the decide node and the
+    Cartographer down together. An env toggle beats an emergency deploy.
+    """
+    return not re.match(r"^(1|true|yes)$", (os.environ.get("DEEDPILOT_DISABLE_GROK") or ""), re.I)
+
+
 def configured_providers() -> list[str]:
     load_env()
     out: list[str] = []
-    if os.environ.get("XAI_API_KEY"):
+    if _use_grok() and _has_key("XAI_API_KEY"):
         out.append("grok")
-    if os.environ.get("ANTHROPIC_API_KEY"):
+    if _has_key("ANTHROPIC_API_KEY"):
         out.append("claude")
     return out
 
@@ -271,15 +294,16 @@ def run_structured(
     failures: list[str] = []
     chain: list[tuple[str, Any]] = []
 
-    if os.environ.get("XAI_API_KEY"):
+    if _use_grok() and _has_key("XAI_API_KEY"):
         chain.append(("grok", _run_grok))
-    if os.environ.get("ANTHROPIC_API_KEY"):
+    if _has_key("ANTHROPIC_API_KEY"):
         chain.append(("claude", _run_claude))
 
     if not chain:
         raise NoProviderAvailableError(
             "No LLM provider configured. Set XAI_API_KEY (primary) or "
-            "ANTHROPIC_API_KEY (fallback)."
+            "ANTHROPIC_API_KEY (fallback). Note ANTHROPIC_API_KEY is an Anthropic "
+            "Console key, billed separately from a Claude.ai Pro/Max subscription."
         )
 
     for i, (name, runner) in enumerate(chain):

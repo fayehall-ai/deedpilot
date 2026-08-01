@@ -62,7 +62,7 @@ const grokProvider: Provider = {
   name: "grok",
   model: GROK_MODEL,
 
-  configured: () => Boolean(process.env.XAI_API_KEY),
+  configured: () => (process.env.XAI_API_KEY ?? "").trim().length > 0,
 
   async run<T extends z.ZodType>(req: StructuredRequest<T>): Promise<z.infer<T>> {
     const client = new OpenAI({
@@ -102,7 +102,11 @@ const claudeProvider: Provider = {
   name: "claude",
   model: CLAUDE_MODEL,
 
-  configured: () => Boolean(process.env.ANTHROPIC_API_KEY),
+  // An empty string is not a key. ANTHROPIC_API_KEY was set to "" in .env.local,
+  // which `Boolean()` reports as unconfigured only by luck of it being falsy —
+  // but a whitespace-only value would have passed and failed at the API instead,
+  // reporting "all providers failed" for what is really "no key set".
+  configured: () => (process.env.ANTHROPIC_API_KEY ?? "").trim().length > 0,
 
   async run<T extends z.ZodType>(req: StructuredRequest<T>): Promise<z.infer<T>> {
     const client = new Anthropic();
@@ -135,8 +139,16 @@ const claudeProvider: Provider = {
 // Chain
 // ---------------------------------------------------------------------------
 
-/** Primary first, fallback second. Order is the product decision. */
-const CHAIN: Provider[] = [grokProvider, claudeProvider];
+/**
+ * Primary first, fallback second. Order is the product decision.
+ *
+ * Grok stays primary. `DEEDPILOT_DISABLE_GROK=1` drops it from the chain without
+ * a code change, which is worth having: when the xAI account hit its spending
+ * limit it returned 403 on every call and took reflection, the decide node and
+ * the Cartographer down together, and an env flag beats an emergency deploy.
+ */
+const DISABLE_GROK = /^(1|true|yes)$/i.test(process.env.DEEDPILOT_DISABLE_GROK ?? "");
+const CHAIN: Provider[] = DISABLE_GROK ? [claudeProvider] : [grokProvider, claudeProvider];
 
 export function configuredProviders(): string[] {
   return CHAIN.filter((p) => p.configured()).map((p) => p.name);
