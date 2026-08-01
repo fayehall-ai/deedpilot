@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getUpcomingAuctions } from "@/lib/queries";
 import { money, num, relativeDays, saleDate } from "@/lib/format";
 import { Breadcrumbs, EmptyState, SaleTypeBadge, StatusBadge } from "@/components/ui";
-import { COVERED_STATES, STATE_NAMES } from "@/lib/atlas";
+import { STATE_NAMES } from "@/lib/atlas";
 
 export const metadata: Metadata = {
   title: "Upcoming tax sale auctions",
@@ -17,7 +17,24 @@ export default async function AuctionsPage(props: PageProps<"/auctions">) {
   const { state } = await props.searchParams;
   const stateFilter = typeof state === "string" ? state.toUpperCase() : undefined;
 
-  const rows = await getUpcomingAuctions({ state: stateFilter });
+  // Fetch once unfiltered. Derive dynamic tabs from actual data (so new states
+  // from registry + ingest appear as soon as they have scheduled sales).
+  // Then filter for the current view + header counts.
+  const allRows = await getUpcomingAuctions({});
+  const rows = stateFilter
+    ? allRows.filter((r) => r.state === stateFilter)
+    : allRows;
+
+  // Dynamic list of states that currently have upcoming auctions in the DB.
+  // New states from prospecting/ingest will automatically get their own tab.
+  // Sorted alphabetically by full name.
+  const availableStates = Array.from(
+    new Set(allRows.map((r) => r.state))
+  ).sort((a, b) => {
+    const na = STATE_NAMES[a] ?? a;
+    const nb = STATE_NAMES[b] ?? b;
+    return na.localeCompare(nb);
+  });
 
   // Group by sale date so the page reads as a calendar, which is how bidders
   // actually plan — they block out a day, then decide which counties to work.
@@ -39,9 +56,11 @@ export default async function AuctionsPage(props: PageProps<"/auctions">) {
         </p>
       </header>
 
+      {/* Dynamic tabs based on real data, not a hardcoded list.
+          This is why new states now appear. */}
       <div className="mb-6 flex flex-wrap gap-2">
         <FilterChip href="/auctions" label="All states" active={!stateFilter} />
-        {COVERED_STATES.map((s) => (
+        {availableStates.map((s) => (
           <FilterChip
             key={s}
             href={`/auctions?state=${s}`}
