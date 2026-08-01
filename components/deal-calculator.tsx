@@ -110,6 +110,33 @@ export function DealCalculator({
           <p className="mt-2 text-sm font-medium" style={{ color: "var(--danger)" }}>
             Do not bid — the numbers do not clear your margin.
           </p>
+        ) : result.maxBid === null ? (
+          /*
+            "Not enough data" on its own is useless: it reads as a broken page
+            rather than a stated limit, and the two reasons behind it need
+            different things from the user. A parcel in an uncovered state needs
+            statutory research nobody can do from this screen; a parcel with no
+            published assessment just needs a comparable-sales figure, which the
+            field below already accepts.
+          */
+          <div className="mt-2 space-y-2 text-sm text-muted">
+            {result.warnings.length ? (
+              <ul className="space-y-1">
+                {result.warnings.slice(0, 2).map((w) => (
+                  <li key={w} className="leading-relaxed">
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>This listing does not carry enough to compute a walk-away price.</p>
+            )}
+            {result.arv.value === null ? (
+              <p className="font-medium text-foreground">
+                Enter an after-repair value below and the ceiling will compute.
+              </p>
+            ) : null}
+          </div>
         ) : result.maxBid !== null ? (
           <p className="mt-2 text-sm text-muted">
             Walk away above this. Projected profit at the ceiling:{" "}
