@@ -228,8 +228,15 @@ export async function runAdapter(
           }
 
           if (!opts.dryRun) {
-            const auctionId = await upsertAuction(auction);
-            result.lotsFound += await upsertLots(auctionId, binding.countyFips, judgedLots.accepted);
+            // Guard: only persist an auction + its lots if we actually extracted >0 parcels.
+            // This stops generic-county (new states) from creating "skeleton" records
+            // (calendar date only, no table/PDF success) that show up as county cards with Lots: 0.
+            if (judgedLots.accepted.length > 0) {
+              const auctionId = await upsertAuction(auction);
+              result.lotsFound += await upsertLots(auctionId, binding.countyFips, judgedLots.accepted);
+            } else {
+              log(`[${adapter.name}] ${auction.externalId}: skipped persist (0 lots after judgment)`);
+            }
           } else {
             result.lotsFound += judgedLots.accepted.length;
           }
