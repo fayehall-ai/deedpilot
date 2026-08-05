@@ -11,14 +11,16 @@
  * `politeFetch` enforces per-host delays and many counties share a host.
  */
 import "../lib/env";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { ALL_COUNTIES } from "../lib/atlas";
 import {
   buildRegistry,
+  mergeRegistry,
   countiesWithAtlasLinks,
   prospectCounties,
   registryCoverage,
+  type SourceRegistry,
 } from "../lib/prospector";
 
 function arg(name: string): string | undefined {
@@ -68,7 +70,24 @@ async function main() {
     }
   }
 
-  const registry = buildRegistry(results);
+  const patch = buildRegistry(results);
+  // Default: merge into existing registry so a --state FL run cannot wipe TX/MI.
+  // Pass --replace only when intentionally rebuilding from scratch.
+  let registry = patch;
+  if (!flag("replace") && existsSync(out)) {
+    try {
+      const base = JSON.parse(readFileSync(out, "utf8")) as SourceRegistry;
+      registry = mergeRegistry(base, patch);
+      console.log(
+        `Merged ${Object.keys(patch.counties).length} prospected counties into existing registry (${base.nCounties} → ${registry.nCounties}).`,
+      );
+    } catch {
+      console.warn(`Could not read ${out}; writing patch only.`);
+    }
+  } else if (flag("replace")) {
+    console.log("Replace mode: overwriting registry with this run only.");
+  }
+
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, JSON.stringify(registry, null, 2));
   const cov = registryCoverage(registry);

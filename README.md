@@ -109,7 +109,31 @@ robots-permissive, and they sit behind no platform ToS.
 | Parcel-level target | FL, GA, TX, AZ, MI — 578 counties |
 | **Ingesting today** | **TX (28 counties) · MI (74 counties)** |
 
-Live as of the last run: **120 auctions, 2,665 lots**, 0 rejected.
+Live as of the last run: **128 sales, 3,090 lots** on published sale lists,
+**2,861 of them auto-priceable (93%)**. A further 6,508 parcels are held as
+*leads* — see "What counts as inventory" below.
+
+### What counts as inventory
+
+Counties publish delinquent rolls, lands-available inventory and actual sale
+lists from the same page, in the same format. Only the last is something to bid
+on, and the difference is not visible to a parser: a delinquent roll has
+parcels, owners, addresses and dollar amounts, exactly like a sale list, and is
+routinely 10-50x larger because most owners pay before any levy.
+
+Every auction therefore carries two facts, asserted by the adapter and never
+inferred:
+
+- `listing_kind` — `sale_list` · `delinquent_list` · `lands_available` · `unknown`
+- `sale_date_confirmed` — false when the date came from `nextSaleWindows`
+  projecting the state's typical schedule rather than from the county
+
+Only `sale_list` + confirmed counts as inventory, anywhere. Everything else is
+reported under its own name on `/coverage`. This is not a display preference:
+before it existed, Cobb County GA's delinquent roll (2,825 parcels) and
+Greenville SC's procedures page (3,461) made up 65% of the headline lot count
+under sale dates that were projected, and in Cobb's case did not exist — Cobb
+held two sales in 2026, on May 5 and November 3.
 
 ## Commands
 
@@ -119,13 +143,39 @@ npm run build
 npm run db:push / db:seed / db:studio
 npm run ingest -- --adapter tx-lgbs [--county 48201] [--limit N] [--dry-run]
 npm run ingest -- --all
+npm run ingest -- --adapter mi-taxsaleinfo --enrich --limit 200   # SEV second pass
+npm run ingest:fl                              # Florida clerk PDFs (Brevard first)
+
+# National coverage meta-loop (see docs/self-improving-coverage-loop.md)
+npm run flywheel:coverage -- --plan              # scoreboard + ranked work
+npm run flywheel:coverage -- --cycle --limit 300 # purge skeletons + MI enrich
+npm run enrich:mi -- --limit 500
+npm run purge:skeletons
 ```
+
+Florida focus: `docs/fl-sprint.md` — clerk list PDFs only; RealAuction stays blocked.
 
 ## Plans
 
 Free (atlas + calendar) · Starter $49 · Pro $149 · Team $349 —
 `lib/billing/plans.ts` is the single source of truth for limits, read by the
 pricing page and the server-side gate alike.
+
+## Coverage loop (in progress)
+
+See `docs/self-improving-coverage-loop.md`. Nightly plan: scoreboard → rank work
+→ safe actions (MI SEV enrich, skeleton purge) → human queue for statutes/labels.
+
+**As of latest cycle (local):** skeletons purged; MI SEV enrichment climbing;
+auto-priceable rate **93%** of confirmed inventory (2,861 / 3,090). Gold score
+26.3%. Gold scoreboard on `/coverage` and `data/coverage-scoreboard.json`.
+
+The rate jumped from 30% when listing provenance landed, without enriching a
+single new lot: the old denominator counted 6,508 delinquent-roll and
+lands-available parcels that contributed 25 assessed values between them. The
+scoreboard now counts only what a subscriber can bid on, which also stops the
+work plan from ranking "enrich 3,477 SC lots" as the top priority when none of
+those parcels were for sale.
 
 ## Not done yet
 
@@ -134,12 +184,22 @@ pricing page and the server-side gate alike.
 - **Live auction-day co-pilot.** The research half ships; the real-time bidding
   sidebar does not.
 - **FL and AZ adapters.** FL needs 67 county-clerk sources (RealAuction is
-  policy-blocked); AZ is annual February lien auctions. The GA adapter exists
-  (`lib/ingest/adapters/georgia.ts`, LLM extraction over unstructured county
-  sources) but is not yet in the live ingest rotation — GA is mostly in-person
-  courthouse sales with no live feed.
-- **Assessor enrichment.** `lot_valuations` is modelled but unpopulated, so
-  Michigan lots have no assessed value and ARV can't be derived there.
+  policy-blocked); AZ is annual February lien auctions.
+- **GA real sale lists.** `lib/ingest/adapters/georgia.ts` currently pins Cobb
+  to the county's *delinquent roll*, now correctly tagged `delinquent_list` and
+  excluded from inventory. Cobb publishes the actual sale list roughly four
+  weeks before each sale (2026: May 5, Nov 3), so GA needs a discovery pass that
+  picks up the sale list when it appears rather than a standing URL. GA is
+  otherwise in-person courthouse sales with no live feed, and PDF extract needs
+  a working LLM (Grok credits / Claude fallback).
+- **SC sale-date semantics.** Greenville's 3,461-row table and Charleston's list
+  sit under dates projected by `nextSaleWindows`, so both are excluded from
+  inventory. Confirm whether the Greenville table is the sale list or a standing
+  certificate roll before promoting it — see `proposals/statute-sc-2026-08-01.md`.
+- **Finish MI SEV enrichment** for remaining lots without assessed values
+  (`npm run enrich:mi -- --limit 700` until dry).
 - **Interactive atlas map.** TopoJSON for all 3,142 counties is in
   `public/geo/`; the current atlas is list-based.
 - **Transitive CVEs** from the Next scaffold (`postcss`, `sharp`, eslint chain).
+- **Grok API credits** — set `DEEDPILOT_DISABLE_GROK=1` to skip burned primary
+  and use Claude for PDF extraction / cartographer.

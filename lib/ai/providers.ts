@@ -110,28 +110,39 @@ const claudeProvider: Provider = {
 
   async run<T extends z.ZodType>(req: StructuredRequest<T>): Promise<z.infer<T>> {
     const client = new Anthropic();
+    const maxTokens = req.maxTokens ?? 16000;
 
-    const response = await client.messages.parse({
+    // Anthropic requires streaming for operations that may exceed ~10 minutes.
+    // Large PDF extractions (high max_tokens + high effort + big prompts) hit
+    // that gate on non-streaming `messages.parse`, so we always stream and
+    // take finalMessage() — same structured parse when output_config.format
+    // is set.
+    const stream = client.messages.stream({
       model: CLAUDE_MODEL,
-      max_tokens: req.maxTokens ?? 16000,
+      max_tokens: maxTokens,
       system: req.system,
       output_config: {
-        effort: "high",
+        // Medium is enough for transcription; "high" balloons latency and
+        // was forcing the long-request path on booklets.
+        effort: maxTokens >= 16000 ? "medium" : "high",
         format: zodOutputFormat(req.schema),
       },
       messages: [{ role: "user", content: req.prompt }],
     });
 
+    const response = await stream.finalMessage();
+
     // Safety classifiers can decline; check before reading content.
     if (response.stop_reason === "refusal") {
       throw new ProviderRefusedError(
-        `claude declined (${response.stop_details?.category ?? "unspecified"})`,
+        `claude declined (${(response as { stop_details?: { category?: string } }).stop_details?.category ?? "unspecified"})`,
       );
     }
-    if (!response.parsed_output) {
+    const parsed = (response as { parsed_output?: z.infer<T> }).parsed_output;
+    if (!parsed) {
       throw new Error("claude returned no parsed output matching the schema");
     }
-    return response.parsed_output as z.infer<T>;
+    return parsed;
   },
 };
 
@@ -146,12 +157,17 @@ const claudeProvider: Provider = {
  * a code change, which is worth having: when the xAI account hit its spending
  * limit it returned 403 on every call and took reflection, the decide node and
  * the Cartographer down together, and an env flag beats an emergency deploy.
+ *
+ * Read at call time (not module load) so `dotenv` / `.env.local` loaded by
+ * scripts after import still takes effect.
  */
-const DISABLE_GROK = /^(1|true|yes)$/i.test(process.env.DEEDPILOT_DISABLE_GROK ?? "");
-const CHAIN: Provider[] = DISABLE_GROK ? [claudeProvider] : [grokProvider, claudeProvider];
+function providerChain(): Provider[] {
+  const disableGrok = /^(1|true|yes)$/i.test(process.env.DEEDPILOT_DISABLE_GROK ?? "");
+  return disableGrok ? [claudeProvider] : [grokProvider, claudeProvider];
+}
 
 export function configuredProviders(): string[] {
-  return CHAIN.filter((p) => p.configured()).map((p) => p.name);
+  return providerChain().filter((p) => p.configured()).map((p) => p.name);
 }
 
 /**
@@ -168,7 +184,7 @@ export function configuredProviders(): string[] {
 export async function runStructured<T extends z.ZodType>(
   req: StructuredRequest<T>,
 ): Promise<ProviderResult<z.infer<T>>> {
-  const usable = CHAIN.filter((p) => p.configured());
+  const usable = providerChain().filter((p) => p.configured());
 
   if (usable.length === 0) {
     throw new NoProviderAvailableError(

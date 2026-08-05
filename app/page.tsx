@@ -11,18 +11,19 @@ export default async function HomePage() {
   // blip should not take the marketing site down with it.
   const stats = await getPlatformStats().catch(() => ({
     upcomingAuctions: 0,
+    skeletonAuctions: 0,
     totalLots: 0,
+    lotsWithAssessed: 0,
+    leadAuctions: 0,
+    leadLots: 0,
     byState: [] as { state: string; counties: number; auctions: number; lots: number }[],
   }));
 
   // States with parcels a bidder can actually act on today, biggest first.
-  const withInventory = stats.byState.filter((b) => b.lots > 0).slice(0, 10);
-  // Auctions on the calendar whose parcel list has not published yet. Arizona's
-  // lien sale is annual in February; Georgia's lists arrive days before a
-  // first-Tuesday courthouse sale. Counting these as coverage would overstate
-  // it, and hiding them would understate the pipeline — so they get a line.
-  const scheduledOnly = stats.byState.filter((b) => b.lots === 0 && b.auctions > 0);
-  const scheduledAuctions = scheduledOnly.reduce((n, b) => n + b.auctions, 0);
+  // getPlatformStats only returns states that already have lots (>0).
+  const withInventory = stats.byState.slice(0, 10);
+  // 0-lot shells no longer appear in byState; surface residual skeleton debt if any.
+  const scheduledAuctions = stats.skeletonAuctions ?? 0;
 
   return (
     <div>
@@ -63,8 +64,26 @@ export default async function HomePage() {
             <HeroStat label="Researched in depth" value={num(Object.keys(COUNTY_DATA).length)} />
             <HeroStat label="States with inventory" value={num(stats.byState.length)} />
             <HeroStat label="Upcoming auctions" value={num(stats.upcomingAuctions)} />
-            <HeroStat label="Lots tracked" value={num(stats.totalLots)} />
+            <HeroStat
+              label="Lots on published sale lists"
+              value={num(stats.totalLots)}
+            />
           </dl>
+
+          {/*
+            Counted separately and named for what it is. A delinquent roll is a
+            useful lead list and a terrible auction listing — most owners on it
+            pay before any sale — so it never joins the number above.
+          */}
+          {stats.leadLots > 0 ? (
+            <p className="mt-6 text-sm text-muted">
+              Plus {num(stats.leadLots)} parcels on delinquent rolls and lands-available
+              inventory — research leads, not scheduled lots.{" "}
+              <Link href="/coverage" className="underline hover:text-fg">
+                How we count
+              </Link>
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -130,13 +149,15 @@ export default async function HomePage() {
             ))}
           </div>
 
-          {scheduledOnly.length ? (
+          {scheduledAuctions > 0 ? (
             <p className="mt-4 text-sm text-muted">
-              <span className="tnum font-medium text-fg">{num(scheduledAuctions)}</span> further
-              auctions are on the calendar across{" "}
-              <span className="tnum font-medium text-fg">{num(scheduledOnly.length)}</span> states —{" "}
-              {scheduledOnly.map((b) => STATE_NAMES[b.state] ?? b.state).join(", ")} — with no parcel
-              list published yet.
+              <span className="tnum font-medium text-fg">{num(scheduledAuctions)}</span> calendar
+              row{scheduledAuctions === 1 ? "" : "s"} still have no parcel list (hidden from browse;
+              see{" "}
+              <Link href="/coverage" className="underline">
+                coverage
+              </Link>
+              ).
             </p>
           ) : null}
 

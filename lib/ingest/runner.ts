@@ -64,6 +64,10 @@ async function upsertAuction(a: DiscoveredAuction): Promise<string> {
       externalId: a.externalId,
       title: a.title,
       saleDate: a.saleDate,
+      // Absent means unconfirmed. An adapter has to assert a published date and
+      // a known document kind; neither is ever inferred on its behalf here.
+      saleDateConfirmed: a.saleDateConfirmed ?? false,
+      listingKind: a.listingKind ?? "unknown",
       startTime: a.startTime,
       status: a.status ?? "scheduled",
       registrationDeadline: a.registrationDeadline,
@@ -75,6 +79,8 @@ async function upsertAuction(a: DiscoveredAuction): Promise<string> {
       target: [auctions.countyFips, auctions.platform, auctions.externalId],
       set: {
         saleDate: sql`excluded.sale_date`,
+        saleDateConfirmed: sql`excluded.sale_date_confirmed`,
+        listingKind: sql`excluded.listing_kind`,
         startTime: sql`excluded.start_time`,
         status: sql`excluded.status`,
         title: sql`excluded.title`,

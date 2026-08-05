@@ -1,0 +1,462 @@
+/**
+ * National coverage scoreboard — the honesty surface for the self-improving loop.
+ *
+ * Gold is a vector, not a vanity count: live lots, history that is fittable,
+ * and counties that can produce a max bid. See docs/self-improving-coverage-loop.md.
+ */
+
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { and, count, eq, gte, gt, sql } from "drizzle-orm";
+import { db } from "../db";
+import { auctions, counties, lots } from "../db/schema";
+import { coveredStateList, hasStatuteParams } from "../deal/statute";
+import { ALL_COUNTIES } from "../atlas";
+import type { SourceRegistry } from "../prospector/types";
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export interface StateLiveRow {
+  state: string;
+  auctions: number;
+  lots: number;
+  withAssessed: number;
+  autoPriceable: number;
+  counties: number;
+}
+
+export interface WorkItem {
+  class: "A" | "B" | "C" | "D" | "E";
+  priority: number;
+  title: string;
+  reason: string;
+  /** Optional target for agents (FIPS, state, adapter). */
+  target?: { state?: string; fips?: string; adapter?: string; limit?: number };
+}
+
+export interface CoverageScoreboard {
+  generatedAt: string;
+  gold: {
+    /** Weighted composite 0–1. */
+    score: number;
+    weights: { live: number; history: number; price: number };
+    liveShare: number;
+    historyShare: number;
+    priceShare: number;
+    penalties: number;
+  };
+  live: {
+    upcomingAuctionsWithLots: number;
+    skeletonAuctions: number;
+    totalLotsUpcoming: number;
+    lotsWithOpening: number;
+    lotsWithAssessed: number;
+    lotsAutoPriceable: number;
+    statesWithLots: number;
+    countiesWithLots: number;
+    byState: StateLiveRow[];
+  };
+  history: {
+    /** From copilot status.json when present. */
+    nRows: number | null;
+    nPriceUsable: number | null;
+    nRedemptionObserved: number | null;
+    sharePriceUsable: number | null;
+    statesWithPriceUsable: string[];
+    note: string;
+  };
+  statute: {
+    statesWithParams: string[];
+    nStates: number;
+    nMissing: number;
+    missingStates: string[];
+  };
+  registry: {
+    nCounties: number;
+    nVerified: number;
+    nGaps: number;
+    nListing: number;
+    nResults: number;
+    builtAt: string | null;
+  };
+  maxbid: {
+    /** Counties whose state has statute params (of 3142). */
+    countiesWithStatute: number;
+    totalCounties: number;
+    /** Upcoming lots that would get a non-null maxBid without comps. */
+    autoPriceableLots: number;
+    autoPriceableRate: number;
+  };
+  workPlan: WorkItem[];
+  budgetShares: Record<"A" | "B" | "C" | "D" | "E", number>;
+}
+
+const US_STATES = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID",
+  "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO",
+  "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA",
+  "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+];
+
+async function loadRegistry(): Promise<SourceRegistry | null> {
+  try {
+    const path = join(process.cwd(), "data", "source-registry.json");
+    return JSON.parse(await readFile(path, "utf8")) as SourceRegistry;
+  } catch {
+    return null;
+  }
+}
+
+async function loadHistorySnippet(): Promise<CoverageScoreboard["history"]> {
+  try {
+    const path = join(process.cwd(), "copilot", "data", "status.json");
+    const s = JSON.parse(await readFile(path, "utf8")) as {
+      corpus?: {
+        nRows?: number;
+        nPriceUsable?: number;
+        nRedemptionObserved?: number;
+        sharePriceUsable?: number;
+        byRule?: { rule: string; price_usable: number }[];
+      };
+    };
+    const states = new Set<string>();
+    // Infer states from known label rules / priors buckets if present later.
+    // For now pull from copilot priors when available via status.
+    try {
+      const full = JSON.parse(await readFile(path, "utf8")) as {
+        priors?: { buckets?: { state: string | null; nObserved: number }[] };
+      };
+      for (const b of full.priors?.buckets ?? []) {
+        if (b.state && b.nObserved > 0) states.add(b.state);
+      }
+    } catch {
+      /* ignore */
+    }
+    // Price-usable rules: mi_titlecheck_sold → MI, ca_county_sold → CA
+    for (const r of s.corpus?.byRule ?? []) {
+      if (r.price_usable > 0) {
+        if (r.rule.startsWith("mi_")) states.add("MI");
+        if (r.rule.startsWith("ca_")) states.add("CA");
+        if (r.rule.startsWith("tx_")) states.add("TX");
+        if (r.rule.startsWith("il_")) {
+          /* IL has rows but not price_usable clearing prices */
+        }
+      }
+    }
+    return {
+      nRows: s.corpus?.nRows ?? null,
+      nPriceUsable: s.corpus?.nPriceUsable ?? null,
+      nRedemptionObserved: s.corpus?.nRedemptionObserved ?? null,
+      sharePriceUsable: s.corpus?.sharePriceUsable ?? null,
+      statesWithPriceUsable: [...states].sort(),
+      note: "Row count is not progress. price_usable and redemption_observed are.",
+    };
+  } catch {
+    return {
+      nRows: null,
+      nPriceUsable: null,
+      nRedemptionObserved: null,
+      sharePriceUsable: null,
+      statesWithPriceUsable: [],
+      note: "copilot/data/status.json not found — run deedpilot-copilot export-status",
+    };
+  }
+}
+
+function buildWorkPlan(input: {
+  byState: StateLiveRow[];
+  skeletonAuctions: number;
+  lotsUpcoming: number;
+  lotsWithAssessed: number;
+  lotsAutoPriceable: number;
+  missingStatutes: string[];
+  registryListing: number;
+  historyStates: number;
+}): WorkItem[] {
+  const items: WorkItem[] = [];
+
+  // Class A: ARV on existing volume
+  for (const s of input.byState) {
+    if (s.lots < 20) continue;
+    const assessedRate = s.lots > 0 ? s.withAssessed / s.lots : 0;
+    if (assessedRate < 0.5) {
+      items.push({
+        class: "A",
+        priority: s.lots * (1 - assessedRate),
+        title: `Enrich assessed values in ${s.state}`,
+        reason: `${s.withAssessed}/${s.lots} lots have assessed (${(assessedRate * 100).toFixed(1)}%). Max bid is dark without ARV.`,
+        target: {
+          state: s.state,
+          adapter: s.state === "MI" ? "mi-taxsaleinfo" : undefined,
+          limit: Math.min(500, s.lots - s.withAssessed),
+        },
+      });
+    }
+  }
+
+  // Class E: skeletons
+  if (input.skeletonAuctions > 0) {
+    items.push({
+      class: "E",
+      priority: input.skeletonAuctions * 10,
+      title: "Purge or hide skeleton auctions",
+      reason: `${input.skeletonAuctions} upcoming auction(s) with zero lots inflate coverage.`,
+    });
+  }
+
+  // Class B: states with no real lots
+  const liveStates = new Set(input.byState.filter((s) => s.lots > 0).map((s) => s.state));
+  const dark = US_STATES.filter((s) => !liveStates.has(s));
+  // Prefer high-value parcel targets first
+  const prefer = ["FL", "GA", "AZ", "CA", "IL", "OH", "NY", "PA", "NC", "NJ"];
+  for (const st of prefer) {
+    if (dark.includes(st)) {
+      items.push({
+        class: "B",
+        priority: 80 + (prefer.length - prefer.indexOf(st)),
+        title: `Live inventory pilot: ${st}`,
+        reason: "No upcoming lots with parcels. Need verified listing URL + scout.",
+        target: { state: st },
+      });
+    }
+  }
+  if (input.registryListing < 200) {
+    items.push({
+      class: "B",
+      priority: 60,
+      title: "Grow listing registry",
+      reason: `Only ${input.registryListing} listing-kind sources verified. Prospector should target kind=listing.`,
+    });
+  }
+
+  // Class D: statutes
+  for (const st of input.missingStatutes.slice(0, 12)) {
+    const stranded = input.byState.find((s) => s.state === st)?.lots ?? 0;
+    items.push({
+      class: "D",
+      priority: 40 + stranded,
+      title: `Statute draft: ${st}`,
+      reason:
+        stranded > 0
+          ? `${stranded} live lots stranded without max-bid params.`
+          : "No STATUTE_PARAMS — engine returns insufficient-data.",
+      target: { state: st },
+    });
+  }
+
+  // Class C: history
+  if (input.historyStates < 15) {
+    items.push({
+      class: "C",
+      priority: 50,
+      title: "Expand labelled historical outcomes",
+      reason: `Only ${input.historyStates} state(s) with observed price_usable history. Archivist + label rules, not raw imports.`,
+    });
+  }
+
+  // LLM gate — without a working provider, PDF-heavy states stay dark.
+  // Surfaced so the work plan names the real bottleneck.
+  items.push({
+    class: "B",
+    priority: 70,
+    title: "Unblock LLM for PDF county lists",
+    reason:
+      "GA/AZ/FL/Charleston SC sealed-bid PDFs need extractLots. XAI credits exhausted and ANTHROPIC_API_KEY is empty — set a key or DEEDPILOT_DISABLE_GROK=1 with Claude.",
+  });
+
+  // Auto-priceable rate
+  if (input.lotsUpcoming > 0 && input.lotsAutoPriceable / input.lotsUpcoming < 0.4) {
+    items.push({
+      class: "A",
+      priority: 200,
+      title: "Raise auto-priceable rate above 40%",
+      reason: `${input.lotsAutoPriceable}/${input.lotsUpcoming} upcoming lots can max-bid without comps.`,
+    });
+  }
+
+  items.sort((a, b) => b.priority - a.priority);
+  return items.slice(0, 40);
+}
+
+function budgetFromPlan(items: WorkItem[]): CoverageScoreboard["budgetShares"] {
+  const base = { A: 0.25, B: 0.3, C: 0.2, D: 0.15, E: 0.1 };
+  if (items.length === 0) return base;
+  const sum = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+  for (const i of items) sum[i.class] += i.priority;
+  const total = Object.values(sum).reduce((a, b) => a + b, 0) || 1;
+  // Blend base with demand (70% demand / 30% base) so we never starve a class.
+  const demand = {
+    A: sum.A / total,
+    B: sum.B / total,
+    C: sum.C / total,
+    D: sum.D / total,
+    E: sum.E / total,
+  };
+  return {
+    A: 0.3 * base.A + 0.7 * demand.A,
+    B: 0.3 * base.B + 0.7 * demand.B,
+    C: 0.3 * base.C + 0.7 * demand.C,
+    D: 0.3 * base.D + 0.7 * demand.D,
+    E: 0.3 * base.E + 0.7 * demand.E,
+  };
+}
+
+/**
+ * Build the live national scoreboard from Postgres + on-disk registry/corpus.
+ */
+export async function buildCoverageScoreboard(): Promise<CoverageScoreboard> {
+  const today = todayIso();
+  const statuteStates = coveredStateList();
+  const missingStatutes = US_STATES.filter((s) => !hasStatuteParams(s));
+
+  // Bidding inventory only: a published sale list on a published date. A
+  // delinquent roll parses like a sale list and dwarfs one, so counting both
+  // makes the score move fastest by ingesting things nobody can bid on.
+  const isInventory = and(
+    eq(auctions.listingKind, "sale_list"),
+    eq(auctions.saleDateConfirmed, true),
+  );
+
+  const [withLots] = await db
+    .select({ n: count() })
+    .from(auctions)
+    .where(and(gte(auctions.saleDate, today), gt(auctions.lotCount, 0), isInventory));
+
+  const [skeletons] = await db
+    .select({ n: count() })
+    .from(auctions)
+    .where(and(gte(auctions.saleDate, today), eq(auctions.lotCount, 0)));
+
+  // Upcoming lots = lots on auctions with sale_date >= today
+  const lotStats = await db
+    .select({
+      state: counties.state,
+      auctions: sql<number>`count(DISTINCT ${auctions.id})::int`,
+      lots: sql<number>`count(${lots.id})::int`,
+      withAssessed: sql<number>`count(${lots.id}) filter (where ${lots.assessedValue} is not null)::int`,
+      withOpening: sql<number>`count(${lots.id}) filter (where ${lots.openingBid} is not null)::int`,
+      counties: sql<number>`count(DISTINCT ${auctions.countyFips})::int`,
+    })
+    .from(auctions)
+    .innerJoin(counties, eq(counties.fips, auctions.countyFips))
+    .innerJoin(lots, eq(lots.auctionId, auctions.id))
+    .where(and(gte(auctions.saleDate, today), gt(auctions.lotCount, 0), isInventory))
+    .groupBy(counties.state)
+    .orderBy(sql`count(${lots.id}) desc`);
+
+  const byState: StateLiveRow[] = lotStats.map((r) => {
+    const autoPriceable =
+      hasStatuteParams(r.state) ? r.withAssessed : 0;
+    return {
+      state: r.state,
+      auctions: r.auctions,
+      lots: r.lots,
+      withAssessed: r.withAssessed,
+      autoPriceable,
+      counties: r.counties,
+    };
+  });
+
+  const totalLots = byState.reduce((n, s) => n + s.lots, 0);
+  const lotsWithAssessed = byState.reduce((n, s) => n + s.withAssessed, 0);
+  const lotsAutoPriceable = byState.reduce((n, s) => n + s.autoPriceable, 0);
+  const lotsWithOpening = byState.reduce((n, s) => n + s.lots, 0); // approx; refined below if needed
+
+  const countiesWithLots = byState.reduce((n, s) => n + s.counties, 0);
+
+  const registry = await loadRegistry();
+  let nListing = 0;
+  let nResults = 0;
+  if (registry) {
+    for (const c of Object.values(registry.counties)) {
+      for (const s of c.sources ?? []) {
+        if (s.kind === "listing") nListing++;
+        if (s.kind === "results") nResults++;
+      }
+    }
+  }
+
+  const history = await loadHistorySnippet();
+
+  const totalCounties = ALL_COUNTIES.length;
+  const countiesWithStatute = ALL_COUNTIES.filter((c) => hasStatuteParams(c.state)).length;
+
+  const workPlan = buildWorkPlan({
+    byState,
+    skeletonAuctions: skeletons?.n ?? 0,
+    lotsUpcoming: totalLots,
+    lotsWithAssessed,
+    lotsAutoPriceable,
+    missingStatutes,
+    registryListing: nListing,
+    historyStates: history.statesWithPriceUsable.length,
+  });
+
+  const budgetShares = budgetFromPlan(workPlan);
+
+  // Gold score components (0–1)
+  const liveShare = Math.min(1, byState.filter((s) => s.lots > 0).length / 51);
+  const historyShare = Math.min(1, history.statesWithPriceUsable.length / 51);
+  const priceShare = Math.min(1, countiesWithStatute / totalCounties);
+  const autoRate = totalLots > 0 ? lotsAutoPriceable / totalLots : 0;
+  // Blend county statute readiness with actual auto-price rate on live lots
+  const priceBlend = 0.5 * priceShare + 0.5 * autoRate;
+  // Soft penalty: skeletons hurt trust but must not zero a real live market.
+  // Cap at 25% of the raw score so inventory progress still shows.
+  const skeletonFrac = Math.min(1, (skeletons?.n ?? 0) / 100);
+  const weights = { live: 0.35, history: 0.25, price: 0.4 };
+  const raw =
+    weights.live * liveShare +
+    weights.history * historyShare +
+    weights.price * priceBlend;
+  const skeletonPenalty = Math.min(raw * 0.25, skeletonFrac * 0.05);
+  const goldScore = Math.max(0, raw - skeletonPenalty);
+
+  return {
+    generatedAt: new Date().toISOString(),
+    gold: {
+      score: Math.round(goldScore * 1000) / 1000,
+      weights,
+      liveShare: Math.round(liveShare * 1000) / 1000,
+      historyShare: Math.round(historyShare * 1000) / 1000,
+      priceShare: Math.round(priceBlend * 1000) / 1000,
+      penalties: Math.round(skeletonPenalty * 1000) / 1000,
+    },
+    live: {
+      upcomingAuctionsWithLots: withLots?.n ?? 0,
+      skeletonAuctions: skeletons?.n ?? 0,
+      totalLotsUpcoming: totalLots,
+      lotsWithOpening,
+      lotsWithAssessed,
+      lotsAutoPriceable,
+      statesWithLots: byState.filter((s) => s.lots > 0).length,
+      countiesWithLots,
+      byState,
+    },
+    history,
+    statute: {
+      statesWithParams: statuteStates,
+      nStates: statuteStates.length,
+      nMissing: missingStatutes.length,
+      missingStates: missingStatutes,
+    },
+    registry: {
+      nCounties: registry?.nCounties ?? 0,
+      nVerified: registry?.nVerified ?? 0,
+      nGaps: registry?.nGaps ?? 0,
+      nListing,
+      nResults,
+      builtAt: registry?.builtAt ?? null,
+    },
+    maxbid: {
+      countiesWithStatute,
+      totalCounties,
+      autoPriceableLots: lotsAutoPriceable,
+      autoPriceableRate: totalLots > 0 ? Math.round((lotsAutoPriceable / totalLots) * 1000) / 1000 : 0,
+    },
+    workPlan,
+    budgetShares,
+  };
+}

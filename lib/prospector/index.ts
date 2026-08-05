@@ -197,6 +197,37 @@ export function buildRegistry(results: ProspectResult[]): SourceRegistry {
 }
 
 /**
+ * Merge a partial prospect run into an existing registry without deleting
+ * other counties. Partial state runs used to overwrite the whole file with
+ * 3 counties and wipe national coverage — this is the fix.
+ *
+ * New results win for the same FIPS (they are fresher). Untouched FIPS keep
+ * their previous sources.
+ */
+export function mergeRegistry(
+  base: SourceRegistry | null,
+  patch: SourceRegistry,
+): SourceRegistry {
+  const counties: SourceRegistry["counties"] = {
+    ...(base?.counties ?? {}),
+    ...patch.counties,
+  };
+  let nVerified = 0;
+  let nGaps = 0;
+  for (const entry of Object.values(counties)) {
+    nVerified += entry.sources.length;
+    if (entry.isGap) nGaps++;
+  }
+  return {
+    builtAt: new Date().toISOString(),
+    nCounties: Object.keys(counties).length,
+    nVerified,
+    nGaps,
+    counties,
+  };
+}
+
+/**
  * The best source of a given kind for a county, for the Scout and Archivist.
  *
  * Ranks rather than taking the first match, so it does not depend on the stored

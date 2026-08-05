@@ -25,6 +25,7 @@ function parseBody(raw: unknown): DealInputs | { error: string } {
   return {
     state: b.state,
     saleType: b.saleType as SaleType,
+    fips: typeof b.fips === "string" ? b.fips : undefined,
     openingBid: typeof b.openingBid === "number" ? b.openingBid : undefined,
     assessedValue: typeof b.assessedValue === "number" ? b.assessedValue : undefined,
     arvOverride: typeof b.arvOverride === "number" ? b.arvOverride : undefined,

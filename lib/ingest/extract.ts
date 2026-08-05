@@ -59,8 +59,13 @@ Rules:
 - Parcel numbers keep their exact printed punctuation and spacing.
 - Transcribe every parcel in the list, not a sample.`;
 
-/** Cap the payload so a 300-page booklet doesn't blow the context window. */
-const MAX_CHARS = 250_000;
+/**
+ * Cap the payload so a 300-page booklet doesn't blow the context window.
+ * 80k chars is enough for a typical county list page and keeps Claude under
+ * the non-streaming duration estimate that used to force 10-minute streaming
+ * failures on huge booklets.
+ */
+const MAX_CHARS = 80_000;
 
 /**
  * Extract parcels from an unstructured county document.
@@ -73,7 +78,9 @@ export async function extractLots(
   text: string,
   context: { countyName: string; state: string; sourceUrl: string },
 ): Promise<ExtractionResult> {
-  const trimmed = text.replace(/\s+/g, " ").trim().slice(0, MAX_CHARS);
+  // Prefer full document for deterministic pre-parse; LLM still gets a cap.
+  const full = text.replace(/\s+/g, " ").trim();
+  const trimmed = full.slice(0, MAX_CHARS);
 
   if (trimmed.length < 100) {
     return {
@@ -84,41 +91,76 @@ export async function extractLots(
     };
   }
 
-  const result = await runStructured({
-    system: SYSTEM,
-    schema: ExtractionSchema,
-    schemaName: "tax_sale_listing",
-    maxTokens: 32000,
-    prompt: `Source: ${context.countyName} County, ${context.state}
+  // Chunk large documents so a 300k-char delinquent list does not blow
+  // structured-output JSON mid-string (Claude truncates and parse fails).
+  const CHUNK = 40_000;
+  const OVERLAP = 500;
+  const chunks: string[] = [];
+  if (trimmed.length <= CHUNK) {
+    chunks.push(trimmed);
+  } else {
+    for (let i = 0; i < trimmed.length; i += CHUNK - OVERLAP) {
+      chunks.push(trimmed.slice(i, i + CHUNK));
+      if (i + CHUNK >= trimmed.length) break;
+    }
+  }
+
+  const merged: DiscoveredLot[] = [];
+  const seen = new Set<string>();
+  let model = "none";
+  let anyList = false;
+  let lastNote: string | null = null;
+
+  for (const [idx, chunk] of chunks.entries()) {
+    const result = await runStructured({
+      system: SYSTEM,
+      schema: ExtractionSchema,
+      schemaName: "tax_sale_listing",
+      maxTokens: 12000,
+      prompt: `Source: ${context.countyName} County, ${context.state}
 URL: ${context.sourceUrl}
+${chunks.length > 1 ? `Document part ${idx + 1} of ${chunks.length} (continue extracting; do not restate prior parcels).` : ""}
 
 Transcribe every parcel in the upcoming tax sale listing below. If this document
 does not contain one, set containsParcelList=false.
+If the document is truncated mid-list, extract every complete parcel that appears.
 
 ---
-${trimmed}`,
-  });
+${chunk}`,
+    });
 
-  const { data } = result;
+    model = result.model;
+    lastNote = result.data.note;
+    if (result.data.containsParcelList) anyList = true;
 
-  // Normalise nulls to undefined so the judge's "field absent" checks apply.
-  const lots: DiscoveredLot[] = data.lots.map((l) => ({
-    parcelNumber: l.parcelNumber ?? undefined,
-    lotNumber: l.lotNumber ?? undefined,
-    ownerName: l.ownerName ?? undefined,
-    addressLine: l.addressLine ?? undefined,
-    city: l.city ?? undefined,
-    openingBid: l.openingBid ?? undefined,
-    legalDescription: l.legalDescription ?? undefined,
-    sourceUrl: context.sourceUrl,
-    raw: { extracted: true, model: result.model },
-  }));
+    for (const l of result.data.lots) {
+      const key = (l.parcelNumber ?? l.lotNumber ?? l.addressLine ?? JSON.stringify(l)).toString();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push({
+        parcelNumber: l.parcelNumber ?? undefined,
+        lotNumber: l.lotNumber ?? undefined,
+        ownerName: l.ownerName ?? undefined,
+        addressLine: l.addressLine ?? undefined,
+        city: l.city ?? undefined,
+        openingBid: l.openingBid ?? undefined,
+        legalDescription: l.legalDescription ?? undefined,
+        sourceUrl: context.sourceUrl,
+        raw: { extracted: true, model: result.model, chunk: idx },
+      });
+    }
+
+    // If the first chunk says there is no list, stop spending.
+    if (idx === 0 && !result.data.containsParcelList && result.data.lots.length === 0) {
+      break;
+    }
+  }
 
   return {
-    lots,
-    containsParcelList: data.containsParcelList,
-    note: data.note,
-    model: result.model,
+    lots: merged,
+    containsParcelList: anyList || merged.length > 0,
+    note: lastNote,
+    model,
   };
 }
 

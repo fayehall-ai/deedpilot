@@ -1,0 +1,91 @@
+{
+  "finishedAt": "2026-08-01T04:03:14.064Z",
+  "gold": {
+    "score": 0.154,
+    "weights": {
+      "live": 0.35,
+      "history": 0.25,
+      "price": 0.4
+    },
+    "liveShare": 0.078,
+    "historyShare": 0.039,
+    "priceShare": 0.292,
+    "penalties": 0
+  },
+  "actions": [
+    "MI enrich attempted (limit 500)",
+    "purged 0 skeleton auction(s)",
+    "noted: Raise auto-priceable rate above 40% (no auto executor yet)",
+    "noted: Enrich assessed values in NM (no auto executor yet)"
+  ],
+  "blockedOnHumans": [
+    "Live inventory pilot: FL — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Live inventory pilot: GA — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Live inventory pilot: AZ — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Live inventory pilot: CA — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Live inventory pilot: IL — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Live inventory pilot: OH — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Live inventory pilot: NY — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Live inventory pilot: PA — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Live inventory pilot: NC — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Live inventory pilot: NJ — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Grow listing registry — prospector/scout expansion not auto-run in cycle (use npm run prospect / scout)",
+    "Expand labelled historical outcomes — label rules / archivist require human semantics",
+    "Statute draft: AK — cartographer draft requires human PR",
+    "Statute draft: AL — cartographer draft requires human PR",
+    "Statute draft: AR — cartographer draft requires human PR",
+    "Statute draft: CO — cartographer draft requires human PR",
+    "Statute draft: CT — cartographer draft requires human PR",
+    "Statute draft: DE — cartographer draft requires human PR",
+    "Statute draft: DC — cartographer draft requires human PR",
+    "Statute draft: HI — cartographer draft requires human PR",
+    "Statute draft: ID — cartographer draft requires human PR",
+    "Statute draft: IN — cartographer draft requires human PR",
+    "Statute draft: IA — cartographer draft requires human PR",
+    "Statute draft: KS — cartographer draft requires human PR"
+  ],
+  "live": {
+    "upcomingAuctionsWithLots": 125,
+    "skeletonAuctions": 0,
+    "totalLotsUpcoming": 3118,
+    "lotsWithOpening": 3118,
+    "lotsWithAssessed": 1089,
+    "lotsAutoPriceable": 1089,
+    "statesWithLots": 4,
+    "countiesWithLots": 105,
+    "byState": [
+      {
+        "state": "MI",
+        "auctions": 75,
+        "lots": 2272,
+        "withAssessed": 510,
+        "autoPriceable": 510,
+        "counties": 75
+      },
+      {
+        "state": "TX",
+        "auctions": 47,
+        "lots": 659,
+        "withAssessed": 579,
+        "autoPriceable": 579,
+        "counties": 27
+      },
+      {
+        "state": "NM",
+        "auctions": 2,
+        "lots": 186,
+        "withAssessed": 0,
+        "autoPriceable": 0,
+        "counties": 2
+      },
+      {
+        "state": "AK",
+        "auctions": 1,
+        "lots": 1,
+        "withAssessed": 0,
+        "autoPriceable": 0,
+        "counties": 1
+      }
+    ]
+  }
+}

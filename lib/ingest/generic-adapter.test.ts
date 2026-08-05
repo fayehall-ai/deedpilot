@@ -8,7 +8,13 @@
 import * as cheerio from "cheerio";
 import { __setRegistry, genericAdapter } from "./adapters/generic";
 import { ADAPTERS } from "./adapters";
-import { listPageLinks, parseHtmlTable, pdfLinks } from "./parse";
+import {
+  classifiedPdfLinks,
+  classifyListingLink,
+  listPageLinks,
+  parseHtmlTable,
+  pdfLinks,
+} from "./parse";
 import type { SourceRegistry, VerifiedSource } from "../prospector/types";
 
 function assert(cond: unknown, msg: string) {
@@ -63,6 +69,46 @@ const links = cheerio.load(`
 const pdfs = pdfLinks(links, "https://co.gov/page");
 assert(pdfs.length === 1, `expected 1 pdf after filtering, got ${pdfs.length}: ${pdfs}`);
 assert(pdfs[0].endsWith("tax-sale-list.pdf"), "kept the real list");
+
+// --- sale list vs delinquent roll --------------------------------------------
+//
+// Regression: Cobb County GA links both from one tax-sale page. They scored
+// alike, the delinquent roll sorted first, and 2,825 parcels that were not for
+// sale entered inventory under a sale date the calendar had invented.
+
+assert(
+  classifyListingLink("2026 Tax Sale List") === "sale_list",
+  "a sale list is a sale list",
+);
+assert(
+  classifyListingLink("Cobb County Tax Commissioner Delinquent Tax List 07.01.2026.pdf") ===
+    "delinquent_list",
+  "a delinquent roll is not a sale list",
+);
+assert(
+  classifyListingLink("Lands Available for Taxes") === "lands_available",
+  "struck inventory is its own kind",
+);
+assert(
+  classifyListingLink("Delinquent Tax Sale List") === "sale_list",
+  "sale vocabulary wins when a heading carries both words",
+);
+
+const cobbStyle = cheerio.load(`
+  <a href="/Delinquent%20Tax%20List%2007.01.2026.pdf">Delinquent Tax List</a>
+  <a href="/nov-3-2026-tax-sale-list.pdf">November 3rd, 2026 Tax Sale List</a>
+  <a href="/excess-funds.pdf">Excess Funds List</a>`);
+const cobbPdfs = classifiedPdfLinks(cobbStyle, "https://www.cobbtax.gov/property/tax_sale/");
+assert(cobbPdfs.length === 2, `excess funds dropped, got ${cobbPdfs.length}`);
+assert(
+  cobbPdfs[0].url.includes("tax-sale-list"),
+  `sale list must be opened first, got ${cobbPdfs[0].url}`,
+);
+assert(cobbPdfs[0].kind === "sale_list", "and it must be labelled a sale list");
+assert(
+  cobbPdfs[1].kind === "delinquent_list",
+  "the roll is kept as a lead, tagged for what it is",
+);
 
 const navLinks = cheerio.load(`
   <a href="/current-tax-sale">Current Tax Sale List</a>
@@ -139,7 +185,7 @@ assert(ohAuctions[0].saleType !== undefined, "Ohio resolves a sale type from the
 
 const names = ADAPTERS.map((x) => x.name);
 assert(names.at(-1) === "generic-county", "generic adapter must be registered last");
-assert(names.length === 4, `expected 4 adapters, got ${names.length}`);
+assert(names.length === 5, `expected 5 adapters, got ${names.length}: ${names.join(", ")}`);
 
   // No registry means no bindings, not a crash. The explicit override matters:
   // merely clearing the cache would fall through to a disk read and make this

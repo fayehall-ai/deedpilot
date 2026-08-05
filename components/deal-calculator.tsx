@@ -27,6 +27,7 @@ export function DealCalculator({
   fips,
   historyBucket = null,
   historyKey,
+  thinListing = false,
 }: {
   state: string;
   saleType: SaleType;
@@ -36,6 +37,8 @@ export function DealCalculator({
   /** Server-loaded history bucket (no fs on the client). */
   historyBucket?: HistoryBucket | null;
   historyKey?: string;
+  /** Listing has no address/assessed — show clearer empty state. */
+  thinListing?: boolean;
 }) {
   const [arvOverride, setArvOverride] = useState<string>("");
   const [rehab, setRehab] = useState<string>("");
@@ -46,6 +49,7 @@ export function DealCalculator({
     const inputs: DealInputs = {
       state,
       saleType,
+      fips,
       openingBid,
       assessedValue,
       targetMargin: margin / 100,
@@ -54,7 +58,7 @@ export function DealCalculator({
     if (rehab.trim() !== "") inputs.rehabCost = Number(rehab.replace(/[^0-9.]/g, ""));
     if (liens.trim() !== "") inputs.survivingLiens = Number(liens.replace(/[^0-9.]/g, ""));
     return computeMaxBid(inputs);
-  }, [state, saleType, openingBid, assessedValue, arvOverride, rehab, liens, margin]);
+  }, [state, saleType, fips, openingBid, assessedValue, arvOverride, rehab, liens, margin]);
 
   const suggestion = useMemo(() => {
     return computeSuggestedBid({
@@ -103,7 +107,11 @@ export function DealCalculator({
       <div className="rounded-xl border-2 p-5" style={{ borderColor: tone }}>
         <div className="text-xs uppercase tracking-wide text-muted">Your maximum bid</div>
         <div className="tnum mt-1 text-4xl font-semibold" style={{ color: tone }}>
-          {result.maxBid === null ? "Not enough data" : money(result.maxBid)}
+          {result.maxBid === null
+            ? thinListing
+              ? "Needs ARV"
+              : "Not enough data"
+            : money(result.maxBid)}
         </div>
 
         {result.recommendation === "no-bid" ? (
@@ -112,15 +120,19 @@ export function DealCalculator({
           </p>
         ) : result.maxBid === null ? (
           /*
-            "Not enough data" on its own is useless: it reads as a broken page
-            rather than a stated limit, and the two reasons behind it need
-            different things from the user. A parcel in an uncovered state needs
-            statutory research nobody can do from this screen; a parcel with no
-            published assessment just needs a comparable-sales figure, which the
-            field below already accepts.
+            Thin sale lists (parcel + opening bid only) are not a bug — the clerk
+            never published an assessed value. Max bid needs ARV from comps or
+            property enrichment; opening bid is not a substitute for market value.
           */
           <div className="mt-2 space-y-2 text-sm text-muted">
-            {result.warnings.length ? (
+            {thinListing ? (
+              <p className="leading-relaxed text-foreground">
+                This sale list only published a <strong>parcel number</strong> and{" "}
+                <strong>opening bid</strong> — not an assessed value. Enter an after-repair
+                (comps) estimate below, open the county appraiser (sidebar), or run{" "}
+                <em>Fetch property details</em> if you have an API key.
+              </p>
+            ) : result.warnings.length ? (
               <ul className="space-y-1">
                 {result.warnings.slice(0, 2).map((w) => (
                   <li key={w} className="leading-relaxed">

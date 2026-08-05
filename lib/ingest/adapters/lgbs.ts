@@ -162,6 +162,10 @@ export const lgbsAdapter: SourceAdapter = {
         saleType: "Redeemable Deed",
         externalId,
         saleDate: row.sale_date_only,
+        // LGBS is the counties' own foreclosure counsel and publishes the sale
+        // date and the parcel list together, per sale.
+        saleDateConfirmed: true,
+        listingKind: "sale_list",
         title: `${row.county} tax sale${row.precinct ? ` — precinct ${row.precinct}` : ""}`,
         status: status.includes("postpon")
           ? "postponed"

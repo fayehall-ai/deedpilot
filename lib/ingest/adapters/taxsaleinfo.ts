@@ -161,6 +161,10 @@ export const taxSaleInfoAdapter: SourceAdapter = {
         saleType: "Tax Deed",
         externalId: catalogId,
         saleDate,
+        // Read off the auction's own listing header, and the catalog is the
+        // parcel list for that sale — nothing here is projected.
+        saleDateConfirmed: true,
+        listingKind: "sale_list",
         startTime,
         title: `${countyLabel} County tax foreclosure auction`,
         status: "scheduled",

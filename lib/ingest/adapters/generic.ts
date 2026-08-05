@@ -34,7 +34,13 @@ import { nextSaleWindows } from "../../atlas/calendar";
 import type { SourceRegistry } from "../../prospector/types";
 import { extractLots, NoProviderAvailableError } from "../extract";
 import { politeFetch } from "../fetch";
-import { listPageLinks, parseHtmlTable, pdfLinks, pdfToText } from "../parse";
+import {
+  classifiedPdfLinks,
+  listPageLinks,
+  parseHtmlTable,
+  parseStructuredPdfText,
+  pdfToText,
+} from "../parse";
 import type {
   CountyBinding,
   DiscoveredAuction,
@@ -152,6 +158,11 @@ export const genericAdapter: SourceAdapter = {
         saleType,
         externalId: `${binding.countyFips}|${window.saleDate}`,
         saleDate: window.saleDate,
+        // The calendar projects; it does not observe. `listLots` upgrades this
+        // only if the fetched document names its own sale date.
+        saleDateConfirmed: window.estimated === false,
+        // Set once we see what the county actually publishes.
+        listingKind: "unknown",
         title: `${countyName}, ${state} tax sale`,
         status: "scheduled",
         sourceUrl: url,
@@ -179,8 +190,8 @@ export const genericAdapter: SourceAdapter = {
     const fromTable = parseHtmlTable($, auction.sourceUrl);
     if (fromTable?.length) return fromTable;
 
-    // 2. Linked PDFs, decoys already filtered.
-    for (const pdf of pdfLinks($, auction.sourceUrl).slice(0, 3)) {
+    // 2. Linked PDFs, decoys already filtered and sale lists ranked first.
+    for (const { url: pdf, kind } of classifiedPdfLinks($, auction.sourceUrl).slice(0, 3)) {
       let text: string;
       try {
         text = await pdfToText(pdf);
@@ -188,16 +199,28 @@ export const genericAdapter: SourceAdapter = {
         console.warn(`[generic-county] ${pdf}: ${e instanceof Error ? e.message : e}`);
         continue;
       }
+      // Free path: structured sealed-bid / list PDFs (no LLM, no credits).
+      const structured = parseStructuredPdfText(text, pdf);
+      if (structured?.length) {
+        auction.listingKind = kind;
+        console.log(
+          `[generic-county] ${pdf}: structured PDF parse → ${structured.length} lot(s) [${kind}]`,
+        );
+        return structured;
+      }
       try {
         const result = await extractLots(text, { ...context, sourceUrl: pdf });
-        if (result.containsParcelList && result.lots.length) return result.lots;
+        if (result.containsParcelList && result.lots.length) {
+          auction.listingKind = kind;
+          return result.lots;
+        }
       } catch (e) {
         if (e instanceof NoProviderAvailableError) {
           // "We couldn't look" is not "there is nothing here". Returning []
           // would mark the county as having no inventory, which reads as a
           // fact and stops anyone investigating.
           throw new Error(
-            `${pdf} needs LLM extraction but no provider is configured — ` +
+            `${pdf} needs LLM extraction — ${e.message} — ` +
               `${context.countyName} left unresolved rather than recorded as empty`,
           );
         }

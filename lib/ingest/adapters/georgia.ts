@@ -28,12 +28,13 @@
 import * as cheerio from "cheerio";
 import { politeFetch } from "../fetch";
 import { extractLots, NoProviderAvailableError } from "../extract";
-import { parseHtmlTable, pdfLinks, pdfToText } from "../parse";
+import { parseHtmlTable, parseStructuredPdfText, pdfLinks, pdfToText } from "../parse";
 import { findCountyByName } from "../../atlas";
 import type {
   CountyBinding,
   DiscoveredAuction,
   DiscoveredLot,
+  ListingKind,
   SourceAdapter,
 } from "../types";
 
@@ -42,25 +43,56 @@ interface GaCounty {
   name: string;
   /** Page that carries, or links to, the sale list. */
   url: string;
+  /**
+   * Direct list PDF when the landing page only has a booklet / "no parcels"
+   * notice. Prefer the live list when known.
+   */
+  listPdf?: string;
+  /**
+   * What `listPdf` actually is. Several Georgia counties publish only the
+   * delinquent roll between sales, and it parses exactly like a sale list —
+   * parcel, owner, address, amount. Declaring it here is the only thing that
+   * keeps a lead list from being served as bidding inventory.
+   */
+  listKind?: ListingKind;
   /** Set when the list lives on a different page than the landing page. */
   note?: string;
 }
 
 /**
- * Verified county entries. 5 of 159 — this list is the unit of remaining work,
- * and the coverage page reports it honestly rather than implying statewide
- * Georgia support.
+ * Verified county entries. The coverage page reports this honestly rather than
+ * implying statewide Georgia support.
  *
  * To add a county: find its tax commissioner's tax-sale page, confirm it
  * actually publishes a parcel list (many link to a "no sale scheduled"
  * document), and add a row.
  */
 export const GA_COUNTIES: GaCounty[] = [
-  { name: "Cobb", url: "https://www.cobbtax.gov/property/tax_sale/index.php" },
+  {
+    name: "Cobb",
+    url: "https://www.cobbtax.gov/property/tax_sale/index.php",
+    // The published delinquent roll, not the sale list. Cobb posts the sale
+    // list roughly four weeks before each sale and holds only a few sales a
+    // year (2026: May 5 and Nov 3) — not first-Tuesday-monthly. Everyone on
+    // this roll owes money; only a fraction is ever levied and sold.
+    listPdf:
+      "https://www.cobbtax.gov/Cobb%20County%20Tax%20Commissioner%20Delinquent%20Tax%20List%2007.01.2026.pdf",
+    listKind: "delinquent_list",
+    note: "Sale list is published ~4 weeks before each sale; this is the delinquent roll.",
+  },
   { name: "Forsyth", url: "https://forsythcountytax.com/tax-sales-excess-funds/" },
   { name: "Barrow", url: "https://www.barrowgatax.org/tax-sales.html" },
   { name: "Chatham", url: "https://tax.chathamcountyga.gov/TaxSaleList" },
   { name: "Clarke", url: "https://www.accgov.com/1719/Tax-Sales", note: "Athens-Clarke unified government" },
+  {
+    name: "Fulton",
+    url: "https://www.fultoncountyga.gov/inside-fulton-county/fulton-county-departments/sheriff/tax-sales",
+    note: "Sheriff levy PDFs are often scanned images (no text layer).",
+  },
+  {
+    name: "Gwinnett",
+    url: "https://www.gwinnetttaxcommissioner.com/property-tax/delinquent_tax/tax-liens-tax-sales",
+  },
 ];
 
 /** Georgia sales are the first Tuesday of the month. */
@@ -97,14 +129,28 @@ export const georgiaAdapter: SourceAdapter = {
       }
       bindings.push({
         countyFips: county.fips,
-        config: { url: entry.url, name: entry.name, note: entry.note },
+        config: {
+          url: entry.url,
+          name: entry.name,
+          note: entry.note,
+          listPdf: entry.listPdf,
+          listKind: entry.listKind,
+        },
       });
     }
     return bindings;
   },
 
   async listAuctions(binding: CountyBinding): Promise<DiscoveredAuction[]> {
-    const { url, name } = binding.config as { url: string; name: string };
+    const { url, name, listPdf, listKind } = binding.config as {
+      url: string;
+      name: string;
+      listPdf?: string;
+      listKind?: ListingKind;
+    };
+    // Georgia's statute sets first-Tuesday *as the sale day*, but says nothing
+    // about which months a county chooses to sell in — Cobb runs two a year.
+    // So this is a crawl window, never a published date.
     const saleDate = nextFirstTuesday();
 
     return [
@@ -116,15 +162,46 @@ export const georgiaAdapter: SourceAdapter = {
         saleType: "Redeemable Deed",
         externalId: `${binding.countyFips}|${saleDate}`,
         saleDate,
+        // Projected from the statutory sale day, never read off the county.
+        saleDateConfirmed: false,
+        listingKind: listKind ?? "unknown",
         title: `${name} County tax sale (courthouse steps)`,
         status: "scheduled",
-        sourceUrl: url,
-        raw: { registryUrl: url },
+        // Prefer the direct list PDF when known — landing pages often only
+        // carry the procedure booklet.
+        sourceUrl: listPdf || url,
+        raw: { registryUrl: url, listPdf },
       },
     ];
   },
 
   async listLots(auction: DiscoveredAuction): Promise<DiscoveredLot[]> {
+    // Direct PDF auction source (e.g. Cobb delinquent roll).
+    if (/\.pdf(\?|$)/i.test(auction.sourceUrl)) {
+      const text = await pdfToText(auction.sourceUrl);
+      const structured = parseStructuredPdfText(text, auction.sourceUrl);
+      if (structured?.length) {
+        console.log(
+          `[ga-counties] ${auction.sourceUrl}: structured PDF parse → ${structured.length} lot(s)`,
+        );
+        return structured;
+      }
+      try {
+        const result = await extractLots(text, {
+          countyName: auction.title ?? auction.countyFips,
+          state: "GA",
+          sourceUrl: auction.sourceUrl,
+        });
+        if (result.containsParcelList && result.lots.length) return result.lots;
+      } catch (e) {
+        if (e instanceof NoProviderAvailableError) {
+          throw new Error(`${auction.sourceUrl} needs LLM extraction — ${e.message}`);
+        }
+        throw e;
+      }
+      return [];
+    }
+
     const res = await politeFetch(auction.sourceUrl);
     const $ = cheerio.load(res.body);
 
@@ -142,6 +219,12 @@ export const georgiaAdapter: SourceAdapter = {
         continue;
       }
 
+      const structured = parseStructuredPdfText(text, pdf);
+      if (structured?.length) {
+        console.log(`[ga-counties] ${pdf}: structured PDF parse → ${structured.length} lot(s)`);
+        return structured;
+      }
+
       try {
         const result = await extractLots(text, {
           countyName: auction.title ?? auction.countyFips,
@@ -154,9 +237,9 @@ export const georgiaAdapter: SourceAdapter = {
         if (e instanceof NoProviderAvailableError) {
           // Distinguish "we couldn't look" from "there is no sale". Silently
           // returning [] here would mark the county as having no inventory.
-          throw new Error(
-            `${pdf} needs LLM extraction but no provider is configured — county left unresolved`,
-          );
+          // Surface the real failure (credits, bad key, model name) — not a
+          // misleading "no provider configured" when keys are set but failing.
+          throw new Error(`${pdf} needs LLM extraction — ${e.message}`);
         }
         throw e;
       }

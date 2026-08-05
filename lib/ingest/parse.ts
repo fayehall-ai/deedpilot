@@ -17,7 +17,7 @@
 import * as cheerio from "cheerio";
 import { politeFetchBinary } from "./fetch";
 import { parseMoney } from "./judge";
-import type { DiscoveredLot } from "./types";
+import type { DiscoveredLot, ListingKind } from "./types";
 
 /** Headers that suggest a table of parcels going to sale. */
 export const PARCEL_HEADERS = /parcel|map\s*#|property|owner|defendant|bid|amount\s*due|address/i;
@@ -27,7 +27,68 @@ export const EXCLUDE_HEADERS = /excess\s*funds|overbid|surplus|claim|sold\s*date
 
 /** Link text or filenames that are never an upcoming parcel list. */
 export const EXCLUDE_LINKS =
-  /excess|surplus|overbid|brochure|faq|instruction|guide|kiosk|no tax sale|results|sold/i;
+  /excess|surplus|overbid|brochure|faq|instruction|guide|kiosk|no tax sale|results|sold|water.?quality|ccr|annual.?report|budget|minutes|agenda|form\b|application|bid.?package|how.?to.?bid|terms.?and.?conditions/i;
+
+/**
+ * A list published *for a specific sale* — the only thing that is inventory.
+ */
+const SALE_LIST_LINK =
+  /tax.?sale.?list|sale.?list|auction.?advert|properties.?for.?sale|sheriff.?sale|lien.?sale|deed.?sale|tax.?sale|foreclos/i;
+
+/**
+ * Everyone behind on taxes. Counties publish this beside the sale list and it
+ * looks identical to a parser: parcel, owner, address, amount.
+ *
+ * It is a superset of any eventual sale and usually 10-50x its size — most
+ * owners pay before the levy. Cobb County GA publishes both on one page, and
+ * scoring them alike put 2,825 delinquent taxpayers into inventory as lots
+ * under a sale date that did not exist. Ranked below sale lists, and tagged
+ * when it is all a county offers, rather than excluded — it is a real lead
+ * list, just not one anyone should bid from.
+ */
+const DELINQUENT_LIST_LINK = /delinquent|tax.?roll|levy.?list|execution.?docket/i;
+
+/** Struck-off / forfeited inventory available after a sale, not at one. */
+const LANDS_AVAILABLE_LINK =
+  /lands?.?available|struck.?off|forfeited.?land|county.?held|surplus.?land|flc\b/i;
+
+/** Generic parcel-shaped documents — worth opening, kind unknown. */
+const PARCEL_ISH_LINK = /parcel|booklet|list\b/i;
+
+/**
+ * What a link's text and filename claim the document is.
+ *
+ * Deliberately name-based: the county tells you in the anchor text, and reading
+ * that is cheaper and far more reliable than inferring it from parsed rows,
+ * where a delinquent list and a sale list are genuinely indistinguishable.
+ */
+export function classifyListingLink(label: string): ListingKind {
+  // Order matters — "Delinquent Tax Sale List" is a sale list; "Delinquent Tax
+  // List" is not. The more specific sale vocabulary wins where both appear.
+  if (/sale.?list|tax.?sale.?list|auction.?advert|properties.?for.?sale/i.test(label)) {
+    return "sale_list";
+  }
+  if (LANDS_AVAILABLE_LINK.test(label)) return "lands_available";
+  if (DELINQUENT_LIST_LINK.test(label)) return "delinquent_list";
+  if (SALE_LIST_LINK.test(label)) return "sale_list";
+  return "unknown";
+}
+
+/** Ranking score for a candidate document link. Higher is opened first. */
+function linkScore(label: string): number {
+  switch (classifyListingLink(label)) {
+    case "sale_list":
+      return 3;
+    case "lands_available":
+      return 2;
+    case "delinquent_list":
+      // Below anything sale-shaped, above an unrecognised PDF: it is real
+      // parcel data, it is simply not the sale.
+      return 1;
+    default:
+      return PARCEL_ISH_LINK.test(label) ? 1 : 0;
+  }
+}
 
 /**
  * Best parcel table on the page, or null.
@@ -89,8 +150,26 @@ export function parseHtmlTable(
   return best;
 }
 
-/** PDF links on the page, resolved absolute, with the known decoys removed. */
-export function pdfLinks($: cheerio.CheerioAPI, pageUrl: string): string[] {
+/** A candidate document link, with what the county's own wording says it is. */
+export interface ClassifiedPdfLink {
+  url: string;
+  kind: ListingKind;
+}
+
+/**
+ * PDF links on the page, resolved absolute, decoys removed, ranked so a sale
+ * list is always opened before a delinquent roll.
+ *
+ * Ranking is the whole point. Cobb County GA links both from one page; opening
+ * whichever came first put the delinquent roll into inventory. The returned
+ * `kind` then travels with the parsed lots so that if a county only ever
+ * publishes a delinquent list, that fact survives into the database instead of
+ * being flattened into "an auction".
+ */
+export function classifiedPdfLinks(
+  $: cheerio.CheerioAPI,
+  pageUrl: string,
+): ClassifiedPdfLink[] {
   const base = $("base[href]").attr("href");
   let resolveAgainst = pageUrl;
   if (base) {
@@ -101,18 +180,34 @@ export function pdfLinks($: cheerio.CheerioAPI, pageUrl: string): string[] {
     }
   }
 
-  const out: string[] = [];
+  const scored: { url: string; score: number; kind: ListingKind }[] = [];
   $('a[href*=".pdf" i]').each((_, a) => {
     const href = $(a).attr("href");
     if (!href) return;
-    if (EXCLUDE_LINKS.test(`${$(a).text()} ${href}`)) return;
+    const label = `${$(a).text()} ${href}`;
+    if (EXCLUDE_LINKS.test(label)) return;
     try {
-      out.push(new URL(href, resolveAgainst).toString());
+      const url = new URL(href, resolveAgainst).toString();
+      scored.push({ url, score: linkScore(label), kind: classifyListingLink(label) });
     } catch {
       /* malformed href — skip */
     }
   });
-  return [...new Set(out)];
+
+  // Same URL can appear under several anchors; keep its strongest claim.
+  const best = new Map<string, { score: number; kind: ListingKind }>();
+  for (const s of scored) {
+    const prev = best.get(s.url);
+    if (!prev || s.score > prev.score) best.set(s.url, { score: s.score, kind: s.kind });
+  }
+  return [...best.entries()]
+    .sort((a, b) => b[1].score - a[1].score)
+    .map(([url, v]) => ({ url, kind: v.kind }));
+}
+
+/** URLs only — for callers that do not care which document they got. */
+export function pdfLinks($: cheerio.CheerioAPI, pageUrl: string): string[] {
+  return classifiedPdfLinks($, pageUrl).map((l) => l.url);
 }
 
 /** Link text that points straight at a sale list. */
@@ -246,4 +341,189 @@ export async function pdfToText(url: string): Promise<string> {
   } finally {
     await parser.destroy().catch(() => {});
   }
+}
+
+/**
+ * Deterministic parse of common sealed-bid / tax-sale PDF text layouts.
+ *
+ * Used *before* LLM extraction so a structured list (Charleston County SC
+ * sealed-bid is the template) does not depend on API credits. Returns null
+ * when the text does not look like a parcel table — callers then try the LLM
+ * or record "no list".
+ *
+ * Charleston shape (header then rows):
+ *   PIN OWNER(S) SITUSADDRESS CITY APPRAISAL ACREAGE DESCRIPTION MINIMUM BID
+ *   4660800256 BUSH … NORTH CHARLESTON 12,000.00$ 0.19 905 - VAC-RES-LOT $500.00
+ */
+export function parseStructuredPdfText(
+  text: string,
+  sourceUrl: string,
+): DiscoveredLot[] | null {
+  const flat = text.replace(/\r/g, "\n");
+  // Need a header that looks like a sale list, not a statute or FAQ.
+  // "Amount" / "Opening Bid" cover GA delinquent rolls and FL clerk sale PDFs.
+  const hasHeader =
+    /PIN|PARCEL|MAP\s*#|ACCOUNT|Delinquent\s+Tax\s+List|Case\s*Number/i.test(flat) &&
+    /(MINIMUM\s*BID|MIN\.?\s*BID|OPENING\s*BID|AMOUNT\s*DUE|TOTAL\s*DUE|APPRAISAL|ASSESSED|\bAMOUNT\b)/i.test(
+      flat,
+    );
+  if (!hasHeader) return null;
+
+  const lots: DiscoveredLot[] = [];
+
+  // Collapse multi-line owner/address blocks onto the prior PIN line.
+  const rawLines = flat
+    .split(/\n/)
+    .map((l) => l.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  const collapsed: string[] = [];
+  for (const line of rawLines) {
+    if (/^(?:MH)?\d{7,14}\b/i.test(line) || /PIN|OWNER|TAX SALE|AS OF|-- \d/i.test(line)) {
+      collapsed.push(line);
+    } else if (collapsed.length) {
+      collapsed[collapsed.length - 1] += " " + line;
+    }
+  }
+
+  // Also split glued single lines on PIN boundaries.
+  const expanded: string[] = [];
+  for (const line of collapsed) {
+    const parts = line.split(/(?=\b(?:MH)?\d{7,14}\b)/);
+    for (const p of parts) {
+      const t = p.trim();
+      if (t) expanded.push(t);
+    }
+  }
+
+  const seen = new Set<string>();
+  for (const line of expanded) {
+    const m = line.match(/^((?:MH)?\d{7,14})\b(.*)$/i);
+    if (!m) continue;
+    const pin = m[1];
+    const rest = m[2];
+    if (/^PIN\b/i.test(line)) continue;
+
+    // Money tokens: 12,000.00$ or $500.00
+    const monies = [...rest.matchAll(/\$?\s*([\d,]+\.\d{2})\s*\$?/g)].map((x) =>
+      Number(x[1].replace(/,/g, "")),
+    );
+    if (monies.length === 0) continue;
+
+    // Convention: last money is minimum/opening bid; first (if distinct) is appraisal
+    const openingBid = monies[monies.length - 1];
+    const assessedValue =
+      monies.length >= 2 && monies[0] > openingBid ? monies[0] : undefined;
+
+    if (!Number.isFinite(openingBid) || openingBid <= 0) continue;
+    if (seen.has(pin)) continue;
+    seen.add(pin);
+
+    // Owner: text after pin until first street number or money region
+    const ownerMatch = rest.match(
+      /^\s*([A-Z0-9][A-Z0-9 &.',/\-]{2,60}?)(?=\s+\d{1,5}\s+[A-Z]|\s+0\s+[A-Z]|\s+\$|[\d,]+\.\d{2})/i,
+    );
+
+    lots.push({
+      parcelNumber: pin,
+      ownerName: ownerMatch?.[1]?.trim(),
+      openingBid,
+      assessedValue,
+      sourceUrl,
+      raw: { source: "structured-pdf", line: line.slice(0, 240) },
+    });
+  }
+
+  // Require a few rows so a statute PDF that mentions one account number does
+  // not become fake inventory.
+  if (lots.length >= 3) return lots;
+
+  // --- Volusia FL lands available PDF ----------------------------------------
+  // 9219-20 533952000070 APRIL 18, 2023 AUGUST 17, 2023 $19,493.98
+  if (/LANDS\s+AVAILABLE\s+FOR\s+TAXES/i.test(flat) && /OPENING\s*BID|CERTIFICATE/i.test(flat)) {
+    const volusia: DiscoveredLot[] = [];
+    const re =
+      /\b(\d{1,6}-\d{2})\s+(\d{10,14})\s+[A-Z]+\s+\d{1,2},\s*\d{4}\s+[A-Za-z]+\s+\d{1,2},\s*\d{4}\s+\$?\s*([\d,]+\.\d{2})/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(flat.replace(/\s+/g, " ")))) {
+      const bid = Number(m[3].replace(/,/g, ""));
+      if (!Number.isFinite(bid) || bid <= 0) continue;
+      volusia.push({
+        lotNumber: m[1],
+        parcelNumber: m[2],
+        openingBid: bid,
+        sourceUrl,
+        raw: { source: "structured-pdf-volusia-lat" },
+      });
+    }
+    if (volusia.length >= 3) return volusia;
+  }
+
+  // --- Brevard FL tax deed sale PDF ----------------------------------------
+  // Pages 1–2: ACTIVE case# date app# parcel saleDate deposit…
+  // Later pages: "Opening Bid" then a stream of bare numbers (no $) in order.
+  if (/Case\s*Number|Application\s*Number/i.test(flat) && /Parcel\s*Number|Sale\s*Date/i.test(flat)) {
+    const active = [
+      ...flat.matchAll(
+        /\bACTIVE\s+(\d{5,6})\s+\d{1,2}\/\d{1,2}\/\d{4}\s+\d{5,6}\s+(\d{5,10})\s+(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+      ),
+    ];
+    const bidSection = flat.split(/Opening\s*Bid/i)[1] ?? "";
+    const bids = [...bidSection.matchAll(/\b(\d+(?:\.\d{1,2})?)\b/g)]
+      .map((m) => Number(m[1]))
+      .filter((n) => Number.isFinite(n) && n >= 100); // drop page numbers / noise
+    if (active.length >= 3) {
+      const brevard: DiscoveredLot[] = [];
+      active.forEach((m, i) => {
+        const openingBid = Number.isFinite(bids[i]) ? bids[i] : undefined;
+        brevard.push({
+          lotNumber: m[1],
+          parcelNumber: m[2],
+          openingBid,
+          sourceUrl,
+          raw: {
+            source: "structured-pdf-brevard",
+            saleDateRaw: m[3],
+            bidIndex: i,
+          },
+        });
+      });
+      if (brevard.length >= 3) return brevard;
+    }
+  }
+
+  // --- Cobb / GA-style delinquent list (glued single stream) ---------------
+  // "Parcel ID Owner Name Address Amount … 01000100290 SCHERER … 4512 COLUMNS DR $50.57 2025"
+  if (/Parcel\s*ID|Delinquent\s+Tax\s+List/i.test(flat) && /Amount/i.test(flat)) {
+    const cobb: DiscoveredLot[] = [];
+    const seenCobb = new Set<string>();
+    // Split on 10–14 digit parcel tokens that start a record.
+    const segs = flat.replace(/\s+/g, " ").split(/(?=\b\d{10,14}\b)/);
+    for (const seg of segs) {
+      const m = seg
+        .trim()
+        .match(
+          /^(\d{10,14})\s+([A-Z0-9][A-Z0-9 &.',\-\/]{1,80}?)\s+(\d{1,5}\s+[^$]{2,80}?)\s+\$\s*([\d,]+\.\d{2})\b/i,
+        );
+      if (!m) continue;
+      const parcelNumber = m[1];
+      if (seenCobb.has(parcelNumber)) continue;
+      const amount = Number(m[4].replace(/,/g, ""));
+      if (!Number.isFinite(amount) || amount <= 0) continue;
+      seenCobb.add(parcelNumber);
+      cobb.push({
+        parcelNumber,
+        ownerName: m[2].trim(),
+        addressLine: m[3].replace(/\s+/g, " ").trim(),
+        // Delinquent lists publish tax due; that is the usual floor for a sale.
+        openingBid: amount,
+        taxesOwed: amount,
+        sourceUrl,
+        raw: { source: "structured-pdf-delinquent", segment: seg.slice(0, 200) },
+      });
+    }
+    if (cobb.length >= 3) return cobb;
+  }
+
+  return null;
 }

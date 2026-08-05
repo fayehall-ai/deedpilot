@@ -26,6 +26,14 @@ export type Platform =
   | "in_person";
 
 export type AuctionStatus = "scheduled" | "live" | "closed" | "cancelled" | "postponed";
+
+/**
+ * Which published document the parcels came from.
+ *
+ * Only `sale_list` is inventory. See `listingKindEnum` in the schema for why
+ * this is tracked rather than assumed.
+ */
+export type ListingKind = "sale_list" | "delinquent_list" | "lands_available" | "unknown";
 export type LotStatus =
   | "pending"
   | "sold"
@@ -49,6 +57,17 @@ export interface DiscoveredAuction {
   externalId: string;
   /** ISO date, YYYY-MM-DD. */
   saleDate: string;
+  /**
+   * True only if the county published this date. Adapters that read a date off
+   * the source say so; adapters that take one from the sale calendar must not.
+   * Omitted means unconfirmed — the safe reading.
+   */
+  saleDateConfirmed?: boolean;
+  /**
+   * Which document the lots come from. Adapters pinned to a known sale list say
+   * `sale_list`; the registry-driven crawler reports what it actually opened.
+   */
+  listingKind?: ListingKind;
   startTime?: string;
   title?: string;
   status?: AuctionStatus;
@@ -120,6 +139,15 @@ export interface SourceAdapter {
 
   listAuctions(binding: CountyBinding): Promise<DiscoveredAuction[]>;
 
+  /**
+   * Parcels in one sale.
+   *
+   * May refine `auction.listingKind` and `auction.saleDateConfirmed` in place:
+   * which document a county actually serves is often only knowable after
+   * fetching it, and the runner persists the auction *after* this resolves.
+   * Refining upward (unknown → sale_list) requires evidence from the source;
+   * silence leaves the conservative value set by `listAuctions`.
+   */
   listLots(auction: DiscoveredAuction): Promise<DiscoveredLot[]>;
 
   /**

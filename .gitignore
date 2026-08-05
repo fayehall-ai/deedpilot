@@ -54,3 +54,6 @@ copilot/data/pdf_cache/
 # Improve-run JSON dumps (keep latest optional — full history is local)
 copilot/data/improve/
 copilot/data/pdf_cache/
+
+# Stale registry snapshots
+data/source-registry.backup.json

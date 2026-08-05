@@ -1,0 +1,361 @@
+{
+  "generatedAt": "2026-08-02T03:11:20.916Z",
+  "gold": {
+    "score": 0.263,
+    "weights": {
+      "live": 0.35,
+      "history": 0.25,
+      "price": 0.4
+    },
+    "liveShare": 0.059,
+    "historyShare": 0.039,
+    "priceShare": 0.58,
+    "penalties": 0
+  },
+  "live": {
+    "upcomingAuctionsWithLots": 128,
+    "skeletonAuctions": 0,
+    "totalLotsUpcoming": 3090,
+    "lotsWithOpening": 3090,
+    "lotsWithAssessed": 2861,
+    "lotsAutoPriceable": 2861,
+    "statesWithLots": 3,
+    "countiesWithLots": 106,
+    "byState": [
+      {
+        "state": "MI",
+        "auctions": 75,
+        "lots": 2272,
+        "withAssessed": 2272,
+        "autoPriceable": 2272,
+        "counties": 75
+      },
+      {
+        "state": "TX",
+        "auctions": 47,
+        "lots": 659,
+        "withAssessed": 579,
+        "autoPriceable": 579,
+        "counties": 27
+      },
+      {
+        "state": "FL",
+        "auctions": 6,
+        "lots": 159,
+        "withAssessed": 10,
+        "autoPriceable": 10,
+        "counties": 4
+      }
+    ]
+  },
+  "history": {
+    "nRows": 92208,
+    "nPriceUsable": 17770,
+    "nRedemptionObserved": 17156,
+    "sharePriceUsable": 0.1927,
+    "statesWithPriceUsable": [
+      "CA",
+      "MI"
+    ],
+    "note": "Row count is not progress. price_usable and redemption_observed are."
+  },
+  "statute": {
+    "statesWithParams": [
+      "AZ",
+      "CA",
+      "FL",
+      "GA",
+      "IL",
+      "MI",
+      "TX"
+    ],
+    "nStates": 7,
+    "nMissing": 44,
+    "missingStates": [
+      "AL",
+      "AK",
+      "AR",
+      "CO",
+      "CT",
+      "DE",
+      "DC",
+      "HI",
+      "ID",
+      "IN",
+      "IA",
+      "KS",
+      "KY",
+      "LA",
+      "ME",
+      "MD",
+      "MA",
+      "MN",
+      "MS",
+      "MO",
+      "MT",
+      "NE",
+      "NV",
+      "NH",
+      "NJ",
+      "NM",
+      "NY",
+      "NC",
+      "ND",
+      "OH",
+      "OK",
+      "OR",
+      "PA",
+      "RI",
+      "SC",
+      "SD",
+      "TN",
+      "UT",
+      "VT",
+      "VA",
+      "WA",
+      "WV",
+      "WI",
+      "WY"
+    ]
+  },
+  "registry": {
+    "nCounties": 618,
+    "nVerified": 157,
+    "nGaps": 463,
+    "nListing": 2,
+    "nResults": 131,
+    "builtAt": "2026-08-01T20:09:54.265Z"
+  },
+  "maxbid": {
+    "countiesWithStatute": 738,
+    "totalCounties": 3142,
+    "autoPriceableLots": 2861,
+    "autoPriceableRate": 0.926
+  },
+  "workPlan": [
+    {
+      "class": "A",
+      "priority": 149,
+      "title": "Enrich assessed values in FL",
+      "reason": "10/159 lots have assessed (6.3%). Max bid is dark without ARV.",
+      "target": {
+        "state": "FL",
+        "limit": 149
+      }
+    },
+    {
+      "class": "B",
+      "priority": 89,
+      "title": "Live inventory pilot: GA",
+      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "target": {
+        "state": "GA"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 88,
+      "title": "Live inventory pilot: AZ",
+      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "target": {
+        "state": "AZ"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 87,
+      "title": "Live inventory pilot: CA",
+      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "target": {
+        "state": "CA"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 86,
+      "title": "Live inventory pilot: IL",
+      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "target": {
+        "state": "IL"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 85,
+      "title": "Live inventory pilot: OH",
+      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "target": {
+        "state": "OH"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 84,
+      "title": "Live inventory pilot: NY",
+      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "target": {
+        "state": "NY"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 83,
+      "title": "Live inventory pilot: PA",
+      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "target": {
+        "state": "PA"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 82,
+      "title": "Live inventory pilot: NC",
+      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "target": {
+        "state": "NC"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 81,
+      "title": "Live inventory pilot: NJ",
+      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "target": {
+        "state": "NJ"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 70,
+      "title": "Unblock LLM for PDF county lists",
+      "reason": "GA/AZ/FL/Charleston SC sealed-bid PDFs need extractLots. XAI credits exhausted and ANTHROPIC_API_KEY is empty — set a key or DEEDPILOT_DISABLE_GROK=1 with Claude."
+    },
+    {
+      "class": "B",
+      "priority": 60,
+      "title": "Grow listing registry",
+      "reason": "Only 2 listing-kind sources verified. Prospector should target kind=listing."
+    },
+    {
+      "class": "C",
+      "priority": 50,
+      "title": "Expand labelled historical outcomes",
+      "reason": "Only 2 state(s) with observed price_usable history. Archivist + label rules, not raw imports."
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: AL",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "AL"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: AK",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "AK"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: AR",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "AR"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: CO",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "CO"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: CT",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "CT"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: DE",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "DE"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: DC",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "DC"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: HI",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "HI"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: ID",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "ID"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: IN",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "IN"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: IA",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "IA"
+      }
+    },
+    {
+      "class": "D",
+      "priority": 40,
+      "title": "Statute draft: KS",
+      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
+      "target": {
+        "state": "KS"
+      }
+    }
+  ],
+  "budgetShares": {
+    "A": 0.14126429479034308,
+    "B": 0.4880304955527318,
+    "C": 0.08223634053367217,
+    "D": 0.25846886912325284,
+    "E": 0.03
+  }
+}

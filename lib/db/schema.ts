@@ -89,6 +89,33 @@ export const ingestStatusEnum = pgEnum("ingest_status", [
   "failed",
 ]);
 
+/**
+ * What kind of document the lots came from — the difference between "these
+ * parcels are being sold on this date" and "these parcels owe money".
+ *
+ * Counties publish several superficially similar lists on the same page. Cobb
+ * County GA links a Tax Sale List, a Delinquent Tax List, an Excess Funds list
+ * and a booklet from one page; only the first is inventory. A crawler that
+ * scores them alike ingests 2,825 delinquent taxpayers as an auction — which is
+ * what happened, under a sale date the calendar invented.
+ *
+ * Recording which document was read makes that recoverable instead of
+ * indistinguishable. Only `sale_list` is inventory a bidder can act on.
+ */
+export const listingKindEnum = pgEnum("listing_kind", [
+  /** The county's published list for a specific, dated sale. Real inventory. */
+  "sale_list",
+  /**
+   * Everyone delinquent on taxes. A superset of any eventual sale — most of
+   * these owners pay before the levy. Useful as a lead list, never as lots.
+   */
+  "delinquent_list",
+  /** Struck to the county / forfeited land inventory, available post-sale. */
+  "lands_available",
+  /** Read something parcel-shaped, could not establish which of the above. */
+  "unknown",
+]);
+
 // ---------------------------------------------------------------------------
 // Geography
 // ---------------------------------------------------------------------------
@@ -138,6 +165,18 @@ export const auctions = pgTable(
     externalId: text("external_id").notNull(),
     title: text("title"),
     saleDate: date("sale_date").notNull(),
+    /**
+     * True only when the county published this date for this sale. False when
+     * `nextSaleWindows` projected it from the state's typical schedule.
+     *
+     * The projection exists so unresearched counties still get crawled rather
+     * than skipped, which is right — but a projected date is a research lead,
+     * not a date to drive to. Defaults to false so a source that never says
+     * otherwise cannot be mistaken for a confirmed one.
+     */
+    saleDateConfirmed: boolean("sale_date_confirmed").notNull().default(false),
+    /** Which published document the lots were read from. See `listingKindEnum`. */
+    listingKind: listingKindEnum("listing_kind").notNull().default("unknown"),
     /** Local start time as published, e.g. "10:00 AM ET". Prose, not parsed. */
     startTime: text("start_time"),
     status: auctionStatusEnum("status").notNull().default("scheduled"),
@@ -155,6 +194,8 @@ export const auctions = pgTable(
     index("auctions_date_idx").on(t.saleDate),
     index("auctions_county_date_idx").on(t.countyFips, t.saleDate),
     index("auctions_status_idx").on(t.status),
+    // Every inventory-facing query filters on these two together.
+    index("auctions_confirmed_idx").on(t.listingKind, t.saleDateConfirmed),
   ],
 );
 

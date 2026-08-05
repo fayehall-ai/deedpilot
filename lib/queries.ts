@@ -1,12 +1,23 @@
 import "server-only";
 import { and, asc, desc, eq, gte, sql, count } from "drizzle-orm";
 import { db } from "./db";
-import { auctions, counties, lots, ingestRuns, dealAnalyses } from "./db/schema";
+import { auctions, counties, lots, ingestRuns, dealAnalyses, lotValuations } from "./db/schema";
 
 /** Today in UTC as YYYY-MM-DD — sale dates are stored as plain dates. */
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
+
+/**
+ * Inventory a bidder can act on: parcels from a county's published sale list.
+ *
+ * A delinquent roll parses identically to a sale list and is 10-50x larger, so
+ * without this filter the honest counts are swamped by parcels that are not for
+ * sale. Applied to every headline number and every default listing view; ops
+ * surfaces opt out explicitly.
+ */
+const isConfirmedInventory = () =>
+  and(eq(auctions.listingKind, "sale_list"), eq(auctions.saleDateConfirmed, true));
 
 export interface AuctionListRow {
   id: string;
@@ -20,12 +31,35 @@ export interface AuctionListRow {
   countyFips: string;
   countyName: string;
   state: string;
+  /** Which document these parcels came from. Only `sale_list` is inventory. */
+  listingKind: string;
+  /** False when the date is projected from the state's typical schedule. */
+  saleDateConfirmed: boolean;
   /** Sum of opening bids where known — an incomplete floor, labelled as such. */
   totalOpeningBids: string | null;
 }
 
-export async function getUpcomingAuctions(opts: { state?: string; limit?: number } = {}) {
-  const where = [gte(auctions.saleDate, todayIso())];
+export async function getUpcomingAuctions(
+  opts: {
+    state?: string;
+    limit?: number;
+    /** Include 0-lot calendar shells. Default false. */
+    includeSkeletons?: boolean;
+    /**
+     * Include delinquent rolls and projected sale dates. Default false —
+     * these are research leads, not auctions, and must be labelled wherever
+     * they are shown.
+     */
+    includeUnconfirmed?: boolean;
+  } = {},
+) {
+  // Skeletons (lot_count = 0) are not inventory — they inflate "coverage" and
+  // look like real sales on the auctions page. Opt in only for ops views.
+  const where = [
+    gte(auctions.saleDate, todayIso()),
+    ...(opts.includeSkeletons ? [] : [sql`${auctions.lotCount} > 0`]),
+    ...(opts.includeUnconfirmed ? [] : [isConfirmedInventory()]),
+  ];
   if (opts.state) where.push(eq(counties.state, opts.state));
 
   return db
@@ -41,6 +75,8 @@ export async function getUpcomingAuctions(opts: { state?: string; limit?: number
       countyFips: auctions.countyFips,
       countyName: counties.name,
       state: counties.state,
+      listingKind: auctions.listingKind,
+      saleDateConfirmed: auctions.saleDateConfirmed,
       totalOpeningBids: sql<string | null>`(
         SELECT sum(${lots.openingBid}) FROM ${lots} WHERE ${lots.auctionId} = ${auctions.id}
       )`,
@@ -86,6 +122,15 @@ export async function getLot(id: string) {
   return row ?? null;
 }
 
+/** Latest enrichment rows for a lot (ATTOM / RentCast / assessor). */
+export async function getLotValuations(lotId: string) {
+  return db
+    .select()
+    .from(lotValuations)
+    .where(eq(lotValuations.lotId, lotId))
+    .orderBy(desc(lotValuations.fetchedAt));
+}
+
 /**
  * A previously generated brief for this lot and exact input set.
  *
@@ -108,16 +153,55 @@ export async function getCachedBrief(lotId: string, inputsHash: string) {
   }
 }
 
-/** Headline counts for the landing page and the coverage report. */
+/**
+ * Headline counts for the landing page and the coverage report.
+ *
+ * Every number here counts *confirmed sale inventory only* — a published sale
+ * list on a published date. Delinquent rolls and projected dates are counted
+ * separately as `leads`, because presenting them together is the difference
+ * between "9,598 lots" and the ~3,300 a subscriber can actually bid on.
+ */
 export async function getPlatformStats() {
+  const upcoming = gte(auctions.saleDate, todayIso());
+  const hasLots = sql`${auctions.lotCount} > 0`;
+  const confirmed = isConfirmedInventory();
+
   const [totals] = await db
     .select({
       auctions: count(auctions.id),
     })
     .from(auctions)
-    .where(gte(auctions.saleDate, todayIso()));
+    .where(and(upcoming, hasLots, confirmed));
 
-  const [lotTotals] = await db.select({ lots: count(lots.id) }).from(lots);
+  const [skeletonTotals] = await db
+    .select({ auctions: count(auctions.id) })
+    .from(auctions)
+    .where(and(upcoming, eq(auctions.lotCount, 0)));
+
+  // Lots on upcoming non-skeleton auctions only (not historical junk).
+  const [lotTotals] = await db
+    .select({ lots: count(lots.id) })
+    .from(lots)
+    .innerJoin(auctions, eq(auctions.id, lots.auctionId))
+    .where(and(upcoming, hasLots, confirmed));
+
+  const [lotsWithAssessed] = await db
+    .select({ n: count(lots.id) })
+    .from(lots)
+    .innerJoin(auctions, eq(auctions.id, lots.auctionId))
+    .where(and(upcoming, hasLots, confirmed, sql`${lots.assessedValue} is not null`));
+
+  // Parcels we hold that are *not* bidding inventory: delinquent rolls, lands
+  // available, and lists sitting under a projected date. Real research value,
+  // reported under its own name so it can never pad the inventory figure.
+  const [leadTotals] = await db
+    .select({
+      auctions: sql<number>`count(DISTINCT ${auctions.id})::int`,
+      lots: count(lots.id),
+    })
+    .from(lots)
+    .innerJoin(auctions, eq(auctions.id, lots.auctionId))
+    .where(and(upcoming, hasLots, sql`NOT (${confirmed})`));
 
   const byState = await db
     .select({
@@ -128,13 +212,19 @@ export async function getPlatformStats() {
     })
     .from(auctions)
     .innerJoin(counties, eq(counties.fips, auctions.countyFips))
-    .leftJoin(lots, eq(lots.auctionId, auctions.id))
+    .innerJoin(lots, eq(lots.auctionId, auctions.id))
+    .where(and(upcoming, hasLots, confirmed))
     .groupBy(counties.state)
     .orderBy(desc(sql`count(${lots.id})`));
 
   return {
     upcomingAuctions: totals?.auctions ?? 0,
+    skeletonAuctions: skeletonTotals?.auctions ?? 0,
     totalLots: lotTotals?.lots ?? 0,
+    lotsWithAssessed: lotsWithAssessed?.n ?? 0,
+    /** Parcels held that are not confirmed bidding inventory. */
+    leadAuctions: leadTotals?.auctions ?? 0,
+    leadLots: leadTotals?.lots ?? 0,
     byState,
   };
 }
