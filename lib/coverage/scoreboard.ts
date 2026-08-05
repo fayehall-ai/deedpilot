@@ -104,6 +104,7 @@ export interface StateLeverage {
   alsoUnlocks: string[];
   researchedCounties: number;
   reachablePopulation: number;
+  access?: "allow" | "requires_agreement" | "deny";
 }
 
 async function loadSourceLeverage(): Promise<StateLeverage[]> {
@@ -257,6 +258,7 @@ function buildWorkPlan(input: {
         state: st,
         counties,
         source: l?.bestSource ?? "none-known",
+        access: l?.access ?? "allow",
         multiState,
         // A platform serving N other states is worth building once for all of
         // them, so cross-state reach counts as much as local county count.
@@ -265,20 +267,29 @@ function buildWorkPlan(input: {
     })
     .filter((r) => r.counties > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
+    .slice(0, 12);
 
   for (const r of ranked) {
     const also =
       r.multiState > 0
         ? ` Same adapter also serves ${r.multiState} other state(s).`
         : "";
+    // Sources needing an access decision are ranked, not hidden. The data is
+    // published; how we are entitled to take it is a separate question with a
+    // human answer, and burying the state until that answer exists is how the
+    // largest inventory in the country stayed invisible.
+    const gate =
+      r.access === "allow"
+        ? ""
+        : ` Access: ${r.source} is ${r.access} — decide the route (agreement, ` +
+          `operator browser session, or county source of record) before building.`;
     items.push({
       class: "B",
       priority: 80 + r.score,
       title: `Live inventory pilot: ${r.state}`,
       reason:
         `No upcoming lots with parcels. ≥${r.counties} counties reachable via ` +
-        `${r.source} (floor — only researched counties counted).${also}`,
+        `${r.source} (floor — only researched counties counted).${also}${gate}`,
       target: { state: r.state },
     });
   }

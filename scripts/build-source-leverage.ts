@@ -42,21 +42,24 @@ const PLATFORMS: ReadonlyArray<
 ];
 
 /**
- * Platforms we may not crawl, read from the access policy rather than
- * duplicated here.
+ * Access status per platform, read from policy.ts rather than duplicated.
  *
- * This matters more than it looks. Ranking by raw county count puts GovEase
- * states (AL, MS, TN…) at the top of the work plan, and every one of them is
- * unreachable: liveauctions.govease.com serves `Disallow: /`. A plan that
- * ranks work nobody can do is worse than the population ranking it replaced.
+ * Recorded alongside each state rather than used to filter it. An earlier
+ * version dropped `requires_agreement` platforms from the ranking entirely,
+ * which hid the largest inventory in the country: GovEase publishes 154
+ * auctions across 13 states, and Bid4Assets a full county tax-sale calendar,
+ * both readable in a browser with no login. Their robots.txt posture is a
+ * crawler question, not a statement that the data is private, and the two are
+ * easy to conflate into "no inventory here" — which is what happened.
+ *
+ * The work plan's job is to show the work. Whether a given source is
+ * approached by crawler, by data agreement, or through the operator's own
+ * browser session is a separate decision, made per source, by a human.
  */
-function blockedPlatforms(): Set<string> {
-  const blocked = new Set<string>();
-  for (const [name, , host] of PLATFORMS) {
-    const policy = policyFor(host);
-    if (policy && policy.decision !== "allow") blocked.add(name);
-  }
-  return blocked;
+function accessStatus(platform: string): "allow" | "requires_agreement" | "deny" {
+  const entry = PLATFORMS.find(([name]) => name === platform);
+  if (!entry) return "allow";
+  return policyFor(entry[2])?.decision ?? "allow";
 }
 
 interface CountySource {
@@ -78,6 +81,8 @@ interface StateLeverage {
   researchedCounties: number;
   /** Population in reachable counties, the tiebreak once leverage is equal. */
   reachablePopulation: number;
+  /** Crawl posture of the best source. Annotated, never used to filter. */
+  access: "allow" | "requires_agreement" | "deny";
 }
 
 function main() {
@@ -87,7 +92,6 @@ function main() {
   ) as { counties: CountySource[]; exportedAt?: string };
 
   const counties = raw.counties ?? [];
-  const BLOCKED = blockedPlatforms();
 
   // platform -> state -> {counties, population}
   const byPlatform = new Map<string, Map<string, { n: number; pop: number }>>();
@@ -115,7 +119,6 @@ function main() {
     let best: { source: string; n: number; pop: number; also: string[] } | null = null;
 
     for (const [platform, states] of byPlatform) {
-      if (BLOCKED.has(platform)) continue;
       const here = states.get(state);
       if (!here) continue;
       if (!best || here.n > best.n) {
@@ -135,6 +138,7 @@ function main() {
       alsoUnlocks: best?.also ?? [],
       researchedCounties: researchedByState.get(state) ?? 0,
       reachablePopulation: best?.pop ?? 0,
+      access: best ? accessStatus(best.source) : "allow",
     });
   }
 
@@ -145,13 +149,13 @@ function main() {
     sourceExportedAt: raw.exportedAt ?? null,
     note:
       "Counties one adapter reaches, per state. Ranks the coverage work plan " +
-      "by adapter leverage rather than state population. Platforms whose " +
-      "access policy is not `allow` are excluded — their counties are not " +
-      "reachable inventory, and ranking them would fill the plan with work " +
-      "nobody can do. Counts are floors: only counties researched in depth " +
+      "by adapter leverage rather than state population. Every platform is " +
+      "ranked; those needing an access decision carry access!=allow rather " +
+      "than being dropped, so the inventory stays visible. Counts are " +
+      "floors: only counties researched in depth " +
       "(roughly 50k+ population) are counted, so statewide sources like " +
       "Arkansas COSL are undercounted.",
-    blockedPlatforms: [...BLOCKED],
+    requiresAgreement: [...new Set(out.filter((s) => s.access !== "allow").map((s) => s.bestSource))],
     states: out,
   };
 
@@ -163,8 +167,9 @@ function main() {
   console.log("top leverage:");
   for (const s of out.slice(0, 12)) {
     const also = s.alsoUnlocks.length ? ` (+${s.alsoUnlocks.length} states)` : "";
+    const gate = s.access === "allow" ? "" : `  [${s.access}]`;
     console.log(
-      `  ${s.state}  ${String(s.bestSourceCounties).padStart(3)} counties via ${s.bestSource}${also}`,
+      `  ${s.state}  ${String(s.bestSourceCounties).padStart(3)} counties via ${s.bestSource}${also}${gate}`,
     );
   }
 }
