@@ -58,9 +58,11 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     reason:
       "liveauctions.govease.com/robots.txt is `User-agent: * / Disallow: /` — verified 2026-08-05. " +
       "GovEase is the widest-reach platform in the researched set (59 counties across AL, CA, IA, IN, " +
-      "MO, MS, OK, PA, TN, TX, WA), so this is the single largest blocked surface after RealAuction. " +
-      "The marketing site (www.govease.com) is permissive but carries no parcel data. Correct paths " +
-      "are a data agreement, or the county's own published list where one exists.",
+      "MO, MS, OK, PA, TN, TX, WA). The data itself is public — no login — but this entry stays " +
+      "`requires_agreement` so nothing in the ingest path can crawl it by default. The `govease` " +
+      "adapter takes the browser-capture route instead: pages are opened in the operator's own " +
+      "browser and read from data/govease-capture/, and the adapter imports node:fs rather than " +
+      "politeFetch, so there is no code path from it to this host. See docs/govease-capture.md.",
   },
   {
     host: "bid4assets.com",

@@ -57,3 +57,6 @@ copilot/data/pdf_cache/
 
 # Stale registry snapshots
 data/source-registry.backup.json
+
+# GovEase browser captures (working artifacts, not source)
+data/govease-capture/

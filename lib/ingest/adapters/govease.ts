@@ -6,16 +6,20 @@
  * the auction registry and, once a county uploads it, the parcel catalog —
  * owner, parcel number, opening bid and legal description — with no login.
  *
- * ## Access
+ * ## Access — this adapter never touches the network
  *
- * `liveauctions.govease.com/robots.txt` is `User-agent: * / Disallow: /`,
- * and `policy.ts` records the host as `requires_agreement`. This adapter runs
- * `underAgreement: true`, which bypasses the robots check but never the rate
- * limiter. That is a deliberate operator decision recorded here rather than
- * hidden: the data is a public record published without authentication, and
- * the account owner authorised this route on 2026-08-05. Revisit it if GovEase
- * objects or publishes terms that speak to automated access — and prefer the
- * county's own list wherever one exists.
+ * `liveauctions.govease.com/robots.txt` is `User-agent: * / Disallow: /`, and
+ * `policy.ts` records the host as `requires_agreement`. Rather than crawl it
+ * under a bypass, the pages are opened in the operator's own browser and saved
+ * to `data/govease-capture/`; this adapter only reads those files. Fetching a
+ * public page in a browser you are sitting in front of is not crawling, and
+ * this keeps that distinction structural instead of a matter of intent.
+ *
+ * See `docs/govease-capture.md` for the capture workflow.
+ *
+ * The parsers below are pure functions over HTML, so they are identical either
+ * way — only the transport changed. If a data agreement is signed later, add a
+ * fetching transport and keep `parseRegistry` / `parseCatalog` untouched.
  *
  * ## Shape of the source
  *
@@ -38,8 +42,9 @@
  *    dates approach or it will report a near-empty state forever.
  */
 
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
 import * as cheerio from "cheerio";
-import { politeFetch } from "../fetch";
 import { findCountyByName } from "../../atlas";
 import type {
   CountyBinding,
@@ -50,13 +55,21 @@ import type {
 import type { SaleType } from "../../atlas/types";
 
 const BASE = "https://liveauctions.govease.com";
-const REGISTRY_PATH = "/PublicPortal/PublicRegisterAuctions";
 
-/**
- * Set on every request. See the access note above — this is an operator
- * decision, not an inference the code made on its own.
- */
-const FETCH_OPTS = { underAgreement: true as const, timeoutMs: 45_000 };
+/** Where the browser capture lands. Gitignored — it is a working artifact. */
+const CAPTURE_DIR = join(process.cwd(), "data", "govease-capture");
+const REGISTRY_FILE = "registry.html";
+
+class CaptureMissingError extends Error {
+  constructor(what: string) {
+    super(
+      `[govease] no capture found for ${what}. GovEase is not crawled — open ` +
+        `the portal in your browser and save the pages first. ` +
+        `See docs/govease-capture.md.`,
+    );
+    this.name = "CaptureMissingError";
+  }
+}
 
 interface GovEaseAuction {
   auctionId: string;
@@ -120,42 +133,32 @@ function parseMoney(raw: string | undefined): number | undefined {
 }
 
 /**
- * Establish a session and return the registry HTML.
+ * Read a captured page.
  *
- * The bootstrap shell POSTs the browser's timezone before the server will
- * render the grid. Without it every request returns the same 1.8 KB stub,
- * which parses to zero auctions and looks like an empty portal.
+ * The browser session already handled the timezone handshake that makes the
+ * server render a real grid rather than its 1.8 KB bootstrap shell, so nothing
+ * here needs to replay it.
  */
-async function bootstrapSession(): Promise<{ html: string; cookie: string }> {
-  const seed = await politeFetch(`${BASE}${REGISTRY_PATH}`, FETCH_OPTS);
-  const cookie = seed.setCookie.map((c) => c.split(";")[0]).join("; ");
+async function readCapture(file: string): Promise<string | null> {
+  try {
+    return await readFile(join(CAPTURE_DIR, file), "utf8");
+  } catch {
+    return null;
+  }
+}
 
-  const tz = await politeFetch(`${BASE}/PublicPortal/SetTimeZone`, {
-    ...FETCH_OPTS,
-    method: "POST",
-    headers: {
-      "x-requested-with": "XMLHttpRequest",
-      ...(cookie ? { cookie } : {}),
-    },
-    body: new URLSearchParams({
-      clientTZ: new Date().toString(),
-      RawUrl: REGISTRY_PATH,
-    }).toString(),
-  });
-
-  const merged = [
-    cookie,
-    ...tz.setCookie.map((c) => c.split(";")[0]),
-  ]
-    .filter(Boolean)
-    .join("; ");
-
-  const grid = await politeFetch(`${BASE}${REGISTRY_PATH}`, {
-    ...FETCH_OPTS,
-    headers: merged ? { cookie: merged } : {},
-  });
-
-  return { html: grid.body, cookie: merged };
+/** Auction ids that have a captured catalog, so gaps can be reported. */
+async function capturedAuctionIds(): Promise<Set<string>> {
+  try {
+    const files = await readdir(CAPTURE_DIR);
+    return new Set(
+      files
+        .map((f) => /^auction-(\d+)\.html$/.exec(f)?.[1])
+        .filter((id): id is string => Boolean(id)),
+    );
+  } catch {
+    return new Set();
+  }
 }
 
 /**
@@ -313,8 +316,11 @@ export const goveaseAdapter: SourceAdapter = {
     "13 states. Catalogs publish shortly before each sale, so re-run as dates approach.",
 
   async discoverCounties(): Promise<CountyBinding[]> {
-    const { html, cookie } = await bootstrapSession();
+    const html = await readCapture(REGISTRY_FILE);
+    if (!html) throw new CaptureMissingError("the auction registry");
+
     const auctions = parseRegistry(html).filter((a) => isUpcoming(a.saleDate));
+    const captured = await capturedAuctionIds();
 
     const byFips = new Map<string, CountyBinding>();
     const unmapped: string[] = [];
@@ -330,7 +336,7 @@ export const goveaseAdapter: SourceAdapter = {
       list.push(a);
       byFips.set(county.fips, {
         countyFips: county.fips,
-        config: { countyName: county.name, cookie, auctions: list },
+        config: { countyName: county.name, auctions: list },
       });
     }
 
@@ -339,6 +345,16 @@ export const goveaseAdapter: SourceAdapter = {
       // silently so the gap is countable.
       console.warn(`[govease] ${unmapped.length} auction(s) not mapped to a county:`);
       for (const u of unmapped.slice(0, 20)) console.warn(`  ${u}`);
+    }
+
+    const missing = auctions.filter((a) => !captured.has(a.auctionId));
+    if (missing.length > 0) {
+      // Not an error: a county that has not uploaded its catalog is worth no
+      // capture. Reported so an empty state is never mistaken for a parse bug.
+      console.warn(
+        `[govease] ${captured.size}/${auctions.length} upcoming auction(s) captured; ` +
+          `${missing.length} without a saved catalog will yield no lots.`,
+      );
     }
 
     return [...byFips.values()];
@@ -374,17 +390,24 @@ export const goveaseAdapter: SourceAdapter = {
   },
 
   async listLots(auction: DiscoveredAuction): Promise<DiscoveredLot[]> {
-    const res = await politeFetch(auction.sourceUrl, FETCH_OPTS);
-    if (res.status !== 200) {
-      console.warn(`[govease] ${auction.sourceUrl} returned ${res.status}`);
+    const auctionId = (auction.raw as { auctionId?: string } | undefined)?.auctionId;
+    if (!auctionId) return [];
+
+    const html = await readCapture(`auction-${auctionId}.html`);
+    if (!html) {
+      // No capture for this auction — usually because the county has not
+      // uploaded a catalog worth capturing. Returning empty means the runner
+      // persists no skeleton auction.
+      console.warn(
+        `[govease] no captured catalog for ${auction.title} (${auction.saleDate})`,
+      );
       return [];
     }
-    const lots = parseCatalog(res.body, auction.sourceUrl);
+
+    const lots = parseCatalog(html, auction.sourceUrl);
     if (lots.length === 0) {
-      // Expected before a county uploads its catalog. Returning empty means
-      // the runner does not persist a skeleton auction.
       console.warn(
-        `[govease] catalog not yet published for ${auction.title} (${auction.saleDate})`,
+        `[govease] captured catalog for ${auction.title} contains no parcels`,
       );
     }
     return lots;
