@@ -60,6 +60,10 @@ export interface PoliteFetchOptions {
    * never bypasses rate limiting.
    */
   underAgreement?: boolean;
+  /** Defaults to GET. POST is for session bootstraps, not for mutating state. */
+  method?: "GET" | "POST";
+  /** Form-encoded body for POST. */
+  body?: string;
 }
 
 export interface FetchResult {
@@ -67,13 +71,29 @@ export interface FetchResult {
   status: number;
   body: string;
   contentType: string;
+  /**
+   * Raw `set-cookie` values.
+   *
+   * Some portals serve an empty shell until a session exists — GovEase returns
+   * a 1.8 KB bootstrap page and the real grid only after a handshake. Exposing
+   * the cookie lets an adapter carry that session across requests rather than
+   * dropping to a raw `fetch` that would skip policy and rate limiting.
+   */
+  setCookie: string[];
 }
 
 export async function politeFetch(
   url: string,
   opts: PoliteFetchOptions = {},
 ): Promise<FetchResult> {
-  const { attempts = 3, timeoutMs = 30_000, headers = {}, underAgreement = false } = opts;
+  const {
+    attempts = 3,
+    timeoutMs = 30_000,
+    headers = {},
+    underAgreement = false,
+    method = "GET",
+    body,
+  } = opts;
   const host = new URL(url).hostname;
 
   const policy = policyFor(host);
@@ -108,10 +128,13 @@ export async function politeFetch(
     for (let attempt = 1; attempt <= attempts; attempt++) {
       try {
         const res = await fetch(url, {
+          method,
+          body,
           headers: {
             "user-agent": USER_AGENT,
             accept: "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
             "accept-language": "en-US,en;q=0.9",
+            ...(body ? { "content-type": "application/x-www-form-urlencoded" } : {}),
             ...headers,
           },
           redirect: "follow",
@@ -134,6 +157,7 @@ export async function politeFetch(
           status: res.status,
           body: await res.text(),
           contentType: res.headers.get("content-type") ?? "",
+          setCookie: res.headers.getSetCookie?.() ?? [],
         };
       } catch (e) {
         lastErr = e;
