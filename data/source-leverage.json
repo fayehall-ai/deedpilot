@@ -1,0 +1,458 @@
+{
+  "generatedAt": "2026-08-05T23:14:53.902Z",
+  "sourceExportedAt": "2026-07-30T00:10:35.167Z",
+  "note": "Counties one adapter reaches, per state. Ranks the coverage work plan by adapter leverage rather than state population. Platforms whose access policy is not `allow` are excluded — their counties are not reachable inventory, and ranking them would fill the plan with work nobody can do. Counts are floors: only counties researched in depth (roughly 50k+ population) are counted, so statewide sources like Arkansas COSL are undercounted.",
+  "blockedPlatforms": [
+    "realauction",
+    "govease",
+    "bid4assets"
+  ],
+  "states": [
+    {
+      "state": "MI",
+      "bestSourceCounties": 28,
+      "bestSource": "tax-sale.info",
+      "alsoUnlocks": [],
+      "researchedCounties": 36,
+      "reachablePopulation": 5401528
+    },
+    {
+      "state": "IN",
+      "bestSourceCounties": 19,
+      "bestSource": "zeus-sri",
+      "alsoUnlocks": [
+        "CO",
+        "LA",
+        "MI",
+        "TN"
+      ],
+      "researchedCounties": 28,
+      "reachablePopulation": 2234326
+    },
+    {
+      "state": "AR",
+      "bestSourceCounties": 12,
+      "bestSource": "cosl",
+      "alsoUnlocks": [],
+      "researchedCounties": 13,
+      "reachablePopulation": 1813815
+    },
+    {
+      "state": "LA",
+      "bestSourceCounties": 7,
+      "bestSource": "zeus-sri",
+      "alsoUnlocks": [
+        "CO",
+        "IN",
+        "MI",
+        "TN"
+      ],
+      "researchedCounties": 21,
+      "reachablePopulation": 1668978
+    },
+    {
+      "state": "CA",
+      "bestSourceCounties": 6,
+      "bestSource": "grantstreet",
+      "alsoUnlocks": [
+        "FL",
+        "NY"
+      ],
+      "researchedCounties": 43,
+      "reachablePopulation": 9149831
+    },
+    {
+      "state": "UT",
+      "bestSourceCounties": 6,
+      "bestSource": "publicsurplus",
+      "alsoUnlocks": [
+        "CA",
+        "MN",
+        "WA"
+      ],
+      "researchedCounties": 9,
+      "reachablePopulation": 2385995
+    },
+    {
+      "state": "IL",
+      "bestSourceCounties": 5,
+      "bestSource": "iltaxsale",
+      "alsoUnlocks": [],
+      "researchedCounties": 28,
+      "reachablePopulation": 694053
+    },
+    {
+      "state": "MN",
+      "bestSourceCounties": 5,
+      "bestSource": "publicsurplus",
+      "alsoUnlocks": [
+        "CA",
+        "UT",
+        "WA"
+      ],
+      "researchedCounties": 18,
+      "reachablePopulation": 842751
+    },
+    {
+      "state": "WA",
+      "bestSourceCounties": 4,
+      "bestSource": "publicsurplus",
+      "alsoUnlocks": [
+        "CA",
+        "MN",
+        "UT"
+      ],
+      "researchedCounties": 21,
+      "reachablePopulation": 545323
+    },
+    {
+      "state": "CO",
+      "bestSourceCounties": 3,
+      "bestSource": "zeus-sri",
+      "alsoUnlocks": [
+        "IN",
+        "LA",
+        "MI",
+        "TN"
+      ],
+      "researchedCounties": 16,
+      "reachablePopulation": 1142394
+    },
+    {
+      "state": "NY",
+      "bestSourceCounties": 2,
+      "bestSource": "nysauctions",
+      "alsoUnlocks": [],
+      "researchedCounties": 45,
+      "reachablePopulation": 138395
+    },
+    {
+      "state": "FL",
+      "bestSourceCounties": 1,
+      "bestSource": "grantstreet",
+      "alsoUnlocks": [
+        "CA",
+        "NY"
+      ],
+      "researchedCounties": 41,
+      "reachablePopulation": 494605
+    },
+    {
+      "state": "TN",
+      "bestSourceCounties": 1,
+      "bestSource": "zeus-sri",
+      "alsoUnlocks": [
+        "CO",
+        "IN",
+        "LA",
+        "MI"
+      ],
+      "researchedCounties": 33,
+      "reachablePopulation": 910530
+    },
+    {
+      "state": "AK",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 4,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "AL",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 28,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "AZ",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 12,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "CT",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 8,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "DC",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 1,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "DE",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 3,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "GA",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 43,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "HI",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 4,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "IA",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 11,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "ID",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 9,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "KS",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 10,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "KY",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 20,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "MA",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 12,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "MD",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 18,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "ME",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 9,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "MO",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 22,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "MS",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 15,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "MT",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 6,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "NC",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 52,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "ND",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 4,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "NE",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 5,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "NH",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 8,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "NJ",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 21,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "NM",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 11,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "NV",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 6,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "OH",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 49,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "OK",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 16,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "OR",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 18,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "PA",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 43,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "RI",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 5,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "SC",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 24,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "SD",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 3,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "TX",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 74,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "VA",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 36,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "VT",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 5,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "WI",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 29,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "WV",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 11,
+      "reachablePopulation": 0
+    },
+    {
+      "state": "WY",
+      "bestSourceCounties": 0,
+      "bestSource": "none-known",
+      "alsoUnlocks": [],
+      "researchedCounties": 3,
+      "reachablePopulation": 0
+    }
+  ]
+}

@@ -52,10 +52,46 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     reason: "Same RealAuction platform and robots policy as realtaxdeed.com.",
   },
   {
+    host: "govease.com",
+    decision: "requires_agreement",
+    minDelayMs: 5000,
+    reason:
+      "liveauctions.govease.com/robots.txt is `User-agent: * / Disallow: /` — verified 2026-08-05. " +
+      "GovEase is the widest-reach platform in the researched set (59 counties across AL, CA, IA, IN, " +
+      "MO, MS, OK, PA, TN, TX, WA), so this is the single largest blocked surface after RealAuction. " +
+      "The marketing site (www.govease.com) is permissive but carries no parcel data. Correct paths " +
+      "are a data agreement, or the county's own published list where one exists.",
+  },
+  {
+    host: "bid4assets.com",
+    decision: "requires_agreement",
+    minDelayMs: 5000,
+    reason:
+      "Returns 403 Access Denied on robots.txt itself — verified 2026-08-05 — so the crawl posture " +
+      "cannot even be read without defeating an active edge control. Same stance as RealAuction. " +
+      "40 counties across CA, FL, LA, NV, PA, WA.",
+  },
+  {
     host: "tax-sale.info",
     decision: "allow",
     minDelayMs: 2000,
     reason: "Title Check LLC, Michigan's county foreclosure auction host. robots.txt permits crawling.",
+  },
+  {
+    host: "cosl.org",
+    decision: "allow",
+    minDelayMs: 2000,
+    reason:
+      "Arkansas Commissioner of State Lands, the statutory publisher of every tax-delinquent sale in " +
+      "the state (A.C.A. §26-37-101 et seq.). Serves no robots.txt. Government source of record.",
+  },
+  {
+    host: "sriservices.com",
+    decision: "allow",
+    minDelayMs: 2000,
+    reason:
+      "SRI Inc, contracted sale agent for Indiana and other county tax sales. robots.txt is " +
+      "`Disallow:` (empty — permits all). Verified 2026-08-05.",
   },
   {
     host: "taxsales.lgbs.com",
