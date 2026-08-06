@@ -12,6 +12,7 @@
  */
 
 import type { EnrichInput, PropertyProvider, PropertyRecord } from "../types";
+import { ProviderUnavailableError } from "../types";
 
 const BASE = "https://api.gateway.attomdata.com/propertyapi/v1.0.0";
 
@@ -127,8 +128,17 @@ async function fetchProperty(
 
   if (!res.ok || (data.status?.code !== undefined && data.status.code !== 0)) {
     // Real errors (auth, quota, bad request shape)
+    // Auth, quota and rate-limit failures are outages, not misses. They must
+    // abort the batch — see ProviderUnavailableError.
     if (res.status === 401 || res.status === 403) {
-      throw new Error(`attom ${res.status}: invalid or unauthorized API key`);
+      throw new ProviderUnavailableError(
+        "attom",
+        res.status,
+        "invalid, unauthorized, or out-of-quota API key",
+      );
+    }
+    if (res.status === 429) {
+      throw new ProviderUnavailableError("attom", 429, "rate limited");
     }
     throw new Error(`attom ${res.status}: ${text.slice(0, 200)}`);
   }

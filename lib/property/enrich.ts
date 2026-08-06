@@ -6,6 +6,7 @@ import { and, eq, isNull, sql, gte } from "drizzle-orm";
 import { db } from "../db";
 import { lots, lotValuations, counties } from "../db/schema";
 import type { EnrichInput, PropertyProvider, PropertyRecord } from "./types";
+import { ProviderUnavailableError } from "./types";
 import { rentcastProvider } from "./providers/rentcast";
 import { attomProvider } from "./providers/attom";
 import { batchdataProvider } from "./providers/batchdata";
@@ -44,6 +45,11 @@ export async function lookupProperty(input: EnrichInput): Promise<PropertyRecord
       const rec = await p.lookup(input);
       if (rec) return rec;
     } catch (e) {
+      // An unusable provider is not a miss on this parcel. Rethrow at once
+      // rather than falling through to the others and returning null, which
+      // is what turned an exhausted ATTOM key into 799 phantom "no match"
+      // results on a single Arkansas run.
+      if (e instanceof ProviderUnavailableError) throw e;
       errors.push(`${p.name}: ${e instanceof Error ? e.message : e}`);
     }
   }
@@ -224,7 +230,14 @@ export async function enrichLotsMissingAssessed(opts: {
   /** Skip parcels below this opening bid entirely. */
   minOpeningBid?: number;
   onProgress?: (msg: string) => void;
-}): Promise<{ attempted: number; updated: number; skipped: number; failed: number }> {
+}): Promise<{
+  attempted: number;
+  updated: number;
+  skipped: number;
+  failed: number;
+  /** Set when the run stopped early because a provider became unusable. */
+  aborted?: string;
+}> {
   const log = opts.onProgress ?? (() => {});
   const limit = opts.limit ?? 50;
 
@@ -275,6 +288,18 @@ export async function enrichLotsMissingAssessed(opts: {
         log(`[${i + 1}/${filtered.length}] skip: ${result.reason}`);
       }
     } catch (e) {
+      // Stop the run. Grinding through the remaining lots against a dead
+      // provider costs wall-clock, may cost quota, and — worse — buries the
+      // real cause under a pile of per-lot noise. Report where it stopped so
+      // the operator can resume from there once the key is fixed.
+      if (e instanceof ProviderUnavailableError) {
+        log(
+          `\n[${i + 1}/${filtered.length}] ABORTED — ${e.message}\n` +
+            `  ${updated} enriched before this point. The remaining ` +
+            `${filtered.length - i} lot(s) were not attempted and are NOT misses.`,
+        );
+        return { attempted: i, updated, skipped, failed, aborted: e.message };
+      }
       failed++;
       log(`[${i + 1}/${filtered.length}] fail: ${e instanceof Error ? e.message : e}`);
     }
