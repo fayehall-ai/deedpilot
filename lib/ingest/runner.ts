@@ -78,6 +78,15 @@ async function upsertAuction(a: DiscoveredAuction): Promise<string> {
     .onConflictDoUpdate({
       target: [auctions.countyFips, auctions.platform, auctions.externalId],
       set: {
+        // saleType must update. It was omitted here originally, which meant an
+        // auction kept whatever classification it was first written with, for
+        // good — a re-run looked successful (lastSeenAt moved, lots refreshed)
+        // while the legal classification driving the max-bid maths stayed
+        // stale. Arkansas surfaced it: 46 auctions held "Redeemable Deed"
+        // through a full re-ingest after the adapter was corrected to
+        // "Tax Deed". The TDC drive lists 12 more states whose sale type may
+        // need correcting, so this would have bitten again.
+        saleType: sql`excluded.sale_type`,
         saleDate: sql`excluded.sale_date`,
         saleDateConfirmed: sql`excluded.sale_date_confirmed`,
         listingKind: sql`excluded.listing_kind`,
@@ -142,20 +151,35 @@ async function upsertLots(
       .onConflictDoUpdate({
         target: [lots.auctionId, lots.dedupeKey],
         set: {
+          // Adapter-owned. The source is authoritative, so a re-run overwrites
+          // — including back to null, because a bid the county withdrew must
+          // not linger, and a lot that goes pending → sold has to move.
           openingBid: sql`excluded.opening_bid`,
-          assessedValue: sql`excluded.assessed_value`,
           taxesOwed: sql`excluded.taxes_owed`,
           status: sql`excluded.status`,
           soldAmount: sql`excluded.sold_amount`,
-          addressLine: sql`excluded.address_line`,
-          city: sql`excluded.city`,
-          zip: sql`excluded.zip`,
-          latitude: sql`excluded.latitude`,
-          longitude: sql`excluded.longitude`,
-          landUse: sql`excluded.land_use`,
-          ownerName: sql`excluded.owner_name`,
           raw: sql`excluded.raw`,
           lastSeenAt: sql`now()`,
+
+          // Enrichment-owned: coalesced so a re-ingest cannot erase them.
+          //
+          // `applyRecordToLot` writes these columns from ATTOM/RentCast, and
+          // most adapters never collect them — Arkansas COSL publishes no
+          // address and no assessed value at all. Plain `excluded.x` therefore
+          // set them back to null on the next run, silently destroying paid
+          // API work: the Arkansas plan is ~6,760 ATTOM lookups, and one
+          // routine re-ingest afterwards would have wiped every one.
+          //
+          // COALESCE keeps the adapter authoritative when it actually has a
+          // value, and preserves the enriched value when it does not.
+          assessedValue: sql`coalesce(excluded.assessed_value, ${lots.assessedValue})`,
+          addressLine: sql`coalesce(excluded.address_line, ${lots.addressLine})`,
+          city: sql`coalesce(excluded.city, ${lots.city})`,
+          zip: sql`coalesce(excluded.zip, ${lots.zip})`,
+          latitude: sql`coalesce(excluded.latitude, ${lots.latitude})`,
+          longitude: sql`coalesce(excluded.longitude, ${lots.longitude})`,
+          landUse: sql`coalesce(excluded.land_use, ${lots.landUse})`,
+          ownerName: sql`coalesce(excluded.owner_name, ${lots.ownerName})`,
         },
       });
     written += batch.length;
