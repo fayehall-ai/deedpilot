@@ -35,7 +35,7 @@
 
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { findCountyByName } from "../../atlas";
+import { countyLabel, findCountyByName } from "../../atlas";
 import type { SaleType } from "../../atlas/types";
 import type {
   CountyBinding,
@@ -66,6 +66,13 @@ export interface SriProperty {
   saleType: string;
   /** "Online" or "In-person". */
   method: string;
+
+  // The site's own Excel export carries more than the rendered cards do.
+  // See docs/sri-capture.md — prefer it wherever a county offers one.
+  /** Minimum bid. Absent from the web cards, present in the Excel export. */
+  minBid?: number;
+  owner?: string;
+  legal?: string;
 }
 
 export interface SriCapture {
@@ -170,9 +177,12 @@ export function propertyToLot(p: SriProperty): DiscoveredLot | null {
     parcelNumber: p.parcel || undefined,
     addressLine: address || undefined,
     city: cityOnly(p.city ?? ""),
-    // SRI publishes no opening bid or assessed value on the listing page.
-    // Leaving both unset is correct: max bid stays dark until enrichment
-    // supplies an ARV, and inventing one from nothing would be worse.
+    ownerName: p.owner || undefined,
+    legalDescription: p.legal || undefined,
+    // Present only from the Excel export; the rendered cards omit it. Assessed
+    // value is never published either way, so max bid stays dark until
+    // enrichment supplies an ARV — inventing one would be worse than nothing.
+    openingBid: p.minBid,
     status: "pending" as const,
     sourceUrl: BASE,
     raw: {
@@ -289,7 +299,7 @@ export const sriAdapter: SourceAdapter = {
         saleDateConfirmed: true,
         listingKind: "sale_list" as const,
         startTime: to24h(first?.time ?? ""),
-        title: `${cfg.countyName} County ${cfg.state} — SRI ${saleTypeLabel}`,
+        title: `${countyLabel(cfg.state, cfg.countyName)} ${cfg.state} — SRI ${saleTypeLabel}`,
         status: "scheduled" as const,
         sourceUrl: BASE,
         raw: {

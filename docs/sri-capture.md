@@ -54,6 +54,42 @@ running two sales in one capture splits into two auctions on `(date, saleType)`.
 
 `data/sri-capture/` is gitignored — captures are working artifacts.
 
+## Large counties: use the site's own Excel export
+
+The rendered cards are fine for a small county, but Jefferson Parish LA is
+1,638 properties across **182 pages**, and the Excel export is both faster and
+strictly richer — it carries the **minimum bid**, owner and full legal
+description, none of which appear on screen.
+
+1. Filter to the county and sale type, then **Download List → Excel**.
+2. Convert:
+
+   ```bash
+   python3 scripts/sri_xlsx_to_capture.py \
+     ~/Downloads/Jefferson_Tax\ Lien\ Sale_Sale_Properties_Downloaded_2026-08-06.xlsx \
+     --state LA --county Jefferson --type "tax lien"
+   ```
+
+   It writes `data/sri-capture/LA-Jefferson-tax-lien.json` and reports counts to
+   check against the page's own *"Showing N properties"*.
+
+Export columns: `Sale Date · Sale Time · Sale Location · Sale ID · Owner Name ·
+Property Street · Property ID · Minimum Bid · Legal`. `Property ID` is the
+parcel; there is no city column, which the adapter tolerates.
+
+## Louisiana bids down the ownership interest
+
+Jefferson Parish minimum bids run from **$0.21** to $312,055. The low figures
+are not errors. Louisiana tax sales bid down the *percentage interest* conveyed
+rather than the price, which is why legal descriptions read
+`97% INT IN 2024 GRETNA TAX SALE`. A winning bidder may take a fractional
+undivided interest, not the whole property.
+
+`StatuteParams.redemption.bidDown` exists for exactly this, but **LA has no
+STATUTE_PARAMS entry**, so these lots list without a walk-away price — the same
+position as Arkansas. Do not price them until the bid-down mechanic is encoded,
+because a max bid that assumes fee simple is wrong on every one of them.
+
 ## Capture steps
 
 1. Go to `https://sriservices.com/properties`, then pick **State → County →

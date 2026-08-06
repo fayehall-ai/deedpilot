@@ -113,6 +113,30 @@ for (const c of ALL_COUNTIES) {
  * not something to paper over with a fuzzy best-effort match that silently
  * files Texas parcels under the wrong FIPS.
  */
+/**
+ * The word a state uses for its county-equivalent, for display.
+ *
+ * County names are stored bare ("Jefferson"), so anything rendering a title
+ * has to add the noun — and Louisiana does not have counties. Calling a
+ * Louisiana parish a county in a product whose whole value is legal precision
+ * is the kind of error a subscriber notices first.
+ *
+ * Alaska returns an empty string on purpose: its subdivisions are a mix of
+ * boroughs, census areas and one municipality, so there is no single correct
+ * noun to append and the bare name is the honest rendering.
+ */
+export function countyNoun(stateAbbr: string): string {
+  if (stateAbbr === "LA") return "Parish";
+  if (stateAbbr === "AK") return "";
+  return "County";
+}
+
+/** "Jefferson Parish", "Bastrop County", "Anchorage". */
+export function countyLabel(stateAbbr: string, name: string): string {
+  const noun = countyNoun(stateAbbr);
+  return noun ? `${name} ${noun}` : name;
+}
+
 export function findCountyByName(stateAbbr: string, name: string): County | null {
   return BY_NORMALIZED_NAME.get(`${stateAbbr}:${normalizeCountyName(name)}`) ?? null;
 }
