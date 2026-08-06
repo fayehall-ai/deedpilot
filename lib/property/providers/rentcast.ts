@@ -63,12 +63,19 @@ export const rentcastProvider: PropertyProvider = {
       zip: str(p.zipCode) ?? input.zip ?? undefined,
       county: str(p.county) ?? input.countyName,
       ownerName: str(p.ownerName) ?? str((p.owner as { names?: string[] })?.names?.[0]),
-      // Prefer tax assessed; fall back to AVM so max-bid can still fire.
-      assessedValue:
-        num(p.assessedValue) ??
-        num(p.taxAssessedValue) ??
-        marketValue ??
-        num(p.price),
+      // Tax assessments only. An AVM must never land here.
+      //
+      // maxbid derives ARV as `assessedValue / assessmentRatio`, so a market
+      // estimate in this field gets divided by the ratio a second time: a
+      // $144,000 AVM on a Louisiana parcel (10% ratio) implies a $1.44M
+      // property. The old fallback did exactly that "so max-bid can still
+      // fire", which is the wrong trade — a walk-away price ten times too high
+      // is the single output that can cost a subscriber money at auction.
+      //
+      // The AVM is still returned as `marketValue` and stored in
+      // lot_valuations. Surfacing it as a suggested ARV is a product decision
+      // for the `arvOverride` path, not something to smuggle in here.
+      assessedValue: num(p.assessedValue) ?? num(p.taxAssessedValue),
       marketValue: marketValue ?? num(p.price) ?? num(p.lastSalePrice),
       lastSaleAmount: num(p.lastSalePrice),
       lastSaleDate: dateStr(p.lastSaleDate),
