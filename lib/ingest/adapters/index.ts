@@ -4,6 +4,7 @@ import { georgiaAdapter } from "./georgia";
 import { genericAdapter } from "./generic";
 import { goveaseAdapter } from "./govease";
 import { lgbsAdapter } from "./lgbs";
+import { mvbaAdapter } from "./mvba";
 import { sriAdapter } from "./sri";
 import { taxSaleInfoAdapter } from "./taxsaleinfo";
 import { floridaAdapter, floridaClerksAdapter } from "./florida";
@@ -13,6 +14,7 @@ import { floridaAdapter, floridaClerksAdapter } from "./florida";
  */
 export const ADAPTERS: SourceAdapter[] = [
   lgbsAdapter,
+  mvbaAdapter,
   taxSaleInfoAdapter,
   georgiaAdapter,
   floridaClerksAdapter,
@@ -30,6 +32,7 @@ export function getAdapter(name: string): SourceAdapter | undefined {
 
 export {
   lgbsAdapter,
+  mvbaAdapter,
   taxSaleInfoAdapter,
   georgiaAdapter,
   floridaAdapter,
