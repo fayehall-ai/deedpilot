@@ -1,8 +1,33 @@
-# Texas expansion via MVBA — research, not yet shipped
+# Texas expansion via MVBA
 
-**Status: source validated, adapter not built.** A first parser produced
-confidently wrong output (details below), and this is a money field. Nothing
-here is in production.
+**Status: shipped.** `lib/ingest/adapters/mvba.ts`, covered by
+`lib/ingest/mvba-parser.test.ts`. First live run: Eastland County (48133),
+21 lots for the 2026-09-01 sale.
+
+## Open: which Eastland identifier is the parcel
+
+Eastland prints two account numbers per tract, slash-separated:
+
+```
+Account #215480001000000000000000001 / 52840
+```
+
+The adapter takes the first as `parcelNumber` and keeps the second in
+`raw.additionalAccounts`. **That choice is unverified.** In Texas appraisal
+districts the short number is usually the Property ID and the long one the
+Geographic ID, and which of them ATTOM matches on has not been tested — the
+ATTOM key was out of quota when this shipped.
+
+This is exactly the shape of the Brevard failure
+(`docs/brevard-apn-resolution.md`), where sending the wrong identifier left
+~130 lots unpriceable and looked like a data problem rather than a choice.
+Resolve by enriching a handful of Eastland lots on both numbers once the key is
+renewed, then set the primary accordingly.
+
+Note this is separate from the multi-tract rule. Eastland lists tracts as
+individually numbered entries with their own minimum bids — cause
+`24-067-DCTX-05321` correctly yields two lots at $6,000 and $3,880. The
+one-lot-per-cause rule applies to tracts *inside* a single entry, as in Rusk.
 
 ## Why Texas
 
