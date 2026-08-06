@@ -4,6 +4,7 @@
  *   npm run enrich:lots -- --state FL --limit 20
  *   npm run enrich:lots -- --lot <uuid>
  *   npm run enrich:lots -- --state FL --force
+ *   npm run enrich:lots -- --state AR --high-value-first --min-bid 500 --limit 1500
  *
  * Requires ATTOM_API_KEY (parcel/APN) and/or RENTCAST_API_KEY (needs address).
  */
@@ -41,6 +42,10 @@ async function main() {
     state,
     limit,
     force: flag("force"),
+    // Spend quota on parcels worth bidding on first — opening bid tracks
+    // assessed value closely (r = 0.852 on Arkansas).
+    highValueFirst: flag("high-value-first"),
+    minOpeningBid: arg("min-bid") ? Number(arg("min-bid")) : undefined,
     onProgress: (m) => console.log(m),
   });
   console.log("\n=== summary ===");

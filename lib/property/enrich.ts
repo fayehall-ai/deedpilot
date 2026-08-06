@@ -2,7 +2,7 @@
  * Apply property enrichment to a lot row + lot_valuations.
  */
 
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql, gte } from "drizzle-orm";
 import { db } from "../db";
 import { lots, lotValuations, counties } from "../db/schema";
 import type { EnrichInput, PropertyProvider, PropertyRecord } from "./types";
@@ -207,6 +207,22 @@ export async function enrichLotsMissingAssessed(opts: {
   state?: string;
   limit?: number;
   force?: boolean;
+  /**
+   * Enrich the most valuable parcels first, by opening bid descending.
+   *
+   * Every lookup costs the same, but the parcels are not worth the same. On
+   * 246 enriched Arkansas lots the opening bid — which is taxes, penalties and
+   * costs — correlates with assessed value at r = 0.852, so bid order is a
+   * good proxy for value order when the value itself is what we are buying.
+   *
+   * It matters because the tail is long and cheap: Arkansas's median parcel
+   * carries $194 in taxes against roughly $2,500 of implied market value, and
+   * a quarter of them imply under $1,325. Enriching in arbitrary order spends
+   * the same quota to surface parcels nobody will bid on.
+   */
+  highValueFirst?: boolean;
+  /** Skip parcels below this opening bid entirely. */
+  minOpeningBid?: number;
   onProgress?: (msg: string) => void;
 }): Promise<{ attempted: number; updated: number; skipped: number; failed: number }> {
   const log = opts.onProgress ?? (() => {});
@@ -215,6 +231,9 @@ export async function enrichLotsMissingAssessed(opts: {
   const conditions = [];
   if (opts.state) conditions.push(eq(counties.state, opts.state));
   if (!opts.force) conditions.push(isNull(lots.assessedValue));
+  if (opts.minOpeningBid !== undefined) {
+    conditions.push(gte(lots.openingBid, String(opts.minOpeningBid)));
+  }
 
   // Prefer parcels that look like assessor APNs (dashes / letters). Pure numeric
   // IDs (e.g. Brevard tax-deed account #s) rarely match ATTOM and burn quota.
@@ -228,11 +247,15 @@ export async function enrichLotsMissingAssessed(opts: {
     .innerJoin(counties, eq(counties.fips, lots.countyFips))
     .where(conditions.length ? and(...conditions) : undefined)
     .orderBy(
-      sql`case
-        when ${lots.parcelNumber} ~ '[A-Za-z-]' then 0
-        when ${lots.addressLine} is not null then 1
-        else 2
-      end`,
+      ...(opts.highValueFirst
+        ? [sql`${lots.openingBid} desc nulls last`]
+        : [
+            sql`case
+              when ${lots.parcelNumber} ~ '[A-Za-z-]' then 0
+              when ${lots.addressLine} is not null then 1
+              else 2
+            end`,
+          ]),
       lots.id,
     )
     .limit(limit);
