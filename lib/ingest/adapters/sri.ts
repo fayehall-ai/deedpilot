@@ -50,6 +50,8 @@ const BASE = "https://sriservices.com/properties";
 /** One property row as rendered on the SRI listings page. */
 export interface SriProperty {
   addr: string;
+  /** Present on mortgage-foreclosure listings only; see isMortgageForeclosure. */
+  causeNumber?: string;
   /** "ADRIAN, Michigan" — city and state in one cell, as the page renders it. */
   city: string;
   /** SRI's own sale identifier. Stable, and the dedupe key. */
@@ -83,8 +85,36 @@ function toSaleType(label: string): SaleType {
   if (l.includes("lien")) return "Tax Lien";
   if (l.includes("redeemable")) return "Redeemable Deed";
   if (l.includes("deed")) return "Tax Deed";
-  if (l.includes("foreclosure")) return "Hybrid";
   return "Tax Deed";
+}
+
+/**
+ * SRI runs mortgage foreclosure sheriff's sales alongside tax sales, and they
+ * are out of scope.
+ *
+ * A mortgage foreclosure is a different instrument: the debt is a defaulted
+ * note, not delinquent taxes. None of `STATUTE_PARAMS` applies — no tax
+ * redemption tier, no assessment ratio path to ARV — so pricing one with the
+ * tax-sale engine would produce a confident, meaningless number.
+ *
+ * They are recognisable without guessing. The listing carries a `Cause #`
+ * bearing the Indiana `-MF-` mortgage-foreclosure code and a named defendant
+ * where a tax listing carries a `Sale ID` and a `Parcel #`, and it has no
+ * parcel number at all. On 2026-08-05 every one of SRI's 20 upcoming Indiana
+ * auctions was this type, as was Plaquemines Parish LA — while Jefferson and
+ * Livingston LA were genuine tax lien sales.
+ *
+ * Excluded here rather than left to fail silently: the capture regex needs a
+ * `Parcel #` and so already yields nothing for these, which reads as "no
+ * inventory" instead of "wrong instrument".
+ */
+export function isMortgageForeclosure(p: {
+  saleType?: string;
+  parcel?: string;
+  causeNumber?: string;
+}): boolean {
+  if (/-MF-/i.test(p.causeNumber ?? "")) return true;
+  return /foreclosure/i.test(p.saleType ?? "") && !p.parcel?.trim();
 }
 
 function toIsoDate(mdy: string): string | null {
@@ -130,6 +160,8 @@ export function splitAddressNote(raw: string): { address: string; note?: string 
 
 export function propertyToLot(p: SriProperty): DiscoveredLot | null {
   if (!p.saleId && !p.parcel) return null;
+  // A defaulted mortgage is not a tax sale — see isMortgageForeclosure.
+  if (isMortgageForeclosure(p)) return null;
   const { address, note } = splitAddressNote(p.addr ?? "");
 
   return {

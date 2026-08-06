@@ -103,6 +103,31 @@ running two sales in one capture splits into two auctions on `(date, saleType)`.
    npm run ingest -- --adapter sri
    ```
 
+## Mortgage foreclosures are out of scope
+
+SRI runs mortgage-foreclosure sheriff's sales alongside tax sales, and the
+filters present them identically. They are a different instrument — the debt is
+a defaulted note, not delinquent taxes — so no `STATUTE_PARAMS` entry applies
+and the max-bid engine would produce a confident meaningless number.
+
+Tell them apart by the card schema:
+
+| Tax sale | Mortgage foreclosure |
+|---|---|
+| `Sale ID:` + `Parcel #:` | `Cause #:` + `Defendant:` |
+| `Status: DELINQUENT` | `Status: Sale Active` / `Cancelled` |
+| — | Indiana cause numbers carry `-MF-` |
+
+As of 2026-08-05 **all 20** of SRI's upcoming Indiana auctions were mortgage
+foreclosures, as was Plaquemines Parish LA. Jefferson, Livingston and Town of
+Roseland LA were genuine Tax Lien Sales. Indiana's actual tax sales run
+August–October and had not been posted.
+
+Do not capture the foreclosure listings. `isMortgageForeclosure` in the adapter
+drops them if any slip through, and the capture regex needs a `Parcel #` so it
+already returns nothing for them — which is why an Indiana capture reads as
+"no inventory" rather than "wrong instrument".
+
 ## Gotchas
 
 - **Clicking Next past the last page re-adds the last page.** It does not
