@@ -1,42 +1,50 @@
 {
-  "generatedAt": "2026-08-02T03:11:20.916Z",
+  "generatedAt": "2026-08-06T00:18:57.026Z",
   "gold": {
-    "score": 0.263,
+    "score": 0.138,
     "weights": {
       "live": 0.35,
       "history": 0.25,
       "price": 0.4
     },
-    "liveShare": 0.059,
+    "liveShare": 0.098,
     "historyShare": 0.039,
-    "priceShare": 0.58,
+    "priceShare": 0.235,
     "penalties": 0
   },
   "live": {
-    "upcomingAuctionsWithLots": 128,
+    "upcomingAuctionsWithLots": 130,
     "skeletonAuctions": 0,
-    "totalLotsUpcoming": 3090,
-    "lotsWithOpening": 3090,
-    "lotsWithAssessed": 2861,
-    "lotsAutoPriceable": 2861,
-    "statesWithLots": 3,
-    "countiesWithLots": 106,
+    "totalLotsUpcoming": 9105,
+    "lotsWithOpening": 9105,
+    "lotsWithAssessed": 2140,
+    "lotsAutoPriceable": 2140,
+    "statesWithLots": 5,
+    "countiesWithLots": 122,
     "byState": [
       {
+        "state": "AR",
+        "auctions": 46,
+        "lots": 6760,
+        "withAssessed": 0,
+        "autoPriceable": 0,
+        "counties": 46
+      },
+      {
         "state": "MI",
-        "auctions": 75,
-        "lots": 2272,
-        "withAssessed": 2272,
-        "autoPriceable": 2272,
-        "counties": 75
+        "auctions": 64,
+        "lots": 1984,
+        "withAssessed": 1954,
+        "autoPriceable": 1954,
+        "counties": 64
       },
       {
         "state": "TX",
-        "auctions": 47,
-        "lots": 659,
-        "withAssessed": 579,
-        "autoPriceable": 579,
-        "counties": 27
+        "auctions": 12,
+        "lots": 176,
+        "withAssessed": 176,
+        "autoPriceable": 176,
+        "counties": 6
       },
       {
         "state": "FL",
@@ -45,6 +53,14 @@
         "withAssessed": 10,
         "autoPriceable": 10,
         "counties": 4
+      },
+      {
+        "state": "CO",
+        "auctions": 2,
+        "lots": 26,
+        "withAssessed": 0,
+        "autoPriceable": 0,
+        "counties": 2
       }
     ]
   },
@@ -129,10 +145,35 @@
   "maxbid": {
     "countiesWithStatute": 738,
     "totalCounties": 3142,
-    "autoPriceableLots": 2861,
-    "autoPriceableRate": 0.926
+    "autoPriceableLots": 2140,
+    "autoPriceableRate": 0.235
   },
   "workPlan": [
+    {
+      "class": "D",
+      "priority": 6800,
+      "title": "Statute draft: AR",
+      "reason": "6760 live lots stranded without max-bid params.",
+      "target": {
+        "state": "AR"
+      }
+    },
+    {
+      "class": "A",
+      "priority": 6760,
+      "title": "Enrich assessed values in AR",
+      "reason": "0/6760 lots have assessed (0.0%). Max bid is dark without ARV.",
+      "target": {
+        "state": "AR",
+        "limit": 500
+      }
+    },
+    {
+      "class": "A",
+      "priority": 200,
+      "title": "Raise auto-priceable rate above 40%",
+      "reason": "2140/9105 upcoming lots can max-bid without comps."
+    },
     {
       "class": "A",
       "priority": 149,
@@ -145,83 +186,110 @@
     },
     {
       "class": "B",
-      "priority": 89,
-      "title": "Live inventory pilot: GA",
-      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "priority": 147,
+      "title": "Live inventory pilot: AL",
+      "reason": "No upcoming lots with parcels. ≥17 counties reachable via govease (floor — only researched counties counted). Same adapter also serves 10 other state(s). Access: govease is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
       "target": {
-        "state": "GA"
+        "state": "AL"
       }
     },
     {
       "class": "B",
-      "priority": 88,
-      "title": "Live inventory pilot: AZ",
-      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "priority": 143,
+      "title": "Live inventory pilot: MS",
+      "reason": "No upcoming lots with parcels. ≥13 counties reachable via govease (floor — only researched counties counted). Same adapter also serves 10 other state(s). Access: govease is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
       "target": {
-        "state": "AZ"
+        "state": "MS"
       }
     },
     {
       "class": "B",
-      "priority": 87,
+      "priority": 136,
+      "title": "Live inventory pilot: TN",
+      "reason": "No upcoming lots with parcels. ≥6 counties reachable via govease (floor — only researched counties counted). Same adapter also serves 10 other state(s). Access: govease is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
+      "target": {
+        "state": "TN"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 133,
+      "title": "Live inventory pilot: IA",
+      "reason": "No upcoming lots with parcels. ≥3 counties reachable via govease (floor — only researched counties counted). Same adapter also serves 10 other state(s). Access: govease is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
+      "target": {
+        "state": "IA"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 131,
+      "title": "Live inventory pilot: MO",
+      "reason": "No upcoming lots with parcels. ≥1 counties reachable via govease (floor — only researched counties counted). Same adapter also serves 10 other state(s). Access: govease is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
+      "target": {
+        "state": "MO"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 131,
+      "title": "Live inventory pilot: OK",
+      "reason": "No upcoming lots with parcels. ≥1 counties reachable via govease (floor — only researched counties counted). Same adapter also serves 10 other state(s). Access: govease is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
+      "target": {
+        "state": "OK"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 125,
       "title": "Live inventory pilot: CA",
-      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "reason": "No upcoming lots with parcels. ≥20 counties reachable via bid4assets (floor — only researched counties counted). Same adapter also serves 5 other state(s). Access: bid4assets is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
       "target": {
         "state": "CA"
       }
     },
     {
       "class": "B",
-      "priority": 86,
-      "title": "Live inventory pilot: IL",
-      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "priority": 119,
+      "title": "Live inventory pilot: IN",
+      "reason": "No upcoming lots with parcels. ≥19 counties reachable via zeus-sri (floor — only researched counties counted). Same adapter also serves 4 other state(s).",
       "target": {
-        "state": "IL"
+        "state": "IN"
       }
     },
     {
       "class": "B",
-      "priority": 85,
-      "title": "Live inventory pilot: OH",
-      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "priority": 115,
+      "title": "Live inventory pilot: WA",
+      "reason": "No upcoming lots with parcels. ≥10 counties reachable via bid4assets (floor — only researched counties counted). Same adapter also serves 5 other state(s). Access: bid4assets is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
       "target": {
-        "state": "OH"
+        "state": "WA"
       }
     },
     {
       "class": "B",
-      "priority": 84,
-      "title": "Live inventory pilot: NY",
-      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "priority": 109,
+      "title": "Live inventory pilot: NV",
+      "reason": "No upcoming lots with parcels. ≥4 counties reachable via bid4assets (floor — only researched counties counted). Same adapter also serves 5 other state(s). Access: bid4assets is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
       "target": {
-        "state": "NY"
+        "state": "NV"
       }
     },
     {
       "class": "B",
-      "priority": 83,
-      "title": "Live inventory pilot: PA",
-      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
-      "target": {
-        "state": "PA"
-      }
-    },
-    {
-      "class": "B",
-      "priority": 82,
-      "title": "Live inventory pilot: NC",
-      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
-      "target": {
-        "state": "NC"
-      }
-    },
-    {
-      "class": "B",
-      "priority": 81,
+      "priority": 109,
       "title": "Live inventory pilot: NJ",
-      "reason": "No upcoming lots with parcels. Need verified listing URL + scout.",
+      "reason": "No upcoming lots with parcels. ≥4 counties reachable via realauction (floor — only researched counties counted). Same adapter also serves 5 other state(s). Access: realauction is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
       "target": {
         "state": "NJ"
+      }
+    },
+    {
+      "class": "B",
+      "priority": 109,
+      "title": "Live inventory pilot: PA",
+      "reason": "No upcoming lots with parcels. ≥4 counties reachable via bid4assets (floor — only researched counties counted). Same adapter also serves 5 other state(s). Access: bid4assets is requires_agreement — decide the route (agreement, operator browser session, or county source of record) before building.",
+      "target": {
+        "state": "PA"
       }
     },
     {
@@ -229,6 +297,15 @@
       "priority": 70,
       "title": "Unblock LLM for PDF county lists",
       "reason": "GA/AZ/FL/Charleston SC sealed-bid PDFs need extractLots. XAI credits exhausted and ANTHROPIC_API_KEY is empty — set a key or DEEDPILOT_DISABLE_GROK=1 with Claude."
+    },
+    {
+      "class": "D",
+      "priority": 66,
+      "title": "Statute draft: CO",
+      "reason": "26 live lots stranded without max-bid params.",
+      "target": {
+        "state": "CO"
+      }
     },
     {
       "class": "B",
@@ -258,24 +335,6 @@
       "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
       "target": {
         "state": "AK"
-      }
-    },
-    {
-      "class": "D",
-      "priority": 40,
-      "title": "Statute draft: AR",
-      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
-      "target": {
-        "state": "AR"
-      }
-    },
-    {
-      "class": "D",
-      "priority": 40,
-      "title": "Statute draft: CO",
-      "reason": "No STATUTE_PARAMS — engine returns insufficient-data.",
-      "target": {
-        "state": "CO"
       }
     },
     {
@@ -349,13 +408,23 @@
       "target": {
         "state": "KS"
       }
+    },
+    {
+      "class": "A",
+      "priority": 26,
+      "title": "Enrich assessed values in CO",
+      "reason": "0/26 lots have assessed (0.0%). Max bid is dark without ARV.",
+      "target": {
+        "state": "CO",
+        "limit": 26
+      }
     }
   ],
   "budgetShares": {
-    "A": 0.14126429479034308,
-    "B": 0.4880304955527318,
-    "C": 0.08223634053367217,
-    "D": 0.25846886912325284,
+    "A": 0.38544878170064645,
+    "B": 0.1612270014917951,
+    "C": 0.062175534559920434,
+    "D": 0.36114868224763796,
     "E": 0.03
   }
 }

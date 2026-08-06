@@ -316,9 +316,15 @@ export const arkansasCoslAdapter: SourceAdapter = {
     return cfg.sales.map((sale) => ({
       countyFips: binding.countyFips,
       platform: "county_site" as const,
-      // Arkansas sells the deed at public auction with a 90-day post-sale
-      // period during which the owner may redeem via the Commissioner.
-      saleType: "Redeemable Deed" as const,
+      // Tax Deed, not Redeemable Deed. Redemption closes at 4:00 p.m. CST on
+      // the last business day *before* the sale (A.C.A. § 26-37-202), so the
+      // purchaser takes the deed free of any redemption right.
+      //
+      // The 90-day window in § 26-37-203 is a bar on actions contesting the
+      // conveyance, not a right to redeem. Labelling it Redeemable Deed — as
+      // this adapter first did — would have the engine price a redemption
+      // penalty the investor can never actually earn.
+      saleType: "Tax Deed" as const,
       externalId: `${binding.countyFips}|cosl|${sale.saleDate}`,
       saleDate: sale.saleDate,
       // From the Commissioner's own calendar feed, not projected.
