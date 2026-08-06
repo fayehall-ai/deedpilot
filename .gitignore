@@ -60,3 +60,6 @@ data/source-registry.backup.json
 
 # GovEase browser captures (working artifacts, not source)
 data/govease-capture/
+
+# SRI browser captures (working artifacts, not source)
+data/sri-capture/
