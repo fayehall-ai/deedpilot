@@ -262,6 +262,14 @@ export function distinguishingLabels(titles: (string | null)[]): (string | null)
 // ---------------------------------------------------------------------------
 
 export interface CalendarFilters {
+  /**
+   * The route these filter links point back at.
+   *
+   * The same calendar renders on `/calendar` and on the home page, and a chip
+   * must return you to the page you clicked it on — hardcoding `/calendar`
+   * silently teleported anyone filtering from home.
+   */
+  basePath: string;
   /** YYYY-MM currently shown. */
   month: string;
   /** The month containing today — omitted from hrefs to keep `/calendar` clean. */
@@ -297,9 +305,14 @@ function csv(raw: string | string[] | undefined): string[] {
   );
 }
 
-export function parseCalendarFilters(params: RawParams, today: string): CalendarFilters {
+export function parseCalendarFilters(
+  params: RawParams,
+  today: string,
+  basePath = "/calendar",
+): CalendarFilters {
   const currentMonth = monthOf(today);
   return {
+    basePath,
     month: parseMonth(params.m, currentMonth),
     currentMonth,
     states: csv(params.state)
@@ -314,7 +327,7 @@ export function parseCalendarFilters(params: RawParams, today: string): Calendar
   };
 }
 
-/** `/calendar?...` for these filters, with `patch` applied. */
+/** The filters' own route with `patch` applied, e.g. `/calendar?m=2026-09`. */
 export function calendarHref(
   filters: CalendarFilters,
   patch: Partial<CalendarFilters> = {},
@@ -329,7 +342,7 @@ export function calendarHref(
   if (next.platforms.length) p.set("platform", [...next.platforms].sort().join(","));
   if (next.includeLeads) p.set("leads", "1");
   const qs = p.toString();
-  return qs ? `/calendar?${qs}` : "/calendar";
+  return qs ? `${next.basePath}?${qs}` : next.basePath;
 }
 
 /** Add `value` if absent, remove it if present. */

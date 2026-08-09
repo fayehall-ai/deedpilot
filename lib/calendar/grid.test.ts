@@ -143,6 +143,20 @@ assert(parseCalendarFilters({ leads: "true" }, today).includeLeads === false, "l
 // --- href round-tripping -----------------------------------------------------
 
 assert(calendarHref(empty) === "/calendar", "clean URL when nothing is set");
+assert(empty.basePath === "/calendar", "default base path");
+
+// The same calendar renders on the home page. A chip clicked there must come
+// back to the home page — the earlier hardcoded "/calendar" teleported anyone
+// who filtered from home onto a different route mid-interaction.
+const onHome = parseCalendarFilters({ state: "MI" }, today, "/");
+assert(onHome.basePath === "/", "base path is carried on the filters");
+assert(calendarHref(onHome) === "/?state=MI", `home href, got ${calendarHref(onHome)}`);
+assert(
+  calendarHref(onHome, { month: "2026-09" }) === "/?m=2026-09&state=MI",
+  `home month nav stays on home, got ${calendarHref(onHome, { month: "2026-09" })}`,
+);
+// A bare home calendar with nothing set is just "/", not "/?".
+assert(calendarHref(parseCalendarFilters({}, today, "/")) === "/", "clean home URL");
 assert(
   calendarHref(empty, { month: "2026-09" }) === "/calendar?m=2026-09",
   `month added, got ${calendarHref(empty, { month: "2026-09" })}`,

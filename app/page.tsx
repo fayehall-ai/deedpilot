@@ -4,7 +4,8 @@ import { getPlatformStats } from "@/lib/queries";
 import { num } from "@/lib/format";
 import { COVERED_STATES, STATE_NAMES, COUNTY_DATA, ALL_COUNTIES } from "@/lib/atlas";
 import { Card } from "@/components/ui";
-import { StatsSkeleton } from "@/components/skeleton";
+import { CalendarSkeleton, StatsSkeleton } from "@/components/skeleton";
+import { CalendarView } from "@/components/calendar-view";
 
 
 /*
@@ -14,17 +15,22 @@ import { StatsSkeleton } from "@/components/skeleton";
  * making the page dynamic. The Suspense boundary stays: it is what shows a
  * skeleton instead of a blank hero if the cache is cold.
  */
-export default function HomePage() {
+export default function HomePage(props: PageProps<"/">) {
   return (
     <div>
       <Suspense fallback={<StatsSkeleton />}>
-        <HomeBody />
+        <HomeBody searchParams={props.searchParams} />
       </Suspense>
+
     </div>
   );
 }
 
-async function HomeBody() {
+async function HomeBody({
+  searchParams,
+}: {
+  searchParams: PageProps<"/">["searchParams"];
+}) {
   // The landing page must render even if Postgres is unreachable — a database
   // blip should not take the marketing site down with it.
   const stats = await getPlatformStats().catch(() => ({
@@ -102,6 +108,30 @@ async function HomeBody() {
               </Link>
             </p>
           ) : null}
+        </div>
+      </section>
+
+      {/*
+        The calendar, directly under the pitch.
+
+        This is the screen a returning subscriber opens; the hero is read once.
+        Its own <Suspense> keeps it independent of the stats above — a slow
+        aggregate must not hold back the grid, and vice versa.
+      */}
+      <section className="border-b border-border bg-surface-2/20">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="text-2xl font-semibold tracking-tight">What is selling, and when</h2>
+            <Link
+              href="/calendar"
+              className="text-sm text-muted underline transition-colors hover:text-foreground"
+            >
+              Open the full calendar
+            </Link>
+          </div>
+          <Suspense fallback={<CalendarSkeleton />}>
+            <CalendarView searchParams={searchParams} basePath="/" />
+          </Suspense>
         </div>
       </section>
 

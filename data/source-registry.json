@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-08-09T22:03:04.319Z",
-  "nCounties": 726,
-  "nVerified": 291,
-  "nGaps": 484,
+  "builtAt": "2026-08-09T22:15:46.885Z",
+  "nCounties": 787,
+  "nVerified": 345,
+  "nGaps": 506,
   "counties": {
     "10001": {
       "state": "DE",
@@ -1602,15 +1602,15 @@
       "sources": [],
       "isGap": true
     },
-    "13067": {
+    "13021": {
       "state": "GA",
-      "county": "Cobb",
+      "county": "Bibb",
       "sources": [
         {
-          "fips": "13067",
+          "fips": "13021",
           "state": "GA",
-          "url": "https://www.cobbtax.gov/property/tax_sale/index.php",
-          "host": "www.cobbtax.gov",
+          "url": "https://www.maconbibbtax.us/property.html",
+          "host": "www.maconbibbtax.us",
           "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
@@ -1620,7 +1620,407 @@
             "tax sale",
             "minimum/opening bid"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13029": {
+      "state": "GA",
+      "county": "Bryan",
+      "sources": [],
+      "isGap": true
+    },
+    "13031": {
+      "state": "GA",
+      "county": "Bulloch",
+      "sources": [],
+      "isGap": true
+    },
+    "13039": {
+      "state": "GA",
+      "county": "Camden",
+      "sources": [
+        {
+          "fips": "13039",
+          "state": "GA",
+          "url": "https://www.camdencountyga.gov/87/Tax-Sale",
+          "host": "www.camdencountyga.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13045": {
+      "state": "GA",
+      "county": "Carroll",
+      "sources": [
+        {
+          "fips": "13045",
+          "state": "GA",
+          "url": "https://carrollcountygatax.com/tax-sales-2/",
+          "host": "carrollcountygatax.com",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13045",
+          "state": "GA",
+          "url": "https://carrollcountygatax.com/tax-sales-2/",
+          "host": "carrollcountygatax.com",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13047": {
+      "state": "GA",
+      "county": "Catoosa",
+      "sources": [
+        {
+          "fips": "13047",
+          "state": "GA",
+          "url": "https://www.catoosataxes.com/",
+          "host": "www.catoosataxes.com",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13051": {
+      "state": "GA",
+      "county": "Chatham",
+      "sources": [
+        {
+          "fips": "13051",
+          "state": "GA",
+          "url": "https://tax.chathamcountyga.gov/TaxSaleList",
+          "host": "tax.chathamcountyga.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13057": {
+      "state": "GA",
+      "county": "Cherokee",
+      "sources": [
+        {
+          "fips": "13057",
+          "state": "GA",
+          "url": "https://www.cherokeecountytax.com/property.html",
+          "host": "www.cherokeecountytax.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13057",
+          "state": "GA",
+          "url": "https://www.cherokeecountytax.com/property.html",
+          "host": "www.cherokeecountytax.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13059": {
+      "state": "GA",
+      "county": "Clarke",
+      "sources": [
+        {
+          "fips": "13059",
+          "state": "GA",
+          "url": "https://www.accgov.com/1719/Tax-Sales",
+          "host": "www.accgov.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13059",
+          "state": "GA",
+          "url": "https://www.accgov.com/1703/Delinquent-Tax-Division",
+          "host": "www.accgov.com",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13063": {
+      "state": "GA",
+      "county": "Clayton",
+      "sources": [],
+      "isGap": true
+    },
+    "13067": {
+      "state": "GA",
+      "county": "Cobb",
+      "sources": [
+        {
+          "fips": "13067",
+          "state": "GA",
+          "url": "https://www.cobbtax.gov/",
+          "host": "www.cobbtax.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13073": {
+      "state": "GA",
+      "county": "Columbia",
+      "sources": [
+        {
+          "fips": "13073",
+          "state": "GA",
+          "url": "https://www.columbiacountyga.gov/186/Delinquent-Taxes",
+          "host": "www.columbiacountyga.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13077": {
+      "state": "GA",
+      "county": "Coweta",
+      "sources": [],
+      "isGap": true
+    },
+    "13089": {
+      "state": "GA",
+      "county": "DeKalb",
+      "sources": [
+        {
+          "fips": "13089",
+          "state": "GA",
+          "url": "https://dekalbtaxga.gov/",
+          "host": "dekalbtaxga.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13095": {
+      "state": "GA",
+      "county": "Dougherty",
+      "sources": [],
+      "isGap": true
+    },
+    "13097": {
+      "state": "GA",
+      "county": "Douglas",
+      "sources": [
+        {
+          "fips": "13097",
+          "state": "GA",
+          "url": "https://www.douglastax.org/property-tax-sales",
+          "host": "www.douglastax.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13097",
+          "state": "GA",
+          "url": "https://douglastax.org/delinquent-property-tax",
+          "host": "douglastax.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13097",
+          "state": "GA",
+          "url": "https://douglastax.org/",
+          "host": "douglastax.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13103": {
+      "state": "GA",
+      "county": "Effingham",
+      "sources": [],
+      "isGap": true
+    },
+    "13113": {
+      "state": "GA",
+      "county": "Fayette",
+      "sources": [],
+      "isGap": true
+    },
+    "13115": {
+      "state": "GA",
+      "county": "Floyd",
+      "sources": [],
+      "isGap": true
+    },
+    "13117": {
+      "state": "GA",
+      "county": "Forsyth",
+      "sources": [
+        {
+          "fips": "13117",
+          "state": "GA",
+          "url": "https://forsythcountytax.com/",
+          "host": "forsythcountytax.com",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13117",
+          "state": "GA",
+          "url": "https://forsythcountytax.com/delinquent-tax-sale/",
+          "host": "forsythcountytax.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -1643,11 +2043,23 @@
             "tax sale",
             "minimum/opening bid"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
       "isGap": false
+    },
+    "13127": {
+      "state": "GA",
+      "county": "Glynn",
+      "sources": [],
+      "isGap": true
+    },
+    "13129": {
+      "state": "GA",
+      "county": "Gordon",
+      "sources": [],
+      "isGap": true
     },
     "13135": {
       "state": "GA",
@@ -1669,11 +2081,335 @@
             "minimum/opening bid",
             "bidder registration"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
       "isGap": false
+    },
+    "13139": {
+      "state": "GA",
+      "county": "Hall",
+      "sources": [
+        {
+          "fips": "13139",
+          "state": "GA",
+          "url": "https://hallcountytax.org/property/tax-sale/",
+          "host": "hallcountytax.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13139",
+          "state": "GA",
+          "url": "https://hallcountytax.org/property/tax-sale/",
+          "host": "hallcountytax.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13139",
+          "state": "GA",
+          "url": "https://hallcountytax.org/property/",
+          "host": "hallcountytax.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13151": {
+      "state": "GA",
+      "county": "Henry",
+      "sources": [],
+      "isGap": true
+    },
+    "13153": {
+      "state": "GA",
+      "county": "Houston",
+      "sources": [],
+      "isGap": true
+    },
+    "13157": {
+      "state": "GA",
+      "county": "Jackson",
+      "sources": [],
+      "isGap": true
+    },
+    "13175": {
+      "state": "GA",
+      "county": "Laurens",
+      "sources": [],
+      "isGap": true
+    },
+    "13179": {
+      "state": "GA",
+      "county": "Liberty",
+      "sources": [],
+      "isGap": true
+    },
+    "13185": {
+      "state": "GA",
+      "county": "Lowndes",
+      "sources": [],
+      "isGap": true
+    },
+    "13215": {
+      "state": "GA",
+      "county": "Muscogee",
+      "sources": [
+        {
+          "fips": "13215",
+          "state": "GA",
+          "url": "https://columbusga.gov/taxcommissioner/Delinquent-Tax",
+          "host": "columbusga.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13217": {
+      "state": "GA",
+      "county": "Newton",
+      "sources": [
+        {
+          "fips": "13217",
+          "state": "GA",
+          "url": "https://newtoncountytax.com/property_tax/tax-sales/",
+          "host": "newtoncountytax.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13217",
+          "state": "GA",
+          "url": "https://newtoncountytax.com/",
+          "host": "newtoncountytax.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13223": {
+      "state": "GA",
+      "county": "Paulding",
+      "sources": [],
+      "isGap": true
+    },
+    "13245": {
+      "state": "GA",
+      "county": "Richmond",
+      "sources": [
+        {
+          "fips": "13245",
+          "state": "GA",
+          "url": "https://arctax.com/",
+          "host": "arctax.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13245",
+          "state": "GA",
+          "url": "https://arctax.com/property/tax-sale-lists/",
+          "host": "arctax.com",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13247": {
+      "state": "GA",
+      "county": "Rockdale",
+      "sources": [
+        {
+          "fips": "13247",
+          "state": "GA",
+          "url": "https://rockdaletaxoffice.org/property-tax",
+          "host": "rockdaletaxoffice.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13247",
+          "state": "GA",
+          "url": "https://rockdaletaxoffice.org/",
+          "host": "rockdaletaxoffice.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13255": {
+      "state": "GA",
+      "county": "Spalding",
+      "sources": [],
+      "isGap": true
+    },
+    "13285": {
+      "state": "GA",
+      "county": "Troup",
+      "sources": [],
+      "isGap": true
+    },
+    "13295": {
+      "state": "GA",
+      "county": "Walker",
+      "sources": [
+        {
+          "fips": "13295",
+          "state": "GA",
+          "url": "https://walkercountytax.com/",
+          "host": "walkercountytax.com",
+          "origin": "atlas",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13297": {
+      "state": "GA",
+      "county": "Walton",
+      "sources": [
+        {
+          "fips": "13297",
+          "state": "GA",
+          "url": "https://tax.waltoncountypay.com/property.html",
+          "host": "tax.waltoncountypay.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "13297",
+          "state": "GA",
+          "url": "https://tax.waltoncountypay.com/property.html",
+          "host": "tax.waltoncountypay.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "13313": {
+      "state": "GA",
+      "county": "Whitfield",
+      "sources": [],
+      "isGap": true
     },
     "15001": {
       "state": "HI",
@@ -1684,8 +2420,27 @@
     "15003": {
       "state": "HI",
       "county": "Honolulu",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "15003",
+          "state": "HI",
+          "url": "https://www.nolo.com/legal-encyclopedia/what-happens-if-i-don-t-pay-property-taxes-in-hawaii.html",
+          "host": "www.nolo.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "redemption period",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "15005": {
       "state": "HI",
@@ -1716,7 +2471,7 @@
             "delinquent tax",
             "tax sale"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -1754,26 +2509,8 @@
     "16005": {
       "state": "ID",
       "county": "Bannock",
-      "sources": [
-        {
-          "fips": "16005",
-          "state": "ID",
-          "url": "https://www.bannockcounty.gov/treasurer/",
-          "host": "www.bannockcounty.gov",
-          "origin": "link_followed",
-          "kind": "results",
-          "isGovernment": true,
-          "confidence": 0.8,
-          "signals": [
-            "delinquent tax",
-            "parcel id",
-            "assessed value"
-          ],
-          "verifiedOn": "2026-07-31",
-          "httpStatus": 200
-        }
-      ],
-      "isGap": false
+      "sources": [],
+      "isGap": true
     },
     "16007": {
       "state": "ID",
@@ -1790,8 +2527,25 @@
     "16011": {
       "state": "ID",
       "county": "Bingham",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "16011",
+          "state": "ID",
+          "url": "http://web.binghamid.gov/treasurer/treasurer_tax_deed.html",
+          "host": "web.binghamid.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "16013": {
       "state": "ID",
@@ -1808,8 +2562,26 @@
     "16017": {
       "state": "ID",
       "county": "Bonner",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "16017",
+          "state": "ID",
+          "url": "https://www.bonnercountyid.gov/departments/Treasurer/FAQTaxDeeding",
+          "host": "www.bonnercountyid.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "16019": {
       "state": "ID",
@@ -1832,14 +2604,61 @@
     "16055": {
       "state": "ID",
       "county": "Kootenai",
+      "sources": [
+        {
+          "fips": "16055",
+          "state": "ID",
+          "url": "https://www.kcgov.us/528/Property-Tax-Sale",
+          "host": "www.kcgov.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "tax deed sale",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "16065": {
+      "state": "ID",
+      "county": "Madison",
+      "sources": [],
+      "isGap": true
+    },
+    "16083": {
+      "state": "ID",
+      "county": "Twin Falls",
       "sources": [],
       "isGap": true
     },
     "17001": {
       "state": "IL",
       "county": "Adams",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "17001",
+          "state": "IL",
+          "url": "https://iltaxsale.com/new/index.php/main/company/",
+          "host": "iltaxsale.com",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "17003": {
       "state": "IL",
@@ -1873,8 +2692,25 @@
     "17007": {
       "state": "IL",
       "county": "Boone",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "17007",
+          "state": "IL",
+          "url": "https://boonecountytreasurer.us/",
+          "host": "boonecountytreasurer.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "17009": {
       "state": "IL",
@@ -1946,8 +2782,26 @@
     "17019": {
       "state": "IL",
       "county": "Champaign",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "17019",
+          "state": "IL",
+          "url": "https://iltaxsale.com/new/index.php/main/company/",
+          "host": "iltaxsale.com",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "17021": {
       "state": "IL",
@@ -1991,6 +2845,62 @@
       "sources": [],
       "isGap": true
     },
+    "17037": {
+      "state": "IL",
+      "county": "DeKalb",
+      "sources": [
+        {
+          "fips": "17037",
+          "state": "IL",
+          "url": "https://dekalbcountyclerkil.gov/tax-extension/",
+          "host": "dekalbcountyclerkil.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "17037",
+          "state": "IL",
+          "url": "https://dekalbcounty.org/departments/treasurer-collector/frequently-asked-questions/delinquent-tax-sale-information/",
+          "host": "dekalbcounty.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "17037",
+          "state": "IL",
+          "url": "https://dekalbcounty.org/departments/treasurer-collector/",
+          "host": "dekalbcounty.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "17043": {
       "state": "IL",
       "county": "DuPage",
@@ -2011,30 +2921,267 @@
             "redemption period",
             "parcel id"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
       "isGap": false
     },
+    "17063": {
+      "state": "IL",
+      "county": "Grundy",
+      "sources": [
+        {
+          "fips": "17063",
+          "state": "IL",
+          "url": "https://www.grundycountyil.gov/services/treasurer/index.php",
+          "host": "www.grundycountyil.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "tax sale",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17077": {
+      "state": "IL",
+      "county": "Jackson",
+      "sources": [
+        {
+          "fips": "17077",
+          "state": "IL",
+          "url": "https://www.jacksoncounty-il.gov/263/Treasurer",
+          "host": "www.jacksoncounty-il.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17089": {
+      "state": "IL",
+      "county": "Kane",
+      "sources": [],
+      "isGap": true
+    },
+    "17091": {
+      "state": "IL",
+      "county": "Kankakee",
+      "sources": [
+        {
+          "fips": "17091",
+          "state": "IL",
+          "url": "https://iltaxsale.com/new/index.php/main/company/",
+          "host": "iltaxsale.com",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17093": {
+      "state": "IL",
+      "county": "Kendall",
+      "sources": [],
+      "isGap": true
+    },
     "17097": {
       "state": "IL",
       "county": "Lake",
+      "sources": [],
+      "isGap": true
+    },
+    "17099": {
+      "state": "IL",
+      "county": "LaSalle",
       "sources": [
         {
-          "fips": "17097",
+          "fips": "17099",
           "state": "IL",
-          "url": "https://www.lakecountyclerk.org/administrative_services/tax_deeds.aspx",
-          "host": "www.lakecountyclerk.org",
+          "url": "https://iltaxsale.com/new/index.php/main/company/",
+          "host": "iltaxsale.com",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17111": {
+      "state": "IL",
+      "county": "McHenry",
+      "sources": [
+        {
+          "fips": "17111",
+          "state": "IL",
+          "url": "https://iltaxsale.com/new/index.php/main/company/",
+          "host": "iltaxsale.com",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17113": {
+      "state": "IL",
+      "county": "McLean",
+      "sources": [
+        {
+          "fips": "17113",
+          "state": "IL",
+          "url": "https://www.mcleancountyil.gov/97/Treasurer-Tax-Collector",
+          "host": "www.mcleancountyil.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17115": {
+      "state": "IL",
+      "county": "Macon",
+      "sources": [
+        {
+          "fips": "17115",
+          "state": "IL",
+          "url": "https://maconcounty.illinois.gov/departments/treasurer/",
+          "host": "maconcounty.illinois.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "redemption period",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17119": {
+      "state": "IL",
+      "county": "Madison",
+      "sources": [
+        {
+          "fips": "17119",
+          "state": "IL",
+          "url": "https://www.madisoncountyil.gov/treasurer/tax_sale.php",
+          "host": "www.madisoncountyil.gov",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17141": {
+      "state": "IL",
+      "county": "Ogle",
+      "sources": [],
+      "isGap": true
+    },
+    "17143": {
+      "state": "IL",
+      "county": "Peoria",
+      "sources": [
+        {
+          "fips": "17143",
+          "state": "IL",
+          "url": "https://www.peoriacounty.gov/1347/Treasurer",
+          "host": "www.peoriacounty.gov",
           "origin": "atlas",
           "kind": "calendar",
-          "isGovernment": false,
-          "confidence": 0.58,
+          "isGovernment": true,
+          "confidence": 0.85,
           "signals": [
-            "tax deed sale",
-            "foreclosure auction"
+            "delinquent tax",
+            "tax sale"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17161": {
+      "state": "IL",
+      "county": "Rock Island",
+      "sources": [
+        {
+          "fips": "17161",
+          "state": "IL",
+          "url": "https://www.rockislandcountyil.gov/350/Property-Tax-Search",
+          "host": "www.rockislandcountyil.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -2047,17 +3194,165 @@
         {
           "fips": "17163",
           "state": "IL",
-          "url": "https://stclaircounty.org/Offices/27",
-          "host": "stclaircounty.org",
-          "origin": "link_followed",
-          "kind": "calendar",
-          "isGovernment": false,
-          "confidence": 0.5,
+          "url": "https://www.co.st-clair.il.us/departments/treasurer/tax-sale",
+          "host": "www.co.st-clair.il.us",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.75,
           "signals": [
             "delinquent tax",
-            "foreclosure auction"
+            "tax sale"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17167": {
+      "state": "IL",
+      "county": "Sangamon",
+      "sources": [
+        {
+          "fips": "17167",
+          "state": "IL",
+          "url": "https://sangamonil.gov/departments/s-z/treasurer",
+          "host": "sangamonil.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17179": {
+      "state": "IL",
+      "county": "Tazewell",
+      "sources": [
+        {
+          "fips": "17179",
+          "state": "IL",
+          "url": "https://iltaxsale.com/new/index.php/main/company/",
+          "host": "iltaxsale.com",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "17179",
+          "state": "IL",
+          "url": "https://iltaxsale.com/new/index.php/main/company/",
+          "host": "iltaxsale.com",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17183": {
+      "state": "IL",
+      "county": "Vermilion",
+      "sources": [],
+      "isGap": true
+    },
+    "17195": {
+      "state": "IL",
+      "county": "Whiteside",
+      "sources": [
+        {
+          "fips": "17195",
+          "state": "IL",
+          "url": "https://www.whitesidecountyil.gov/226/Tax-Sale-Information",
+          "host": "www.whitesidecountyil.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17197": {
+      "state": "IL",
+      "county": "Will",
+      "sources": [
+        {
+          "fips": "17197",
+          "state": "IL",
+          "url": "https://willcounty.gov/County-Offices/Budget-Finance/Treasurer-Office",
+          "host": "willcounty.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "17199": {
+      "state": "IL",
+      "county": "Williamson",
+      "sources": [],
+      "isGap": true
+    },
+    "17201": {
+      "state": "IL",
+      "county": "Winnebago",
+      "sources": [
+        {
+          "fips": "17201",
+          "state": "IL",
+          "url": "https://wincoil.gov/departments/treasurer/tax-information",
+          "host": "wincoil.gov",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
