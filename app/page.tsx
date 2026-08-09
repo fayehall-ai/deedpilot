@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { getPlatformStats } from "@/lib/queries";
 import { num } from "@/lib/format";
 import { COUNTY_DATA, ALL_COUNTIES } from "@/lib/atlas";
-import { AuctionListSkeleton, CalendarSkeleton, StatsSkeleton } from "@/components/skeleton";
+import { AuctionListSkeleton, CalendarSkeleton } from "@/components/skeleton";
 import { CalendarView } from "@/components/calendar-view";
 import { AuctionsList } from "@/components/auctions-list";
 import { AtlasStates } from "@/components/atlas-states";
@@ -27,8 +27,18 @@ import { PricingPlans } from "@/components/pricing-plans";
  * boundaries flat means each section resolves on its own and none of them can
  * ever contain another.
  *
- * The hero copy sits outside every boundary, so it is part of the prerendered
- * shell and paints immediately; only the figures wait on Postgres.
+ * There are exactly two boundaries, and the count is the point. An earlier
+ * four-boundary version passed every local check and then failed on Vercel:
+ * the server sent complete HTML — 386 auction links, all four
+ * `$RC("B:n","S:n")` completion scripts — and the browser left every one of
+ * them stranded in React's staging container. No error, no CSP, just a
+ * permanent skeleton. Behind a CDN the whole stream replays at once rather
+ * than progressively, and the reveal scheduler never ran them.
+ *
+ * So only the two genuinely request-time sections get a boundary. The hero
+ * figures and the coverage report read `use cache` data and prerender into the
+ * static shell instead, which is both faster and one less thing that has to
+ * reveal correctly.
  */
 export default function HomePage(props: PageProps<"/">) {
   return (
@@ -65,9 +75,7 @@ export default function HomePage(props: PageProps<"/">) {
             </div>
           </div>
 
-          <Suspense fallback={<StatsSkeleton count={5} />}>
-            <HeroStats />
-          </Suspense>
+          <HeroStats />
         </div>
       </section>
 
@@ -139,9 +147,7 @@ export default function HomePage(props: PageProps<"/">) {
             </Link>
           </div>
           {/* compact: the per-county ingest log is 200 rows of ops detail. */}
-          <Suspense fallback={<StatsSkeleton />}>
-            <CoverageReport compact />
-          </Suspense>
+          <CoverageReport compact />
         </div>
       </section>
 
