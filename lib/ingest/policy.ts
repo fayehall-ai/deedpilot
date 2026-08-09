@@ -103,18 +103,14 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
       "Linebarger Goggan Blair & Sampson publishes Texas delinquent-tax sale lists as a public notice " +
       "function. robots.txt permits crawling.",
   },
-  {
-    host: "govease.com",
-    decision: "allow",
-    minDelayMs: 3000,
-    reason: "robots.txt restricts only HubSpot preview paths; public auction listings are permitted.",
-  },
-  {
-    host: "bid4assets.com",
-    decision: "allow",
-    minDelayMs: 3000,
-    reason: "No robots.txt served. Rate-limited conservatively; public listing pages only.",
-  },
+  // Removed 2026-08-09: duplicate `allow` entries for govease.com and
+  // bid4assets.com sat below the `requires_agreement` ones above. `policyFor`
+  // returns the first match, so they never applied — but they recorded the
+  // opposite conclusion from the same file, and a reordering or a switch to
+  // last-match-wins would have silently started crawling two hosts the project
+  // had decided not to. The earlier belief ("robots.txt restricts only HubSpot
+  // preview paths") was superseded by the 2026-08-05 verification that
+  // liveauctions.govease.com serves `User-agent: * / Disallow: /`.
   {
     host: "tax.newmexico.gov",
     decision: "allow",
