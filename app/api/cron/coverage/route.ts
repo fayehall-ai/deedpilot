@@ -21,7 +21,6 @@ import { buildCoverageScoreboard } from "@/lib/coverage/scoreboard";
 import { runEnrichment } from "@/lib/ingest/runner";
 import { getAdapter } from "@/lib/ingest/adapters";
 
-export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const CRON_SECRET = process.env.VERCEL_CRON_SECRET || "dev-secret";

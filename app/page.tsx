@@ -1,12 +1,30 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { getPlatformStats } from "@/lib/queries";
 import { num } from "@/lib/format";
 import { COVERED_STATES, STATE_NAMES, COUNTY_DATA, ALL_COUNTIES } from "@/lib/atlas";
 import { Card } from "@/components/ui";
+import { StatsSkeleton } from "@/components/skeleton";
 
-export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
+/*
+ * No `unstable_instant`. The home page reads only cached aggregates, so it is
+ * already fully prerenderable — validation flags the static `metadata` export
+ * as the sole thing preventing that, which is not a problem worth solving by
+ * making the page dynamic. The Suspense boundary stays: it is what shows a
+ * skeleton instead of a blank hero if the cache is cold.
+ */
+export default function HomePage() {
+  return (
+    <div>
+      <Suspense fallback={<StatsSkeleton />}>
+        <HomeBody />
+      </Suspense>
+    </div>
+  );
+}
+
+async function HomeBody() {
   // The landing page must render even if Postgres is unreachable — a database
   // blip should not take the marketing site down with it.
   const stats = await getPlatformStats().catch(() => ({
@@ -177,10 +195,10 @@ export default async function HomePage() {
 
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <>
       <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
       <dd className="tnum mt-1 text-3xl font-semibold">{value}</dd>
-    </div>
+    </>
   );
 }
 

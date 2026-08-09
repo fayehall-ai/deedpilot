@@ -7,7 +7,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getComparables } from "@/lib/history/comparables";
 
-export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
   const state = req.nextUrl.searchParams.get("state")?.trim().toUpperCase();

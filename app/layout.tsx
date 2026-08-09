@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cacheLife } from "next/cache";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -66,10 +67,27 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               and may be stale or incomplete. Confirm everything with the county treasurer, tax
               collector, or clerk of court — and with an attorney — before bidding.
             </p>
-            <p>© {new Date().getFullYear()} DeedPilot</p>
+            <p>
+              © <CopyrightYear /> DeedPilot
+            </p>
           </div>
         </footer>
       </body>
     </html>
   );
+}
+
+/**
+ * The copyright year, cached for a day.
+ *
+ * Under Cache Components a Server Component may not read the clock while it
+ * prerenders — the value would be frozen into 1,061 static atlas pages at
+ * build time and silently go stale on January 1st. A cached component is the
+ * sanctioned answer: the year is computed inside the cache scope and expires
+ * on its own, so the surrounding shell stays fully static and prefetchable.
+ */
+async function CopyrightYear() {
+  "use cache";
+  cacheLife("days");
+  return <>{new Date().getFullYear()}</>;
 }

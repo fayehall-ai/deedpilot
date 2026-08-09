@@ -1,4 +1,5 @@
 import "server-only";
+import { cacheLife } from "next/cache";
 import { and, asc, desc, eq, gte, inArray, lte, sql, count } from "drizzle-orm";
 import { db } from "./db";
 import { auctions, counties, lots, ingestRuns, dealAnalyses, lotValuations } from "./db/schema";
@@ -53,6 +54,13 @@ export async function getUpcomingAuctions(
     includeUnconfirmed?: boolean;
   } = {},
 ) {
+  /*
+   * Cached for the same two reasons as the aggregates: it reads the clock
+   * before its first query, which Cache Components only permits inside a cache
+   * scope, and the underlying rows only move on the nightly ingest.
+   */
+  "use cache";
+  cacheLife("minutes");
   // Skeletons (lot_count = 0) are not inventory — they inflate "coverage" and
   // look like real sales on the auctions page. Opt in only for ops views.
   const where = [
@@ -62,7 +70,7 @@ export async function getUpcomingAuctions(
   ];
   if (opts.state) where.push(eq(counties.state, opts.state));
 
-  return db
+  return await db
     .select({
       id: auctions.id,
       saleDate: auctions.saleDate,
@@ -197,6 +205,13 @@ export interface CalendarFacet {
 export async function getCalendarFacets(
   opts: { includeUnconfirmed?: boolean } = {},
 ): Promise<{ states: CalendarFacet[]; saleTypes: CalendarFacet[]; platforms: CalendarFacet[] }> {
+  /*
+   * Cached for the same two reasons as the aggregates: it reads the clock
+   * before its first query, which Cache Components only permits inside a cache
+   * scope, and the underlying rows only move on the nightly ingest.
+   */
+  "use cache";
+  cacheLife("minutes");
   const rows = await db
     .select({
       state: counties.state,
@@ -314,6 +329,19 @@ export async function getCachedBrief(lotId: string, inputsHash: string) {
  * between "9,598 lots" and the ~3,300 a subscriber can actually bid on.
  */
 export async function getPlatformStats() {
+  /*
+   * Cached, which under Cache Components is also what makes the clock read
+   * inside it legal: a Server Component may not ask the time before it has
+   * read uncached data, and `todayIso()` here runs before the first query.
+   *
+   * Minutes is the right window. Everything this aggregates moves on the
+   * nightly ingest cron, so a request-fresh count buys nothing a subscriber
+   * can perceive, and the page is one a person reloads repeatedly while
+   * working — which is precisely when a cache earns its keep.
+   */
+  "use cache";
+  cacheLife("minutes");
+
   const upcoming = gte(auctions.saleDate, todayIso());
   const hasLots = sql`${auctions.lotCount} > 0`;
   const confirmed = isConfirmedInventory();
@@ -387,6 +415,19 @@ export async function getPlatformStats() {
  * rather than as an empty auction list.
  */
 export async function getIngestHealth() {
+  /*
+   * Cached, which under Cache Components is also what makes the clock read
+   * inside it legal: a Server Component may not ask the time before it has
+   * read uncached data, and `todayIso()` here runs before the first query.
+   *
+   * Minutes is the right window. Everything this aggregates moves on the
+   * nightly ingest cron, so a request-fresh count buys nothing a subscriber
+   * can perceive, and the page is one a person reloads repeatedly while
+   * working — which is precisely when a cache earns its keep.
+   */
+  "use cache";
+  cacheLife("minutes");
+
   return db
     .select({
       adapter: ingestRuns.adapter,

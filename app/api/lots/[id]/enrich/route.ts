@@ -9,7 +9,6 @@ import {
   enrichLotById,
 } from "@/lib/property/enrich";
 
-export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(

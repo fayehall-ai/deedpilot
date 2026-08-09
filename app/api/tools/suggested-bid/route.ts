@@ -10,7 +10,6 @@ import { computeMaxBid } from "@/lib/deal/maxbid";
 import { computeSuggestedBidWithIndex } from "@/lib/history/suggested-bid.server";
 import type { SaleType } from "@/lib/atlas/types";
 
-export const runtime = "nodejs";
 
 const SALE_TYPES: SaleType[] = [
   "Tax Lien",

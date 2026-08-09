@@ -1,4 +1,5 @@
 import "server-only";
+import { cacheLife } from "next/cache";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -94,6 +95,19 @@ export interface CopilotStatus {
  * job is telling you what state things are in.
  */
 export async function getCopilotStatus(): Promise<CopilotStatus | null> {
+  /*
+   * Cached, which under Cache Components is also what makes the clock read
+   * inside it legal: a Server Component may not ask the time before it has
+   * read uncached data, and `todayIso()` here runs before the first query.
+   *
+   * Minutes is the right window. Everything this aggregates moves on the
+   * nightly ingest cron, so a request-fresh count buys nothing a subscriber
+   * can perceive, and the page is one a person reloads repeatedly while
+   * working — which is precisely when a cache earns its keep.
+   */
+  "use cache";
+  cacheLife("minutes");
+
   try {
     const path = join(process.cwd(), "copilot", "data", "status.json");
     return JSON.parse(await readFile(path, "utf8")) as CopilotStatus;

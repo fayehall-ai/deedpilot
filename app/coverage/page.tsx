@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { getIngestHealth, getPlatformStats } from "@/lib/queries";
 import { buildCoverageScoreboard } from "@/lib/coverage/scoreboard";
 import { num } from "@/lib/format";
 import { Breadcrumbs, Callout, Card, EmptyState, StatusBadge } from "@/components/ui";
+import { StatsSkeleton } from "@/components/skeleton";
 import { COVERED_STATES, STATE_NAMES, countiesInState } from "@/lib/atlas";
 import { SOURCE_POLICIES } from "@/lib/ingest/policy";
 
@@ -13,7 +15,6 @@ export const metadata: Metadata = {
     "Which counties DeedPilot ingests, where the data comes from, what is blocked, and when each source last ran cleanly.",
 };
 
-export const dynamic = "force-dynamic";
 
 /**
  * The honesty page.
@@ -26,7 +27,24 @@ export const dynamic = "force-dynamic";
  * Gold score = live nation + history nation + price nation (see
  * docs/self-improving-coverage-loop.md).
  */
-export default async function CoveragePage() {
+/*
+ * No `unstable_instant` here. Both ops pages read fully-cached aggregates, so
+ * the whole page is prerenderable and validation objects to the static
+ * `metadata` export as the one thing keeping it from being so. The Suspense
+ * boundary below still does the work that matters — these are the two screens
+ * where a slow query is most likely and least urgent.
+ */
+export default function CoveragePage() {
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <Suspense fallback={<StatsSkeleton />}>
+        <CoverageBody />
+      </Suspense>
+    </div>
+  );
+}
+
+async function CoverageBody() {
   const [health, stats, board] = await Promise.all([
     getIngestHealth().catch(() => []),
     getPlatformStats().catch(() => ({
@@ -54,7 +72,7 @@ export default async function CoveragePage() {
     stats.totalLots > 0 ? stats.lotsWithAssessed / stats.totalLots : 0;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <>
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Coverage" }]} />
 
       <header className="mb-6 max-w-3xl">
@@ -374,6 +392,6 @@ export default async function CoveragePage() {
           </li>
         </ul>
       </section>
-    </div>
+    </>
   );
 }

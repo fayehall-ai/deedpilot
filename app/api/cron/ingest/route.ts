@@ -7,7 +7,6 @@ const execAsync = promisify(exec);
 // Vercel Cron secret protection (set VERCEL_CRON_SECRET in env)
 const CRON_SECRET = process.env.VERCEL_CRON_SECRET || 'dev-secret';
 
-export const runtime = 'nodejs';
 export const maxDuration = 60; // seconds - keep short; use --limit for batches
 
 export async function GET(request: NextRequest) {

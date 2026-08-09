@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import { getUpcomingAuctions } from "@/lib/queries";
 import { money, num, relativeDays, saleDate } from "@/lib/format";
 import { Breadcrumbs, EmptyState, SaleTypeBadge, StatusBadge } from "@/components/ui";
+import { AuctionListSkeleton } from "@/components/skeleton";
 import { STATE_NAMES } from "@/lib/atlas";
 
 export const metadata: Metadata = {
@@ -11,9 +14,38 @@ export const metadata: Metadata = {
     "Every upcoming tax deed, tax lien, and redeemable deed auction we track, with lot counts and opening bids.",
 };
 
-export const dynamic = "force-dynamic";
 
-export default async function AuctionsPage(props: PageProps<"/auctions">) {
+/**
+ * Validated at dev and build time to produce an instant static shell. The
+ * container below ships on prefetch; everything that touches Postgres streams
+ * in behind the boundary.
+ */
+export const unstable_instant = {
+  prefetch: "runtime",
+  // The samples are the entry points validation walks. Both matter: the bare
+  // list is what the nav links to, and `?state=` is what every filter chip
+  // produces, so a boundary that blocks only when a filter is on would
+  // otherwise ship unnoticed.
+  samples: [{ searchParams: { state: null } }, { searchParams: { state: "MI" } }],
+};
+
+export default function AuctionsPage(props: PageProps<"/auctions">) {
+  return (
+    <>
+      <Suspense fallback={<AuctionListSkeleton />}>
+        <AuctionsBody {...props} />
+      </Suspense>
+    </>
+  );
+}
+
+async function AuctionsBody(props: PageProps<"/auctions">) {
+  /*
+   * `relativeDays` renders "in 6 days" against the clock, which is a
+   * per-request answer. Marking request time here keeps a stale "tomorrow"
+   * from being frozen into the prefetched shell.
+   */
+  await connection();
   const { state } = await props.searchParams;
   const stateFilter = typeof state === "string" ? state.toUpperCase() : undefined;
 

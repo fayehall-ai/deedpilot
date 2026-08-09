@@ -13,6 +13,7 @@ import { auctions, counties, lots } from "../db/schema";
 import { coveredStateList, hasStatuteParams } from "../deal/statute";
 import { ALL_COUNTIES } from "../atlas";
 import type { SourceRegistry } from "../prospector/types";
+import { cacheLife } from "next/cache";
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -378,6 +379,19 @@ function budgetFromPlan(items: WorkItem[]): CoverageScoreboard["budgetShares"] {
  * Build the live national scoreboard from Postgres + on-disk registry/corpus.
  */
 export async function buildCoverageScoreboard(): Promise<CoverageScoreboard> {
+  /*
+   * Cached, which under Cache Components is also what makes the clock read
+   * inside it legal: a Server Component may not ask the time before it has
+   * read uncached data, and `todayIso()` here runs before the first query.
+   *
+   * Minutes is the right window. Everything this aggregates moves on the
+   * nightly ingest cron, so a request-fresh count buys nothing a subscriber
+   * can perceive, and the page is one a person reloads repeatedly while
+   * working — which is precisely when a cache earns its keep.
+   */
+  "use cache";
+  cacheLife("minutes");
+
   const today = todayIso();
   const statuteStates = coveredStateList();
   const missingStatutes = US_STATES.filter((s) => !hasStatuteParams(s));

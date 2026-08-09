@@ -11,7 +11,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { computeMaxBid, type DealInputs } from "@/lib/deal/maxbid";
 import type { SaleType } from "@/lib/atlas/types";
 
-export const runtime = "nodejs";
 
 const SALE_TYPES: SaleType[] = ["Tax Lien", "Tax Deed", "Redeemable Deed", "Hybrid"];
 

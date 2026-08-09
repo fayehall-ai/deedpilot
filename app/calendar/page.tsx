@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import {
   getCalendarAuctions,
@@ -9,6 +11,7 @@ import {
 } from "@/lib/queries";
 import { num, platformLabel, relativeDays, saleDate, saleTypeColor } from "@/lib/format";
 import { Breadcrumbs } from "@/components/ui";
+import { CalendarSkeleton } from "@/components/skeleton";
 import { STATE_NAMES, countyLabel } from "@/lib/atlas";
 import {
   calendarHref,
@@ -34,7 +37,6 @@ export const metadata: Metadata = {
     "Every tracked tax deed, tax lien, and redeemable deed sale on a month calendar, filterable by state, auction type, and platform. Each day links to the counties selling that day.",
 };
 
-export const dynamic = "force-dynamic";
 
 /**
  * Entries shown in a day square before the rest fold into a disclosure.
@@ -45,7 +47,60 @@ export const dynamic = "force-dynamic";
  */
 const MAX_PER_CELL = 5;
 
-export default async function CalendarPage(props: PageProps<"/calendar">) {
+/**
+ * Validate at dev and build time that this route produces an instant static
+ * shell from every entry point. Without it a misplaced <Suspense> silently
+ * blocks client navigation and the only symptom is that the page feels slow.
+ */
+export const unstable_instant = {
+  prefetch: "runtime",
+  // Every filter this page encodes in the URL, in the two states that matter:
+  // the bare month a nav click produces, and a fully-filtered view. Validation
+  // walks both, so a Suspense boundary that blocks only once filters are on
+  // cannot slip through.
+  samples: [
+    { searchParams: { m: null, state: null, type: null, platform: null, leads: null } },
+    { searchParams: { m: "2026-09", state: "MI", type: "deed", platform: "taxsaleinfo", leads: "1" } },
+  ],
+};
+
+/**
+ * The shell: heading, and nothing that touches Postgres.
+ *
+ * `searchParams` is deliberately not awaited here. Awaiting it suspends, and a
+ * suspended page component has no static shell to prefetch — the whole point.
+ * The promise is handed to <CalendarBody>, which sits behind the boundary.
+ */
+export default function CalendarPage(props: PageProps<"/calendar">) {
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Calendar" }]} />
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Tax sale calendar</h1>
+        </div>
+        <Link
+          href="/auctions"
+          className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-foreground"
+        >
+          List view
+        </Link>
+      </header>
+      <Suspense fallback={<CalendarSkeleton />}>
+        <CalendarBody searchParams={props.searchParams} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function CalendarBody(props: { searchParams: PageProps<"/calendar">["searchParams"] }) {
+  /*
+   * Which square is "today" is a genuinely per-request answer, and this is the
+   * component that asks. `connection()` marks the point where prerendering
+   * stops — without it the current date would be baked into the prefetched
+   * shell and the highlighted day would be whenever the page was last built.
+   */
+  await connection();
   const params = await props.searchParams;
   const today = todayIso();
   const filters = parseCalendarFilters(params, today);
@@ -92,12 +147,9 @@ export default async function CalendarPage(props: PageProps<"/calendar">) {
   const typesInView = [...new Set(rows.map((r) => r.saleType))];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Calendar" }]} />
-
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <>
+      <header className="-mt-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Tax sale calendar</h1>
           <p className="mt-1 text-sm text-muted">
             {inMonth.length === 0 ? (
               <>No sales in {monthLabel(filters.month)} matching these filters.</>
@@ -110,12 +162,6 @@ export default async function CalendarPage(props: PageProps<"/calendar">) {
             )}
           </p>
         </div>
-        <Link
-          href="/auctions"
-          className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-foreground"
-        >
-          List view
-        </Link>
       </header>
 
       <MonthNav filters={filters} />
@@ -294,7 +340,7 @@ export default async function CalendarPage(props: PageProps<"/calendar">) {
           </>
         )}
       </p>
-    </div>
+    </>
   );
 }
 

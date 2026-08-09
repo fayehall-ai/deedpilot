@@ -11,7 +11,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveBySlug, resolveCountyRule } from "@/lib/atlas";
 
-export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
   const fips = req.nextUrl.searchParams.get("fips");

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getCachedBrief, getLot, getLotValuations } from "@/lib/queries";
@@ -6,6 +7,7 @@ import { computeMaxBid } from "@/lib/deal/maxbid";
 import { briefInputsHash } from "@/lib/ai/brief";
 import { money, num, relativeDays, saleDate } from "@/lib/format";
 import { Breadcrumbs, Callout, Card, SaleTypeBadge, StatusBadge } from "@/components/ui";
+import { DetailSkeleton } from "@/components/skeleton";
 import { DealCalculator } from "@/components/deal-calculator";
 import { ParcelBrief } from "@/components/parcel-brief";
 import { HistoricalComps } from "@/components/historical-comps";
@@ -16,7 +18,6 @@ import { assessorLinks } from "@/lib/property/assessor-links";
 import { configuredEnrichmentProviders } from "@/lib/property/enrich";
 import type { SaleType } from "@/lib/atlas/types";
 
-export const dynamic = "force-dynamic";
 
 export async function generateMetadata(props: PageProps<"/lots/[id]">): Promise<Metadata> {
   const { id } = await props.params;
@@ -26,7 +27,24 @@ export async function generateMetadata(props: PageProps<"/lots/[id]">): Promise<
   return { title: `${label} — ${row.county.name} County, ${row.county.state}` };
 }
 
-export default async function LotPage(props: PageProps<"/lots/[id]">) {
+/*
+ * No `unstable_instant` here on purpose. Validation walks a route using sample
+ * params, and this one is keyed on a database UUID — there is no id that is
+ * stable enough to pin in source without it going stale the next time the
+ * table is rebuilt. The Suspense boundary below is what actually makes the
+ * navigation instant; the export would only have added build-time checking.
+ */
+export default function LotPage(props: PageProps<"/lots/[id]">) {
+  return (
+    <>
+      <Suspense fallback={<DetailSkeleton />}>
+        <LotBody {...props} />
+      </Suspense>
+    </>
+  );
+}
+
+async function LotBody(props: PageProps<"/lots/[id]">) {
   const { id } = await props.params;
   const row = await getLot(id);
   if (!row) notFound();

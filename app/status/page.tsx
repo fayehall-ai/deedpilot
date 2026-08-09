@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getCopilotStatus } from "@/lib/status";
 import { num, percent } from "@/lib/format";
 import { Breadcrumbs, Callout, Card, EmptyState, Stat } from "@/components/ui";
+import { TableSkeleton } from "@/components/skeleton";
 import { CalibrationChart, CorpusBars, PolicyBars } from "@/components/status-charts";
 
 export const metadata: Metadata = {
@@ -10,7 +12,6 @@ export const metadata: Metadata = {
     "What the recorded corpus actually observes, which redemption priors are measured rather than assumed, how the clearing-price model calibrates out of time, and how the bid policy scores against baselines.",
 };
 
-export const dynamic = "force-dynamic";
 
 /**
  * The other honesty page.
@@ -20,7 +21,24 @@ export const dynamic = "force-dynamic";
  * that costs a subscriber money is not a visible gap — it is a figure that looks
  * like evidence and is not.
  */
-export default async function StatusPage() {
+/*
+ * No `unstable_instant` here. Both ops pages read fully-cached aggregates, so
+ * the whole page is prerenderable and validation objects to the static
+ * `metadata` export as the one thing keeping it from being so. The Suspense
+ * boundary below still does the work that matters — these are the two screens
+ * where a slow query is most likely and least urgent.
+ */
+export default function StatusPage() {
+  return (
+    <main className="mx-auto max-w-5xl px-4 py-10">
+      <Suspense fallback={<TableSkeleton />}>
+        <StatusBody />
+      </Suspense>
+    </main>
+  );
+}
+
+async function StatusBody() {
   const s = await getCopilotStatus();
 
   if (!s) {
@@ -39,7 +57,7 @@ export default async function StatusPage() {
   const unusable = corpus.nRows - corpus.nPriceUsable;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
+    <>
       <Breadcrumbs items={[{ href: "/", label: "DeedPilot" }, { label: "Status" }]} />
 
       <h1 className="mt-4 text-2xl font-semibold tracking-tight">Corpus and simulation status</h1>
@@ -247,6 +265,6 @@ export default async function StatusPage() {
         committed snapshot rather than a live service, so figures change when the model is refitted
         and the export re-run.
       </p>
-    </main>
+    </>
   );
 }

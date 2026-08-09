@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAuction, getAuctionLots } from "@/lib/queries";
@@ -12,10 +13,10 @@ import {
   StatusBadge,
   Stat,
 } from "@/components/ui";
+import { DetailSkeleton } from "@/components/skeleton";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
 import { statuteFor } from "@/lib/deal/statute";
 
-export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   props: PageProps<"/auctions/[id]">,
@@ -28,7 +29,24 @@ export async function generateMetadata(
   };
 }
 
-export default async function AuctionPage(props: PageProps<"/auctions/[id]">) {
+/*
+ * No `unstable_instant` here on purpose. Validation walks a route using sample
+ * params, and this one is keyed on a database UUID — there is no id that is
+ * stable enough to pin in source without it going stale the next time the
+ * table is rebuilt. The Suspense boundary below is what actually makes the
+ * navigation instant; the export would only have added build-time checking.
+ */
+export default function AuctionPage(props: PageProps<"/auctions/[id]">) {
+  return (
+    <>
+      <Suspense fallback={<DetailSkeleton />}>
+        <AuctionBody {...props} />
+      </Suspense>
+    </>
+  );
+}
+
+async function AuctionBody(props: PageProps<"/auctions/[id]">) {
   const { id } = await props.params;
   const row = await getAuction(id);
   if (!row) notFound();

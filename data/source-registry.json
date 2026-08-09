@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-08-01T20:09:54.265Z",
-  "nCounties": 618,
-  "nVerified": 157,
-  "nGaps": 463,
+  "builtAt": "2026-08-09T22:03:04.319Z",
+  "nCounties": 726,
+  "nVerified": 291,
+  "nGaps": 484,
   "counties": {
     "10001": {
       "state": "DE",
@@ -11,21 +11,18 @@
         {
           "fips": "10001",
           "state": "DE",
-          "url": "https://www.kentcountyde.gov/My-Government/Departments/Sheriffs-Office",
+          "url": "https://www.kentcountyde.gov/My-Government/Departments/Finance/Monition-Sale-Procedures",
           "host": "www.kentcountyde.gov",
           "origin": "atlas",
-          "kind": "results",
+          "kind": "calendar",
           "isGovernment": true,
-          "confidence": 1,
+          "confidence": 0.93,
           "signals": [
             "tax sale",
-            "foreclosure auction",
-            "minimum/opening bid",
             "redemption period",
-            "sheriff sale",
             "monition sale"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -49,7 +46,7 @@
             "sheriff sale",
             "bidder registration"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -62,8 +59,8 @@
         {
           "fips": "10005",
           "state": "DE",
-          "url": "https://www.sussexcountyde.gov/sheriff-sales",
-          "host": "www.sussexcountyde.gov",
+          "url": "https://sussexcountyde.gov/sheriff-sales",
+          "host": "sussexcountyde.gov",
           "origin": "link_followed",
           "kind": "results",
           "isGovernment": true,
@@ -74,7 +71,7 @@
             "monition sale",
             "parcel id"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -83,14 +80,51 @@
     "11001": {
       "state": "DC",
       "county": "District of Columbia",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "11001",
+          "state": "DC",
+          "url": "https://otr.cfo.dc.gov/page/real-property-tax-lien-sale-and-resources",
+          "host": "otr.cfo.dc.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "12001": {
       "state": "FL",
       "county": "Alachua",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "12001",
+          "state": "FL",
+          "url": "https://www.alachuacollector.com/property-taxes/",
+          "host": "www.alachuacollector.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "12003": {
       "state": "FL",
@@ -101,8 +135,25 @@
     "12005": {
       "state": "FL",
       "county": "Bay",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "12005",
+          "state": "FL",
+          "url": "https://www.baycoclerk.com/public-records/property-sales/tax-deed-auctions/",
+          "host": "www.baycoclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax deed sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "12007": {
       "state": "FL",
@@ -113,14 +164,52 @@
     "12009": {
       "state": "FL",
       "county": "Brevard",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "12009",
+          "state": "FL",
+          "url": "https://www.brevardclerk.us/tax-deeds",
+          "host": "www.brevardclerk.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "12011": {
       "state": "FL",
       "county": "Broward",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "12011",
+          "state": "FL",
+          "url": "https://browardtax.org/faqs/tax-certificate-sale/",
+          "host": "browardtax.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "redemption period",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "12013": {
       "state": "FL",
@@ -156,10 +245,10 @@
           "state": "FL",
           "url": "https://taxcollector.charlottecountyfl.gov/delinquent-tax",
           "host": "taxcollector.charlottecountyfl.gov",
-          "origin": "link_followed",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.93,
+          "confidence": 0.98,
           "signals": [
             "tax deed sale",
             "delinquent tax",
@@ -167,7 +256,7 @@
             "bidder registration",
             "assessed value"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -176,20 +265,592 @@
     "12017": {
       "state": "FL",
       "county": "Citrus",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "12017",
+          "state": "FL",
+          "url": "https://www.citrusclerk.org/207/Tax-Deeds",
+          "host": "www.citrusclerk.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.68,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "minimum/opening bid",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12017",
+          "state": "FL",
+          "url": "https://search.citrusclerk.org/TaxSmartWeb",
+          "host": "search.citrusclerk.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "tax deed sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "12019": {
       "state": "FL",
       "county": "Clay",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "12019",
+          "state": "FL",
+          "url": "https://clayclerk.com/tax-deeds-foreclosures/",
+          "host": "clayclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "12021": {
       "state": "FL",
       "county": "Collier",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "12021",
+          "state": "FL",
+          "url": "https://www.collierclerk.com/tax-deed-sales/",
+          "host": "www.collierclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax deed sale",
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12023": {
+      "state": "FL",
+      "county": "Columbia",
+      "sources": [
+        {
+          "fips": "12023",
+          "state": "FL",
+          "url": "https://columbiaclerk.com/clerk-services/tax-deeds/",
+          "host": "columbiaclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12031": {
+      "state": "FL",
+      "county": "Duval",
+      "sources": [
+        {
+          "fips": "12031",
+          "state": "FL",
+          "url": "https://www.duvalclerk.com/departments/county-services/tax-deed-files",
+          "host": "www.duvalclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12031",
+          "state": "FL",
+          "url": "https://taxcollector.coj.net/taxes/property-taxes/tax-sale,-certificates,-and-tax-deeds",
+          "host": "taxcollector.coj.net",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "tax sale",
+            "bidder registration",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12033": {
+      "state": "FL",
+      "county": "Escambia",
+      "sources": [
+        {
+          "fips": "12033",
+          "state": "FL",
+          "url": "https://escambiataxcollector.com/property-tax/tax-certificate-sale-general-information/",
+          "host": "escambiataxcollector.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12035": {
+      "state": "FL",
+      "county": "Flagler",
+      "sources": [
+        {
+          "fips": "12035",
+          "state": "FL",
+          "url": "https://www.flaglertax.gov/tax-certificate-information/",
+          "host": "www.flaglertax.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12053": {
+      "state": "FL",
+      "county": "Hernando",
+      "sources": [
+        {
+          "fips": "12053",
+          "state": "FL",
+          "url": "https://www.hernandocounty.us/county-government/tax-collector/tax-faqs/",
+          "host": "www.hernandocounty.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12053",
+          "state": "FL",
+          "url": "https://hernandoclerk.com/additional-services/tax-deeds/",
+          "host": "hernandoclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax deed sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12053",
+          "state": "FL",
+          "url": "https://hernandoclerk.com/additional-services/tax-deeds/",
+          "host": "hernandoclerk.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax deed sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12055": {
+      "state": "FL",
+      "county": "Highlands",
+      "sources": [
+        {
+          "fips": "12055",
+          "state": "FL",
+          "url": "https://www.highlandsclerkfl.gov/clerk_to_the_board/tax_deeds/index.php",
+          "host": "www.highlandsclerkfl.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "tax deed sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12057": {
+      "state": "FL",
+      "county": "Hillsborough",
+      "sources": [
+        {
+          "fips": "12057",
+          "state": "FL",
+          "url": "https://www.hillstaxfl.gov/taxes/real-estate-tax/delinquent-property-tax/",
+          "host": "www.hillstaxfl.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12061": {
+      "state": "FL",
+      "county": "Indian River",
+      "sources": [
+        {
+          "fips": "12061",
+          "state": "FL",
+          "url": "https://indianriverclerk.com/recording-services/tax-deeds/",
+          "host": "indianriverclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12069": {
+      "state": "FL",
+      "county": "Lake",
+      "sources": [
+        {
+          "fips": "12069",
+          "state": "FL",
+          "url": "https://www.lakecountyclerkfl.gov/departments/records-administrative-services/official-records/tax-deeds/",
+          "host": "www.lakecountyclerkfl.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12071": {
+      "state": "FL",
+      "county": "Lee",
+      "sources": [
+        {
+          "fips": "12071",
+          "state": "FL",
+          "url": "https://leetc.com/delinquent-taxes/",
+          "host": "leetc.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12073": {
+      "state": "FL",
+      "county": "Leon",
+      "sources": [
+        {
+          "fips": "12073",
+          "state": "FL",
+          "url": "https://leonclerk.com/divisions/property-sales/tax-deeds/",
+          "host": "leonclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.7,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12073",
+          "state": "FL",
+          "url": "https://www.leontaxcollector.net/Services/property-taxes/Annual-Tax-Sale",
+          "host": "www.leontaxcollector.net",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "struck off",
+            "minimum/opening bid",
+            "bidder registration",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12073",
+          "state": "FL",
+          "url": "https://www.leontaxcollector.net/Services/property-taxes/Tax-Sale-Information",
+          "host": "www.leontaxcollector.net",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "bidder registration",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12081": {
+      "state": "FL",
+      "county": "Manatee",
+      "sources": [
+        {
+          "fips": "12081",
+          "state": "FL",
+          "url": "https://www.manateeclerk.com/departments/tax-deeds/",
+          "host": "www.manateeclerk.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12083": {
+      "state": "FL",
+      "county": "Marion",
+      "sources": [
+        {
+          "fips": "12083",
+          "state": "FL",
+          "url": "https://www.mariontax.com/tax-certificate-deed-sales",
+          "host": "www.mariontax.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12083",
+          "state": "FL",
+          "url": "https://www.marioncountyclerk.org/departments/records-recording/tax-deeds-and-lands-available-for-taxes/",
+          "host": "www.marioncountyclerk.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12083",
+          "state": "FL",
+          "url": "https://www.marioncountyclerk.org/departments/records-recording/tax-deeds-and-lands-available-for-taxes/",
+          "host": "www.marioncountyclerk.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.43,
+          "signals": [
+            "tax deed sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12085": {
+      "state": "FL",
+      "county": "Martin",
+      "sources": [
+        {
+          "fips": "12085",
+          "state": "FL",
+          "url": "https://martintaxcollector.com/property-tax/faq-tax-certificate-sale/",
+          "host": "martintaxcollector.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.7,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12085",
+          "state": "FL",
+          "url": "https://www.martinclerk.com/258/Tax-Deeds",
+          "host": "www.martinclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.65,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12085",
+          "state": "FL",
+          "url": "https://martintaxcollector.com/property-tax/delinquent-taxes-and-tax-certificates/",
+          "host": "martintaxcollector.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "12086": {
       "state": "FL",
@@ -208,7 +869,264 @@
             "tax deed sale",
             "foreclosure auction"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12087": {
+      "state": "FL",
+      "county": "Monroe",
+      "sources": [
+        {
+          "fips": "12087",
+          "state": "FL",
+          "url": "https://monroetaxcollector.com/services/tax-certificate-information/",
+          "host": "monroetaxcollector.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12087",
+          "state": "FL",
+          "url": "https://monroetaxcollector.com/services/tax-certificate-information/",
+          "host": "monroetaxcollector.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12089": {
+      "state": "FL",
+      "county": "Nassau",
+      "sources": [
+        {
+          "fips": "12089",
+          "state": "FL",
+          "url": "https://taxdeeds.nassauclerk.com/",
+          "host": "taxdeeds.nassauclerk.com",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax deed sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12089",
+          "state": "FL",
+          "url": "https://www.nassautaxes.com/Content/Delinquent",
+          "host": "www.nassautaxes.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12089",
+          "state": "FL",
+          "url": "https://www.nassauclerk.com/190/View-Tax-Deed-Sales-and-Foreclosures",
+          "host": "www.nassauclerk.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax deed sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12091": {
+      "state": "FL",
+      "county": "Okaloosa",
+      "sources": [
+        {
+          "fips": "12091",
+          "state": "FL",
+          "url": "https://okaloosaclerk.com/board-services/tax-deed-sales/tax-deed-sales-faqs/",
+          "host": "okaloosaclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.7,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12091",
+          "state": "FL",
+          "url": "https://okaloosaclerk.com/board-services/tax-deed-sales/",
+          "host": "okaloosaclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12091",
+          "state": "FL",
+          "url": "https://okaloosatax.com/about-us/tax-collector-calendar/",
+          "host": "okaloosatax.com",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12095": {
+      "state": "FL",
+      "county": "Orange",
+      "sources": [
+        {
+          "fips": "12095",
+          "state": "FL",
+          "url": "https://www.occompt.com/Faq.aspx?QID=119",
+          "host": "www.occompt.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "tax deed sale",
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12095",
+          "state": "FL",
+          "url": "https://octaxcol.com/taxes/about-property-tax/tax-certificate-deed-sales/",
+          "host": "octaxcol.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.43,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12095",
+          "state": "FL",
+          "url": "http://or.occompt.com/recorder/web/help.jsp",
+          "host": "or.occompt.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "tax deed sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12097": {
+      "state": "FL",
+      "county": "Osceola",
+      "sources": [
+        {
+          "fips": "12097",
+          "state": "FL",
+          "url": "https://osceolaclerk.com/tax-deeds/",
+          "host": "osceolaclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12097",
+          "state": "FL",
+          "url": "https://osceolataxcollector.org/tax-certificate-information/",
+          "host": "osceolataxcollector.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -217,8 +1135,418 @@
     "12099": {
       "state": "FL",
       "county": "Palm Beach",
+      "sources": [
+        {
+          "fips": "12099",
+          "state": "FL",
+          "url": "https://www.pbctax.gov/taxes/property-tax/tax-certificates-and-deeds/",
+          "host": "www.pbctax.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12101": {
+      "state": "FL",
+      "county": "Pasco",
+      "sources": [
+        {
+          "fips": "12101",
+          "state": "FL",
+          "url": "https://www.pascoclerk.com/201/Tax-Deed-Sales",
+          "host": "www.pascoclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.65,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12101",
+          "state": "FL",
+          "url": "https://www.pascotaxes.com/taxes/tax-information/delinquent-real-estate-taxes/tax-sale-information/",
+          "host": "www.pascotaxes.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12101",
+          "state": "FL",
+          "url": "https://www.pascoclerk.com/648/Online-Property-Auctions-and-Sales",
+          "host": "www.pascoclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12103": {
+      "state": "FL",
+      "county": "Pinellas",
+      "sources": [
+        {
+          "fips": "12103",
+          "state": "FL",
+          "url": "https://pinellastaxcollector.gov/property-tax/tax-certificate-and-tax-deed/",
+          "host": "pinellastaxcollector.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12105": {
+      "state": "FL",
+      "county": "Polk",
+      "sources": [
+        {
+          "fips": "12105",
+          "state": "FL",
+          "url": "https://www.polkclerkfl.gov/189/Tax-Deeds",
+          "host": "www.polkclerkfl.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.98,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12105",
+          "state": "FL",
+          "url": "https://www.polktaxes.com/services/delinquency-and-tax-sale-information/",
+          "host": "www.polktaxes.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "struck off"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12107": {
+      "state": "FL",
+      "county": "Putnam",
+      "sources": [
+        {
+          "fips": "12107",
+          "state": "FL",
+          "url": "https://putnamclerk.com/tax-deed-sales/",
+          "host": "putnamclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12107",
+          "state": "FL",
+          "url": "https://putnamtax.com/services/other-services/tax-services/property-tax/",
+          "host": "putnamtax.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.43,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12109": {
+      "state": "FL",
+      "county": "St. Johns",
+      "sources": [
+        {
+          "fips": "12109",
+          "state": "FL",
+          "url": "https://sjctax.us/tax-certificate-sales/",
+          "host": "sjctax.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.93,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12111": {
+      "state": "FL",
+      "county": "St. Lucie",
       "sources": [],
       "isGap": true
+    },
+    "12113": {
+      "state": "FL",
+      "county": "Santa Rosa",
+      "sources": [],
+      "isGap": true
+    },
+    "12115": {
+      "state": "FL",
+      "county": "Sarasota",
+      "sources": [
+        {
+          "fips": "12115",
+          "state": "FL",
+          "url": "https://www.sarasotataxcollector.gov/services/tax-services/property-tax/tax-deed",
+          "host": "www.sarasotataxcollector.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12117": {
+      "state": "FL",
+      "county": "Seminole",
+      "sources": [
+        {
+          "fips": "12117",
+          "state": "FL",
+          "url": "https://seminolecounty.tax/services/property-taxes/delinquent-taxes/",
+          "host": "seminolecounty.tax",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "delinquent tax",
+            "struck off",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12119": {
+      "state": "FL",
+      "county": "Sumter",
+      "sources": [
+        {
+          "fips": "12119",
+          "state": "FL",
+          "url": "https://www.sumterclerk.com/public-records/tax-deeds/",
+          "host": "www.sumterclerk.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.65,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12119",
+          "state": "FL",
+          "url": "https://www.sumtertaxcollector.com/taxdeed.html",
+          "host": "www.sumtertaxcollector.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax deed sale",
+            "tax sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12119",
+          "state": "FL",
+          "url": "https://www.sumterclerk.com/courts/foreclosures/",
+          "host": "www.sumterclerk.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "tax deed sale",
+            "foreclosure auction",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12127": {
+      "state": "FL",
+      "county": "Volusia",
+      "sources": [
+        {
+          "fips": "12127",
+          "state": "FL",
+          "url": "https://www.vctaxcollector.org/taxes/tax-certificate-info.html",
+          "host": "www.vctaxcollector.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12127",
+          "state": "FL",
+          "url": "https://www.clerk.org/tax-deeds.aspx",
+          "host": "www.clerk.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "12131": {
+      "state": "FL",
+      "county": "Walton",
+      "sources": [
+        {
+          "fips": "12131",
+          "state": "FL",
+          "url": "http://taxsmart.clerkofcourts.co.walton.fl.us/",
+          "host": "taxsmart.clerkofcourts.co.walton.fl.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "tax deed sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "12131",
+          "state": "FL",
+          "url": "https://waltontaxcollector.com/services/property-taxes/delinquent-taxes",
+          "host": "waltontaxcollector.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "13001": {
       "state": "GA",
@@ -5522,26 +6850,8 @@
     "04001": {
       "state": "AZ",
       "county": "Apache",
-      "sources": [
-        {
-          "fips": "04001",
-          "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
-          "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.48,
-          "signals": [
-            "tax deed sale",
-            "delinquent tax",
-            "tax sale"
-          ],
-          "verifiedOn": "2026-07-31",
-          "httpStatus": 200
-        }
-      ],
-      "isGap": false
+      "sources": [],
+      "isGap": true
     },
     "04003": {
       "state": "AZ",
@@ -5550,18 +6860,20 @@
         {
           "fips": "04003",
           "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
+          "url": "https://parcelinquiry.azurewebsites.us/Main/Help#TaxLienSale",
+          "host": "parcelinquiry.azurewebsites.us",
+          "origin": "link_followed",
           "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.48,
+          "isGovernment": true,
+          "confidence": 0.83,
           "signals": [
-            "tax deed sale",
-            "delinquent tax",
-            "tax sale"
+            "tax lien sale",
+            "tax sale",
+            "certificate of purchase",
+            "parcel id",
+            "assessed value"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5596,31 +6908,29 @@
     "09003": {
       "state": "CT",
       "county": "Hartford",
-      "sources": [
-        {
-          "fips": "09003",
-          "state": "CT",
-          "url": "https://www.hartfordct.gov/Government/Departments/Tax",
-          "host": "www.hartfordct.gov",
-          "origin": "atlas",
-          "kind": "results",
-          "isGovernment": true,
-          "confidence": 0.88,
-          "signals": [
-            "delinquent tax",
-            "tax sale",
-            "assessed value"
-          ],
-          "verifiedOn": "2026-08-01",
-          "httpStatus": 200
-        }
-      ],
-      "isGap": false
+      "sources": [],
+      "isGap": true
     },
     "02020": {
       "state": "AK",
       "county": "Anchorage",
       "sources": [
+        {
+          "fips": "02020",
+          "state": "AK",
+          "url": "https://www.muni.org/Departments/hlb/pages/resforeclosedproperties.aspx",
+          "host": "www.muni.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
         {
           "fips": "02020",
           "state": "AK",
@@ -5634,7 +6944,23 @@
             "delinquent tax",
             "foreclosure auction"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "02020",
+          "state": "AK",
+          "url": "https://www.muni.org/Departments/hlb/Pages/realestateservices.aspx",
+          "host": "www.muni.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5647,18 +6973,18 @@
         {
           "fips": "04005",
           "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
+          "url": "https://www.hometaxsale.com/auction/az/coconino",
+          "host": "www.hometaxsale.com",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": false,
           "confidence": 0.48,
           "signals": [
-            "tax deed sale",
-            "delinquent tax",
-            "tax sale"
+            "tax sale",
+            "certificate of purchase",
+            "bidder registration"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5671,8 +6997,8 @@
         {
           "fips": "04007",
           "state": "AZ",
-          "url": "https://gilacountyaz.gov/government/treasurer/index.php",
-          "host": "gilacountyaz.gov",
+          "url": "https://www.gilacountyaz.gov/government/treasurer/index.php",
+          "host": "www.gilacountyaz.gov",
           "origin": "link_followed",
           "kind": "listing",
           "isGovernment": true,
@@ -5681,24 +7007,7 @@
             "tax lien sale",
             "delinquent tax"
           ],
-          "verifiedOn": "2026-07-31",
-          "httpStatus": 200
-        },
-        {
-          "fips": "04007",
-          "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
-          "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.48,
-          "signals": [
-            "tax deed sale",
-            "delinquent tax",
-            "tax sale"
-          ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5817,7 +7126,7 @@
             "certificate of purchase",
             "parcel id"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5830,18 +7139,17 @@
         {
           "fips": "04015",
           "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
+          "url": "https://www.mohave.gov/departments/treasurer/tax-liens/",
+          "host": "www.mohave.gov",
+          "origin": "atlas",
           "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.48,
+          "isGovernment": true,
+          "confidence": 0.8,
           "signals": [
             "tax deed sale",
-            "delinquent tax",
-            "tax sale"
+            "tax lien sale"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5854,18 +7162,20 @@
         {
           "fips": "04017",
           "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
+          "url": "https://www.navajocountyaz.gov/451/Foreclosure-Statutes",
+          "host": "www.navajocountyaz.gov",
+          "origin": "link_followed",
           "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.48,
+          "isGovernment": true,
+          "confidence": 0.95,
           "signals": [
-            "tax deed sale",
-            "delinquent tax",
-            "tax sale"
+            "tax lien sale",
+            "certificate of purchase",
+            "struck off",
+            "minimum/opening bid",
+            "parcel id"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5888,7 +7198,7 @@
             "tax lien sale",
             "struck off"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5911,7 +7221,7 @@
             "delinquent tax",
             "foreclosure auction"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5963,7 +7273,7 @@
             "bidder registration",
             "parcel id"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -5976,19 +7286,55 @@
         {
           "fips": "01015",
           "state": "AL",
-          "url": "https://calhouncountyal.gov/revenue/index.html",
-          "host": "calhouncountyal.gov",
-          "origin": "link_followed",
+          "url": "https://www.calhouncounty.org/revenue/",
+          "host": "www.calhouncounty.org",
+          "origin": "atlas",
           "kind": "results",
-          "isGovernment": true,
-          "confidence": 0.85,
+          "isGovernment": false,
+          "confidence": 0.6,
           "signals": [
             "delinquent tax",
             "tax sale",
             "parcel id",
             "assessed value"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "01015",
+          "state": "AL",
+          "url": "https://www.calhouncounty.org/revenue/index.html",
+          "host": "www.calhouncounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "01015",
+          "state": "AL",
+          "url": "https://www.calhouncounty.org/revenue/index.html",
+          "host": "www.calhouncounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -6001,18 +7347,20 @@
         {
           "fips": "04021",
           "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
-          "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.48,
+          "url": "https://treasurer.pinal.gov/",
+          "host": "treasurer.pinal.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.9,
           "signals": [
-            "tax deed sale",
+            "tax lien sale",
             "delinquent tax",
-            "tax sale"
+            "tax sale",
+            "certificate of purchase",
+            "parcel id"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -6045,26 +7393,8 @@
     "04023": {
       "state": "AZ",
       "county": "Santa Cruz",
-      "sources": [
-        {
-          "fips": "04023",
-          "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
-          "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.48,
-          "signals": [
-            "tax deed sale",
-            "delinquent tax",
-            "tax sale"
-          ],
-          "verifiedOn": "2026-07-31",
-          "httpStatus": 200
-        }
-      ],
-      "isGap": false
+      "sources": [],
+      "isGap": true
     },
     "04025": {
       "state": "AZ",
@@ -6073,18 +7403,17 @@
         {
           "fips": "04025",
           "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
+          "url": "https://www.yavapaiaz.gov/Mapping-and-Properties/Property-Taxes/Treasurers-Office/Treasurers-Tax-Lien-Sale",
+          "host": "www.yavapaiaz.gov",
+          "origin": "atlas",
           "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.48,
+          "isGovernment": true,
+          "confidence": 0.9,
           "signals": [
             "tax deed sale",
-            "delinquent tax",
-            "tax sale"
+            "tax lien sale"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -6093,26 +7422,8 @@
     "04027": {
       "state": "AZ",
       "county": "Yuma",
-      "sources": [
-        {
-          "fips": "04027",
-          "state": "AZ",
-          "url": "https://www.govease.com/",
-          "host": "www.govease.com",
-          "origin": "platform_pattern",
-          "kind": "results",
-          "isGovernment": false,
-          "confidence": 0.48,
-          "signals": [
-            "tax deed sale",
-            "delinquent tax",
-            "tax sale"
-          ],
-          "verifiedOn": "2026-07-31",
-          "httpStatus": 200
-        }
-      ],
-      "isGap": false
+      "sources": [],
+      "isGap": true
     },
     "02013": {
       "state": "AK",
@@ -6123,8 +7434,28 @@
     "01001": {
       "state": "AL",
       "county": "Autauga",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "01001",
+          "state": "AL",
+          "url": "https://govease.helpscoutdocs.com/article/97-alabama-tax-lien-auction-overview",
+          "host": "govease.helpscoutdocs.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "certificate of purchase",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "05001": {
       "state": "AR",
@@ -6141,8 +7472,27 @@
     "08001": {
       "state": "CO",
       "county": "Adams",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "08001",
+          "state": "CO",
+          "url": "https://adamscountyco.gov/our-county/elected-officials/treasurer-public-trustee/treasurer-division/tax-lien-sale/",
+          "host": "adamscountyco.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "09001": {
       "state": "CT",
@@ -6177,8 +7527,25 @@
     "08005": {
       "state": "CO",
       "county": "Arapahoe",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "08005",
+          "state": "CO",
+          "url": "https://cctpta.org/tax-deed-sales/",
+          "host": "cctpta.org",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "09005": {
       "state": "CT",
@@ -6237,8 +7604,27 @@
     "05007": {
       "state": "AR",
       "county": "Benton",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "05007",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Buyers",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "06007": {
       "state": "CA",
@@ -6285,8 +7671,27 @@
     "08014": {
       "state": "CO",
       "county": "Broomfield",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "08014",
+          "state": "CO",
+          "url": "https://www.broomfield.org/814/Tax-Lien-Sale-Information",
+          "host": "www.broomfield.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.68,
+          "signals": [
+            "tax lien sale",
+            "tax sale",
+            "certificate of purchase",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "09011": {
       "state": "CT",
@@ -6351,8 +7756,25 @@
     "06013": {
       "state": "CA",
       "county": "Contra Costa",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "06013",
+          "state": "CA",
+          "url": "https://www.contracosta.ca.gov/2218/Public-Auction-Information",
+          "host": "www.contracosta.ca.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "08019": {
       "state": "CO",
@@ -6439,6 +7861,40 @@
         {
           "fips": "06073",
           "state": "CA",
+          "url": "https://www.sdttc.com/content/ttc/en/tax-collection/property-tax-sales.html",
+          "host": "www.sdttc.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "bidder registration",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "06073",
+          "state": "CA",
+          "url": "https://www.sdttc.com/content/ttc/en/tax-collection/property-tax-sales/bidder-registration.html",
+          "host": "www.sdttc.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "bidder registration",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "06073",
+          "state": "CA",
           "url": "https://sdttc.mytaxsale.com/user/contact",
           "host": "sdttc.mytaxsale.com",
           "origin": "link_followed",
@@ -6449,7 +7905,7 @@
             "tax deed sale",
             "tax sale"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -6458,32 +7914,157 @@
     "06059": {
       "state": "CA",
       "county": "Orange",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "06059",
+          "state": "CA",
+          "url": "https://www.octreasurer.gov/taxauction",
+          "host": "www.octreasurer.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.93,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "06065": {
       "state": "CA",
       "county": "Riverside",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "06065",
+          "state": "CA",
+          "url": "https://rivco.gov/news/annual-riverside-county-tax-sale-returns-april",
+          "host": "rivco.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "06071": {
       "state": "CA",
       "county": "San Bernardino",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "06071",
+          "state": "CA",
+          "url": "https://sbcounty.mytaxsale.com/",
+          "host": "sbcounty.mytaxsale.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax deed sale",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "01073": {
       "state": "AL",
       "county": "Jefferson",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "01073",
+          "state": "AL",
+          "url": "https://govease.helpscoutdocs.com/article/97-alabama-tax-lien-auction-overview",
+          "host": "govease.helpscoutdocs.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "certificate of purchase",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "01073",
+          "state": "AL",
+          "url": "https://www.jccal.org/1018/2025-Tax-Delinquent-Parcels---Birmingham",
+          "host": "www.jccal.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "01073",
+          "state": "AL",
+          "url": "https://www.jccal.org/1018/2025-Tax-Delinquent-Parcels---Birmingham",
+          "host": "www.jccal.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "01089": {
       "state": "AL",
       "county": "Madison",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "01089",
+          "state": "AL",
+          "url": "https://govease.helpscoutdocs.com/article/97-alabama-tax-lien-auction-overview",
+          "host": "govease.helpscoutdocs.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "certificate of purchase",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "02170": {
       "state": "AK",
@@ -6500,8 +8081,27 @@
     "05143": {
       "state": "AR",
       "county": "Washington",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "05143",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Buyers",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "08041": {
       "state": "CO",
@@ -6510,7 +8110,7 @@
         {
           "fips": "08041",
           "state": "CO",
-          "url": "https://treasurer.elpasoco.com/county-treasurer/tax-lien-sale/",
+          "url": "https://treasurer.elpasoco.com/tax-lien-sale/",
           "host": "treasurer.elpasoco.com",
           "origin": "atlas",
           "kind": "results",
@@ -6524,7 +8124,46 @@
             "certificate of purchase",
             "redemption period"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "08041",
+          "state": "CO",
+          "url": "https://treasurer.elpasoco.com/real-estate-tax-lien-questions/",
+          "host": "treasurer.elpasoco.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax lien sale",
+            "tax sale",
+            "certificate of purchase",
+            "struck off",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "08041",
+          "state": "CO",
+          "url": "https://treasurer.elpasoco.com/tax-lien-sale/",
+          "host": "treasurer.elpasoco.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "certificate of purchase",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
@@ -6551,7 +8190,1408 @@
             "minimum/opening bid",
             "parcel id"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "08031",
+          "state": "CO",
+          "url": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/Our-Divisions/Treasury",
+          "host": "denvergov.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "08031",
+          "state": "CO",
+          "url": "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Clerk-and-Recorder",
+          "host": "www.denvergov.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "08031",
+          "state": "CO",
+          "url": "https://cctpta.org/tax-deed-sales/",
+          "host": "cctpta.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax lien sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01031": {
+      "state": "AL",
+      "county": "Coffee",
+      "sources": [],
+      "isGap": true
+    },
+    "01033": {
+      "state": "AL",
+      "county": "Colbert",
+      "sources": [
+        {
+          "fips": "01033",
+          "state": "AL",
+          "url": "http://revenuecommissioner.com/",
+          "host": "revenuecommissioner.com",
+          "origin": "atlas",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01043": {
+      "state": "AL",
+      "county": "Cullman",
+      "sources": [],
+      "isGap": true
+    },
+    "01045": {
+      "state": "AL",
+      "county": "Dale",
+      "sources": [
+        {
+          "fips": "01045",
+          "state": "AL",
+          "url": "https://www.dalecountyrevenue.com/Default.asp?ID=354&pg=Deliquent+Property+Taxes",
+          "host": "www.dalecountyrevenue.com",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "01045",
+          "state": "AL",
+          "url": "https://www.dalecountyrevenue.com/Default.asp?ID=354&pg=Deliquent+Property+Taxes",
+          "host": "www.dalecountyrevenue.com",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.43,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01049": {
+      "state": "AL",
+      "county": "DeKalb",
+      "sources": [],
+      "isGap": true
+    },
+    "01051": {
+      "state": "AL",
+      "county": "Elmore",
+      "sources": [],
+      "isGap": true
+    },
+    "01055": {
+      "state": "AL",
+      "county": "Etowah",
+      "sources": [],
+      "isGap": true
+    },
+    "01069": {
+      "state": "AL",
+      "county": "Houston",
+      "sources": [],
+      "isGap": true
+    },
+    "01071": {
+      "state": "AL",
+      "county": "Jackson",
+      "sources": [],
+      "isGap": true
+    },
+    "01077": {
+      "state": "AL",
+      "county": "Lauderdale",
+      "sources": [],
+      "isGap": true
+    },
+    "01081": {
+      "state": "AL",
+      "county": "Lee",
+      "sources": [],
+      "isGap": true
+    },
+    "01083": {
+      "state": "AL",
+      "county": "Limestone",
+      "sources": [
+        {
+          "fips": "01083",
+          "state": "AL",
+          "url": "https://www.limestonecounty-al.gov/Departments/Revenue-Commission",
+          "host": "www.limestonecounty-al.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01095": {
+      "state": "AL",
+      "county": "Marshall",
+      "sources": [],
+      "isGap": true
+    },
+    "01097": {
+      "state": "AL",
+      "county": "Mobile",
+      "sources": [
+        {
+          "fips": "01097",
+          "state": "AL",
+          "url": "https://www.mobilecopropertytax.com/",
+          "host": "www.mobilecopropertytax.com",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "01097",
+          "state": "AL",
+          "url": "https://mobilecopropertytax.com/taxliensale/",
+          "host": "mobilecopropertytax.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "bidder registration",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01101": {
+      "state": "AL",
+      "county": "Montgomery",
+      "sources": [
+        {
+          "fips": "01101",
+          "state": "AL",
+          "url": "https://1819news.com/news/item/alabama-democratic-conference-building-listed-in-montgomery-county-auction-for-unpaid-property-taxes",
+          "host": "1819news.com",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01103": {
+      "state": "AL",
+      "county": "Morgan",
+      "sources": [
+        {
+          "fips": "01103",
+          "state": "AL",
+          "url": "https://www.morgancountyrevenue.com/tax-sale",
+          "host": "www.morgancountyrevenue.com",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "01103",
+          "state": "AL",
+          "url": "https://www.morgancountyrevenue.com/tax-sale",
+          "host": "www.morgancountyrevenue.com",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01113": {
+      "state": "AL",
+      "county": "Russell",
+      "sources": [
+        {
+          "fips": "01113",
+          "state": "AL",
+          "url": "https://russellcountyal.gov/",
+          "host": "russellcountyal.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01115": {
+      "state": "AL",
+      "county": "St. Clair",
+      "sources": [],
+      "isGap": true
+    },
+    "01117": {
+      "state": "AL",
+      "county": "Shelby",
+      "sources": [],
+      "isGap": true
+    },
+    "01121": {
+      "state": "AL",
+      "county": "Talladega",
+      "sources": [
+        {
+          "fips": "01121",
+          "state": "AL",
+          "url": "https://www.talladegacountyal.org/departments/revenue_commission_-_new/property/tax_sale.php",
+          "host": "www.talladegacountyal.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01125": {
+      "state": "AL",
+      "county": "Tuscaloosa",
+      "sources": [
+        {
+          "fips": "01125",
+          "state": "AL",
+          "url": "https://www.tuscco.com/government/departments/tax-collector/tax-lien-sale/",
+          "host": "www.tuscco.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "01125",
+          "state": "AL",
+          "url": "https://www.tuscco.com/tax-collector/tax-lien-sale/",
+          "host": "www.tuscco.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "01125",
+          "state": "AL",
+          "url": "https://www.tuscco.com/",
+          "host": "www.tuscco.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax lien sale",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "01127": {
+      "state": "AL",
+      "county": "Walker",
+      "sources": [
+        {
+          "fips": "01127",
+          "state": "AL",
+          "url": "https://www.walkercountyrevenue.com/",
+          "host": "www.walkercountyrevenue.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "02122": {
+      "state": "AK",
+      "county": "Kenai Peninsula",
+      "sources": [
+        {
+          "fips": "02122",
+          "state": "AK",
+          "url": "https://www.kpb.us/departments/property-tax/property-tax-resources/tax-foreclosure-sales",
+          "host": "www.kpb.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05031": {
+      "state": "AR",
+      "county": "Craighead",
+      "sources": [
+        {
+          "fips": "05031",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Buyers",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05033": {
+      "state": "AR",
+      "county": "Crawford",
+      "sources": [
+        {
+          "fips": "05033",
+          "state": "AR",
+          "url": "https://www.rivervalleydemocratgazette.com/news/2026/jul/13/tax-delinquent-land-auction-set-for-july-21-in/",
+          "host": "www.rivervalleydemocratgazette.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05045": {
+      "state": "AR",
+      "county": "Faulkner",
+      "sources": [
+        {
+          "fips": "05045",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Buyers",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05051": {
+      "state": "AR",
+      "county": "Garland",
+      "sources": [],
+      "isGap": true
+    },
+    "05069": {
+      "state": "AR",
+      "county": "Jefferson",
+      "sources": [
+        {
+          "fips": "05069",
+          "state": "AR",
+          "url": "https://www.pbcommercial.com/jefferson-county-to-hold-tax-auction-on-land/",
+          "host": "www.pbcommercial.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05085": {
+      "state": "AR",
+      "county": "Lonoke",
+      "sources": [],
+      "isGap": true
+    },
+    "05115": {
+      "state": "AR",
+      "county": "Pope",
+      "sources": [],
+      "isGap": true
+    },
+    "05125": {
+      "state": "AR",
+      "county": "Saline",
+      "sources": [
+        {
+          "fips": "05125",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Buyers",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05131": {
+      "state": "AR",
+      "county": "Sebastian",
+      "sources": [],
+      "isGap": true
+    },
+    "05145": {
+      "state": "AR",
+      "county": "White",
+      "sources": [],
+      "isGap": true
+    },
+    "06019": {
+      "state": "CA",
+      "county": "Fresno",
+      "sources": [
+        {
+          "fips": "06019",
+          "state": "CA",
+          "url": "https://www.fresnocountyca.gov/Departments/Auditor-Controller-Treasurer-Tax-Collector/Property-Tax-Information/Tax-Sale-Excess-Proceeds",
+          "host": "www.fresnocountyca.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06023": {
+      "state": "CA",
+      "county": "Humboldt",
+      "sources": [],
+      "isGap": true
+    },
+    "06025": {
+      "state": "CA",
+      "county": "Imperial",
+      "sources": [],
+      "isGap": true
+    },
+    "06029": {
+      "state": "CA",
+      "county": "Kern",
+      "sources": [
+        {
+          "fips": "06029",
+          "state": "CA",
+          "url": "https://www.kcttc.co.kern.ca.us/index.cfm?fuseaction=kcttcinternet.showGeneralTaxSaleInfo",
+          "host": "www.kcttc.co.kern.ca.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06031": {
+      "state": "CA",
+      "county": "Kings",
+      "sources": [],
+      "isGap": true
+    },
+    "06033": {
+      "state": "CA",
+      "county": "Lake",
+      "sources": [],
+      "isGap": true
+    },
+    "06039": {
+      "state": "CA",
+      "county": "Madera",
+      "sources": [
+        {
+          "fips": "06039",
+          "state": "CA",
+          "url": "https://maderatribune.com/tax-collector-announces-sale-for-taxes/",
+          "host": "maderatribune.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06041": {
+      "state": "CA",
+      "county": "Marin",
+      "sources": [],
+      "isGap": true
+    },
+    "06045": {
+      "state": "CA",
+      "county": "Mendocino",
+      "sources": [],
+      "isGap": true
+    },
+    "06047": {
+      "state": "CA",
+      "county": "Merced",
+      "sources": [
+        {
+          "fips": "06047",
+          "state": "CA",
+          "url": "https://www.countyofmerced.com/2515/Defaulted-Tax-Information",
+          "host": "www.countyofmerced.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06053": {
+      "state": "CA",
+      "county": "Monterey",
+      "sources": [],
+      "isGap": true
+    },
+    "06055": {
+      "state": "CA",
+      "county": "Napa",
+      "sources": [
+        {
+          "fips": "06055",
+          "state": "CA",
+          "url": "https://www.napacounty.gov/1253/Delinquent-Property-Taxes",
+          "host": "www.napacounty.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06057": {
+      "state": "CA",
+      "county": "Nevada",
+      "sources": [],
+      "isGap": true
+    },
+    "06061": {
+      "state": "CA",
+      "county": "Placer",
+      "sources": [
+        {
+          "fips": "06061",
+          "state": "CA",
+          "url": "https://www.placer.ca.gov/1427/Tax-Land-Sale",
+          "host": "www.placer.ca.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06067": {
+      "state": "CA",
+      "county": "Sacramento",
+      "sources": [
+        {
+          "fips": "06067",
+          "state": "CA",
+          "url": "https://finance.saccounty.gov/content/finance/us/en/tax/tax/tax-sales.html",
+          "host": "finance.saccounty.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06069": {
+      "state": "CA",
+      "county": "San Benito",
+      "sources": [],
+      "isGap": true
+    },
+    "06075": {
+      "state": "CA",
+      "county": "San Francisco",
+      "sources": [],
+      "isGap": true
+    },
+    "06077": {
+      "state": "CA",
+      "county": "San Joaquin",
+      "sources": [
+        {
+          "fips": "06077",
+          "state": "CA",
+          "url": "https://sjgov.org/department/ttc/tax/redemption/public-auction",
+          "host": "sjgov.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06079": {
+      "state": "CA",
+      "county": "San Luis Obispo",
+      "sources": [
+        {
+          "fips": "06079",
+          "state": "CA",
+          "url": "https://www.slocounty.ca.gov/departments/auditor-controller-treasurer-tax-collector-public/tax-collector/services/public-auction-of-tax-defaulted-property",
+          "host": "www.slocounty.ca.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06081": {
+      "state": "CA",
+      "county": "San Mateo",
+      "sources": [
+        {
+          "fips": "06081",
+          "state": "CA",
+          "url": "https://sanmateo.mytaxsale.com/user/contact",
+          "host": "sanmateo.mytaxsale.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.43,
+          "signals": [
+            "tax deed sale",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06083": {
+      "state": "CA",
+      "county": "Santa Barbara",
+      "sources": [
+        {
+          "fips": "06083",
+          "state": "CA",
+          "url": "https://www.countyofsb.org/tt-defaulted-tax-sales",
+          "host": "www.countyofsb.org",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06085": {
+      "state": "CA",
+      "county": "Santa Clara",
+      "sources": [],
+      "isGap": true
+    },
+    "06087": {
+      "state": "CA",
+      "county": "Santa Cruz",
+      "sources": [],
+      "isGap": true
+    },
+    "06089": {
+      "state": "CA",
+      "county": "Shasta",
+      "sources": [],
+      "isGap": true
+    },
+    "06095": {
+      "state": "CA",
+      "county": "Solano",
+      "sources": [
+        {
+          "fips": "06095",
+          "state": "CA",
+          "url": "https://solano.mytaxsale.com/user/contact",
+          "host": "solano.mytaxsale.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.43,
+          "signals": [
+            "tax deed sale",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06097": {
+      "state": "CA",
+      "county": "Sonoma",
+      "sources": [
+        {
+          "fips": "06097",
+          "state": "CA",
+          "url": "https://sonomacounty.gov/administrative-support-and-fiscal-services/auditor-controller-treasurer-tax-collector/divisions",
+          "host": "sonomacounty.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06099": {
+      "state": "CA",
+      "county": "Stanislaus",
+      "sources": [
+        {
+          "fips": "06099",
+          "state": "CA",
+          "url": "https://www.stancounty.com/tr-tax/auction/",
+          "host": "www.stancounty.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "06099",
+          "state": "CA",
+          "url": "https://www.stancounty.com/tr-tax/auction/tax-sale-auction.shtm",
+          "host": "www.stancounty.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "06099",
+          "state": "CA",
+          "url": "https://www.stancounty.com/tr-tax/",
+          "host": "www.stancounty.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "06099",
+          "state": "CA",
+          "url": "https://www.stancounty.com/tr-tax/",
+          "host": "www.stancounty.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06101": {
+      "state": "CA",
+      "county": "Sutter",
+      "sources": [],
+      "isGap": true
+    },
+    "06103": {
+      "state": "CA",
+      "county": "Tehama",
+      "sources": [
+        {
+          "fips": "06103",
+          "state": "CA",
+          "url": "https://www.tehama.gov/government/departments/treasurer-tax-collector/",
+          "host": "www.tehama.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "06107": {
+      "state": "CA",
+      "county": "Tulare",
+      "sources": [],
+      "isGap": true
+    },
+    "06109": {
+      "state": "CA",
+      "county": "Tuolumne",
+      "sources": [],
+      "isGap": true
+    },
+    "06111": {
+      "state": "CA",
+      "county": "Ventura",
+      "sources": [],
+      "isGap": true
+    },
+    "06113": {
+      "state": "CA",
+      "county": "Yolo",
+      "sources": [],
+      "isGap": true
+    },
+    "06115": {
+      "state": "CA",
+      "county": "Yuba",
+      "sources": [],
+      "isGap": true
+    },
+    "08035": {
+      "state": "CO",
+      "county": "Douglas",
+      "sources": [
+        {
+          "fips": "08035",
+          "state": "CO",
+          "url": "https://www.douglasco.gov/treasurer/tax-lien-sale-information/",
+          "host": "www.douglasco.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08037": {
+      "state": "CO",
+      "county": "Eagle",
+      "sources": [
+        {
+          "fips": "08037",
+          "state": "CO",
+          "url": "https://www.eaglecounty.us/departments___services/treasurer___public_trustee_office/treasurer/tax_lien_sale.php",
+          "host": "www.eaglecounty.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08043": {
+      "state": "CO",
+      "county": "Fremont",
+      "sources": [
+        {
+          "fips": "08043",
+          "state": "CO",
+          "url": "https://fremontcountyco.gov/treasurer/foreclosure-deeds-trust",
+          "host": "fremontcountyco.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "tax lien sale",
+            "foreclosure auction",
+            "certificate of purchase",
+            "struck off",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08045": {
+      "state": "CO",
+      "county": "Garfield",
+      "sources": [
+        {
+          "fips": "08045",
+          "state": "CO",
+          "url": "https://www.garfieldcountyco.gov/treasurer/tax-lien-sale/",
+          "host": "www.garfieldcountyco.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08059": {
+      "state": "CO",
+      "county": "Jefferson",
+      "sources": [
+        {
+          "fips": "08059",
+          "state": "CO",
+          "url": "https://www.jeffco.us/2430/Tax-Lien-Sale",
+          "host": "www.jeffco.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.98,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08067": {
+      "state": "CO",
+      "county": "La Plata",
+      "sources": [
+        {
+          "fips": "08067",
+          "state": "CO",
+          "url": "https://www.lpcgov.org/departments/treasurer___public_trustee_s_office/treasurer_deed.php",
+          "host": "www.lpcgov.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.68,
+          "signals": [
+            "tax lien sale",
+            "tax sale",
+            "certificate of purchase",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "08067",
+          "state": "CO",
+          "url": "https://www.lpcgov.org/departments/treasurer___public_trustee_s_office/index.php",
+          "host": "www.lpcgov.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08069": {
+      "state": "CO",
+      "county": "Larimer",
+      "sources": [
+        {
+          "fips": "08069",
+          "state": "CO",
+          "url": "https://cctpta.org/tax-deed-sales/",
+          "host": "cctpta.org",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08077": {
+      "state": "CO",
+      "county": "Mesa",
+      "sources": [
+        {
+          "fips": "08077",
+          "state": "CO",
+          "url": "https://www.mesacounty.us/departments-and-services/treasurer/tax-sale-information",
+          "host": "www.mesacounty.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.93,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08101": {
+      "state": "CO",
+      "county": "Pueblo",
+      "sources": [
+        {
+          "fips": "08101",
+          "state": "CO",
+          "url": "https://cctpta.org/tax-deed-sales/",
+          "host": "cctpta.org",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08123": {
+      "state": "CO",
+      "county": "Weld",
+      "sources": [
+        {
+          "fips": "08123",
+          "state": "CO",
+          "url": "https://www.weld.gov/Government/Departments/Treasurer-Public-Trustee/Treasurer/Tax-Lien-Sale-Information",
+          "host": "www.weld.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.98,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-08-09",
           "httpStatus": 200
         }
       ],
