@@ -2,53 +2,35 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getPlatformStats } from "@/lib/queries";
 import { num } from "@/lib/format";
-import { COVERED_STATES, STATE_NAMES, COUNTY_DATA, ALL_COUNTIES } from "@/lib/atlas";
-import { Card } from "@/components/ui";
-import { CalendarSkeleton, StatsSkeleton } from "@/components/skeleton";
+import { COUNTY_DATA, ALL_COUNTIES } from "@/lib/atlas";
+import { AuctionListSkeleton, CalendarSkeleton, StatsSkeleton } from "@/components/skeleton";
 import { CalendarView } from "@/components/calendar-view";
-
+import { AuctionsList } from "@/components/auctions-list";
+import { AtlasStates } from "@/components/atlas-states";
+import { CoverageReport } from "@/components/coverage-report";
+import { PricingPlans } from "@/components/pricing-plans";
 
 /*
- * No `unstable_instant`. The home page reads only cached aggregates, so it is
- * already fully prerenderable — validation flags the static `metadata` export
- * as the sole thing preventing that, which is not a problem worth solving by
- * making the page dynamic. The Suspense boundary stays: it is what shows a
- * skeleton instead of a blank hero if the cache is cold.
+ * One page, one section per nav item.
+ *
+ * Every Suspense boundary here is a *sibling*. That is load-bearing, not
+ * stylistic: an earlier version wrapped the whole body in one async component
+ * and nested the calendar, auctions and coverage boundaries inside it. React
+ * then had to swap a resolved parent into a subtree that already held resolved
+ * children, and threw
+ *
+ *   HierarchyRequestError: Failed to execute 'insertBefore' on 'Node':
+ *   The new child element contains the parent
+ *
+ * followed by hydration error #418. The page prerendered, streamed correct
+ * HTML, and passed the build — and came out blank in the browser. Keeping the
+ * boundaries flat means each section resolves on its own and none of them can
+ * ever contain another.
+ *
+ * The hero copy sits outside every boundary, so it is part of the prerendered
+ * shell and paints immediately; only the figures wait on Postgres.
  */
 export default function HomePage(props: PageProps<"/">) {
-  return (
-    <div>
-      <Suspense fallback={<StatsSkeleton />}>
-        <HomeBody searchParams={props.searchParams} />
-      </Suspense>
-
-    </div>
-  );
-}
-
-async function HomeBody({
-  searchParams,
-}: {
-  searchParams: PageProps<"/">["searchParams"];
-}) {
-  // The landing page must render even if Postgres is unreachable — a database
-  // blip should not take the marketing site down with it.
-  const stats = await getPlatformStats().catch(() => ({
-    upcomingAuctions: 0,
-    skeletonAuctions: 0,
-    totalLots: 0,
-    lotsWithAssessed: 0,
-    leadAuctions: 0,
-    leadLots: 0,
-    byState: [] as { state: string; counties: number; auctions: number; lots: number }[],
-  }));
-
-  // States with parcels a bidder can actually act on today, biggest first.
-  // getPlatformStats only returns states that already have lots (>0).
-  const withInventory = stats.byState.slice(0, 10);
-  // 0-lot shells no longer appear in byState; surface residual skeleton debt if any.
-  const scheduledAuctions = stats.skeletonAuctions ?? 0;
-
   return (
     <div>
       {/* --- Hero --------------------------------------------------------- */}
@@ -69,13 +51,13 @@ async function HomeBody({
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/auctions"
+                href="/#auctions"
                 className="rounded-lg bg-accent px-5 py-2.5 font-medium text-accent-fg hover:opacity-90"
               >
                 Browse upcoming auctions
               </Link>
               <Link
-                href="/atlas"
+                href="/#atlas"
                 className="rounded-lg border border-border px-5 py-2.5 font-medium hover:border-accent"
               >
                 Explore the atlas — free
@@ -83,143 +65,139 @@ async function HomeBody({
             </div>
           </div>
 
-          <dl className="mt-14 grid gap-6 border-t border-border pt-8 sm:grid-cols-5">
-            <HeroStat label="Counties mapped" value={num(ALL_COUNTIES.length)} />
-            <HeroStat label="Researched in depth" value={num(Object.keys(COUNTY_DATA).length)} />
-            <HeroStat label="States with inventory" value={num(stats.byState.length)} />
-            <HeroStat label="Upcoming auctions" value={num(stats.upcomingAuctions)} />
-            <HeroStat
-              label="Lots on published sale lists"
-              value={num(stats.totalLots)}
-            />
-          </dl>
-
-          {/*
-            Counted separately and named for what it is. A delinquent roll is a
-            useful lead list and a terrible auction listing — most owners on it
-            pay before any sale — so it never joins the number above.
-          */}
-          {stats.leadLots > 0 ? (
-            <p className="mt-6 text-sm text-muted">
-              Plus {num(stats.leadLots)} parcels on delinquent rolls and lands-available
-              inventory — research leads, not scheduled lots.{" "}
-              <Link href="/coverage" className="underline hover:text-fg">
-                How we count
-              </Link>
-            </p>
-          ) : null}
-        </div>
-      </section>
-
-      {/*
-        The calendar, directly under the pitch.
-
-        This is the screen a returning subscriber opens; the hero is read once.
-        Its own <Suspense> keeps it independent of the stats above — a slow
-        aggregate must not hold back the grid, and vice versa.
-      */}
-      <section className="border-b border-border bg-surface-2/20">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
-            <h2 className="text-2xl font-semibold tracking-tight">What is selling, and when</h2>
-            <Link
-              href="/calendar"
-              className="text-sm text-muted underline transition-colors hover:text-foreground"
-            >
-              Open the full calendar
-            </Link>
-          </div>
-          <Suspense fallback={<CalendarSkeleton />}>
-            <CalendarView searchParams={searchParams} basePath="/" />
+          <Suspense fallback={<StatsSkeleton count={5} />}>
+            <HeroStats />
           </Suspense>
         </div>
       </section>
 
-      {/* --- What it does -------------------------------------------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <h2 className="text-2xl font-semibold tracking-tight">The spread is not the profit</h2>
-        <p className="mt-2 max-w-2xl leading-relaxed text-muted">
-          A $14,000 opening bid on a property assessed at $831,000 looks like a life-changing deal.
-          Then Georgia assesses at 40% of market value, Texas hands the owner 180 days to redeem, a
-          municipal lien survives the sale, and the title insurer won&apos;t write a policy until
-          you&apos;ve spent $5,000 on a quiet title action. DeedPilot does that arithmetic before
-          you bid, not after.
-        </p>
+      {/* --- Calendar ------------------------------------------------------ */}
+      <section id="calendar" className="scroll-mt-16 border-b border-border bg-surface-2/20">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="text-2xl font-semibold tracking-tight">What is selling, and when</h2>
+            <Link href="/calendar" className="text-sm text-muted underline hover:text-foreground">
+              Open the full calendar
+            </Link>
+          </div>
+          <Suspense fallback={<CalendarSkeleton />}>
+            <CalendarView searchParams={props.searchParams} basePath="/" />
+          </Suspense>
+        </div>
+      </section>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <Feature title="Rules for every county">
-            All {num(ALL_COUNTIES.length)} counties, with {num(Object.keys(COUNTY_DATA).length)}{" "}
-            researched in depth — auction platform, deposit deadlines, what survives the sale, and
-            what quiet title actually costs. Where a county inherits its state&apos;s defaults, we
-            say so on the page instead of implying research we haven&apos;t done.
-          </Feature>
-          <Feature title="Live auction inventory">
-            Parcel-level listings for {COVERED_STATES.length} states, pulled from the government
-            source of record and the platforms that permit it. Every lot carries its opening bid,
-            assessed value, and its own deal analysis.
-          </Feature>
-          <Feature title="A bidding co-pilot">
-            Per-parcel risk briefs and a deterministic max bid — never a number a language model
-            invented. On sale day it tracks the lots you care about and tells you when to stop.
-          </Feature>
+      {/* --- Auctions ------------------------------------------------------ */}
+      <section id="auctions" className="scroll-mt-16 border-b border-border">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight">Upcoming auctions</h2>
+              <p className="mt-1 text-sm text-muted">
+                The same sales as a list, following the state filter above.
+              </p>
+            </div>
+            <Link href="/auctions" className="text-sm text-muted underline hover:text-foreground">
+              Open the full list
+            </Link>
+          </div>
+          <Suspense fallback={<AuctionListSkeleton groups={2} />}>
+            <AuctionsList
+              searchParams={props.searchParams}
+              basePath="/"
+              maxGroups={4}
+              showFilters={false}
+            />
+          </Suspense>
+        </div>
+      </section>
+
+      {/* --- Atlas ---------------------------------------------------------
+          Only the state grid collapses into a section. The 1,010 county pages
+          beneath it stay real routes — they are the SEO surface, and an anchor
+          on this page is not something a search engine can index. */}
+      <section id="atlas" className="scroll-mt-16 border-b border-border bg-surface-2/20">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="text-2xl font-semibold tracking-tight">Rules for every county</h2>
+            <Link href="/atlas" className="text-sm text-muted underline hover:text-foreground">
+              Open the atlas
+            </Link>
+          </div>
+          <AtlasStates heading={false} />
         </div>
       </section>
 
       {/* --- Coverage ------------------------------------------------------ */}
-      <section className="border-t border-border bg-surface-2/40">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-          <h2 className="text-2xl font-semibold tracking-tight">Where we have live inventory</h2>
-          <p className="mt-2 max-w-2xl leading-relaxed text-muted">
-            The rules atlas is national. Parcel-level auction data is deliberately deep rather than
-            wide — we are actively expanding live inventory beyond the original high-volume states via the source registry and generic extraction.
-          </p>
-
-          {/*
-            Driven by what is actually in the database, not by COVERED_STATES.
-            The hardcoded five hid real coverage: the generic adapter had put
-            186 lots into New Mexico and the page could not show them, because
-            NM is not one of the original five. A coverage surface that cannot
-            report coverage is worse than no coverage surface.
-          */}
-          <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {withInventory.map((row) => (
-              <Link
-                key={row.state}
-                href={`/auctions?state=${row.state}`}
-                className="rounded-xl border border-border bg-surface p-4 transition-colors hover:border-accent"
-              >
-                <div className="font-medium">{STATE_NAMES[row.state] ?? row.state}</div>
-                <div className="tnum mt-2 text-2xl font-semibold">{num(row.lots)}</div>
-                <div className="text-xs text-muted">
-                  lots · {num(row.auctions)} auctions
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {scheduledAuctions > 0 ? (
-            <p className="mt-4 text-sm text-muted">
-              <span className="tnum font-medium text-fg">{num(scheduledAuctions)}</span> calendar
-              row{scheduledAuctions === 1 ? "" : "s"} still have no parcel list (hidden from browse;
-              see{" "}
-              <Link href="/coverage" className="underline">
-                coverage
-              </Link>
-              ).
-            </p>
-          ) : null}
-
-          <p className="mt-4 text-xs text-muted">
-            A state showing zero has no sale currently published, or its ingestion is still being
-            built —{" "}
-            <Link href="/coverage" className="underline">
-              see the coverage report
+      <section id="coverage" className="scroll-mt-16 border-b border-border">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="text-2xl font-semibold tracking-tight">
+              What we cover, and what we do not
+            </h2>
+            <Link href="/coverage" className="text-sm text-muted underline hover:text-foreground">
+              Full coverage report
             </Link>
-            .
-          </p>
+          </div>
+          {/* compact: the per-county ingest log is 200 rows of ops detail. */}
+          <Suspense fallback={<StatsSkeleton />}>
+            <CoverageReport compact />
+          </Suspense>
+        </div>
+      </section>
+
+      {/* --- Pricing ------------------------------------------------------- */}
+      <section id="pricing" className="scroll-mt-16 bg-surface-2/20">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <h2 className="mb-6 text-2xl font-semibold tracking-tight">Pricing</h2>
+          <PricingPlans heading={false} />
         </div>
       </section>
     </div>
+  );
+}
+
+/**
+ * The headline figures.
+ *
+ * Falls back to zeros rather than throwing: a database blip should degrade the
+ * hero to "0 upcoming auctions", not take the landing page down with it.
+ */
+async function HeroStats() {
+  const stats = await getPlatformStats().catch(() => ({
+    upcomingAuctions: 0,
+    skeletonAuctions: 0,
+    totalLots: 0,
+    lotsWithAssessed: 0,
+    leadAuctions: 0,
+    leadLots: 0,
+    byState: [] as { state: string; counties: number; auctions: number; lots: number }[],
+  }));
+
+  return (
+    <>
+      <dl className="mt-14 grid gap-6 border-t border-border pt-8 sm:grid-cols-5">
+        <HeroStat label="Counties mapped" value={num(ALL_COUNTIES.length)} />
+        <HeroStat label="Researched in depth" value={num(Object.keys(COUNTY_DATA).length)} />
+        <HeroStat label="States with inventory" value={num(stats.byState.length)} />
+        <HeroStat label="Upcoming auctions" value={num(stats.upcomingAuctions)} />
+        <HeroStat label="Lots on published sale lists" value={num(stats.totalLots)} />
+      </dl>
+
+      {/*
+        Counted separately and named for what it is. A delinquent roll is a
+        useful lead list and a terrible auction listing — most owners on it pay
+        before any sale — so it never joins the number above.
+      */}
+      {stats.leadLots > 0 ? (
+        <p className="mt-6 text-sm text-muted">
+          Plus {num(stats.leadLots)} parcels on delinquent rolls and lands-available inventory —
+          research leads, not scheduled lots.{" "}
+          <Link href="/#coverage" className="underline hover:text-fg">
+            How we count
+          </Link>
+        </p>
+      ) : null}
+    </>
   );
 }
 
@@ -229,14 +207,5 @@ function HeroStat({ label, value }: { label: string; value: string }) {
       <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
       <dd className="tnum mt-1 text-3xl font-semibold">{value}</dd>
     </>
-  );
-}
-
-function Feature({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <Card>
-      <h3 className="font-medium">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted">{children}</p>
-    </Card>
   );
 }

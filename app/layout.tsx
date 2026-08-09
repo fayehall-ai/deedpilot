@@ -16,12 +16,24 @@ export const metadata: Metadata = {
     "Every county's tax sale rules, live auction inventory, and a bidding co-pilot that tells you your walk-away price before you raise the paddle.",
 };
 
+/**
+ * Every nav item is a section of the home page.
+ *
+ * Ordered by how often each is looked at rather than alphabetically or by
+ * marketing logic: the calendar is what a subscriber opens daily, pricing is
+ * read once. That order is also the order the sections appear in, because an
+ * anchor nav whose order disagrees with the page reads as broken.
+ *
+ * Each still has a real route (`/calendar`, `/atlas`, …) — anchors are for
+ * moving around the page, routes are for deep links, sharing, and the search
+ * engines that index the 1,010 county pages.
+ */
 const NAV = [
-  { href: "/atlas", label: "Atlas" },
-  { href: "/calendar", label: "Calendar" },
-  { href: "/auctions", label: "Auctions" },
-  { href: "/coverage", label: "Coverage" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/#calendar", label: "Calendar" },
+  { href: "/#auctions", label: "Auctions" },
+  { href: "/#atlas", label: "Atlas" },
+  { href: "/#coverage", label: "Coverage" },
+  { href: "/#pricing", label: "Pricing" },
 ];
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
