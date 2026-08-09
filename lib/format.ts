@@ -63,6 +63,33 @@ export function relativeDays(iso: string | null | undefined): string {
   return days > 0 ? `in ${days} days` : `${Math.abs(days)} days ago`;
 }
 
+/**
+ * Auction platforms as their operators brand them.
+ *
+ * Worth spelling out rather than title-casing the enum: a bidder who already
+ * holds a GovEase deposit or a Zeus login is filtering for exactly that word,
+ * and "Taxsaleinfo" is not what it says on the site they log into.
+ */
+const PLATFORM_LABELS: Record<string, string> = {
+  realtaxdeed: "RealAuction",
+  realforeclose: "RealForeclose",
+  govease: "GovEase",
+  bid4assets: "Bid4Assets",
+  zeus: "Zeus Auction",
+  lienhub: "LienHub",
+  grantstreet: "Grant Street",
+  taxsaleinfo: "Tax Sale Info",
+  mvba: "MVBA",
+  lgbs: "Linebarger (LGBS)",
+  county_site: "County site",
+  in_person: "In person",
+};
+
+export function platformLabel(platform: string | null | undefined): string {
+  if (!platform) return "—";
+  return PLATFORM_LABELS[platform] ?? platform;
+}
+
 const SALE_TYPE_VAR: Record<string, string> = {
   "Tax Lien": "var(--type-lien)",
   "Tax Deed": "var(--type-deed)",

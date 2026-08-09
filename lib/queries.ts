@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, gte, sql, count } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, sql, count } from "drizzle-orm";
 import { db } from "./db";
 import { auctions, counties, lots, ingestRuns, dealAnalyses, lotValuations } from "./db/schema";
 
@@ -86,6 +86,158 @@ export async function getUpcomingAuctions(
     .where(and(...where))
     .orderBy(asc(auctions.saleDate), asc(counties.state), asc(counties.name))
     .limit(opts.limit ?? 200);
+}
+
+// ---------------------------------------------------------------------------
+// Calendar
+// ---------------------------------------------------------------------------
+
+export interface CalendarAuctionRow {
+  id: string;
+  saleDate: string;
+  saleType: string;
+  status: string;
+  platform: string;
+  lotCount: number;
+  countyFips: string;
+  countyName: string;
+  state: string;
+  listingKind: string;
+  saleDateConfirmed: boolean;
+  /**
+   * The county's own name for this sale. Load-bearing when one county holds
+   * several sales the same day — "HARRIS COUNTY tax sale — precinct 3" is the
+   * only thing separating eight otherwise identical rows.
+   */
+  title: string | null;
+}
+
+export interface CalendarFilterOpts {
+  /** State abbreviations. Empty/absent means all. */
+  states?: string[];
+  /** Sale-type labels, e.g. "Tax Deed". Empty/absent means all. */
+  saleTypes?: string[];
+  /** Platform enum values. Empty/absent means all. */
+  platforms?: string[];
+  /** Include delinquent rolls, lands-available, and projected dates. */
+  includeUnconfirmed?: boolean;
+}
+
+/** The shared WHERE for every calendar query, so facets and cells agree. */
+function calendarWhere(opts: CalendarFilterOpts) {
+  const where = [
+    sql`${auctions.lotCount} > 0`,
+    ...(opts.includeUnconfirmed ? [] : [isConfirmedInventory()]),
+  ];
+  if (opts.states?.length) where.push(inArray(counties.state, opts.states));
+  if (opts.saleTypes?.length) {
+    where.push(inArray(auctions.saleType, opts.saleTypes as (typeof auctions.saleType.enumValues)[number][]));
+  }
+  if (opts.platforms?.length) {
+    where.push(inArray(auctions.platform, opts.platforms as (typeof auctions.platform.enumValues)[number][]));
+  }
+  return where;
+}
+
+/**
+ * Sales landing between two dates, for the calendar grid.
+ *
+ * Bounded by the visible grid range rather than "upcoming", because the grid
+ * shows whole weeks: the last row of August contains September 1, which is the
+ * single busiest sale day in the data. It also means past months are browsable
+ * — a bidder checking what they missed in a county is a real motion.
+ */
+export async function getCalendarAuctions(
+  opts: CalendarFilterOpts & { from: string; to: string },
+): Promise<CalendarAuctionRow[]> {
+  return db
+    .select({
+      id: auctions.id,
+      saleDate: auctions.saleDate,
+      saleType: auctions.saleType,
+      status: auctions.status,
+      platform: auctions.platform,
+      lotCount: auctions.lotCount,
+      countyFips: auctions.countyFips,
+      countyName: counties.name,
+      state: counties.state,
+      listingKind: auctions.listingKind,
+      saleDateConfirmed: auctions.saleDateConfirmed,
+      title: auctions.title,
+    })
+    .from(auctions)
+    .innerJoin(counties, eq(counties.fips, auctions.countyFips))
+    .where(
+      and(
+        gte(auctions.saleDate, opts.from),
+        lte(auctions.saleDate, opts.to),
+        ...calendarWhere(opts),
+      ),
+    )
+    // Biggest sales first within a day: a 400-lot county is worth more of a
+    // bidder's attention than the 3-lot one that happens to sort before it.
+    .orderBy(asc(auctions.saleDate), desc(auctions.lotCount), asc(counties.state), asc(counties.name))
+    .limit(2000);
+}
+
+export interface CalendarFacet {
+  value: string;
+  count: number;
+}
+
+/**
+ * Which states, sale types and platforms have upcoming sales at all.
+ *
+ * Deliberately *not* narrowed by the visible month or the active filters. A
+ * filter chip that disappears when you page to a quiet month, or when another
+ * chip is on, makes the control feel broken and hides where the inventory is —
+ * the counts are the answer to "where should I be looking", which is the
+ * question ahead of "what is on in September".
+ */
+export async function getCalendarFacets(
+  opts: { includeUnconfirmed?: boolean } = {},
+): Promise<{ states: CalendarFacet[]; saleTypes: CalendarFacet[]; platforms: CalendarFacet[] }> {
+  const rows = await db
+    .select({
+      state: counties.state,
+      saleType: auctions.saleType,
+      platform: auctions.platform,
+      n: sql<number>`count(*)::int`,
+    })
+    .from(auctions)
+    .innerJoin(counties, eq(counties.fips, auctions.countyFips))
+    .where(and(gte(auctions.saleDate, todayIso()), ...calendarWhere(opts)))
+    .groupBy(counties.state, auctions.saleType, auctions.platform);
+
+  const tally = (key: "state" | "saleType" | "platform"): CalendarFacet[] => {
+    const totals = new Map<string, number>();
+    for (const r of rows) totals.set(r[key], (totals.get(r[key]) ?? 0) + r.n);
+    return [...totals.entries()]
+      .map(([value, count]) => ({ value, count }))
+      .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+  };
+
+  return { states: tally("state"), saleTypes: tally("saleType"), platforms: tally("platform") };
+}
+
+/**
+ * The next date on or after `after` that has a sale matching these filters.
+ *
+ * Turns an empty month into a jump link instead of a dead end — with sales
+ * concentrated in a few months a year, paging blindly through empty grids is
+ * the default experience otherwise.
+ */
+export async function getNextCalendarDate(
+  opts: CalendarFilterOpts & { after: string },
+): Promise<string | null> {
+  const [row] = await db
+    .select({ saleDate: auctions.saleDate })
+    .from(auctions)
+    .innerJoin(counties, eq(counties.fips, auctions.countyFips))
+    .where(and(gte(auctions.saleDate, opts.after), ...calendarWhere(opts)))
+    .orderBy(asc(auctions.saleDate))
+    .limit(1);
+  return row?.saleDate ?? null;
 }
 
 export async function getAuction(id: string) {

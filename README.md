@@ -47,6 +47,13 @@ lib/atlas/      Rules for all 3,142 counties. Authored research, in code, not
                 152 counties researched individually; the rest inherit state
                 defaults, and every page labels which fields were inherited.
 
+lib/calendar/   Month-grid geometry and filter-state encoding for `/calendar`.
+                Pure UTC string/date functions: a sale date is a plain date,
+                and which square it lands in must not depend on the viewer's
+                timezone. Distinct from `lib/atlas/calendar.ts`, which projects
+                *when counties sell* to schedule crawls; this one only lays out
+                sales already observed.
+
 lib/deal/       Deterministic max-bid engine + per-state statutory parameters
                 (redemption tiers, quiet-title cost, assessment ratios).
                 No model output. Ever.
