@@ -7,7 +7,7 @@
  */
 import * as cheerio from "cheerio";
 import { __setRegistry, genericAdapter } from "./adapters/generic";
-import { ADAPTERS } from "./adapters";
+import { ADAPTERS, getAdapter } from "./adapters";
 import {
   classifiedPdfLinks,
   classifyListingLink,
@@ -184,8 +184,22 @@ assert(ohAuctions[0].saleType !== undefined, "Ohio resolves a sale type from the
 // --- registration order is precedence ----------------------------------------
 
 const names = ADAPTERS.map((x) => x.name);
+
+// The invariant is precedence, not headcount: the generic adapter matches
+// almost any county page, so a bespoke adapter registered after it would never
+// be reached. A hardcoded length assertion tested nothing about that and went
+// stale the first time a state was added — it read "expected 5, got 9" for
+// four adapters before this was noticed.
 assert(names.at(-1) === "generic-county", "generic adapter must be registered last");
-assert(names.length === 5, `expected 5 adapters, got ${names.length}: ${names.join(", ")}`);
+assert(
+  names.filter((n) => n === "generic-county").length === 1,
+  "generic-county registered exactly once",
+);
+assert(new Set(names).size === names.length, `adapter names must be unique: ${names.join(", ")}`);
+assert(
+  names.every((n) => getAdapter(n)?.name === n),
+  "every registered adapter resolves by name",
+);
 
   // No registry means no bindings, not a crash. The explicit override matters:
   // merely clearing the cache would fall through to a disk read and make this

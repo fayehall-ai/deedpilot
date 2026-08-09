@@ -114,11 +114,17 @@ robots-permissive, and they sit behind no platform ToS.
 | Researched in depth | 152 counties (sources + check dates) |
 | Priceable (statutory params) | AZ, CA, FL, GA, IL, MI, TX — `lib/deal/statute.ts` |
 | Parcel-level target | FL, GA, TX, AZ, MI — 578 counties |
-| **Ingesting today** | **TX (28 counties) · MI (74 counties)** |
+| **Ingesting today** | **AR · MI · LA · NM · TX · FL · CO — 119 counties** |
 
-Live as of the last run: **128 sales, 3,090 lots** on published sale lists,
-**2,861 of them auto-priceable (93%)**. A further 6,508 parcels are held as
+Live as of the last run: **128 sales, 10,360 lots** on published sale lists
+across seven states, in **119 counties**. A further 6,508 parcels are held as
 *leads* — see "What counts as inventory" below.
+
+Only a fraction of that is auto-priceable, and the gap is statutory rather than
+technical: AR (6,199 lots), LA (1,638) and NM (444) have no `STATUTE_PARAMS`
+entry, so the engine returns insufficient-data on 82% of live inventory no
+matter how well it is enriched. Drafts sit in `proposals/`, each blocked on a
+citation rather than on code — see `proposals/statute-ar-2026-08-05.md`.
 
 ### What counts as inventory
 

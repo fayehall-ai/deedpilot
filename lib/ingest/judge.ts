@@ -40,6 +40,23 @@ const MIN_YEAR_BUILT = 1600;
 /** Contiguous US + AK/HI bounding box, generous at the edges. */
 const US_BOUNDS = { minLat: 17.5, maxLat: 72.0, minLon: -180.0, maxLon: -64.0 };
 
+/**
+ * A parcel identifier that a spreadsheet turned into a float.
+ *
+ * Excel coerces a long numeric parcel number to a double and renders it as
+ * `3.05711E+12`. The digits past the sixth are gone before the county ever
+ * publishes the file, so the value is not a recoverable identifier — it is a
+ * different number that happens to start the same way.
+ *
+ * This has to be caught rather than passed through. A parcel number is a join
+ * key: enrichment sends it to an assessor or a property API, and one that has
+ * been rounded either resolves to nothing or, worse, resolves to a *different
+ * parcel* whose assessed value then drives a walk-away price. Five New Mexico
+ * parcels in Grant County arrive this way, and it is the same class of failure
+ * as the Brevard account numbers (`docs/brevard-apn-resolution.md`).
+ */
+const SPREADSHEET_FLOAT = /^\d(\.\d+)?[eE][+-]?\d+$/;
+
 function isMoneyish(v: number | undefined, label: string, reasons: string[]): void {
   if (v === undefined) return;
   if (!Number.isFinite(v)) reasons.push(`${label} is not a finite number (${v})`);
@@ -108,6 +125,16 @@ export function judgeLots(records: DiscoveredLot[]): Judgement<DiscoveredLot> {
     const repair = (field: string, value: unknown, reason: string) => {
       repairs.push({ field, value, reason });
     };
+
+    // --- Identifier repair, before identity is judged --------------------
+    // Ordering is deliberate: a rounded parcel number must stop being an
+    // identifier *before* we ask whether the record has one, so the answer
+    // falls through to externalId instead of accepting a corrupted key.
+
+    if (r.parcelNumber && SPREADSHEET_FLOAT.test(r.parcelNumber.trim())) {
+      repair("parcelNumber", r.parcelNumber, "scientific notation — digits lost upstream, not a usable join key");
+      r.parcelNumber = undefined;
+    }
 
     // --- Hard rejections -----------------------------------------------
     // Only two things justify discarding a parcel: we can't identify it, or

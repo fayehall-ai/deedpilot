@@ -5,6 +5,7 @@ import { genericAdapter } from "./generic";
 import { goveaseAdapter } from "./govease";
 import { lgbsAdapter } from "./lgbs";
 import { mvbaAdapter } from "./mvba";
+import { newMexicoPtdAdapter } from "./new-mexico";
 import { sriAdapter } from "./sri";
 import { taxSaleInfoAdapter } from "./taxsaleinfo";
 import { floridaAdapter, floridaClerksAdapter } from "./florida";
@@ -19,6 +20,7 @@ export const ADAPTERS: SourceAdapter[] = [
   georgiaAdapter,
   floridaClerksAdapter,
   arkansasCoslAdapter,
+  newMexicoPtdAdapter,
   goveaseAdapter,
   sriAdapter,
   genericAdapter,
@@ -38,6 +40,7 @@ export {
   floridaAdapter,
   floridaClerksAdapter,
   arkansasCoslAdapter,
+  newMexicoPtdAdapter,
   goveaseAdapter,
   sriAdapter,
   genericAdapter,

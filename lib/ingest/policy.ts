@@ -115,6 +115,17 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     minDelayMs: 3000,
     reason: "No robots.txt served. Rate-limited conservatively; public listing pages only.",
   },
+  {
+    host: "tax.newmexico.gov",
+    decision: "allow",
+    minDelayMs: 2000,
+    reason:
+      "New Mexico Taxation and Revenue Department — the state agency that conducts these sales, " +
+      "publishing the statutory notices required by NMSA 1978 § 7-38-65. robots.txt is " +
+      "`User-agent: * / Disallow:` (empty Disallow — everything permitted), verified 2026-08-09. " +
+      "This is the government source of record, which is the route the policy prefers; the " +
+      "notices are 300KB+ PDFs, hence the delay despite the permission.",
+  },
 ];
 
 /** Government sources of record — always preferred, always polite. */
