@@ -1,55 +1,71 @@
 {
-  "generatedAt": "2026-08-06T00:18:57.026Z",
+  "generatedAt": "2026-08-09T19:44:33.854Z",
   "gold": {
-    "score": 0.138,
+    "score": 0.143,
     "weights": {
       "live": 0.35,
       "history": 0.25,
       "price": 0.4
     },
-    "liveShare": 0.098,
+    "liveShare": 0.137,
     "historyShare": 0.039,
-    "priceShare": 0.235,
+    "priceShare": 0.213,
     "penalties": 0
   },
   "live": {
-    "upcomingAuctionsWithLots": 130,
+    "upcomingAuctionsWithLots": 150,
     "skeletonAuctions": 0,
-    "totalLotsUpcoming": 9105,
-    "lotsWithOpening": 9105,
-    "lotsWithAssessed": 2140,
-    "lotsAutoPriceable": 2140,
-    "statesWithLots": 5,
-    "countiesWithLots": 122,
+    "totalLotsUpcoming": 10851,
+    "lotsWithOpening": 10851,
+    "lotsWithAssessed": 2855,
+    "lotsAutoPriceable": 2076,
+    "statesWithLots": 7,
+    "countiesWithLots": 139,
     "byState": [
       {
         "state": "AR",
-        "auctions": 46,
-        "lots": 6760,
-        "withAssessed": 0,
+        "auctions": 45,
+        "lots": 6199,
+        "withAssessed": 779,
         "autoPriceable": 0,
-        "counties": 46
+        "counties": 45
       },
       {
         "state": "MI",
-        "auctions": 64,
-        "lots": 1984,
-        "withAssessed": 1954,
-        "autoPriceable": 1954,
-        "counties": 64
+        "auctions": 54,
+        "lots": 1713,
+        "withAssessed": 1678,
+        "autoPriceable": 1678,
+        "counties": 54
+      },
+      {
+        "state": "LA",
+        "auctions": 1,
+        "lots": 1638,
+        "withAssessed": 0,
+        "autoPriceable": 0,
+        "counties": 1
       },
       {
         "state": "TX",
-        "auctions": 12,
-        "lots": 176,
-        "withAssessed": 176,
-        "autoPriceable": 176,
+        "auctions": 34,
+        "lots": 607,
+        "withAssessed": 388,
+        "autoPriceable": 388,
+        "counties": 27
+      },
+      {
+        "state": "NM",
+        "auctions": 7,
+        "lots": 444,
+        "withAssessed": 0,
+        "autoPriceable": 0,
         "counties": 6
       },
       {
         "state": "FL",
-        "auctions": 6,
-        "lots": 159,
+        "auctions": 7,
+        "lots": 224,
         "withAssessed": 10,
         "autoPriceable": 10,
         "counties": 4
@@ -145,24 +161,24 @@
   "maxbid": {
     "countiesWithStatute": 738,
     "totalCounties": 3142,
-    "autoPriceableLots": 2140,
-    "autoPriceableRate": 0.235
+    "autoPriceableLots": 2076,
+    "autoPriceableRate": 0.191
   },
   "workPlan": [
     {
       "class": "D",
-      "priority": 6800,
+      "priority": 6239,
       "title": "Statute draft: AR",
-      "reason": "6760 live lots stranded without max-bid params.",
+      "reason": "6199 live lots stranded without max-bid params.",
       "target": {
         "state": "AR"
       }
     },
     {
       "class": "A",
-      "priority": 6760,
+      "priority": 5420,
       "title": "Enrich assessed values in AR",
-      "reason": "0/6760 lots have assessed (0.0%). Max bid is dark without ARV.",
+      "reason": "779/6199 lots have assessed (12.6%). Max bid is dark without ARV.",
       "target": {
         "state": "AR",
         "limit": 500
@@ -170,19 +186,39 @@
     },
     {
       "class": "A",
-      "priority": 200,
-      "title": "Raise auto-priceable rate above 40%",
-      "reason": "2140/9105 upcoming lots can max-bid without comps."
+      "priority": 1638,
+      "title": "Enrich assessed values in LA",
+      "reason": "0/1638 lots have assessed (0.0%). Max bid is dark without ARV.",
+      "target": {
+        "state": "LA",
+        "limit": 500
+      }
     },
     {
       "class": "A",
-      "priority": 149,
+      "priority": 444,
+      "title": "Enrich assessed values in NM",
+      "reason": "0/444 lots have assessed (0.0%). Max bid is dark without ARV.",
+      "target": {
+        "state": "NM",
+        "limit": 444
+      }
+    },
+    {
+      "class": "A",
+      "priority": 214,
       "title": "Enrich assessed values in FL",
-      "reason": "10/159 lots have assessed (6.3%). Max bid is dark without ARV.",
+      "reason": "10/224 lots have assessed (4.5%). Max bid is dark without ARV.",
       "target": {
         "state": "FL",
-        "limit": 149
+        "limit": 214
       }
+    },
+    {
+      "class": "A",
+      "priority": 200,
+      "title": "Raise auto-priceable rate above 40%",
+      "reason": "2076/10851 upcoming lots can max-bid without comps."
     },
     {
       "class": "B",
@@ -421,10 +457,10 @@
     }
   ],
   "budgetShares": {
-    "A": 0.38544878170064645,
-    "B": 0.1612270014917951,
-    "C": 0.062175534559920434,
-    "D": 0.36114868224763796,
+    "A": 0.4153575364270846,
+    "B": 0.16015427941716665,
+    "C": 0.06214276968287009,
+    "D": 0.33234541447287863,
     "E": 0.03
   }
 }
