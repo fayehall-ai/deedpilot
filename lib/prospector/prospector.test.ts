@@ -7,6 +7,8 @@ import { candidatesFor, countiesWithAtlasLinks } from "./discover";
 import { buildRegistry, bestSource, prospectCounty, registryCoverage } from "./index";
 import type { ProspectResult, VerifiedSource } from "./types";
 import { inferKind, scoreContent } from "./verify";
+import { countiesInState } from "../atlas";
+import { COUNTY_DATA } from "../atlas/county-rules";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) throw new Error(msg);
@@ -34,11 +36,27 @@ for (const fips of withLinks.slice(0, 40)) {
   assert(new Set(urls).size === urls.length, `${fips}: duplicate candidate URLs`);
 }
 
-// A Michigan county with no research still gets the statewide platform.
-const miCandidates = candidatesFor("26049");
+// Michigan sells through one statewide platform, so every county must reach
+// tax-sale.info whether or not anyone has researched it.
+//
+// Which *origin* supplies it is the thing that moves: a researched county gets
+// the URL from the atlas, an unresearched one from the state pattern. Pinning a
+// named county to `platform_pattern` broke the moment 26049 was researched — a
+// strict improvement in provenance failing as though it were a regression — so
+// the unresearched example is chosen at runtime instead of hardcoded.
+const miUnresearched = countiesInState("MI").find((c) => !(c.fips in COUNTY_DATA));
+assert(miUnresearched, "MI should still have unresearched counties; if not, drop this assertion");
 assert(
-  miCandidates.some((c) => c.origin === "platform_pattern" && c.url.includes("tax-sale.info")),
-  "Michigan counties fall back to the Title Check platform",
+  candidatesFor(miUnresearched!.fips).some(
+    (c) => c.origin === "platform_pattern" && c.url.includes("tax-sale.info"),
+  ),
+  `unresearched ${miUnresearched!.name} MI must fall back to the Title Check platform`,
+);
+
+const miResearched = countiesInState("MI").find((c) => c.fips in COUNTY_DATA);
+assert(
+  candidatesFor(miResearched!.fips).some((c) => c.url.includes("tax-sale.info")),
+  `researched ${miResearched!.name} MI must still reach the platform, via the atlas`,
 );
 
 // Unknown FIPS is empty, not a throw.
