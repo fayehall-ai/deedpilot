@@ -15,6 +15,7 @@ import { PropertyEnrichButton } from "@/components/property-enrich-button";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
 import { getComparables } from "@/lib/history/comparables";
 import { assessorLinks } from "@/lib/property/assessor-links";
+import { mergeValuations, provenanceLabel } from "@/lib/property/merge";
 import { configuredEnrichmentProviders } from "@/lib/property/enrich";
 import type { SaleType } from "@/lib/atlas/types";
 
@@ -51,12 +52,30 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
 
   const { lot, auction, county } = row;
   const valuations = await getLotValuations(lot.id);
-  const latestVal = valuations[0] ?? null;
-  const valRaw = (latestVal?.raw ?? {}) as Record<string, unknown>;
-  const beds = typeof valRaw.beds === "number" ? valRaw.beds : null;
-  const baths = typeof valRaw.baths === "number" ? valRaw.baths : null;
+  /*
+   * Merged across providers, not `valuations[0]`. Providers differ in coverage
+   * more than in value — RentCast returns a market estimate and little else,
+   * ATTOM returns the whole assessment — so taking only the newest row let a
+   * thin recent answer erase a rich older one. See lib/property/merge.ts.
+   */
+  const latestVal = mergeValuations(valuations);
+  /*
+   * `raw` stays the fallback for rows written before beds/baths/lot size had
+   * columns. Reading the column first and the blob second means the page
+   * improves as rows are re-enriched, without a backfill being a precondition
+   * for showing anything.
+   */
+  const valRaw = (valuations[0]?.raw ?? {}) as Record<string, unknown>;
+  const beds = latestVal?.beds ?? (typeof valRaw.beds === "number" ? valRaw.beds : null);
+  const baths =
+    latestVal?.baths !== null && latestVal?.baths !== undefined
+      ? Number(latestVal.baths)
+      : typeof valRaw.baths === "number"
+        ? valRaw.baths
+        : null;
   const propertyType =
-    typeof valRaw.propertyType === "string" ? valRaw.propertyType : null;
+    latestVal?.propertyType ??
+    (typeof valRaw.propertyType === "string" ? valRaw.propertyType : null);
   const rule = resolveCountyRule(county.fips);
 
   const openingBid = lot.openingBid === null ? undefined : Number(lot.openingBid);
@@ -225,13 +244,36 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
                     .join(" · ")}
                 />
               ) : null}
+              {/*
+                Sale-list value first, enrichment second. What the county
+                published about the parcel it is selling outranks what a
+                commercial database says about the same APN — the county is the
+                one holding the auction.
+              */}
               <Row
                 label="Building"
-                value={lot.buildingSqft ? `${num(lot.buildingSqft)} sqft` : null}
+                value={
+                  (lot.buildingSqft ?? latestVal?.buildingSqft)
+                    ? `${num(lot.buildingSqft ?? latestVal?.buildingSqft)} sqft`
+                    : null
+                }
                 stacked
               />
               <Row label="Acreage" value={lot.acreage ? num(lot.acreage) : null} stacked />
-              <Row label="Year built" value={lot.yearBuilt ? String(lot.yearBuilt) : null} stacked />
+              <Row
+                label="Lot size"
+                value={latestVal?.lotSqft ? `${num(latestVal.lotSqft)} sqft` : null}
+                stacked
+              />
+              <Row
+                label="Year built"
+                value={
+                  (lot.yearBuilt ?? latestVal?.yearBuilt)
+                    ? String(lot.yearBuilt ?? latestVal?.yearBuilt)
+                    : null
+                }
+                stacked
+              />
               <Row label="Owner of record" value={lot.ownerName} stacked />
               {latestVal?.lastSaleAmount ? (
                 <Row
@@ -254,7 +296,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             {/* Provenance stays on the card it describes, not in a footer. */}
             {latestVal ? (
               <p className="mt-3 text-xs text-muted">
-                Property facts enriched via {latestVal.source}
+                Property facts enriched via {provenanceLabel(latestVal)}
                 {latestVal.fetchedAt
                   ? ` · ${new Date(latestVal.fetchedAt).toLocaleDateString()}`
                   : ""}

@@ -186,6 +186,17 @@ export async function applyRecordToLot(lotId: string, record: PropertyRecord): P
       lastSaleDate: record.lastSaleDate ?? null,
       homestead: record.homestead ?? null,
       zoning: record.zoning ?? null,
+      // Columns now, not just `raw`. These were collected on every lookup and
+      // written only into the JSON blob, so nothing could query them.
+      beds: record.beds ?? null,
+      baths: record.baths !== undefined ? String(record.baths) : null,
+      lotSqft: record.lotSqft ?? null,
+      buildingSqft: record.buildingSqft ?? null,
+      yearBuilt: record.yearBuilt ?? null,
+      propertyType: record.propertyType ?? null,
+      // `raw` keeps the whole response. It is what let the assdImprValue typo
+      // be repaired without re-paying ATTOM, so it stays complete rather than
+      // being trimmed now that the fields have columns.
       raw: {
         ...record.raw,
         beds: record.beds,

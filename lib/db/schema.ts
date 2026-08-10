@@ -295,6 +295,25 @@ export const lotValuations = pgTable(
     homestead: boolean("homestead"),
     zoning: text("zoning"),
     floodZone: text("flood_zone"),
+    /*
+     * Building characteristics.
+     *
+     * `PropertyProvider` has returned all four since it was written, and until
+     * now the write path dropped them into `raw` because there was nowhere for
+     * them to land — so every bed, bath and lot size this system ever paid for
+     * is sitting in a JSON blob no query reads. They are columns because the
+     * PropStream-shaped detail page selects on them and because "how many
+     * bedrooms" should not require a jsonb path expression.
+     *
+     * Baths is numeric, not integer: half-baths are real and 1.5 is the value
+     * every provider returns for them.
+     */
+    beds: integer("beds"),
+    baths: numeric("baths", { precision: 4, scale: 1 }),
+    lotSqft: integer("lot_sqft"),
+    buildingSqft: integer("building_sqft"),
+    yearBuilt: integer("year_built"),
+    propertyType: text("property_type"),
     raw: jsonb("raw").$type<Record<string, unknown>>(),
     fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
   },
