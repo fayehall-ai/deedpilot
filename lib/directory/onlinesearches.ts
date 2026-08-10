@@ -68,12 +68,24 @@ export interface CountyDirectory {
  * builds them directly so nothing ever needs to walk the blocked index.
  */
 export function countyPageUrl(state: string, countyName: string): string {
-  // The directory spells county names without their noun and with spaces as
-  // underscores: "St. Francis" → "St._Francis".
+  /*
+   * The directory drops the county noun and removes spaces entirely — it does
+   * not replace them: "Hot Spring" → `AR_HotSpring.htm`, "St. Francis" →
+   * `AR_St.Francis.htm`. Punctuation inside the name is kept.
+   *
+   * This read "underscore" first, and the cost was exactly the counties whose
+   * names have two words: 76 of 755 came back 404 across all eight states, and
+   * every one of them was a Van Buren, an East Baton Rouge or a Ste. Genevieve.
+   * A single-word-name state would have looked like a flawless crawl.
+   *
+   * Diacritics are folded — Doña Ana is `NM_DonaAna.htm`.
+   */
   const bare = countyName
     .replace(/\s+(County|Parish|Borough|Census Area|Municipality|City and Borough)$/i, "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .trim()
-    .replace(/\s+/g, "_");
+    .replace(/\s+/g, "");
   return `${BASE}/${state.toUpperCase()}_${bare}.htm`;
 }
 

@@ -23,9 +23,25 @@ assert(
   countyPageUrl("LA", "Jefferson Parish").endsWith("/LA_Jefferson.htm"),
   "parish is a noun too",
 );
+// Spaces are removed, not replaced. Reading this as "underscore" 404'd every
+// two-word county — 76 of 755 across eight states, all of them a Van Buren or
+// a Ste. Genevieve, while single-word names sailed through and made the crawl
+// look clean.
 assert(
-  countyPageUrl("AR", "St. Francis County").endsWith("/AR_St._Francis.htm"),
-  `spaces become underscores, got ${countyPageUrl("AR", "St. Francis County")}`,
+  countyPageUrl("AR", "St. Francis County").endsWith("/AR_St.Francis.htm"),
+  `spaces are removed, got ${countyPageUrl("AR", "St. Francis County")}`,
+);
+assert(
+  countyPageUrl("AR", "Hot Spring County").endsWith("/AR_HotSpring.htm"),
+  `two words join, got ${countyPageUrl("AR", "Hot Spring County")}`,
+);
+assert(
+  countyPageUrl("LA", "East Baton Rouge Parish").endsWith("/LA_EastBatonRouge.htm"),
+  `three words join, got ${countyPageUrl("LA", "East Baton Rouge Parish")}`,
+);
+assert(
+  countyPageUrl("NM", "Doña Ana County").endsWith("/NM_DonaAna.htm"),
+  `diacritics fold, got ${countyPageUrl("NM", "Doña Ana County")}`,
 );
 // The alphabetical /XX-A.htm indexes are the ones robots.txt disallows. Nothing
 // here may ever produce one.
