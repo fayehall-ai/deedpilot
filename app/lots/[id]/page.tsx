@@ -164,54 +164,59 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
         </div>
       ) : null}
 
+      {/*
+        Property first, in the wide column; the deal tools to the right.
+        This page used to open with the max-bid calculator and push the parcel
+        itself into a 380px sidebar — which asks the reader to price a thing
+        before showing them what it is. The property card is the subject of the
+        page, so it gets the width, the top, and the type scale; the calculator
+        and the brief are what you do *about* it, and they sit alongside where
+        both stay visible while you read.
+      */}
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        <section>
-          <h2 className="mb-3 text-lg font-semibold">Deal analysis</h2>
-          <DealCalculator
-            state={county.state}
-            saleType={auction.saleType as SaleType}
-            openingBid={openingBid}
-            assessedValue={assessedValue}
-            fips={county.fips}
-            historyBucket={history.bucket}
-            historyKey={history.key}
-            thinListing={thinListing}
-          />
-
-          <div className="mt-6">
-            <ParcelBrief
-              lotId={lot.id}
-              countyName={county.name}
-              initialBrief={cached?.brief ?? null}
-              initialModel={cached?.model ?? null}
-            />
-          </div>
-        </section>
-
-        <aside className="space-y-4">
+        <section className="space-y-6">
           <Card>
-            <h3 className="mb-3 text-sm font-semibold">Parcel</h3>
-            <dl className="space-y-2 text-sm">
-              <Row label="Parcel number" value={lot.parcelNumber} mono />
-              <Row label="Case number" value={lot.caseNumber} mono />
-              <Row label="Opening bid" value={money(openingBid)} />
-              <Row label="Assessed value" value={money(assessedValue)} />
-              {latestVal?.marketValue ? (
-                <Row label="Market / AVM" value={money(latestVal.marketValue)} />
-              ) : null}
-              {latestVal?.lastSaleAmount ? (
-                <Row
-                  label="Last sale"
-                  value={`${money(latestVal.lastSaleAmount)}${
-                    latestVal.lastSaleDate ? ` · ${latestVal.lastSaleDate}` : ""
-                  }`}
-                />
-              ) : null}
-              <Row label="Taxes owed" value={money(lot.taxesOwed)} />
-              <Row label="Land use" value={lot.landUse ?? propertyType} />
-              {(beds !== null || baths !== null) && (
+            {/*
+              The four figures a bid turns on, at a size you can read across the
+              room. Opening bid and taxes owed are what you pay; assessed and
+              market are what the county and the market think it is worth.
+            */}
+            <div className="grid grid-cols-2 gap-4 border-b border-border pb-4 sm:grid-cols-4">
+              <Figure label="Opening bid" value={money(openingBid)} />
+              <Figure label="Assessed value" value={money(assessedValue)}>
+                {/*
+                  The split, under the total it adds up to. Land and improvement
+                  say what is actually being bought: $27,500 that is $9,000 land
+                  and $18,500 structure is a house, and the same total as bare
+                  land is not. Absent components are omitted rather than drawn
+                  as $0, which would assert there is no structure.
+                */}
+                {latestVal?.assessedLand || latestVal?.assessedImprovement ? (
+                  <>
+                    {latestVal.assessedLand ? (
+                      <span className="block">Land {money(latestVal.assessedLand)}</span>
+                    ) : null}
+                    {latestVal.assessedImprovement ? (
+                      <span className="block">
+                        Improvement {money(latestVal.assessedImprovement)}
+                      </span>
+                    ) : null}
+                  </>
+                ) : null}
+              </Figure>
+              <Figure label="Market / AVM" value={money(latestVal?.marketValue)} />
+              <Figure label="Taxes owed" value={money(lot.taxesOwed)} />
+            </div>
+
+            {/* Characteristics, in the width the sidebar never had. */}
+            <dl className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-3 lg:grid-cols-4">
+              <Row label="Parcel number" value={lot.parcelNumber} mono stacked />
+              <Row label="Case number" value={lot.caseNumber} mono stacked />
+              <Row label="Land use" value={lot.landUse ?? propertyType} stacked />
+              {beds !== null || baths !== null ? (
                 <Row
                   label="Beds / baths"
+                  stacked
                   value={[
                     beds !== null ? `${beds} bd` : null,
                     baths !== null ? `${baths} ba` : null,
@@ -219,42 +224,42 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
                     .filter(Boolean)
                     .join(" · ")}
                 />
-              )}
-              <Row label="Acreage" value={lot.acreage ? num(lot.acreage) : null} />
+              ) : null}
               <Row
                 label="Building"
                 value={lot.buildingSqft ? `${num(lot.buildingSqft)} sqft` : null}
+                stacked
               />
-              <Row label="Year built" value={lot.yearBuilt ? String(lot.yearBuilt) : null} />
-              <Row label="Owner of record" value={lot.ownerName} />
-              {latestVal ? (
+              <Row label="Acreage" value={lot.acreage ? num(lot.acreage) : null} stacked />
+              <Row label="Year built" value={lot.yearBuilt ? String(lot.yearBuilt) : null} stacked />
+              <Row label="Owner of record" value={lot.ownerName} stacked />
+              {latestVal?.lastSaleAmount ? (
                 <Row
-                  label="Enriched via"
-                  value={`${latestVal.source}${
-                    latestVal.fetchedAt
-                      ? ` · ${new Date(latestVal.fetchedAt).toLocaleDateString()}`
-                      : ""
+                  label="Last sale"
+                  stacked
+                  value={`${money(latestVal.lastSaleAmount)}${
+                    latestVal.lastSaleDate ? ` · ${latestVal.lastSaleDate}` : ""
                   }`}
                 />
               ) : null}
             </dl>
+
             {lot.legalDescription ? (
-              <p className="mt-3 border-t border-border pt-3 text-xs leading-relaxed text-muted">
-                {lot.legalDescription}
+              <div className="mt-4 border-t border-border pt-3">
+                <p className="text-xs uppercase tracking-wide text-muted">Legal description</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted">{lot.legalDescription}</p>
+              </div>
+            ) : null}
+
+            {/* Provenance stays on the card it describes, not in a footer. */}
+            {latestVal ? (
+              <p className="mt-3 text-xs text-muted">
+                Property facts enriched via {latestVal.source}
+                {latestVal.fetchedAt
+                  ? ` · ${new Date(latestVal.fetchedAt).toLocaleDateString()}`
+                  : ""}
               </p>
             ) : null}
-          </Card>
-
-          <Card>
-            <h3 className="mb-2 text-sm font-semibold">Property details</h3>
-            <p className="mb-3 text-xs leading-relaxed text-muted">
-              Pull address, assessed value, and property facts from a commercial property API
-              (PropStream-style).{" "}
-              {providers.length
-                ? `Configured: ${providers.join(", ")}.`
-                : "No API key set yet — links below still work."}
-            </p>
-            <PropertyEnrichButton lotId={lot.id} />
           </Card>
 
           <Card>
@@ -350,8 +355,72 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
               </a>
             ) : null}
           </Card>
+        </section>
+
+        {/*
+          The deal column. Sticky on tall screens so the max bid stays on
+          screen while the property detail beside it scrolls — the two numbers
+          are only useful read against each other.
+        */}
+        <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+          <div>
+            <h2 className="mb-3 text-lg font-semibold">Deal analysis</h2>
+            <DealCalculator
+              state={county.state}
+              saleType={auction.saleType as SaleType}
+              openingBid={openingBid}
+              assessedValue={assessedValue}
+              fips={county.fips}
+              historyBucket={history.bucket}
+              historyKey={history.key}
+              thinListing={thinListing}
+            />
+          </div>
+
+          <ParcelBrief
+            lotId={lot.id}
+            countyName={county.name}
+            initialBrief={cached?.brief ?? null}
+            initialModel={cached?.model ?? null}
+          />
+
+          <Card>
+            <h3 className="mb-2 text-sm font-semibold">Property details</h3>
+            <p className="mb-3 text-xs leading-relaxed text-muted">
+              Pull address, assessed value, and property facts from a commercial property API.{" "}
+              {providers.length
+                ? `Configured: ${providers.join(", ")}.`
+                : "No API key set yet — the county record links still work."}
+            </p>
+            <PropertyEnrichButton lotId={lot.id} />
+          </Card>
         </aside>
       </div>
+    </div>
+  );
+}
+
+/**
+ * A headline figure: big number, small label, optional detail beneath.
+ *
+ * Deliberately not a `Row` — these four are the numbers a bid turns on, and
+ * they are meant to be read at a glance across the top of the card rather than
+ * scanned down a list with everything else.
+ */
+function Figure({
+  label,
+  value,
+  children,
+}: {
+  label: string;
+  value: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-wide text-muted">{label}</p>
+      <p className="tnum mt-0.5 text-xl font-semibold">{value}</p>
+      {children ? <div className="tnum mt-1 text-xs text-muted">{children}</div> : null}
     </div>
   );
 }
@@ -361,18 +430,30 @@ function Row({
   value,
   mono,
   wrap,
+  stacked,
 }: {
   label: string;
   value: string | number | null | undefined;
   mono?: boolean;
   wrap?: boolean;
+  /**
+   * Label above value instead of label-left/value-right.
+   *
+   * The side-by-side form is right in a narrow sidebar, where the gap between
+   * the two is small. Dropped into a four-column grid it strands each label at
+   * the far left of its cell and each value at the far right, and the reader
+   * has to re-pair them by eye across a column of whitespace.
+   */
+  stacked?: boolean;
 }) {
   return (
-    <div className={wrap ? "" : "flex items-baseline justify-between gap-3"}>
-      <dt className="shrink-0 text-muted">{label}</dt>
+    <div className={wrap || stacked ? "" : "flex items-baseline justify-between gap-3"}>
+      <dt className={`shrink-0 text-muted${stacked ? " text-xs uppercase tracking-wide" : ""}`}>
+        {label}
+      </dt>
       <dd
         className={`${mono ? "font-mono text-xs" : ""} ${
-          wrap ? "mt-0.5 text-xs leading-relaxed" : "tnum text-right"
+          wrap ? "mt-0.5 text-xs leading-relaxed" : stacked ? "tnum mt-0.5" : "tnum text-right"
         }`}
       >
         {value === null || value === undefined || value === "" ? (
