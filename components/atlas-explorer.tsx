@@ -20,11 +20,41 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CountyDetail, StatePath, StatePayload } from "@/lib/atlas/geo";
 import { NATIONAL_VIEWBOX } from "@/lib/atlas/geo";
+import { num } from "@/lib/format";
 
 /** A modified click means the reader wants a new tab — never intercept it. */
 function opensElsewhere(e: React.MouseEvent) {
   return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
 }
+
+/**
+ * Minimum-population stops for the filter.
+ *
+ * A stepped ladder rather than a linear range: county populations span four
+ * orders of magnitude, so a linear slider spends nine tenths of its travel
+ * between "everything" and "everything except twelve counties".
+ *
+ * Index 0 is "All", and that is the default on purpose. The obvious default is
+ * 50k+, and it is the wrong one here: Arkansas is 45 counties and 6,199 lots —
+ * 55% of live inventory — and almost none of those counties clear 50,000
+ * residents. `lib/coverage/scoreboard.ts` records the same mistake being made
+ * once already, where a population ranking "hid Arkansas for months". A filter
+ * that ships pre-set to hide the majority of your own inventory is a bug with a
+ * default value.
+ */
+const POPULATION_STOPS: { min: number; label: string }[] = [
+  { min: 0, label: "All" },
+  { min: 1_000, label: "1k+" },
+  { min: 2_500, label: "2.5k+" },
+  { min: 5_000, label: "5k+" },
+  { min: 10_000, label: "10k+" },
+  { min: 25_000, label: "25k+" },
+  { min: 50_000, label: "50k+" },
+  { min: 100_000, label: "100k+" },
+  { min: 250_000, label: "250k+" },
+  { min: 500_000, label: "500k+" },
+  { min: 1_000_000, label: "1M+" },
+];
 
 const TYPE_COLOR: Record<string, string> = {
   "Tax Lien": "var(--type-lien)",
@@ -50,6 +80,21 @@ export function AtlasExplorer({
   const [county, setCounty] = useState<CountyDetail | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [popIndex, setPopIndex] = useState(0);
+  const minPopulation = POPULATION_STOPS[popIndex].min;
+
+  /**
+   * Counties clearing the population filter.
+   *
+   * A null population passes. The shapefile carries features the Census table
+   * does not, and silently dropping a county because we lack a number for it
+   * would be the filter quietly deleting data rather than narrowing it.
+   */
+  const passesPopulation = useCallback(
+    (c: CountyDetail) => c.population === null || c.population >= minPopulation,
+    [minPopulation],
+  );
+  const visibleCounties = openState?.counties.filter(passesPopulation) ?? [];
   /** Fetched states, kept so re-opening one is instant. */
   const cache = useRef(
     new Map<string, StatePayload>(initialState ? [[initialState.slug, initialState]] : []),
@@ -93,6 +138,92 @@ export function AtlasExplorer({
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <div>
+        {/*
+          Controls above the map, driving the same state the map clicks do.
+          Two ways into the same place: pointing at a shape is faster when you
+          know where the county is, and a named list is the only way in when you
+          do not — or when you are on a phone, where a 60-county map is a set of
+          two-millimetre tap targets.
+        */}
+        <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_14rem]">
+          <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-wide text-muted">State</span>
+            <select
+              value={openState?.slug ?? ""}
+              onChange={(e) => {
+                const slug = e.target.value;
+                if (!slug) {
+                  setOpenState(null);
+                  setCounty(null);
+                  return;
+                }
+                void openStateBySlug(slug);
+              }}
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:border-accent focus:border-accent focus:outline-none"
+            >
+              <option value="">All states</option>
+              {[...states]
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((s) => (
+                  <option key={s.fips} value={s.slug}>
+                    {s.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-wide text-muted">County</span>
+            <select
+              value={county?.fips ?? ""}
+              disabled={!openState}
+              onChange={(e) => {
+                const fips = e.target.value;
+                setCounty(openState?.counties.find((c) => c.fips === fips) ?? null);
+              }}
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:border-accent focus:border-accent focus:outline-none disabled:opacity-60 disabled:hover:border-border"
+            >
+              <option value="">
+                {openState
+                  ? `All ${visibleCounties.length} counties`
+                  : "Select a state first…"}
+              </option>
+              {visibleCounties.map((c) => (
+                <option key={c.fips} value={c.fips}>
+                  {c.label}
+                  {c.population === null ? "" : ` — ${num(c.population)}`}
+                  {c.researched ? " ★" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div>
+            <div className="mb-1 flex items-baseline justify-between gap-2">
+              <span className="text-xs uppercase tracking-wide text-muted">Min. population</span>
+              <span className="tnum text-xs font-medium">{POPULATION_STOPS[popIndex].label}</span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={POPULATION_STOPS.length - 1}
+              step={1}
+              value={popIndex}
+              onChange={(e) => setPopIndex(Number(e.target.value))}
+              aria-label="Minimum county population"
+              aria-valuetext={POPULATION_STOPS[popIndex].label}
+              className="mt-2 w-full accent-[var(--accent)]"
+            />
+            {/* Says what the filter is doing to the map, so a suddenly sparse
+                state reads as a filter rather than as missing data. */}
+            {openState && popIndex > 0 ? (
+              <p className="mt-1 text-xs text-muted">
+                {num(visibleCounties.length)} of {num(openState.counties.length)} shown
+              </p>
+            ) : null}
+          </div>
+        </div>
+
         {/* Breadcrumb + reset, mirroring where you are in the drill-down. */}
         <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
           <button
@@ -164,37 +295,54 @@ export function AtlasExplorer({
               role="img"
               aria-label={`Counties of ${openState.name}`}
             >
-              {openState.counties.map((c) => (
-                <a
-                  key={c.fips}
-                  href={`/atlas/${openState.slug}/${c.slug}`}
-                  onClick={(e) => {
-                    if (opensElsewhere(e)) return;
-                    e.preventDefault();
-                    setCounty(c);
-                  }}
-                  className="outline-none"
-                >
-                  <title>
-                    {`${c.label} — ${c.researched ? "researched individually" : "showing state defaults"}`}
-                  </title>
-                  <path
-                    d={c.d}
-                    fill={
-                      county?.fips === c.fips
-                        ? "var(--accent)"
-                        : c.researched
+              {openState.counties.map((c) => {
+                /*
+                 * Filtered-out counties dim; they never disappear and never
+                 * stop being clickable. Every county has a real page, and a
+                 * slider is a way to emphasise part of the map — not a reason
+                 * to make the rest of it unreachable. Someone who drags to
+                 * 250k+ and then spots the small county they actually came for
+                 * can still click it.
+                 */
+                const dimmed = !passesPopulation(c);
+                const selected = county?.fips === c.fips;
+                return (
+                  <a
+                    key={c.fips}
+                    href={`/atlas/${openState.slug}/${c.slug}`}
+                    onClick={(e) => {
+                      if (opensElsewhere(e)) return;
+                      e.preventDefault();
+                      setCounty(c);
+                    }}
+                    className="outline-none"
+                  >
+                    {/* Single expression — see the note on the national map. */}
+                    <title>
+                      {`${c.label} — ${c.researched ? "researched individually" : "showing state defaults"}` +
+                        (c.population === null ? "" : `, ${num(c.population)} residents`) +
+                        (dimmed ? " (below the population filter)" : "")}
+                    </title>
+                    <path
+                      d={c.d}
+                      fill={
+                        selected
                           ? "var(--accent)"
-                          : "var(--surface-2)"
-                    }
-                    fillOpacity={county?.fips === c.fips ? 1 : c.researched ? 0.85 : 1}
-                    stroke={county?.fips === c.fips ? "var(--foreground)" : "var(--border)"}
-                    strokeWidth={county?.fips === c.fips ? 1.2 : 0.4}
-                    vectorEffect="non-scaling-stroke"
-                    className="cursor-pointer transition-opacity hover:opacity-100"
-                  />
-                </a>
-              ))}
+                          : c.researched
+                            ? "var(--accent)"
+                            : "var(--surface-2)"
+                      }
+                      fillOpacity={
+                        dimmed && !selected ? 0.15 : selected ? 1 : c.researched ? 0.85 : 1
+                      }
+                      stroke={selected ? "var(--foreground)" : "var(--border)"}
+                      strokeWidth={selected ? 1.2 : 0.4}
+                      vectorEffect="non-scaling-stroke"
+                      className="cursor-pointer transition-opacity hover:opacity-100"
+                    />
+                  </a>
+                );
+              })}
             </svg>
           ) : (
             <svg
@@ -214,10 +362,21 @@ export function AtlasExplorer({
                   }}
                   className="outline-none"
                 >
+                  {/*
+                    One expression, not three children. React separates
+                    adjacent text children with comment markers in the
+                    server-rendered HTML; inside `<title>` the browser
+                    normalises those away, so the client tree no longer matches
+                    and hydration fails on `/atlas` with "server rendered HTML
+                    didn't match the client". React then throws away and
+                    re-renders this subtree — which on a page whose whole point
+                    is an interactive map is the difference between a map and a
+                    blank panel. Concatenate before it reaches JSX.
+                  */}
                   <title>
-                    {`${s.name} — ${s.saleType}. ${s.counties} counties`}
-                    {s.researched > 0 ? `, ${s.researched} researched` : ""}
-                    {s.covered ? ", live auction inventory" : ""}
+                    {`${s.name} — ${s.saleType}. ${s.counties} counties` +
+                      (s.researched > 0 ? `, ${s.researched} researched` : "") +
+                      (s.covered ? ", live auction inventory" : "")}
                   </title>
                   <path
                     d={s.d}
@@ -370,49 +529,124 @@ function DetailPanel({
   }
 
   const r = county.rule;
+  const offices = r
+    ? ([
+        ["Tax collector", r.taxCollector],
+        ["Clerk of court", r.clerkOfCourt],
+        ["Property appraiser", r.propertyAppraiser],
+        ["GIS / parcel map", r.gisMap],
+      ] as const).filter(([, ref]) => ref?.label)
+    : [];
+
   return (
-    <aside className="rounded-xl border border-border bg-surface p-4">
+    /*
+     * Scrolls internally rather than growing the page. A researched county
+     * carries enough prose — surviving liens, quiet title, deposit rules — to
+     * run past the map beside it, and a panel taller than the thing it
+     * describes pushes the map off screen mid-read.
+     */
+    <aside className="max-h-[38rem] overflow-y-auto rounded-xl border border-border bg-surface p-4">
       <p className="text-xs uppercase tracking-wide text-muted">{state.name}</p>
       <h3 className="mt-1 text-lg font-semibold tracking-tight">{county.label}</h3>
+      {/* The county's own label when it runs a finer-grained system than the
+          four national buckets the map colour can express. */}
+      {r?.type ? <p className="mt-0.5 text-sm text-muted">{r.type}</p> : null}
 
       {r ? (
-        <dl className="mt-3 space-y-3 text-sm">
-          {r.auctionFormat ? <Field label="Format">{r.auctionFormat}</Field> : null}
-          {r.auctionPlatform?.label ? (
-            <Field label="Platform">
-              {r.auctionPlatform.url ? (
-                <a
-                  href={r.auctionPlatform.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-foreground"
-                >
-                  {r.auctionPlatform.label}
-                </a>
-              ) : (
-                r.auctionPlatform.label
-              )}
-            </Field>
+        <div className="mt-3 space-y-4 text-sm">
+          {/*
+            Risk first, logistics second. These two are what a bid is wrong
+            about when it is wrong expensively: a surviving municipal lien and
+            a required quiet title action are both money the opening bid does
+            not mention. Burying them under "Format: online" — as this panel
+            did while it showed five fields and a link — puts the cheapest
+            information at the top and the costliest behind a navigation.
+          */}
+          {r.survivingLiens || r.quietTitle ? (
+            <dl className="space-y-3 rounded-lg border border-warn/30 bg-warn/5 p-3">
+              {r.survivingLiens ? (
+                <Field label="Surviving liens">{r.survivingLiens}</Field>
+              ) : null}
+              {r.quietTitle ? <Field label="Quiet title">{r.quietTitle}</Field> : null}
+            </dl>
           ) : null}
-          {r.auctionFrequency ? <Field label="Frequency">{r.auctionFrequency}</Field> : null}
-          {r.taxCollector?.label ? (
-            <Field label="Tax collector">
-              {r.taxCollector.url ? (
-                <a
-                  href={r.taxCollector.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-foreground"
-                >
-                  {r.taxCollector.label}
-                </a>
-              ) : (
-                r.taxCollector.label
-              )}
-            </Field>
+
+          <dl className="space-y-3">
+            {r.auctionFormat ? <Field label="Format">{r.auctionFormat}</Field> : null}
+            {r.auctionPlatform?.label ? (
+              <Field label="Platform">
+                <Ref link={r.auctionPlatform} />
+              </Field>
+            ) : null}
+            {r.auctionFrequency ? <Field label="Frequency">{r.auctionFrequency}</Field> : null}
+            {r.depositRules ? <Field label="Deposit">{r.depositRules}</Field> : null}
+          </dl>
+
+          {offices.length > 0 ? (
+            <dl className="space-y-3 border-t border-border pt-3">
+              {offices.map(([label, ref]) => (
+                <Field key={label} label={label}>
+                  <Ref link={ref!} />
+                </Field>
+              ))}
+            </dl>
           ) : null}
-          {r.asOf ? <Field label="Checked">{r.asOf}</Field> : null}
-        </dl>
+
+          {r.notes ? (
+            <div className="border-t border-border pt-3">
+              <Field label="Notes">{r.notes}</Field>
+            </div>
+          ) : null}
+
+          {r.growthNeighborhoods?.length ? (
+            <div className="border-t border-border pt-3">
+              <p className="text-xs uppercase tracking-wide text-muted">Areas trending up</p>
+              <ul className="mt-1.5 space-y-1.5">
+                {r.growthNeighborhoods.map((g) => (
+                  <li key={g.name} className="leading-relaxed">
+                    <span className="font-medium">{g.name}</span>
+                    <span className="text-muted"> — {g.why}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {/* Dated and sourced, or it is just an assertion. Collapsed because
+              the citations matter on challenge, not on every read. */}
+          {r.asOf || r.sources?.length ? (
+            <div className="border-t border-border pt-3">
+              {r.asOf ? (
+                <p className="text-xs text-muted">Logistics and contacts checked {r.asOf}</p>
+              ) : null}
+              {r.sources?.length ? (
+                <details className="group/src mt-1.5">
+                  <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-xs text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+                    <span aria-hidden className="transition-transform group-open/src:rotate-90">
+                      ›
+                    </span>
+                    {r.sources.length} {r.sources.length === 1 ? "source" : "sources"}
+                  </summary>
+                  <ul className="mt-1.5 space-y-1 border-l border-border pl-2.5">
+                    {r.sources.map((s) => (
+                      <li key={s} className="truncate">
+                        <a
+                          href={s}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-muted underline hover:text-foreground"
+                          title={s}
+                        >
+                          {s.replace(/^https?:\/\/(www\.)?/, "")}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       ) : (
         /*
          * Said plainly rather than shown as blanks. An unresearched county
@@ -442,5 +676,32 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
       <dd className="mt-0.5 leading-relaxed">{children}</dd>
     </div>
+  );
+}
+
+/**
+ * A contact or office: linked when there is a URL, plain when there is not.
+ *
+ * The phone number rides along because half of what these offices answer is
+ * not on their website, and a researched county that lists one should not make
+ * the reader open the full page to find it.
+ */
+function Ref({ link }: { link: { label: string; url?: string; phone?: string } }) {
+  return (
+    <>
+      {link.url ? (
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-foreground"
+        >
+          {link.label}
+        </a>
+      ) : (
+        link.label
+      )}
+      {link.phone ? <span className="block text-xs text-muted">{link.phone}</span> : null}
+    </>
   );
 }

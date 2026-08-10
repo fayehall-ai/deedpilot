@@ -19,6 +19,7 @@ import statesTopo from "@/public/geo/states-albers-10m.json";
 import countiesTopo from "@/public/geo/counties-albers-10m.json";
 import { COUNTY_DATA } from "./county-rules";
 import { FIPS_TO_STATE } from "./fips";
+import { COUNTY_POPULATION } from "./population";
 import { STATE_DATA } from "./states";
 import { STATE_NAMES, stateSlug } from "./state-names";
 import { countiesInState, countyLabel, countySlug, isCovered, researchedCountCount, toSaleType } from "./index";
@@ -80,6 +81,15 @@ export interface CountyPath {
   slug: string;
   d: string;
   researched: boolean;
+  /**
+   * Census Vintage 2024 estimate, or null where the shapefile has a feature the
+   * population table does not (territories, and the odd independent city).
+   *
+   * Carried on the path rather than looked up by the client because the filter
+   * that uses it has to rank every county in a state at once, and shipping one
+   * integer per county is cheaper than shipping the national table.
+   */
+  population: number | null;
 }
 
 export interface StateCountyMap {
@@ -184,6 +194,7 @@ export function countyMapFor(abbr: string): StateCountyMap | null {
       slug: countySlug(name),
       d,
       researched: fips in COUNTY_DATA,
+      population: COUNTY_POPULATION[fips] ?? null,
     });
   }
   if (!counties.length) return null;
