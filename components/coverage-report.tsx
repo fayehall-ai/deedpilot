@@ -259,7 +259,13 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
         </section>
       ) : null}
 
-      {blocked.length > 0 && (
+      {/* Full report only. On the home page this landed between the coverage
+          figures and pricing, where a stack of "Requires Agreement" callouts
+          reads as a list of things the product cannot do — to a first-time
+          visitor, four warnings about hosts they have never heard of. It is
+          still the honest account of why some counties are missing, so it stays
+          on /coverage, next to the per-county ingest log that gives it context. */}
+      {!compact && blocked.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-3 text-lg font-semibold">Sources we do not scrape</h2>
           <div className="space-y-3">
