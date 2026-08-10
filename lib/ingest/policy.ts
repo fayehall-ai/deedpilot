@@ -122,6 +122,68 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
       "This is the government source of record, which is the route the policy prefers; the " +
       "notices are 300KB+ PDFs, hence the delay despite the permission.",
   },
+
+  // --- Parcel-data aggregators and record directories, added 2026-08-10 -----
+  //
+  // None of these four publishes a tax sale list. Two are directories of links
+  // to county assessor/recorder/GIS sites, and two are commercial parcel-data
+  // products. They belong to the *discovery* and *enrichment* paths, never to
+  // the auction ingest path — an adapter pointed at one of them would produce
+  // parcels that are not for sale, which is the failure `listing_kind` exists
+  // to catch. The entries are here because policy is decided per host, before
+  // anyone writes the code that fetches.
+  {
+    host: "datascoutpro.com",
+    decision: "requires_agreement",
+    minDelayMs: 5000,
+    reason:
+      "Serves an Azure WAF JavaScript challenge on every request including /robots.txt, which " +
+      "returns HTTP 403 — verified 2026-08-10. The crawl posture cannot be read without executing " +
+      "the challenge, i.e. without defeating an active edge control, so the same stance as " +
+      "bid4assets applies. DataScout resells county assessor data that is a public record at " +
+      "source; where a specific county's parcel data is needed, go to that county's assessor " +
+      "instead. A subscription here comes with terms, and those terms are the route in.",
+  },
+  {
+    host: "propwire.com",
+    decision: "requires_agreement",
+    minDelayMs: 5000,
+    reason:
+      "Behind DataDome bot detection — /robots.txt returns HTTP 403 with a captcha-delivery " +
+      "challenge, verified 2026-08-10. Crawl posture unreadable without defeating the control. " +
+      "Propwire is a free front end over a commercial property database; its value here would be " +
+      "comps and AVM, which is the job ATTOM already does under an API key and a contract. Use an " +
+      "account and a documented API, not the web app.",
+  },
+  {
+    host: "publicrecords.netronline.com",
+    decision: "allow",
+    minDelayMs: 10_000,
+    reason:
+      "NETR Online's public records directory — per-county links to assessor, recorder, and GIS " +
+      "sites. robots.txt explicitly keeps the state/county directory pages crawlable for SEO and " +
+      "declares `Crawl-delay: 10`, which is where the 10s here comes from; verified 2026-08-10. " +
+      "Denied entirely to named SEO scrapers, and off-limits under `*` are the dynamic search " +
+      "endpoints (/search_results, /map_search, /zip_search, /city_state_search), the parcel and " +
+      "map endpoints its own comments call the primary scraping targets (/map, /geo_image, " +
+      "/parcel, /parcel_loc, /plss, /fetch_meridian_info), and the admin/user/stripe routes. " +
+      "`politeFetch` reads those paths off live robots.txt, so this entry grants the host, not " +
+      "those paths. Usable surface is /state/XX and the county pages under it.",
+  },
+  {
+    host: "publicrecords.onlinesearches.com",
+    decision: "allow",
+    minDelayMs: 5000,
+    reason:
+      "OnlineSearches public records directory — same shape as NETR, per-county links to official " +
+      "record sites. robots.txt is readable and permissive at the root, with the state indexes " +
+      "(/arkansas, /michigan, …) allowed; verified 2026-08-10. Disallowed under `*`: /maps/, " +
+      "/view/, the alphabetical /*-A.htm … /*-Z.htm listing pages, and any URL carrying stlinks, " +
+      "guidelinks or cnguide query params — which is a meaningful share of the directory, so " +
+      "expect to reach counties through the state pages rather than the A-Z indexes. No " +
+      "Crawl-delay is declared; 5s is set here because this is a commercial aggregator rather " +
+      "than a government source of record.",
+  },
 ];
 
 /** Government sources of record — always preferred, always polite. */

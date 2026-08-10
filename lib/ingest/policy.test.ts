@@ -57,6 +57,41 @@ assert(
   "the GovEase subdomain that serves Disallow: / is covered",
 );
 
+// --- hosts whose crawl posture cannot be read --------------------------------
+
+// DataScout serves an Azure WAF JS challenge and Propwire a DataDome captcha;
+// both return 403 on /robots.txt itself. A host that will not tell you its
+// posture without defeating a bot control has to be treated as closed, the same
+// way bid4assets is — flipping either to `allow` must be deliberate.
+for (const host of ["datascoutpro.com", "propwire.com", "bid4assets.com"]) {
+  assert(
+    policyFor(host)?.decision === "requires_agreement",
+    `${host} serves no readable robots.txt and must stay behind an agreement`,
+  );
+}
+assert(
+  policyFor("www.datascoutpro.com")?.decision === "requires_agreement",
+  "the www subdomain the marketing site uses is covered too",
+);
+
+// --- record directories ------------------------------------------------------
+
+// Both are allowed, and both are directories of links to county assessor and
+// recorder sites — not publishers of sale lists. The delay is the assertion
+// worth pinning: NETR declares `Crawl-delay: 10`, and honouring a stated delay
+// is the whole difference between polite and not.
+assert(
+  policyFor("publicrecords.netronline.com")?.minDelayMs === 10_000,
+  "NETR's declared Crawl-delay: 10 is honoured",
+);
+assert(
+  (policyFor("publicrecords.onlinesearches.com")?.minDelayMs ?? 0) >= 5000,
+  "a commercial aggregator with no declared delay still waits",
+);
+for (const host of ["publicrecords.netronline.com", "publicrecords.onlinesearches.com"]) {
+  assert(!isGovernmentSource(host), `${host} is an aggregator, not a government source`);
+}
+
 // --- government sources ------------------------------------------------------
 
 assert(isGovernmentSource("tax.newmexico.gov"), "state agency host is government");
