@@ -24,6 +24,7 @@ export function DealCalculator({
   saleType,
   openingBid,
   assessedValue,
+  marketValue,
   fips,
   historyBucket = null,
   historyKey,
@@ -33,6 +34,8 @@ export function DealCalculator({
   saleType: SaleType;
   openingBid?: number;
   assessedValue?: number;
+  /** Provider market estimate; ranks above assessed ÷ ratio in deriveArv. */
+  marketValue?: number;
   fips?: string;
   /** Server-loaded history bucket (no fs on the client). */
   historyBucket?: HistoryBucket | null;
@@ -52,13 +55,14 @@ export function DealCalculator({
       fips,
       openingBid,
       assessedValue,
+      marketValue,
       targetMargin: margin / 100,
     };
     if (arvOverride.trim() !== "") inputs.arvOverride = Number(arvOverride.replace(/[^0-9.]/g, ""));
     if (rehab.trim() !== "") inputs.rehabCost = Number(rehab.replace(/[^0-9.]/g, ""));
     if (liens.trim() !== "") inputs.survivingLiens = Number(liens.replace(/[^0-9.]/g, ""));
     return computeMaxBid(inputs);
-  }, [state, saleType, fips, openingBid, assessedValue, arvOverride, rehab, liens, margin]);
+  }, [state, saleType, fips, openingBid, assessedValue, marketValue, arvOverride, rehab, liens, margin]);
 
   const suggestion = useMemo(() => {
     return computeSuggestedBid({

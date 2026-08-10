@@ -129,3 +129,69 @@ console.log("statute tests ok", {
   statutoryPenalty: r.penaltyAtMaxBid,
   observedPenalty: r.marketPenalty!.penaltyAtMaxBidObserved,
 });
+
+// --- market value as an ARV source ------------------------------------------
+
+// The case this was added for: Arkansas has no STATUTE_PARAMS entry, so a
+// parcel with an assessed value still returned insufficient-data because there
+// was no ratio to convert it with. 779 upcoming parcels sat in that state while
+// carrying a market estimate nobody read.
+const arNoRatio = computeMaxBid({ state: "AR", saleType: "Tax Deed", assessedValue: 30_000 });
+assert(
+  arNoRatio.recommendation === "insufficient-data",
+  "assessed value alone is still unpriceable without a ratio",
+);
+const arWithMarket = computeMaxBid({
+  state: "AR",
+  saleType: "Tax Deed",
+  assessedValue: 30_000,
+  marketValue: 120_000,
+});
+assert(
+  arWithMarket.recommendation !== "insufficient-data",
+  `a market estimate prices it without a ratio, got ${arWithMarket.recommendation}`,
+);
+assert(arWithMarket.arv.value === 120_000, `ARV is the market figure, got ${arWithMarket.arv.value}`);
+assert(
+  /as-is valuation, not an after-repair one/.test(arWithMarket.arv.basis),
+  "the basis says plainly that an AVM is not an after-repair value",
+);
+
+// Precedence: the reader's own comps beat a provider estimate, which beats the
+// assessed ÷ ratio derivation. Getting this order wrong would silently override
+// a figure someone researched by hand.
+const precedence = computeMaxBid({
+  state: "IL",
+  saleType: "Tax Lien",
+  assessedValue: 30_000,
+  marketValue: 120_000,
+  arvOverride: 250_000,
+});
+assert(precedence.arv.value === 250_000, `user comps win, got ${precedence.arv.value}`);
+const overRatio = computeMaxBid({
+  state: "IL",
+  saleType: "Tax Lien",
+  assessedValue: 30_000,
+  marketValue: 120_000,
+});
+assert(overRatio.arv.value === 120_000, `market beats the ratio, got ${overRatio.arv.value}`);
+
+// A zero or negative estimate is not a valuation — it must not price a parcel.
+for (const bad of [0, -1]) {
+  assert(
+    computeMaxBid({ state: "AR", saleType: "Tax Deed", marketValue: bad }).recommendation ===
+      "insufficient-data",
+    `marketValue ${bad} is not a valuation`,
+  );
+}
+
+// And the message names the missing input rather than saying "not enough data".
+const nothing = computeMaxBid({ state: "AR", saleType: "Tax Deed" });
+assert(
+  nothing.warnings.some((w) => /no assessed value|published no assessed value/i.test(w)),
+  `the warning says what is missing, got: ${nothing.warnings.join(" | ")}`,
+);
+assert(
+  nothing.warnings.some((w) => /comparable-sales estimate/i.test(w)),
+  "and what to do about it",
+);

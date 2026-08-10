@@ -35,8 +35,19 @@ export interface DealInputs {
   openingBid?: number;
   assessedValue?: number;
 
-  /** A real comparable-sales figure, when the user has one. Beats the ratio. */
+  /** A real comparable-sales figure, when the user has one. Beats everything. */
   arvOverride?: number;
+  /**
+   * A provider's market estimate for the parcel — ATTOM's market total value,
+   * or a RentCast AVM.
+   *
+   * Ranks above the assessed-value derivation because it is a market figure
+   * already, rather than an assessed figure divided by a statutory ratio. It
+   * also needs no ratio at all, which is what makes it usable in the states
+   * that have no `STATUTE_PARAMS` entry — the ones where a parcel could carry
+   * a perfectly good valuation and still return insufficient-data.
+   */
+  marketValue?: number;
   /** Estimated cost to make the property resaleable. */
   rehabCost?: number;
   /** Required profit as a fraction of ARV. Default 30%. */
@@ -154,10 +165,36 @@ function deriveArv(
     };
   }
 
+  /*
+   * A provider's market estimate, ahead of the assessed-value derivation.
+   *
+   * It is an *as-is* market figure, not an after-repair one, and the basis
+   * string says so — a tax-sale parcel is rarely in the condition an AVM
+   * assumes, and treating the two as identical is how a max bid comes out
+   * optimistic. It is still a better ARV input than assessed ÷ ratio, which is
+   * the same guess with an extra division in front of it, and it is the only
+   * one available at all in the states with no statutory ratio.
+   */
+  if (inputs.marketValue !== undefined && inputs.marketValue > 0) {
+    return {
+      value: inputs.marketValue,
+      basis:
+        `Provider market estimate of ${inputs.marketValue.toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        })}. This is an as-is valuation, not an after-repair one — enter your own ` +
+        `comparable-sales figure if the property needs work.`,
+      derived: true,
+    };
+  }
+
   if (inputs.assessedValue === undefined || inputs.assessedValue <= 0) {
     return {
       value: null,
-      basis: "No assessed value on the listing and no comparable-sales estimate provided.",
+      basis:
+        "The county published no assessed value for this parcel, no property provider returned " +
+        "a market estimate, and no comparable-sales figure has been entered.",
       derived: false,
     };
   }
@@ -165,7 +202,10 @@ function deriveArv(
   if (!statute) {
     return {
       value: null,
-      basis: `No assessment-ratio data for ${inputs.state}; assessed value cannot be converted to market value.`,
+      basis:
+        `This parcel has an assessed value, but ${inputs.state} has no verified assessment ratio ` +
+        `in lib/deal/statute.ts, so it cannot be converted to a market value. Enter a ` +
+        `comparable-sales estimate to price it.`,
       derived: false,
     };
   }
@@ -220,9 +260,18 @@ export function computeMaxBid(inputs: DealInputs): DealResult {
       bidRoom: null,
       redemption: null,
       statute,
+      /*
+       * The basis carries the specific reason; this only says what to do about
+       * it. "Not enough data" on its own is the complaint that produced this —
+       * it reads as a defect in the product rather than as a missing input the
+       * reader can supply in ten seconds, and it does not distinguish a parcel
+       * nobody has valued from a state whose assessment ratio has not been
+       * researched. Those need different actions from the reader.
+       */
       warnings: [
         ...warnings,
-        "Cannot compute a max bid without an after-repair value. Add a comparable-sales estimate to proceed.",
+        `${arv.basis} Enter a comparable-sales estimate below and every figure on this page ` +
+          `recalculates — the engine needs one number, not a full appraisal.`,
       ],
     };
   }

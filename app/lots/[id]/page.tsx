@@ -80,6 +80,16 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
 
   const openingBid = lot.openingBid === null ? undefined : Number(lot.openingBid);
   const assessedValue = lot.assessedValue === null ? undefined : Number(lot.assessedValue);
+  /*
+   * The merged provider market estimate, fed to the max-bid engine as an ARV
+   * source. 789 upcoming parcels carry one and none of them reached the engine
+   * before — 779 of those sit in states with no assessment ratio, so they
+   * returned insufficient-data while a paid-for valuation sat in the database.
+   */
+  const marketValue =
+    latestVal?.marketValue === null || latestVal?.marketValue === undefined
+      ? undefined
+      : Number(latestVal.marketValue);
 
   const history = getComparables({
     state: county.state,
@@ -102,6 +112,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             saleType: auction.saleType as SaleType,
             openingBid,
             assessedValue,
+            marketValue,
             fips: county.fips,
           }),
         }),
