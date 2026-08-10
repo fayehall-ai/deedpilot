@@ -145,8 +145,15 @@ export async function CalendarView(props: {
 
       {typesInView.length > 0 ? <Legend types={typesInView} /> : null}
 
-      {/* Desktop: the month grid. */}
-      <div className="hidden md:block">
+      {/*
+        The month grid, from `lg` up.
+        It used to appear at `md` (768px), where seven columns leave 105px per
+        day — a county name at 11px, truncated, with a "+7 more" disclosure
+        under it. That is a grid you can see but not read, and 768px is a
+        tablet in portrait, which is a real way people open this page. The
+        agenda below carries everything narrower.
+      */}
+      <div className="hidden lg:block">
         <div className="grid grid-cols-7 overflow-hidden rounded-xl border border-border bg-surface">
           {WEEKDAY_LABELS.map((label) => (
             <div
@@ -224,10 +231,10 @@ export async function CalendarView(props: {
         </div>
       </div>
 
-      {/* Mobile: the same days as an agenda. A 7-column grid on a phone is
-          unreadable, and this is the view someone opens standing in a
-          courthouse hallway. */}
-      <div className="md:hidden">
+      {/* The same days as an agenda, everywhere narrower than `lg`. A
+          7-column grid on a phone is unreadable, and this is the view someone
+          opens standing in a courthouse hallway. */}
+      <div className="lg:hidden">
         {[...byDay.entries()].length === 0 ? null : (
           <div className="space-y-5">
             {[...byDay.entries()].map(([day, sales]) => (

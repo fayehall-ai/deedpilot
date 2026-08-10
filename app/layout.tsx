@@ -50,8 +50,23 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     >
       <body className="min-h-full flex flex-col font-sans">
         <header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur">
-          <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4 sm:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+          {/*
+            The logo plus five nav items need 551px of intrinsic width, and
+            this row was `flex-wrap: nowrap` with visible overflow — so on a
+            375px phone it pushed 176px past the viewport and every page in the
+            site scrolled sideways, the header dragging the body with it.
+
+            The nav scrolls instead of wrapping: wrapping would break the 56px
+            bar into two rows and push the page content down on exactly the
+            screens with the least of it. `shrink-0` on the items is what makes
+            the scroll work — without it flex compresses them into unreadable
+            slivers rather than overflowing into a scrollable strip.
+          */}
+          <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:gap-6 sm:px-6">
+            <Link
+              href="/"
+              className="flex shrink-0 items-center gap-2 font-semibold tracking-tight"
+            >
               <span
                 aria-hidden
                 className="grid h-7 w-7 place-items-center rounded-md bg-accent text-sm font-bold text-accent-fg"
@@ -60,12 +75,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </span>
               DeedPilot
             </Link>
-            <nav className="flex items-center gap-1 text-sm">
+            <nav
+              className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              aria-label="Primary"
+            >
               {NAV.map((n) => (
                 <Link
                   key={n.href}
                   href={n.href}
-                  className="rounded-md px-3 py-1.5 text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
+                  className="shrink-0 rounded-md px-3 py-1.5 text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
                 >
                   {n.label}
                 </Link>
