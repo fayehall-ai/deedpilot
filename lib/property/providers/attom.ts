@@ -195,7 +195,16 @@ function mapProperty(p: Record<string, unknown>, input: EnrichInput): PropertyRe
     assessedValue: num(assessed.assdTtlValue) ?? num(assessed.ttlassessedvalue),
     marketValue: num(market.mktttlvalue) ?? num(market.mktTtlValue),
     landValue: num(assessed.assdLandValue),
-    improvementValue: num(assessed.assdImpValue),
+    /*
+     * `assdImprValue` — ATTOM's spelling, with the "r". This read `assdImpValue`
+     * for 915 enriched parcels and therefore returned undefined every single
+     * time: land value landed on 913 of them, improvement value on none, and
+     * nothing downstream could notice because a missing improvement value is
+     * indistinguishable from a county that only publishes a total. The fallback
+     * is kept because the two spellings cost nothing to accept and this is
+     * exactly the failure that hid for 915 rows.
+     */
+    improvementValue: num(assessed.assdImprValue) ?? num(assessed.assdImpValue),
     lastSaleAmount: num(saleAmount.saleamt) ?? num(saleAmount.saleAmt),
     lastSaleDate: dateStr(sale.salesearchdate ?? sale.saleTransDate),
     beds: num(rooms.beds),
