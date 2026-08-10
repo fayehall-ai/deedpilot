@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-08-10T00:46:04.542Z",
-  "nCounties": 905,
-  "nVerified": 483,
-  "nGaps": 514,
+  "builtAt": "2026-08-10T01:30:35.178Z",
+  "nCounties": 942,
+  "nVerified": 541,
+  "nGaps": 513,
   "counties": {
     "10001": {
       "state": "DE",
@@ -7541,17 +7541,40 @@
         {
           "fips": "28033",
           "state": "MS",
-          "url": "https://www.desotocountyms.gov/296/Tax-Collector",
+          "url": "https://www.desotocountyms.gov/690/Tax-Sale-Information",
           "host": "www.desotocountyms.gov",
-          "origin": "link_followed",
-          "kind": "listing",
+          "origin": "atlas",
+          "kind": "results",
           "isGovernment": true,
-          "confidence": 0.8,
+          "confidence": 0.85,
           "signals": [
             "delinquent tax",
             "tax sale"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28035": {
+      "state": "MS",
+      "county": "Forrest",
+      "sources": [
+        {
+          "fips": "28035",
+          "state": "MS",
+          "url": "https://forrestcountyms.us/forrest-county-chancery-clerk/",
+          "host": "forrestcountyms.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -7575,7 +7598,7 @@
             "tax sale",
             "redemption period"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -7588,17 +7611,340 @@
         {
           "fips": "28049",
           "state": "MS",
-          "url": "https://www.co.hinds.ms.us/pgs/elected/taxcollector.asp",
-          "host": "www.co.hinds.ms.us",
+          "url": "https://govease.helpscoutdocs.com/article/130-mississippi-tax-sale-overview",
+          "host": "govease.helpscoutdocs.com",
           "origin": "atlas",
           "kind": "results",
-          "isGovernment": true,
-          "confidence": 0.75,
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "28049",
+          "state": "MS",
+          "url": "https://www.hindscountyms.com/delinquent-property-tax-lists-and-tax-sale-lists",
+          "host": "www.hindscountyms.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
           "signals": [
             "delinquent tax",
             "tax sale"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "28049",
+          "state": "MS",
+          "url": "https://www.hindscountyms.com/",
+          "host": "www.hindscountyms.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28059": {
+      "state": "MS",
+      "county": "Jackson",
+      "sources": [
+        {
+          "fips": "28059",
+          "state": "MS",
+          "url": "https://www.co.jackson.ms.us/376/Annual-Sale-of-Delinquent-Taxes",
+          "host": "www.co.jackson.ms.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.93,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28067": {
+      "state": "MS",
+      "county": "Jones",
+      "sources": [],
+      "isGap": true
+    },
+    "28071": {
+      "state": "MS",
+      "county": "Lafayette",
+      "sources": [],
+      "isGap": true
+    },
+    "28073": {
+      "state": "MS",
+      "county": "Lamar",
+      "sources": [
+        {
+          "fips": "28073",
+          "state": "MS",
+          "url": "https://lamarcountyms.gov/ms/departments/tax-assessor-collector/online-tax-sale/",
+          "host": "lamarcountyms.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28075": {
+      "state": "MS",
+      "county": "Lauderdale",
+      "sources": [],
+      "isGap": true
+    },
+    "28081": {
+      "state": "MS",
+      "county": "Lee",
+      "sources": [
+        {
+          "fips": "28081",
+          "state": "MS",
+          "url": "https://leecotaxcollector.com/tax-sale",
+          "host": "leecotaxcollector.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax sale",
+            "struck off",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28087": {
+      "state": "MS",
+      "county": "Lowndes",
+      "sources": [],
+      "isGap": true
+    },
+    "28089": {
+      "state": "MS",
+      "county": "Madison",
+      "sources": [],
+      "isGap": true
+    },
+    "28105": {
+      "state": "MS",
+      "county": "Oktibbeha",
+      "sources": [
+        {
+          "fips": "28105",
+          "state": "MS",
+          "url": "https://www.oktibbeha.ms.gov/262/Land-Taxes",
+          "host": "www.oktibbeha.ms.gov",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28109": {
+      "state": "MS",
+      "county": "Pearl River",
+      "sources": [
+        {
+          "fips": "28109",
+          "state": "MS",
+          "url": "https://pearlrivercounty.net/231/Online-Tax-Sale",
+          "host": "pearlrivercounty.net",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "28109",
+          "state": "MS",
+          "url": "https://pearlrivercounty.net/270/Tax-Sale",
+          "host": "pearlrivercounty.net",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "28109",
+          "state": "MS",
+          "url": "https://pearlrivercounty.net/231/Online-Tax-Sale",
+          "host": "pearlrivercounty.net",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.57,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "28109",
+          "state": "MS",
+          "url": "https://pearlrivercounty.net/231/Online-Tax-Sale",
+          "host": "pearlrivercounty.net",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.57,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "28109",
+          "state": "MS",
+          "url": "https://govease.helpscoutdocs.com/category/117-mississippi-tax-auction-training-new",
+          "host": "govease.helpscoutdocs.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "tax sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28121": {
+      "state": "MS",
+      "county": "Rankin",
+      "sources": [
+        {
+          "fips": "28121",
+          "state": "MS",
+          "url": "https://govease.helpscoutdocs.com/article/130-mississippi-tax-sale-overview",
+          "host": "govease.helpscoutdocs.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "28121",
+          "state": "MS",
+          "url": "https://www.rankincounty.org/topic/index.php?topicid=63&structureid=16",
+          "host": "www.rankincounty.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "28121",
+          "state": "MS",
+          "url": "https://www.rankincounty.org/topic/index.php?topicid=63&structureid=16",
+          "host": "www.rankincounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "28121",
+          "state": "MS",
+          "url": "https://www.rankincounty.org/topic/index.php?topicid=63&structureid=16",
+          "host": "www.rankincounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -7658,23 +8004,565 @@
       "sources": [],
       "isGap": true
     },
+    "29019": {
+      "state": "MO",
+      "county": "Boone",
+      "sources": [
+        {
+          "fips": "29019",
+          "state": "MO",
+          "url": "https://www.boonemo.gov/collector/real-estate-tax/delinquent.asp",
+          "host": "www.boonemo.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase",
+            "minimum/opening bid",
+            "redemption period",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29021": {
+      "state": "MO",
+      "county": "Buchanan",
+      "sources": [],
+      "isGap": true
+    },
+    "29031": {
+      "state": "MO",
+      "county": "Cape Girardeau",
+      "sources": [
+        {
+          "fips": "29031",
+          "state": "MO",
+          "url": "https://www.capecounty.us/collectors-office",
+          "host": "www.capecounty.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29037": {
+      "state": "MO",
+      "county": "Cass",
+      "sources": [
+        {
+          "fips": "29037",
+          "state": "MO",
+          "url": "https://www.casscounty.com/2223/Collector",
+          "host": "www.casscounty.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.65,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29043": {
+      "state": "MO",
+      "county": "Christian",
+      "sources": [],
+      "isGap": true
+    },
+    "29047": {
+      "state": "MO",
+      "county": "Clay",
+      "sources": [
+        {
+          "fips": "29047",
+          "state": "MO",
+          "url": "https://claycountymo.gov/192/Land-Trustee",
+          "host": "claycountymo.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "29047",
+          "state": "MO",
+          "url": "https://claycountymo.tax/tax-sale/",
+          "host": "claycountymo.tax",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax sale",
+            "certificate of purchase",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "29047",
+          "state": "MO",
+          "url": "https://claycountymo.tax/tax-sale/",
+          "host": "claycountymo.tax",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "certificate of purchase",
+            "redemption period"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29051": {
+      "state": "MO",
+      "county": "Cole",
+      "sources": [
+        {
+          "fips": "29051",
+          "state": "MO",
+          "url": "https://www.colecounty.org/179/Delinquent-Tax-Certificate-Sale",
+          "host": "www.colecounty.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29071": {
+      "state": "MO",
+      "county": "Franklin",
+      "sources": [
+        {
+          "fips": "29071",
+          "state": "MO",
+          "url": "https://www.franklinmo.org/collector",
+          "host": "www.franklinmo.org",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "29071",
+          "state": "MO",
+          "url": "https://www.franklinmo.org/collector",
+          "host": "www.franklinmo.org",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29077": {
+      "state": "MO",
+      "county": "Greene",
+      "sources": [
+        {
+          "fips": "29077",
+          "state": "MO",
+          "url": "https://greenecountymo.gov/collector/tax_sale/",
+          "host": "greenecountymo.gov",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "29095": {
       "state": "MO",
       "county": "Jackson",
+      "sources": [
+        {
+          "fips": "29095",
+          "state": "MO",
+          "url": "https://www.jacksongov.org/Government/Departments/Collection/Delinquent-Land-Tax-Sale",
+          "host": "www.jacksongov.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "29095",
+          "state": "MO",
+          "url": "https://www.16thcircuit.org/delinquent-land-tax-sale-overview",
+          "host": "www.16thcircuit.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "bidder registration",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "29095",
+          "state": "MO",
+          "url": "https://molawyersmedia.com/tax-sales/",
+          "host": "molawyersmedia.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29097": {
+      "state": "MO",
+      "county": "Jasper",
+      "sources": [
+        {
+          "fips": "29097",
+          "state": "MO",
+          "url": "https://www.jaspercountymo.gov/treasurer",
+          "host": "www.jaspercountymo.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29099": {
+      "state": "MO",
+      "county": "Jefferson",
+      "sources": [
+        {
+          "fips": "29099",
+          "state": "MO",
+          "url": "https://www.jeffcomo.gov/184/Land-Sale",
+          "host": "www.jeffcomo.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29101": {
+      "state": "MO",
+      "county": "Johnson",
+      "sources": [
+        {
+          "fips": "29101",
+          "state": "MO",
+          "url": "https://www.jocomo.gov/166/Collector",
+          "host": "www.jocomo.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29113": {
+      "state": "MO",
+      "county": "Lincoln",
+      "sources": [
+        {
+          "fips": "29113",
+          "state": "MO",
+          "url": "https://lincolncountycollector.org/TaxSaleBidders/Intro",
+          "host": "lincolncountycollector.org",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "tax sale",
+            "certificate of purchase",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29145": {
+      "state": "MO",
+      "county": "Newton",
       "sources": [],
       "isGap": true
+    },
+    "29165": {
+      "state": "MO",
+      "county": "Platte",
+      "sources": [],
+      "isGap": true
+    },
+    "29169": {
+      "state": "MO",
+      "county": "Pulaski",
+      "sources": [
+        {
+          "fips": "29169",
+          "state": "MO",
+          "url": "https://www.pulaskicollector.com/",
+          "host": "www.pulaskicollector.com",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "29183": {
       "state": "MO",
       "county": "St. Charles",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "29183",
+          "state": "MO",
+          "url": "https://revisor.mo.gov/main/ViewChapter.aspx?chapter=140",
+          "host": "revisor.mo.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 1,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "certificate of purchase",
+            "redemption period",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "29183",
+          "state": "MO",
+          "url": "https://www.sccmo.org/283/Tax-Sale-Information",
+          "host": "www.sccmo.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax sale",
+            "certificate of purchase",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "29183",
+          "state": "MO",
+          "url": "https://www.sccmo.org/283/Tax-Sale-Information",
+          "host": "www.sccmo.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "certificate of purchase",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29187": {
+      "state": "MO",
+      "county": "St. Francois",
+      "sources": [
+        {
+          "fips": "29187",
+          "state": "MO",
+          "url": "https://www.sfcgov.org/collector/tax-sale-records/",
+          "host": "www.sfcgov.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "29187",
+          "state": "MO",
+          "url": "https://www.sfcgov.org/collector/tax-sale-records/",
+          "host": "www.sfcgov.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "29189": {
       "state": "MO",
       "county": "St. Louis",
       "sources": [],
       "isGap": true
+    },
+    "29213": {
+      "state": "MO",
+      "county": "Taney",
+      "sources": [],
+      "isGap": true
+    },
+    "29510": {
+      "state": "MO",
+      "county": "St. Louis",
+      "sources": [
+        {
+          "fips": "29510",
+          "state": "MO",
+          "url": "https://www.stlouis-mo.gov/government/departments/collector/real-estate-tax/index.cfm",
+          "host": "www.stlouis-mo.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "tax sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "30001": {
       "state": "MT",
@@ -7749,8 +8637,26 @@
     "30013": {
       "state": "MT",
       "county": "Cascade",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "30013",
+          "state": "MT",
+          "url": "https://www.cascadecountymt.gov/302/Treasurers-Office",
+          "host": "www.cascadecountymt.gov",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "30015": {
       "state": "MT",
@@ -7776,11 +8682,59 @@
       "sources": [],
       "isGap": true
     },
+    "30029": {
+      "state": "MT",
+      "county": "Flathead",
+      "sources": [
+        {
+          "fips": "30029",
+          "state": "MT",
+          "url": "https://flatheadcounty.gov/department-directory/treasurer/property-tax",
+          "host": "flatheadcounty.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "30031": {
       "state": "MT",
       "county": "Gallatin",
       "sources": [],
       "isGap": true
+    },
+    "30049": {
+      "state": "MT",
+      "county": "Lewis and Clark",
+      "sources": [
+        {
+          "fips": "30049",
+          "state": "MT",
+          "url": "https://www.lccountymt.gov/Government/Clerk-and-Recorder-Treasurer/Tax-Information",
+          "host": "www.lccountymt.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "30063": {
       "state": "MT",
@@ -7791,8 +8745,27 @@
     "30111": {
       "state": "MT",
       "county": "Yellowstone",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "30111",
+          "state": "MT",
+          "url": "https://www.yellowstonecountymt.gov/treasurer/TaxSales.asp",
+          "host": "www.yellowstonecountymt.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.93,
+          "signals": [
+            "delinquent tax",
+            "minimum/opening bid",
+            "redemption period",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "31001": {
       "state": "NE",
@@ -7887,8 +8860,25 @@
     "31019": {
       "state": "NE",
       "county": "Buffalo",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "31019",
+          "state": "NE",
+          "url": "https://buffalocounty.ne.gov/county-offices/treasurer",
+          "host": "buffalocounty.ne.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "tax sale",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "31021": {
       "state": "NE",
@@ -7944,17 +8934,74 @@
       "sources": [],
       "isGap": true
     },
+    "31079": {
+      "state": "NE",
+      "county": "Hall",
+      "sources": [
+        {
+          "fips": "31079",
+          "state": "NE",
+          "url": "https://www.hallcountyne.gov/departments/treasurer/index.php",
+          "host": "www.hallcountyne.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "31109": {
       "state": "NE",
       "county": "Lancaster",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "31109",
+          "state": "NE",
+          "url": "https://www.lancaster.ne.gov/444/Tax-Sale-Information",
+          "host": "www.lancaster.ne.gov",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "31153": {
       "state": "NE",
       "county": "Sarpy",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "31153",
+          "state": "NE",
+          "url": "https://www.sarpy.gov/981/Tax-Sale-Information",
+          "host": "www.sarpy.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "32001": {
       "state": "NV",
@@ -7965,8 +9012,28 @@
     "32003": {
       "state": "NV",
       "county": "Clark",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "32003",
+          "state": "NV",
+          "url": "https://www.clarkcountynv.gov/government/elected_officials/county_treasurer/faqs",
+          "host": "www.clarkcountynv.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "32005": {
       "state": "NV",
@@ -7994,8 +9061,25 @@
     "32007": {
       "state": "NV",
       "county": "Elko",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "32007",
+          "state": "NV",
+          "url": "https://www.elkocountynv.net/departments/treasurer20/trustee_property_sales.php",
+          "host": "www.elkocountynv.net",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "32009": {
       "state": "NV",
@@ -8027,6 +9111,104 @@
       "sources": [],
       "isGap": true
     },
+    "32019": {
+      "state": "NV",
+      "county": "Lyon",
+      "sources": [
+        {
+          "fips": "32019",
+          "state": "NV",
+          "url": "https://www.lyon-county.org/1113/Tax-Sale-Information",
+          "host": "www.lyon-county.org",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "32019",
+          "state": "NV",
+          "url": "https://www.lyon-county.org/1113/Tax-Sale-Information",
+          "host": "www.lyon-county.org",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "32019",
+          "state": "NV",
+          "url": "https://www.lyon-county.org/1113/Tax-Sale-Information",
+          "host": "www.lyon-county.org",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "32019",
+          "state": "NV",
+          "url": "https://www.lyon-county.org/1113/Tax-Sale-Information",
+          "host": "www.lyon-county.org",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "32023": {
+      "state": "NV",
+      "county": "Nye",
+      "sources": [
+        {
+          "fips": "32023",
+          "state": "NV",
+          "url": "https://www.nyecountynv.gov/1118/2026-Online-Only-Tax-Sale-Auctions",
+          "host": "www.nyecountynv.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "32031": {
       "state": "NV",
       "county": "Washoe",
@@ -8036,8 +9218,27 @@
     "32510": {
       "state": "NV",
       "county": "Carson City",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "32510",
+          "state": "NV",
+          "url": "https://www.leg.state.nv.us/nrs/nrs-361.html",
+          "host": "www.leg.state.nv.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "redemption period",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "33001": {
       "state": "NH",
@@ -8048,8 +9249,28 @@
     "33003": {
       "state": "NH",
       "county": "Carroll",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "33003",
+          "state": "NH",
+          "url": "https://www.gencourt.state.nh.us/rsa/html/V/80/80-mrg.htm",
+          "host": "www.gencourt.state.nh.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "33005": {
       "state": "NH",
@@ -8078,12 +9299,38 @@
     "33013": {
       "state": "NH",
       "county": "Merrimack",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "33013",
+          "state": "NH",
+          "url": "https://www.gencourt.state.nh.us/rsa/html/V/80/80-mrg.htm",
+          "host": "www.gencourt.state.nh.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "redemption period",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "33015": {
       "state": "NH",
       "county": "Rockingham",
+      "sources": [],
+      "isGap": true
+    },
+    "33017": {
+      "state": "NH",
+      "county": "Strafford",
       "sources": [],
       "isGap": true
     },

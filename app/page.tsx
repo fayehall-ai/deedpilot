@@ -7,7 +7,8 @@ import { AuctionListSkeleton, CalendarSkeleton } from "@/components/skeleton";
 import { CalendarView } from "@/components/calendar-view";
 import { AuctionsList } from "@/components/auctions-list";
 import { AtlasStates } from "@/components/atlas-states";
-import { AtlasMap } from "@/components/atlas-map";
+import { AtlasExplorer } from "@/components/atlas-explorer";
+import { STATE_PATHS } from "@/lib/atlas/geo";
 import { CoverageReport } from "@/components/coverage-report";
 import { PricingPlans } from "@/components/pricing-plans";
 
@@ -138,7 +139,7 @@ export default function HomePage(props: PageProps<"/">) {
             is scannable, searchable by the browser's own find, and reachable
             without a pointing device.
           */}
-          <AtlasMap />
+          <AtlasExplorer states={STATE_PATHS} />
           <details className="group/states mt-8">
             <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
               <span aria-hidden className="transition-transform group-open/states:rotate-90">
