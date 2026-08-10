@@ -7,6 +7,7 @@ import { AuctionListSkeleton, CalendarSkeleton } from "@/components/skeleton";
 import { CalendarView } from "@/components/calendar-view";
 import { AuctionsList } from "@/components/auctions-list";
 import { AtlasStates } from "@/components/atlas-states";
+import { AtlasMap } from "@/components/atlas-map";
 import { CoverageReport } from "@/components/coverage-report";
 import { PricingPlans } from "@/components/pricing-plans";
 
@@ -131,7 +132,24 @@ export default function HomePage(props: PageProps<"/">) {
               Open the atlas
             </Link>
           </div>
-          <AtlasStates heading={false} />
+          {/*
+            Map first, list second. The map answers "what kind of state is
+            this" at a glance, which the list cannot; the list stays because it
+            is scannable, searchable by the browser's own find, and reachable
+            without a pointing device.
+          */}
+          <AtlasMap />
+          <details className="group/states mt-8">
+            <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+              <span aria-hidden className="transition-transform group-open/states:rotate-90">
+                ›
+              </span>
+              Browse all 51 as a list
+            </summary>
+            <div className="mt-4">
+              <AtlasStates heading={false} intro={false} />
+            </div>
+          </details>
         </div>
       </section>
 

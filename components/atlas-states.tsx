@@ -22,7 +22,14 @@ import {
 import { num } from "@/lib/format";
 import { SaleTypeBadge } from "@/components/ui";
 
-export function AtlasStates({ heading = true }: { heading?: boolean }) {
+export function AtlasStates({
+  heading = true,
+  intro = true,
+}: {
+  heading?: boolean;
+  /** The explanatory paragraph and type legend. Off where a map already says it. */
+  intro?: boolean;
+}) {
   const states = Object.keys(STATE_DATA).sort((a, b) =>
     (STATE_NAMES[a] ?? a).localeCompare(STATE_NAMES[b] ?? b),
   );
@@ -31,6 +38,7 @@ export function AtlasStates({ heading = true }: { heading?: boolean }) {
 
   return (
     <>
+      {intro ? (
       <header className="mb-8 max-w-3xl">
         {heading ? (
           <h1 className="text-3xl font-semibold tracking-tight">Tax sale atlas</h1>
@@ -43,7 +51,9 @@ export function AtlasStates({ heading = true }: { heading?: boolean }) {
           every page.
         </p>
       </header>
+      ) : null}
 
+      {intro ? (
       <section className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {(Object.keys(TYPE_COLORS) as (keyof typeof TYPE_COLORS)[]).map((t) => (
           <div key={t} className="rounded-xl border border-border bg-surface p-4">
@@ -52,8 +62,9 @@ export function AtlasStates({ heading = true }: { heading?: boolean }) {
           </div>
         ))}
       </section>
+      ) : null}
 
-      <h2 className="mb-3 text-lg font-semibold">States</h2>
+      {intro ? <h2 className="mb-3 text-lg font-semibold">States</h2> : null}
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {states.map((s) => {
           const rule = STATE_DATA[s];
