@@ -121,25 +121,15 @@ export async function CalendarView(props: {
 
   return (
     <>
-      <header className="-mt-4 mb-6">
-        <div>
-          <p className="mt-1 text-sm text-muted">
-            {inMonth.length === 0 ? (
-              <>No sales in {monthLabel(filters.month)} matching these filters.</>
-            ) : (
-              <>
-                {num(inMonth.length)} {inMonth.length === 1 ? "sale" : "sales"} across{" "}
-                {num(countyTotal)} {countyTotal === 1 ? "county" : "counties"} in{" "}
-                {monthLabel(filters.month)} · {num(lotTotal)} lots
-              </>
-            )}
-          </p>
-        </div>
-      </header>
-
-      <MonthNav filters={filters} />
-
-      <Filters filters={filters} facets={facets} />
+      <CalendarControls
+        filters={filters}
+        facets={facets}
+        summary={
+          inMonth.length === 0
+            ? `No sales in ${monthLabel(filters.month)} matching these filters`
+            : `${num(inMonth.length)} ${inMonth.length === 1 ? "sale" : "sales"} · ${num(countyTotal)} ${countyTotal === 1 ? "county" : "counties"} · ${num(lotTotal)} lots`
+        }
+      />
 
       {typesInView.length > 0 ? <Legend types={typesInView} /> : null}
 
@@ -497,53 +487,75 @@ function LeadTag({ auction }: { auction: CalendarAuctionRow }) {
   );
 }
 
-function MonthNav({ filters }: { filters: CalendarFilters }) {
-  const prev = shiftMonth(filters.month, -1);
-  const next = shiftMonth(filters.month, 1);
-  return (
-    <div className="mb-5 flex items-center gap-2">
-      <Link
-        href={calendarHref(filters, { month: prev })}
-        {...STAY_PUT}
-        aria-label={`Previous month, ${monthLabel(prev)}`}
-        className="grid h-8 w-8 place-items-center rounded-lg border border-border text-muted transition-colors hover:border-accent hover:text-foreground"
-      >
-        ‹
-      </Link>
-      <Link
-        href={calendarHref(filters, { month: next })}
-        {...STAY_PUT}
-        aria-label={`Next month, ${monthLabel(next)}`}
-        className="grid h-8 w-8 place-items-center rounded-lg border border-border text-muted transition-colors hover:border-accent hover:text-foreground"
-      >
-        ›
-      </Link>
-      <h2 className="ml-1 text-lg font-semibold tracking-tight">{monthLabel(filters.month)}</h2>
-      {filters.month === filters.currentMonth ? null : (
-        <Link
-          href={calendarHref(filters, { month: filters.currentMonth })}
-          {...STAY_PUT}
-          className="ml-2 rounded-lg border border-border px-2.5 py-1 text-xs text-muted transition-colors hover:border-accent hover:text-foreground"
-        >
-          Today
-        </Link>
-      )}
-    </div>
-  );
-}
-
-function Filters({
+/**
+ * Month navigation, the state filter, and everything else — in three lines.
+ *
+ * The previous version stacked four labelled chip rows inside a bordered panel
+ * above the grid. On the home page that put ~330px of chrome between the
+ * heading and the first sale, which is backwards: the calendar is the thing
+ * people came for and the filters are how they narrow it once.
+ *
+ * So the month and the month's totals share one line, the state chips — far
+ * and away the most-used filter — sit unlabelled on the next, and auction
+ * type, platform and the leads toggle fold into a disclosure.
+ *
+ * The disclosure opens itself whenever one of those filters is on. A hidden
+ * active filter is the reason a page shows fewer sales than someone expects
+ * with no visible cause, and it is worth the extra line to never do that.
+ */
+function CalendarControls({
   filters,
   facets,
+  summary,
 }: {
   filters: CalendarFilters;
   facets: { states: CalendarFacet[]; saleTypes: CalendarFacet[]; platforms: CalendarFacet[] };
+  summary: string;
 }) {
+  const prev = shiftMonth(filters.month, -1);
+  const next = shiftMonth(filters.month, 1);
+  const secondaryActive =
+    filters.saleTypes.length > 0 || filters.platforms.length > 0 || filters.includeLeads;
+
   return (
-    <div className="mb-5 space-y-2.5 rounded-xl border border-border bg-surface-2/40 p-3">
-      <FilterRow label="State">
+    <div className="mb-4 space-y-2.5">
+      {/* Month, and what is in it. */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="flex items-center gap-1">
+          <Link
+            href={calendarHref(filters, { month: prev })}
+            {...STAY_PUT}
+            aria-label={`Previous month, ${monthLabel(prev)}`}
+            className="grid h-7 w-7 place-items-center rounded-md border border-border text-muted transition-colors hover:border-accent hover:text-foreground"
+          >
+            ‹
+          </Link>
+          <Link
+            href={calendarHref(filters, { month: next })}
+            {...STAY_PUT}
+            aria-label={`Next month, ${monthLabel(next)}`}
+            className="grid h-7 w-7 place-items-center rounded-md border border-border text-muted transition-colors hover:border-accent hover:text-foreground"
+          >
+            ›
+          </Link>
+        </div>
+        <h3 className="text-lg font-semibold tracking-tight">{monthLabel(filters.month)}</h3>
+        {filters.month === filters.currentMonth ? null : (
+          <Link
+            href={calendarHref(filters, { month: filters.currentMonth })}
+            {...STAY_PUT}
+            className="rounded-md border border-border px-2 py-0.5 text-xs text-muted transition-colors hover:border-accent hover:text-foreground"
+          >
+            Today
+          </Link>
+        )}
+        <span className="tnum ml-auto text-sm text-muted">{summary}</span>
+      </div>
+
+      {/* The filter people actually reach for. */}
+      <div className="flex flex-wrap items-center gap-1.5">
         <Chip href={calendarHref(filters, { states: [] })} active={filters.states.length === 0}>
-          All
+          All states
         </Chip>
         {facets.states.map((f) => (
           <Chip
@@ -556,58 +568,6 @@ function Filters({
             {f.value}
           </Chip>
         ))}
-      </FilterRow>
-
-      <FilterRow label="Auction type">
-        <Chip
-          href={calendarHref(filters, { saleTypes: [] })}
-          active={filters.saleTypes.length === 0}
-        >
-          All
-        </Chip>
-        {facets.saleTypes.map((f) => (
-          <Chip
-            key={f.value}
-            href={calendarHref(filters, { saleTypes: toggle(filters.saleTypes, f.value) })}
-            active={filters.saleTypes.includes(f.value)}
-            count={f.count}
-            dot={saleTypeColor(f.value)}
-          >
-            {f.value}
-          </Chip>
-        ))}
-      </FilterRow>
-
-      <FilterRow label="Platform">
-        <Chip
-          href={calendarHref(filters, { platforms: [] })}
-          active={filters.platforms.length === 0}
-        >
-          All
-        </Chip>
-        {facets.platforms.map((f) => (
-          <Chip
-            key={f.value}
-            href={calendarHref(filters, { platforms: toggle(filters.platforms, f.value) })}
-            active={filters.platforms.includes(f.value)}
-            count={f.count}
-          >
-            {platformLabel(f.value)}
-          </Chip>
-        ))}
-      </FilterRow>
-
-      <FilterRow label="Show">
-        <Chip href={calendarHref(filters, { includeLeads: false })} active={!filters.includeLeads}>
-          Confirmed sales
-        </Chip>
-        <Chip
-          href={calendarHref(filters, { includeLeads: true })}
-          active={filters.includeLeads}
-          title="Also show delinquent rolls, lands-available inventory, and sales sitting under a projected date"
-        >
-          + research leads
-        </Chip>
         {hasActiveFilters(filters) ? (
           <Link
             href={calendarHref(filters, {
@@ -617,21 +577,81 @@ function Filters({
               includeLeads: false,
             })}
             {...STAY_PUT}
-            className="ml-auto self-center text-xs text-muted underline hover:text-foreground"
+            className="ml-1 text-xs text-muted underline hover:text-foreground"
           >
             Clear all
           </Link>
         ) : null}
-      </FilterRow>
-    </div>
-  );
-}
+      </div>
 
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-wrap items-baseline gap-1.5">
-      <span className="w-24 shrink-0 text-xs uppercase tracking-wide text-muted">{label}</span>
-      {children}
+      <details open={secondaryActive} className="group/filters">
+        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-xs text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+          <span aria-hidden className="transition-transform group-open/filters:rotate-90">
+            ›
+          </span>
+          Type, platform &amp; leads
+          {secondaryActive ? (
+            <span className="rounded-full bg-accent px-1.5 text-[10px] text-accent-fg">on</span>
+          ) : null}
+        </summary>
+
+        <div className="mt-2 space-y-2 border-l border-border pl-3">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Chip
+              href={calendarHref(filters, { saleTypes: [] })}
+              active={filters.saleTypes.length === 0}
+            >
+              All types
+            </Chip>
+            {facets.saleTypes.map((f) => (
+              <Chip
+                key={f.value}
+                href={calendarHref(filters, { saleTypes: toggle(filters.saleTypes, f.value) })}
+                active={filters.saleTypes.includes(f.value)}
+                count={f.count}
+                dot={saleTypeColor(f.value)}
+              >
+                {f.value}
+              </Chip>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Chip
+              href={calendarHref(filters, { platforms: [] })}
+              active={filters.platforms.length === 0}
+            >
+              All platforms
+            </Chip>
+            {facets.platforms.map((f) => (
+              <Chip
+                key={f.value}
+                href={calendarHref(filters, { platforms: toggle(filters.platforms, f.value) })}
+                active={filters.platforms.includes(f.value)}
+                count={f.count}
+              >
+                {platformLabel(f.value)}
+              </Chip>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Chip
+              href={calendarHref(filters, { includeLeads: false })}
+              active={!filters.includeLeads}
+            >
+              Confirmed sales
+            </Chip>
+            <Chip
+              href={calendarHref(filters, { includeLeads: true })}
+              active={filters.includeLeads}
+              title="Also show delinquent rolls, lands-available inventory, and sales sitting under a projected date"
+            >
+              + research leads
+            </Chip>
+          </div>
+        </div>
+      </details>
     </div>
   );
 }

@@ -45,21 +45,21 @@ export default function HomePage(props: PageProps<"/">) {
     <div>
       {/* --- Hero --------------------------------------------------------- */}
       <section className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-widest text-accent">
               Tax deed &amp; foreclosure auctions
             </p>
-            <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+            <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
               Know your walk-away price before you raise the paddle.
             </h1>
-            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
+            <p className="mt-3 max-w-2xl leading-relaxed text-muted">
               Every county&apos;s tax sale rules, live auction inventory, and a co-pilot that
               computes your maximum bid — accounting for the liens that survive, the quiet title
               you&apos;ll have to file, and the redemption window that may hand the property back.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/#auctions"
                 className="rounded-lg bg-accent px-5 py-2.5 font-medium text-accent-fg hover:opacity-90"
@@ -81,7 +81,7 @@ export default function HomePage(props: PageProps<"/">) {
 
       {/* --- Calendar ------------------------------------------------------ */}
       <section id="calendar" className="scroll-mt-16 border-b border-border bg-surface-2/20">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
             <h2 className="text-2xl font-semibold tracking-tight">What is selling, and when</h2>
             <Link href="/calendar" className="text-sm text-muted underline hover:text-foreground">
@@ -181,7 +181,7 @@ async function HeroStats() {
 
   return (
     <>
-      <dl className="mt-14 grid gap-6 border-t border-border pt-8 sm:grid-cols-5">
+      <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-border pt-6 sm:grid-cols-3 lg:grid-cols-5">
         <HeroStat label="Counties mapped" value={num(ALL_COUNTIES.length)} />
         <HeroStat label="Researched in depth" value={num(Object.keys(COUNTY_DATA).length)} />
         <HeroStat label="States with inventory" value={num(stats.byState.length)} />
@@ -195,7 +195,7 @@ async function HeroStats() {
         before any sale — so it never joins the number above.
       */}
       {stats.leadLots > 0 ? (
-        <p className="mt-6 text-sm text-muted">
+        <p className="mt-4 text-sm text-muted">
           Plus {num(stats.leadLots)} parcels on delinquent rolls and lands-available inventory —
           research leads, not scheduled lots.{" "}
           <Link href="/#coverage" className="underline hover:text-fg">
@@ -207,11 +207,21 @@ async function HeroStats() {
   );
 }
 
+/**
+ * One figure and its label, as a single grid cell.
+ *
+ * The wrapping <div> is the fix, not decoration. These used to return a bare
+ * <dt>/<dd> fragment into a five-column grid, so each element became its own
+ * cell: the labels and values landed in alternating columns and read as
+ * "Counties mapped / 3,142 / Researched in depth / 1,010 / States with
+ * inventory" across one row and the matching numbers across the next. A <div>
+ * inside <dl> is valid HTML5 and exists for exactly this.
+ */
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
-    <>
+    <div>
       <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
-      <dd className="tnum mt-1 text-3xl font-semibold">{value}</dd>
-    </>
+      <dd className="tnum mt-0.5 text-2xl font-semibold">{value}</dd>
+    </div>
   );
 }
