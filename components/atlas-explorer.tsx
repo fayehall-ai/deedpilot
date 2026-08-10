@@ -33,13 +33,27 @@ const TYPE_COLOR: Record<string, string> = {
   Hybrid: "var(--type-hybrid)",
 };
 
-export function AtlasExplorer({ states }: { states: StatePath[] }) {
-  const [openState, setOpenState] = useState<StatePayload | null>(null);
+export function AtlasExplorer({
+  states,
+  initialState = null,
+}: {
+  states: StatePath[];
+  /**
+   * Open on a state from the first paint. `/atlas/<state>` passes its own
+   * payload so the page arrives already drilled in — the county map is in the
+   * server-rendered HTML rather than appearing after a fetch, and a county
+   * click there stays on the page like everywhere else.
+   */
+  initialState?: StatePayload | null;
+}) {
+  const [openState, setOpenState] = useState<StatePayload | null>(initialState);
   const [county, setCounty] = useState<CountyDetail | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   /** Fetched states, kept so re-opening one is instant. */
-  const cache = useRef(new Map<string, StatePayload>());
+  const cache = useRef(
+    new Map<string, StatePayload>(initialState ? [[initialState.slug, initialState]] : []),
+  );
 
   const openStateBySlug = useCallback(async (slug: string) => {
     setError(null);

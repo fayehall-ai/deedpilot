@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-08-10T01:36:18.520Z",
-  "nCounties": 951,
-  "nVerified": 549,
-  "nGaps": 514,
+  "builtAt": "2026-08-10T02:02:12.300Z",
+  "nCounties": 1085,
+  "nVerified": 674,
+  "nGaps": 557,
   "counties": {
     "10001": {
       "state": "DE",
@@ -10500,15 +10500,15 @@
           "state": "NY",
           "url": "https://www.nyc.gov/site/finance/property/property-lien-sales.page",
           "host": "www.nyc.gov",
-          "origin": "platform_pattern",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.8,
+          "confidence": 0.85,
           "signals": [
             "tax lien sale",
             "assessed value"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10521,17 +10521,17 @@
         {
           "fips": "36007",
           "state": "NY",
-          "url": "https://broomecountyny.gov/realprop",
-          "host": "broomecountyny.gov",
-          "origin": "link_followed",
+          "url": "https://www.broomecountyny.gov/realprop/",
+          "host": "www.broomecountyny.gov",
+          "origin": "atlas",
           "kind": "calendar",
           "isGovernment": true,
-          "confidence": 0.7,
+          "confidence": 0.75,
           "signals": [
             "delinquent tax",
             "foreclosure auction"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10574,18 +10574,18 @@
         {
           "fips": "36019",
           "state": "NY",
-          "url": "https://clintoncountyny.gov/treasurer",
-          "host": "clintoncountyny.gov",
-          "origin": "link_followed",
+          "url": "https://www.clintoncountyny.gov/treasurer",
+          "host": "www.clintoncountyny.gov",
+          "origin": "atlas",
           "kind": "calendar",
           "isGovernment": true,
-          "confidence": 0.75,
+          "confidence": 0.8,
           "signals": [
             "delinquent tax",
             "foreclosure auction",
             "minimum/opening bid"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10594,6 +10594,52 @@
     "36021": {
       "state": "NY",
       "county": "Columbia",
+      "sources": [
+        {
+          "fips": "36021",
+          "state": "NY",
+          "url": "https://taxforeclosures.columbiacountyny.com/",
+          "host": "taxforeclosures.columbiacountyny.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "tax sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36027": {
+      "state": "NY",
+      "county": "Dutchess",
+      "sources": [
+        {
+          "fips": "36027",
+          "state": "NY",
+          "url": "https://www.dutchessny.gov/Departments/Finance/Frequently-Asked-Questions.htm",
+          "host": "www.dutchessny.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36029": {
+      "state": "NY",
+      "county": "Erie",
       "sources": [],
       "isGap": true
     },
@@ -10620,6 +10666,66 @@
       ],
       "isGap": false
     },
+    "36035": {
+      "state": "NY",
+      "county": "Fulton",
+      "sources": [
+        {
+          "fips": "36035",
+          "state": "NY",
+          "url": "https://www.fultoncountyny.gov/real-property-tax-foreclosure-auctions",
+          "host": "www.fultoncountyny.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.98,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36037": {
+      "state": "NY",
+      "county": "Genesee",
+      "sources": [],
+      "isGap": true
+    },
+    "36043": {
+      "state": "NY",
+      "county": "Herkimer",
+      "sources": [],
+      "isGap": true
+    },
+    "36045": {
+      "state": "NY",
+      "county": "Jefferson",
+      "sources": [
+        {
+          "fips": "36045",
+          "state": "NY",
+          "url": "https://www.jeffersoncountyny.gov/departments/CountyAttorney/delinquent-property-tax-program",
+          "host": "www.jeffersoncountyny.gov",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "36047": {
       "state": "NY",
       "county": "Kings",
@@ -10637,7 +10743,66 @@
             "tax lien sale",
             "assessed value"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36051": {
+      "state": "NY",
+      "county": "Livingston",
+      "sources": [],
+      "isGap": true
+    },
+    "36053": {
+      "state": "NY",
+      "county": "Madison",
+      "sources": [],
+      "isGap": true
+    },
+    "36055": {
+      "state": "NY",
+      "county": "Monroe",
+      "sources": [
+        {
+          "fips": "36055",
+          "state": "NY",
+          "url": "https://www.cityofrochester.gov/departments/finance-department/tax-foreclosure-auctions-environmental-auctions",
+          "host": "www.cityofrochester.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36059": {
+      "state": "NY",
+      "county": "Nassau",
+      "sources": [
+        {
+          "fips": "36059",
+          "state": "NY",
+          "url": "https://www.nassaucountyny.gov/527/Annual-Tax-Lien-Sale",
+          "host": "www.nassaucountyny.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10660,11 +10825,77 @@
             "tax lien sale",
             "assessed value"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
       "isGap": false
+    },
+    "36063": {
+      "state": "NY",
+      "county": "Niagara",
+      "sources": [],
+      "isGap": true
+    },
+    "36065": {
+      "state": "NY",
+      "county": "Oneida",
+      "sources": [],
+      "isGap": true
+    },
+    "36067": {
+      "state": "NY",
+      "county": "Onondaga",
+      "sources": [
+        {
+          "fips": "36067",
+          "state": "NY",
+          "url": "https://onondaga.gov/rpts/auction",
+          "host": "onondaga.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36069": {
+      "state": "NY",
+      "county": "Ontario",
+      "sources": [],
+      "isGap": true
+    },
+    "36071": {
+      "state": "NY",
+      "county": "Orange",
+      "sources": [],
+      "isGap": true
+    },
+    "36075": {
+      "state": "NY",
+      "county": "Oswego",
+      "sources": [],
+      "isGap": true
+    },
+    "36077": {
+      "state": "NY",
+      "county": "Otsego",
+      "sources": [],
+      "isGap": true
+    },
+    "36079": {
+      "state": "NY",
+      "county": "Putnam",
+      "sources": [],
+      "isGap": true
     },
     "36081": {
       "state": "NY",
@@ -10683,7 +10914,166 @@
             "tax lien sale",
             "assessed value"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36083": {
+      "state": "NY",
+      "county": "Rensselaer",
+      "sources": [
+        {
+          "fips": "36083",
+          "state": "NY",
+          "url": "https://www.rensco.com/216/Finance",
+          "host": "www.rensco.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36085": {
+      "state": "NY",
+      "county": "Richmond",
+      "sources": [
+        {
+          "fips": "36085",
+          "state": "NY",
+          "url": "https://gothamist.com/news/mamdani-halts-nycs-predatory-private-tax-lien-sale-process",
+          "host": "gothamist.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax lien sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36087": {
+      "state": "NY",
+      "county": "Rockland",
+      "sources": [],
+      "isGap": true
+    },
+    "36089": {
+      "state": "NY",
+      "county": "St. Lawrence",
+      "sources": [],
+      "isGap": true
+    },
+    "36091": {
+      "state": "NY",
+      "county": "Saratoga",
+      "sources": [],
+      "isGap": true
+    },
+    "36093": {
+      "state": "NY",
+      "county": "Schenectady",
+      "sources": [],
+      "isGap": true
+    },
+    "36101": {
+      "state": "NY",
+      "county": "Steuben",
+      "sources": [
+        {
+          "fips": "36101",
+          "state": "NY",
+          "url": "https://www.steubencountyny.gov/335/Tax-Auction",
+          "host": "www.steubencountyny.gov",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "36103": {
+      "state": "NY",
+      "county": "Suffolk",
+      "sources": [],
+      "isGap": true
+    },
+    "36105": {
+      "state": "NY",
+      "county": "Sullivan",
+      "sources": [],
+      "isGap": true
+    },
+    "36109": {
+      "state": "NY",
+      "county": "Tompkins",
+      "sources": [],
+      "isGap": true
+    },
+    "36111": {
+      "state": "NY",
+      "county": "Ulster",
+      "sources": [],
+      "isGap": true
+    },
+    "36113": {
+      "state": "NY",
+      "county": "Warren",
+      "sources": [],
+      "isGap": true
+    },
+    "36115": {
+      "state": "NY",
+      "county": "Washington",
+      "sources": [],
+      "isGap": true
+    },
+    "36117": {
+      "state": "NY",
+      "county": "Wayne",
+      "sources": [],
+      "isGap": true
+    },
+    "36119": {
+      "state": "NY",
+      "county": "Westchester",
+      "sources": [
+        {
+          "fips": "36119",
+          "state": "NY",
+          "url": "https://finance.westchestercountyny.gov/taxes-and-liens/overview",
+          "host": "finance.westchestercountyny.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "tax lien sale",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10696,18 +11086,17 @@
         {
           "fips": "37001",
           "state": "NC",
-          "url": "https://tax.alamancecountync.gov/pay-online/",
+          "url": "https://tax.alamancecountync.gov/",
           "host": "tax.alamancecountync.gov",
-          "origin": "link_followed",
+          "origin": "atlas",
           "kind": "calendar",
           "isGovernment": true,
-          "confidence": 0.73,
+          "confidence": 0.75,
           "signals": [
             "minimum/opening bid",
-            "upset bid/sale",
-            "parcel id"
+            "upset bid/sale"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10764,6 +11153,566 @@
     "37019": {
       "state": "NC",
       "county": "Brunswick",
+      "sources": [
+        {
+          "fips": "37019",
+          "state": "NC",
+          "url": "https://www.brunswickcountync.gov/493/Tax-Foreclosures",
+          "host": "www.brunswickcountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37021": {
+      "state": "NC",
+      "county": "Buncombe",
+      "sources": [
+        {
+          "fips": "37021",
+          "state": "NC",
+          "url": "https://www.buncombenc.gov/622/Tax-Foreclosure-Sales",
+          "host": "www.buncombenc.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37023": {
+      "state": "NC",
+      "county": "Burke",
+      "sources": [],
+      "isGap": true
+    },
+    "37025": {
+      "state": "NC",
+      "county": "Cabarrus",
+      "sources": [
+        {
+          "fips": "37025",
+          "state": "NC",
+          "url": "https://www.cabarruscounty.us/Government/Departments/Tax-Administration/Tax-Collections/Foreclosures",
+          "host": "www.cabarruscounty.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37027": {
+      "state": "NC",
+      "county": "Caldwell",
+      "sources": [
+        {
+          "fips": "37027",
+          "state": "NC",
+          "url": "https://www.cityoflenoir.com/566/Strategic-Tax-Foreclosures",
+          "host": "www.cityoflenoir.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37027",
+          "state": "NC",
+          "url": "https://kanialawfirm.com/tax-foreclosures/foreclosure-listings/",
+          "host": "kanialawfirm.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37031": {
+      "state": "NC",
+      "county": "Carteret",
+      "sources": [
+        {
+          "fips": "37031",
+          "state": "NC",
+          "url": "https://www.carteretcountync.gov/1149/Tax-Foreclosure-Sales",
+          "host": "www.carteretcountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.98,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37035": {
+      "state": "NC",
+      "county": "Catawba",
+      "sources": [
+        {
+          "fips": "37035",
+          "state": "NC",
+          "url": "https://www.catawbacountync.gov/county-services/tax/online-search/search-foreclosure-sales/",
+          "host": "www.catawbacountync.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37037": {
+      "state": "NC",
+      "county": "Chatham",
+      "sources": [
+        {
+          "fips": "37037",
+          "state": "NC",
+          "url": "https://www.zls-nc.com/property-for-sale",
+          "host": "www.zls-nc.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37045": {
+      "state": "NC",
+      "county": "Cleveland",
+      "sources": [
+        {
+          "fips": "37045",
+          "state": "NC",
+          "url": "https://www.clevelandcounty.com/main/departments/find_tax_foreclosures___county_owned_properties_for_sale/index.php",
+          "host": "www.clevelandcounty.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37045",
+          "state": "NC",
+          "url": "https://www.clevelandcounty.com/main/departments/find_tax_foreclosures___county_owned_properties_for_sale/index.php",
+          "host": "www.clevelandcounty.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37045",
+          "state": "NC",
+          "url": "https://kanialawfirm.com/tax-foreclosures/foreclosure-listings/",
+          "host": "kanialawfirm.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37047": {
+      "state": "NC",
+      "county": "Columbus",
+      "sources": [
+        {
+          "fips": "37047",
+          "state": "NC",
+          "url": "https://www.columbusco.org/tax-office/foreclosures",
+          "host": "www.columbusco.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37047",
+          "state": "NC",
+          "url": "https://www.columbusco.org/tax-office/foreclosures",
+          "host": "www.columbusco.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37047",
+          "state": "NC",
+          "url": "https://www.columbusco.org/tax-office/foreclosures",
+          "host": "www.columbusco.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37049": {
+      "state": "NC",
+      "county": "Craven",
+      "sources": [
+        {
+          "fips": "37049",
+          "state": "NC",
+          "url": "https://gis.cravencountync.gov/County_Property_Available_For_Purchase.aspx",
+          "host": "gis.cravencountync.gov",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37051": {
+      "state": "NC",
+      "county": "Cumberland",
+      "sources": [
+        {
+          "fips": "37051",
+          "state": "NC",
+          "url": "https://www.cumberlandcountync.gov/departments/tax-group/tax",
+          "host": "www.cumberlandcountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37057": {
+      "state": "NC",
+      "county": "Davidson",
+      "sources": [
+        {
+          "fips": "37057",
+          "state": "NC",
+          "url": "https://www.co.davidson.nc.us/394/Collections",
+          "host": "www.co.davidson.nc.us",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37061": {
+      "state": "NC",
+      "county": "Duplin",
+      "sources": [
+        {
+          "fips": "37061",
+          "state": "NC",
+          "url": "https://duplinnc.gov/498/Tax-Foreclosure",
+          "host": "duplinnc.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37063": {
+      "state": "NC",
+      "county": "Durham",
+      "sources": [
+        {
+          "fips": "37063",
+          "state": "NC",
+          "url": "https://dconc.gov/Tax-Administration/Payment-Options-and-Collections/Foreclosure",
+          "host": "dconc.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37067": {
+      "state": "NC",
+      "county": "Forsyth",
+      "sources": [
+        {
+          "fips": "37067",
+          "state": "NC",
+          "url": "https://www.forsyth.cc/Tax/foreclosure_prop.aspx",
+          "host": "www.forsyth.cc",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37067",
+          "state": "NC",
+          "url": "https://www.forsyth.cc/tax/foreclosure_faq.aspx",
+          "host": "www.forsyth.cc",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37069": {
+      "state": "NC",
+      "county": "Franklin",
+      "sources": [
+        {
+          "fips": "37069",
+          "state": "NC",
+          "url": "https://www.franklincountync.gov/403/Foreclosures",
+          "host": "www.franklincountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "delinquent tax",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37071": {
+      "state": "NC",
+      "county": "Gaston",
+      "sources": [
+        {
+          "fips": "37071",
+          "state": "NC",
+          "url": "https://www.gastongov.com/faq.aspx?TID=45",
+          "host": "www.gastongov.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.7,
+          "signals": [
+            "tax deed sale",
+            "tax lien sale",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37071",
+          "state": "NC",
+          "url": "https://www.gastongov.com/668/Tax-Foreclosures",
+          "host": "www.gastongov.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37071",
+          "state": "NC",
+          "url": "https://www.gastongov.com/668/Tax-Foreclosures",
+          "host": "www.gastongov.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37077": {
+      "state": "NC",
+      "county": "Granville",
       "sources": [],
       "isGap": true
     },
@@ -10776,16 +11725,319 @@
           "state": "NC",
           "url": "https://www.guilfordcountync.gov/government/departments-and-agencies/tax-department/foreclosures",
           "host": "www.guilfordcountync.gov",
-          "origin": "link_followed",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.85,
+          "confidence": 0.9,
           "signals": [
             "foreclosure auction",
             "minimum/opening bid",
             "upset bid/sale"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37085": {
+      "state": "NC",
+      "county": "Harnett",
+      "sources": [
+        {
+          "fips": "37085",
+          "state": "NC",
+          "url": "https://www.harnett.org/tax/?btid=2&bid=1694",
+          "host": "www.harnett.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.68,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37085",
+          "state": "NC",
+          "url": "https://www.harnett.org/tax/",
+          "host": "www.harnett.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.48,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37085",
+          "state": "NC",
+          "url": "https://kanialawfirm.com/tax-foreclosures/foreclosure-listings/",
+          "host": "kanialawfirm.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37087": {
+      "state": "NC",
+      "county": "Haywood",
+      "sources": [
+        {
+          "fips": "37087",
+          "state": "NC",
+          "url": "https://www.haywoodcountync.gov/274/Tax-Collections",
+          "host": "www.haywoodcountync.gov",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37089": {
+      "state": "NC",
+      "county": "Henderson",
+      "sources": [
+        {
+          "fips": "37089",
+          "state": "NC",
+          "url": "https://www.hendersoncountync.gov/tax/page/tax-foreclosure-sales",
+          "host": "www.hendersoncountync.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37093": {
+      "state": "NC",
+      "county": "Hoke",
+      "sources": [
+        {
+          "fips": "37093",
+          "state": "NC",
+          "url": "https://www.hokecounty.net/490/Foreclosure-Sales",
+          "host": "www.hokecounty.net",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.65,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37093",
+          "state": "NC",
+          "url": "https://www.hokecounty.net/492/Frequently-Asked-Questions",
+          "host": "www.hokecounty.net",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.65,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37093",
+          "state": "NC",
+          "url": "https://www.hokecounty.net/487/Upcoming-Foreclosure-Sales",
+          "host": "www.hokecounty.net",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37093",
+          "state": "NC",
+          "url": "https://www.hokecounty.net/211/Property-Search---GIS",
+          "host": "www.hokecounty.net",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37093",
+          "state": "NC",
+          "url": "https://www.hokecounty.net/209/Taxes",
+          "host": "www.hokecounty.net",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37097": {
+      "state": "NC",
+      "county": "Iredell",
+      "sources": [],
+      "isGap": true
+    },
+    "37101": {
+      "state": "NC",
+      "county": "Johnston",
+      "sources": [
+        {
+          "fips": "37101",
+          "state": "NC",
+          "url": "https://www.johnstonnc.gov/tax2/tcontent.cfm?pid=auctions",
+          "host": "www.johnstonnc.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37105": {
+      "state": "NC",
+      "county": "Lee",
+      "sources": [],
+      "isGap": true
+    },
+    "37107": {
+      "state": "NC",
+      "county": "Lenoir",
+      "sources": [
+        {
+          "fips": "37107",
+          "state": "NC",
+          "url": "https://lenoircountync.gov/business/surplus-land-property/",
+          "host": "lenoircountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37107",
+          "state": "NC",
+          "url": "https://www.zls-nc.com/property-for-sale",
+          "host": "www.zls-nc.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37109": {
+      "state": "NC",
+      "county": "Lincoln",
+      "sources": [
+        {
+          "fips": "37109",
+          "state": "NC",
+          "url": "https://www.lincolncountync.gov/2368/Foreclosures",
+          "host": "www.lincolncountync.gov",
+          "origin": "atlas",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.9,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10811,7 +12063,344 @@
             "minimum/opening bid",
             "upset bid/sale"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37125": {
+      "state": "NC",
+      "county": "Moore",
+      "sources": [
+        {
+          "fips": "37125",
+          "state": "NC",
+          "url": "https://www.moorecountync.gov/204/Collections",
+          "host": "www.moorecountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37127": {
+      "state": "NC",
+      "county": "Nash",
+      "sources": [],
+      "isGap": true
+    },
+    "37129": {
+      "state": "NC",
+      "county": "New Hanover",
+      "sources": [
+        {
+          "fips": "37129",
+          "state": "NC",
+          "url": "https://www.nhcgov.com/345/Foreclosures",
+          "host": "www.nhcgov.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.68,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37129",
+          "state": "NC",
+          "url": "https://www.nhcgov.com/345/Foreclosures",
+          "host": "www.nhcgov.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37133": {
+      "state": "NC",
+      "county": "Onslow",
+      "sources": [],
+      "isGap": true
+    },
+    "37135": {
+      "state": "NC",
+      "county": "Orange",
+      "sources": [
+        {
+          "fips": "37135",
+          "state": "NC",
+          "url": "https://www.orangecountync.gov/728/Tax-Administration",
+          "host": "www.orangecountync.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37141": {
+      "state": "NC",
+      "county": "Pender",
+      "sources": [
+        {
+          "fips": "37141",
+          "state": "NC",
+          "url": "https://www.pendercountync.gov/464/Tax-Foreclosure-Surplus-Property",
+          "host": "www.pendercountync.gov",
+          "origin": "atlas",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37147": {
+      "state": "NC",
+      "county": "Pitt",
+      "sources": [
+        {
+          "fips": "37147",
+          "state": "NC",
+          "url": "https://www.pittcountync.gov/1163/Delinquent-Accounts-Foreclosure-Auctions",
+          "host": "www.pittcountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.98,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37151": {
+      "state": "NC",
+      "county": "Randolph",
+      "sources": [
+        {
+          "fips": "37151",
+          "state": "NC",
+          "url": "https://www.randolphcountync.gov/343/Tax-Liens",
+          "host": "www.randolphcountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37155": {
+      "state": "NC",
+      "county": "Robeson",
+      "sources": [
+        {
+          "fips": "37155",
+          "state": "NC",
+          "url": "https://www.robesoncountync.gov/public-auction-taxes",
+          "host": "www.robesoncountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "minimum/opening bid",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37157": {
+      "state": "NC",
+      "county": "Rockingham",
+      "sources": [],
+      "isGap": true
+    },
+    "37159": {
+      "state": "NC",
+      "county": "Rowan",
+      "sources": [
+        {
+          "fips": "37159",
+          "state": "NC",
+          "url": "https://www.rowancountync.gov/212/Foreclosures",
+          "host": "www.rowancountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37161": {
+      "state": "NC",
+      "county": "Rutherford",
+      "sources": [
+        {
+          "fips": "37161",
+          "state": "NC",
+          "url": "https://www.rutherfordcountync.gov/departments/revenue_department_tax_administrator/foreclosure_sale_dates.php",
+          "host": "www.rutherfordcountync.gov",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37163": {
+      "state": "NC",
+      "county": "Sampson",
+      "sources": [],
+      "isGap": true
+    },
+    "37167": {
+      "state": "NC",
+      "county": "Stanly",
+      "sources": [
+        {
+          "fips": "37167",
+          "state": "NC",
+          "url": "https://kanialawfirm.com/tax-foreclosures/foreclosure-listings/",
+          "host": "kanialawfirm.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37171": {
+      "state": "NC",
+      "county": "Surry",
+      "sources": [
+        {
+          "fips": "37171",
+          "state": "NC",
+          "url": "https://www.co.surry.nc.us/departments/(k_through_z)/tax/property_tax_foreclosures.php",
+          "host": "www.co.surry.nc.us",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37179": {
+      "state": "NC",
+      "county": "Union",
+      "sources": [
+        {
+          "fips": "37179",
+          "state": "NC",
+          "url": "https://www.rowancountync.gov/212/Foreclosures",
+          "host": "www.rowancountync.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10820,8 +12409,161 @@
     "37183": {
       "state": "NC",
       "county": "Wake",
+      "sources": [
+        {
+          "fips": "37183",
+          "state": "NC",
+          "url": "https://www.wake.gov/departments-government/tax-administration/real-estate/foreclosures",
+          "host": "www.wake.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37189": {
+      "state": "NC",
+      "county": "Watauga",
       "sources": [],
       "isGap": true
+    },
+    "37191": {
+      "state": "NC",
+      "county": "Wayne",
+      "sources": [
+        {
+          "fips": "37191",
+          "state": "NC",
+          "url": "https://www.waynegov.com/Faq.aspx?QID=231",
+          "host": "www.waynegov.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37191",
+          "state": "NC",
+          "url": "https://www.waynegov.com/Faq.aspx?QID=234",
+          "host": "www.waynegov.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37191",
+          "state": "NC",
+          "url": "https://www.waynegov.com/784/Tax-Foreclosure-Sales",
+          "host": "www.waynegov.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.65,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37191",
+          "state": "NC",
+          "url": "https://www.waynegov.com/784/Tax-Foreclosure-Sales",
+          "host": "www.waynegov.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "37191",
+          "state": "NC",
+          "url": "https://www.waynegov.com/784/Tax-Foreclosure-Sales",
+          "host": "www.waynegov.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "37193": {
+      "state": "NC",
+      "county": "Wilkes",
+      "sources": [],
+      "isGap": true
+    },
+    "37195": {
+      "state": "NC",
+      "county": "Wilson",
+      "sources": [
+        {
+          "fips": "37195",
+          "state": "NC",
+          "url": "https://www.zls-nc.com/listings",
+          "host": "www.zls-nc.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "upset bid/sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "38001": {
       "state": "ND",
@@ -10868,25 +12610,8 @@
     "38015": {
       "state": "ND",
       "county": "Burleigh",
-      "sources": [
-        {
-          "fips": "38015",
-          "state": "ND",
-          "url": "https://www.burleigh.gov/departments/auditortreasurer/delinquent-tax-property/",
-          "host": "www.burleigh.gov",
-          "origin": "atlas",
-          "kind": "calendar",
-          "isGovernment": true,
-          "confidence": 0.75,
-          "signals": [
-            "delinquent tax",
-            "tax sale"
-          ],
-          "verifiedOn": "2026-08-01",
-          "httpStatus": 200
-        }
-      ],
-      "isGap": false
+      "sources": [],
+      "isGap": true
     },
     "38017": {
       "state": "ND",
@@ -10900,6 +12625,12 @@
       "sources": [],
       "isGap": true
     },
+    "38101": {
+      "state": "ND",
+      "county": "Ward",
+      "sources": [],
+      "isGap": true
+    },
     "39001": {
       "state": "OH",
       "county": "Adams",
@@ -10909,26 +12640,102 @@
     "39003": {
       "state": "OH",
       "county": "Allen",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "39003",
+          "state": "OH",
+          "url": "https://acso-oh.us/sheriff-sales/",
+          "host": "acso-oh.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "39005": {
       "state": "OH",
       "county": "Ashland",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "39005",
+          "state": "OH",
+          "url": "https://www.ashlandcountysheriff.org/tax-sales",
+          "host": "www.ashlandcountysheriff.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "sheriff sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "39007": {
       "state": "OH",
       "county": "Ashtabula",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "39007",
+          "state": "OH",
+          "url": "https://www.ashtabulacounty.us/731/Sheriff-Sales",
+          "host": "www.ashtabulacounty.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 1,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "39009": {
       "state": "OH",
       "county": "Athens",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "39009",
+          "state": "OH",
+          "url": "https://www.athenscountytreasurer.com/foreclosures/",
+          "host": "www.athenscountytreasurer.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "39011": {
       "state": "OH",
@@ -10939,14 +12746,160 @@
     "39013": {
       "state": "OH",
       "county": "Belmont",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "39013",
+          "state": "OH",
+          "url": "https://belmontsheriffohio.gov/sheriffs-sale/",
+          "host": "belmontsheriffohio.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "39013",
+          "state": "OH",
+          "url": "https://www.belmontcountytreasurer.org/tax-foreclosure-sales",
+          "host": "www.belmontcountytreasurer.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "39013",
+          "state": "OH",
+          "url": "https://belmont-treasurer-public.issg.io/tax-foreclosure-sales",
+          "host": "belmont-treasurer-public.issg.io",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "39013",
+          "state": "OH",
+          "url": "https://belmontcountyauditor.org/auditor-s-sale",
+          "host": "belmontcountyauditor.org",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "39015": {
       "state": "OH",
       "county": "Brown",
       "sources": [],
       "isGap": true
+    },
+    "39017": {
+      "state": "OH",
+      "county": "Butler",
+      "sources": [
+        {
+          "fips": "39017",
+          "state": "OH",
+          "url": "https://treasurer.bcohio.gov/treasurers_office/delinquent_taxes/foreclosure.php",
+          "host": "treasurer.bcohio.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39023": {
+      "state": "OH",
+      "county": "Clark",
+      "sources": [
+        {
+          "fips": "39023",
+          "state": "OH",
+          "url": "https://www.clarkcountyohio.gov/235/Tax-Sales",
+          "host": "www.clarkcountyohio.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39025": {
+      "state": "OH",
+      "county": "Clermont",
+      "sources": [],
+      "isGap": true
+    },
+    "39029": {
+      "state": "OH",
+      "county": "Columbiana",
+      "sources": [
+        {
+          "fips": "39029",
+          "state": "OH",
+          "url": "http://www.colcountysheriff.com/sheriff-s-sales",
+          "host": "www.colcountysheriff.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "39035": {
       "state": "OH",
@@ -10955,17 +12908,98 @@
         {
           "fips": "39035",
           "state": "OH",
-          "url": "https://cuyahogacounty.gov/treasury/delinquency/tax-lien-certificate-sales",
+          "url": "https://cuyahogacounty.gov/treasury/delinquency",
           "host": "cuyahogacounty.gov",
           "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.85,
+          "confidence": 0.8,
           "signals": [
             "delinquent tax",
-            "foreclosure auction"
+            "foreclosure auction",
+            "sheriff sale"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39037": {
+      "state": "OH",
+      "county": "Darke",
+      "sources": [
+        {
+          "fips": "39037",
+          "state": "OH",
+          "url": "https://www.darkecountysheriff.org/sheriffsales",
+          "host": "www.darkecountysheriff.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax lien sale",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39041": {
+      "state": "OH",
+      "county": "Delaware",
+      "sources": [
+        {
+          "fips": "39041",
+          "state": "OH",
+          "url": "https://sheriff.co.delaware.oh.us/sheriff-sales/",
+          "host": "sheriff.co.delaware.oh.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39043": {
+      "state": "OH",
+      "county": "Erie",
+      "sources": [],
+      "isGap": true
+    },
+    "39045": {
+      "state": "OH",
+      "county": "Fairfield",
+      "sources": [
+        {
+          "fips": "39045",
+          "state": "OH",
+          "url": "https://sheriff.fairfield.oh.us/FC-Sheriff-Auction-Sales.html",
+          "host": "sheriff.fairfield.oh.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10978,28 +13012,763 @@
         {
           "fips": "39049",
           "state": "OH",
-          "url": "https://treasurer.franklincountyohio.gov/Delinquent-Taxes/Tax-Lien-Sale",
+          "url": "https://treasurer.franklincountyohio.gov/Delinquent-Taxes/Tax-Lien-Sale/Buyer-Information",
           "host": "treasurer.franklincountyohio.gov",
           "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.93,
+          "confidence": 0.9,
           "signals": [
             "tax lien sale",
             "delinquent tax",
-            "sheriff sale"
+            "parcel id"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
       "isGap": false
     },
+    "39055": {
+      "state": "OH",
+      "county": "Geauga",
+      "sources": [
+        {
+          "fips": "39055",
+          "state": "OH",
+          "url": "https://sheriff.co.geauga.oh.us/civil/sheriffs-sales/",
+          "host": "sheriff.co.geauga.oh.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "tax sale",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39057": {
+      "state": "OH",
+      "county": "Greene",
+      "sources": [],
+      "isGap": true
+    },
     "39061": {
       "state": "OH",
       "county": "Hamilton",
+      "sources": [
+        {
+          "fips": "39061",
+          "state": "OH",
+          "url": "https://www.hamiltoncountyohio.gov/government/departments/treasurer/delinquent_taxes.php",
+          "host": "www.hamiltoncountyohio.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39063": {
+      "state": "OH",
+      "county": "Hancock",
+      "sources": [
+        {
+          "fips": "39063",
+          "state": "OH",
+          "url": "https://www.hancocksheriff.org/sheriff-sales",
+          "host": "www.hancocksheriff.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "tax sale",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39077": {
+      "state": "OH",
+      "county": "Huron",
+      "sources": [
+        {
+          "fips": "39077",
+          "state": "OH",
+          "url": "https://huroncountysheriff.com/sheriffs-sale/",
+          "host": "huroncountysheriff.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39081": {
+      "state": "OH",
+      "county": "Jefferson",
       "sources": [],
       "isGap": true
+    },
+    "39083": {
+      "state": "OH",
+      "county": "Knox",
+      "sources": [
+        {
+          "fips": "39083",
+          "state": "OH",
+          "url": "https://co.knox.oh.us/sheriff/sheriff-sales/",
+          "host": "co.knox.oh.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39085": {
+      "state": "OH",
+      "county": "Lake",
+      "sources": [
+        {
+          "fips": "39085",
+          "state": "OH",
+          "url": "https://www.lakecountyohio.gov/treasurer/tax-lien-sales/",
+          "host": "www.lakecountyohio.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39087": {
+      "state": "OH",
+      "county": "Lawrence",
+      "sources": [
+        {
+          "fips": "39087",
+          "state": "OH",
+          "url": "https://www.lawcoso.com/sheriffs-sales.html",
+          "host": "www.lawcoso.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39089": {
+      "state": "OH",
+      "county": "Licking",
+      "sources": [
+        {
+          "fips": "39089",
+          "state": "OH",
+          "url": "https://apps.lickingcounty.gov/sheriff/foreclosures/",
+          "host": "apps.lickingcounty.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid",
+            "sheriff sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39093": {
+      "state": "OH",
+      "county": "Lorain",
+      "sources": [
+        {
+          "fips": "39093",
+          "state": "OH",
+          "url": "https://loraincountysheriff.com/services/lorain-county-sheriffs-sales/",
+          "host": "loraincountysheriff.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39095": {
+      "state": "OH",
+      "county": "Lucas",
+      "sources": [
+        {
+          "fips": "39095",
+          "state": "OH",
+          "url": "https://www.lucascountyohioauditor.gov/forfeitedland",
+          "host": "www.lucascountyohioauditor.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "delinquent tax",
+            "minimum/opening bid",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "39095",
+          "state": "OH",
+          "url": "https://www.lucascountytreasurer.org/sheriff-sales",
+          "host": "www.lucascountytreasurer.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "39095",
+          "state": "OH",
+          "url": "https://lucascountysheriff.org/resources/sheriffs-sales",
+          "host": "lucascountysheriff.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39099": {
+      "state": "OH",
+      "county": "Mahoning",
+      "sources": [],
+      "isGap": true
+    },
+    "39101": {
+      "state": "OH",
+      "county": "Marion",
+      "sources": [
+        {
+          "fips": "39101",
+          "state": "OH",
+          "url": "https://www.co.marion.oh.us/elected_offices/sheriff/sheriff_sales/index.php",
+          "host": "www.co.marion.oh.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "tax sale",
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39103": {
+      "state": "OH",
+      "county": "Medina",
+      "sources": [
+        {
+          "fips": "39103",
+          "state": "OH",
+          "url": "https://medinasheriff.org/divisions/civil/",
+          "host": "medinasheriff.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.6,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39109": {
+      "state": "OH",
+      "county": "Miami",
+      "sources": [
+        {
+          "fips": "39109",
+          "state": "OH",
+          "url": "https://www.miamicountyohio.gov/real-estate-sales/",
+          "host": "www.miamicountyohio.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39113": {
+      "state": "OH",
+      "county": "Montgomery",
+      "sources": [
+        {
+          "fips": "39113",
+          "state": "OH",
+          "url": "https://www.mcohio.org/734/Foreclosure-Sales",
+          "host": "www.mcohio.org",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "tax sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "39113",
+          "state": "OH",
+          "url": "https://go.mcohio.org/applications/sheriffauction/sflistauction.cfm",
+          "host": "go.mcohio.org",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.63,
+          "signals": [
+            "tax lien sale",
+            "tax sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "39113",
+          "state": "OH",
+          "url": "https://www.mcohiosheriff.org/support_services/records_and_property/properties_for_sale.php",
+          "host": "www.mcohiosheriff.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "tax lien sale",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39119": {
+      "state": "OH",
+      "county": "Muskingum",
+      "sources": [
+        {
+          "fips": "39119",
+          "state": "OH",
+          "url": "https://www.ohiomuskingumsheriff.org/Sheriff-Sales/About/",
+          "host": "www.ohiomuskingumsheriff.org",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39129": {
+      "state": "OH",
+      "county": "Pickaway",
+      "sources": [],
+      "isGap": true
+    },
+    "39133": {
+      "state": "OH",
+      "county": "Portage",
+      "sources": [],
+      "isGap": true
+    },
+    "39139": {
+      "state": "OH",
+      "county": "Richland",
+      "sources": [
+        {
+          "fips": "39139",
+          "state": "OH",
+          "url": "https://www.richlandcountyoh.gov/SheriffSales",
+          "host": "www.richlandcountyoh.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39141": {
+      "state": "OH",
+      "county": "Ross",
+      "sources": [],
+      "isGap": true
+    },
+    "39143": {
+      "state": "OH",
+      "county": "Sandusky",
+      "sources": [
+        {
+          "fips": "39143",
+          "state": "OH",
+          "url": "https://sanduskycountyoh.gov/index.php?page=sheriff-sales",
+          "host": "sanduskycountyoh.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39145": {
+      "state": "OH",
+      "county": "Scioto",
+      "sources": [
+        {
+          "fips": "39145",
+          "state": "OH",
+          "url": "https://www.sciotocountysheriff.org/sales",
+          "host": "www.sciotocountysheriff.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39147": {
+      "state": "OH",
+      "county": "Seneca",
+      "sources": [],
+      "isGap": true
+    },
+    "39151": {
+      "state": "OH",
+      "county": "Stark",
+      "sources": [
+        {
+          "fips": "39151",
+          "state": "OH",
+          "url": "https://sheriffsales.starkcountyohio.gov/DelinquentTaxSales.aspx",
+          "host": "sheriffsales.starkcountyohio.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 1,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39153": {
+      "state": "OH",
+      "county": "Summit",
+      "sources": [],
+      "isGap": true
+    },
+    "39155": {
+      "state": "OH",
+      "county": "Trumbull",
+      "sources": [
+        {
+          "fips": "39155",
+          "state": "OH",
+          "url": "https://www.co.trumbull.oh.us/Sheriff/Services/Sheriff-Sales",
+          "host": "www.co.trumbull.oh.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "tax sale",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39157": {
+      "state": "OH",
+      "county": "Tuscarawas",
+      "sources": [
+        {
+          "fips": "39157",
+          "state": "OH",
+          "url": "https://www.co.tuscarawas.oh.us/government/sheriff/sheriff_sales.php",
+          "host": "www.co.tuscarawas.oh.us",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39159": {
+      "state": "OH",
+      "county": "Union",
+      "sources": [
+        {
+          "fips": "39159",
+          "state": "OH",
+          "url": "https://www.unioncountyohio.gov/Sheriff-Sales/",
+          "host": "www.unioncountyohio.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "tax sale",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39165": {
+      "state": "OH",
+      "county": "Warren",
+      "sources": [
+        {
+          "fips": "39165",
+          "state": "OH",
+          "url": "https://codes.ohio.gov/ohio-revised-code/chapter-5721",
+          "host": "codes.ohio.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction",
+            "redemption period",
+            "bidder registration",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39167": {
+      "state": "OH",
+      "county": "Washington",
+      "sources": [
+        {
+          "fips": "39167",
+          "state": "OH",
+          "url": "https://www.washingtongov.org/1090/Delinquent-Tax-Sale-Information",
+          "host": "www.washingtongov.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "39169": {
+      "state": "OH",
+      "county": "Wayne",
+      "sources": [],
+      "isGap": true
+    },
+    "39173": {
+      "state": "OH",
+      "county": "Wood",
+      "sources": [
+        {
+          "fips": "39173",
+          "state": "OH",
+          "url": "https://www.woodcountyohio.gov/381/Sheriff-Sales",
+          "host": "www.woodcountyohio.gov",
+          "origin": "atlas",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "foreclosure auction",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "39173",
+          "state": "OH",
+          "url": "https://woodcountysheriff.com/sheriff-sales/",
+          "host": "woodcountysheriff.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "40001": {
       "state": "OK",
@@ -11049,11 +13818,206 @@
       "sources": [],
       "isGap": true
     },
+    "40017": {
+      "state": "OK",
+      "county": "Canadian",
+      "sources": [
+        {
+          "fips": "40017",
+          "state": "OK",
+          "url": "https://www.oklahomacounty.org/elected-offices/treasurer",
+          "host": "www.oklahomacounty.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "delinquent tax",
+            "bidder registration",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "40027": {
       "state": "OK",
       "county": "Cleveland",
+      "sources": [
+        {
+          "fips": "40027",
+          "state": "OK",
+          "url": "https://www.clevelandcountytreasurer.org/General-Information/Documents-Downloads",
+          "host": "www.clevelandcountytreasurer.org",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.58,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "bidder registration"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "40027",
+          "state": "OK",
+          "url": "https://www.clevelandcountytreasurer.org/Property-Taxes/Tax-Sales",
+          "host": "www.clevelandcountytreasurer.org",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax deed sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "40027",
+          "state": "OK",
+          "url": "https://www.clevelandcountytreasurer.org/",
+          "host": "www.clevelandcountytreasurer.org",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "40031": {
+      "state": "OK",
+      "county": "Comanche",
+      "sources": [
+        {
+          "fips": "40031",
+          "state": "OK",
+          "url": "https://sheriffcomanche.com/Sheriff-Sales.html",
+          "host": "sheriffcomanche.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "40037": {
+      "state": "OK",
+      "county": "Creek",
       "sources": [],
       "isGap": true
+    },
+    "40047": {
+      "state": "OK",
+      "county": "Garfield",
+      "sources": [],
+      "isGap": true
+    },
+    "40051": {
+      "state": "OK",
+      "county": "Grady",
+      "sources": [],
+      "isGap": true
+    },
+    "40083": {
+      "state": "OK",
+      "county": "Logan",
+      "sources": [
+        {
+          "fips": "40083",
+          "state": "OK",
+          "url": "https://www.logancountyok.com/162/Sheriff-Sales",
+          "host": "www.logancountyok.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "40083",
+          "state": "OK",
+          "url": "https://oktaxrolls.com/county/logan",
+          "host": "oktaxrolls.com",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "40101": {
+      "state": "OK",
+      "county": "Muskogee",
+      "sources": [
+        {
+          "fips": "40101",
+          "state": "OK",
+          "url": "https://muskogee.okcounties.org/offices/county-treasurer",
+          "host": "muskogee.okcounties.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "40101",
+          "state": "OK",
+          "url": "https://muskogee.okcounties.org/offices/county-treasurer",
+          "host": "muskogee.okcounties.org",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "40109": {
       "state": "OK",
@@ -11073,7 +14037,76 @@
             "bidder registration",
             "assessed value"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "40109",
+          "state": "OK",
+          "url": "https://www.oklahomacounty.org/elected-offices/assessor",
+          "host": "www.oklahomacounty.org",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "foreclosure auction",
+            "parcel id",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        },
+        {
+          "fips": "40109",
+          "state": "OK",
+          "url": "https://www.oklahomacounty.org/Elected-Offices/Treasurer",
+          "host": "www.oklahomacounty.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "bidder registration",
+            "assessed value"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "40119": {
+      "state": "OK",
+      "county": "Payne",
+      "sources": [],
+      "isGap": true
+    },
+    "40125": {
+      "state": "OK",
+      "county": "Pottawatomie",
+      "sources": [],
+      "isGap": true
+    },
+    "40131": {
+      "state": "OK",
+      "county": "Rogers",
+      "sources": [
+        {
+          "fips": "40131",
+          "state": "OK",
+          "url": "https://www.rogerscountysheriff.gov/services/sheriff-sales/",
+          "host": "www.rogerscountysheriff.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -11082,6 +14115,18 @@
     "40143": {
       "state": "OK",
       "county": "Tulsa",
+      "sources": [],
+      "isGap": true
+    },
+    "40145": {
+      "state": "OK",
+      "county": "Wagoner",
+      "sources": [],
+      "isGap": true
+    },
+    "40147": {
+      "state": "OK",
+      "county": "Washington",
       "sources": [],
       "isGap": true
     },

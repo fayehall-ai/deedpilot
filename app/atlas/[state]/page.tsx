@@ -13,7 +13,8 @@ import {
   toSaleType,
 } from "@/lib/atlas";
 import { num } from "@/lib/format";
-import { AtlasCountyMap } from "@/components/atlas-county-map";
+import { AtlasExplorer } from "@/components/atlas-explorer";
+import { STATE_PATHS, statePayload } from "@/lib/atlas/geo";
 import { Breadcrumbs, Card, SaleTypeBadge } from "@/components/ui";
 
 export function generateStaticParams() {
@@ -72,8 +73,15 @@ export default async function StatePage(props: PageProps<"/atlas/[state]">) {
         Same drill-down thetaxdeed does with client state, but as routes: the
         national map sent you here, and each county here is a real page.
       */}
-      <section className="mb-8 rounded-xl border border-border bg-surface p-4">
-        <AtlasCountyMap stateAbbr={abbr} stateFips={counties[0]?.fips.slice(0, 2) ?? ""} stateName={name} />
+      {/*
+        The same explorer as /atlas, opened on this state. Clicking a county
+        selects it here rather than loading another page; the "Full county
+        page" link in the panel is the way through when you want the whole
+        record. Because it renders on the server too, the county map is in the
+        HTML on first paint.
+      */}
+      <section className="mb-8">
+        <AtlasExplorer states={STATE_PATHS} initialState={statePayload(abbr)} />
       </section>
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
