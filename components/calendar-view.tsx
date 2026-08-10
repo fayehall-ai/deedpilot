@@ -50,6 +50,18 @@ import {
 const MAX_PER_CELL = 5;
 
 
+/*
+ * Links that only change what this calendar shows keep the page where it is.
+ *
+ * Next's default is to scroll to the top of the Page element whenever that
+ * element is not in the viewport. On the home page the calendar sits ~800px
+ * down, so paging August → September threw the reader back up to the hero
+ * mid-interaction. These are in-place view changes, not navigations somewhere
+ * else — the sale links below deliberately keep the default, because opening
+ * a parcel *should* start at the top.
+ */
+const STAY_PUT = { scroll: false } as const;
+
 export async function CalendarView(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
   /** Route the filter links point back at. */
@@ -245,6 +257,7 @@ export async function CalendarView(props: {
                 The next matching sale is{" "}
                 <Link
                   href={calendarHref(filters, { month: monthOf(nextDate) })}
+                  {...STAY_PUT}
                   className="underline hover:text-foreground"
                 >
                   {saleDate(nextDate)}
@@ -262,6 +275,7 @@ export async function CalendarView(props: {
                       platforms: [],
                       includeLeads: false,
                     })}
+                    {...STAY_PUT}
                     className="underline hover:text-foreground"
                   >
                     Clear filters
@@ -288,6 +302,7 @@ export async function CalendarView(props: {
             lands-available inventory rather than a sale list, and are not bidding inventory.{" "}
             <Link
               href={calendarHref(filters, { includeLeads: false })}
+              {...STAY_PUT}
               className="underline hover:text-foreground"
             >
               Show confirmed sales only
@@ -489,6 +504,7 @@ function MonthNav({ filters }: { filters: CalendarFilters }) {
     <div className="mb-5 flex items-center gap-2">
       <Link
         href={calendarHref(filters, { month: prev })}
+        {...STAY_PUT}
         aria-label={`Previous month, ${monthLabel(prev)}`}
         className="grid h-8 w-8 place-items-center rounded-lg border border-border text-muted transition-colors hover:border-accent hover:text-foreground"
       >
@@ -496,6 +512,7 @@ function MonthNav({ filters }: { filters: CalendarFilters }) {
       </Link>
       <Link
         href={calendarHref(filters, { month: next })}
+        {...STAY_PUT}
         aria-label={`Next month, ${monthLabel(next)}`}
         className="grid h-8 w-8 place-items-center rounded-lg border border-border text-muted transition-colors hover:border-accent hover:text-foreground"
       >
@@ -505,6 +522,7 @@ function MonthNav({ filters }: { filters: CalendarFilters }) {
       {filters.month === filters.currentMonth ? null : (
         <Link
           href={calendarHref(filters, { month: filters.currentMonth })}
+          {...STAY_PUT}
           className="ml-2 rounded-lg border border-border px-2.5 py-1 text-xs text-muted transition-colors hover:border-accent hover:text-foreground"
         >
           Today
@@ -598,6 +616,7 @@ function Filters({
               platforms: [],
               includeLeads: false,
             })}
+            {...STAY_PUT}
             className="ml-auto self-center text-xs text-muted underline hover:text-foreground"
           >
             Clear all
@@ -635,6 +654,7 @@ function Chip({
   return (
     <Link
       href={href}
+      {...STAY_PUT}
       title={title}
       // Links, not toggle buttons — `aria-current` is the right state here.
       aria-current={active ? "true" : undefined}
