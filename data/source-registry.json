@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-08-10T01:30:35.178Z",
-  "nCounties": 942,
-  "nVerified": 541,
-  "nGaps": 513,
+  "builtAt": "2026-08-10T01:36:18.520Z",
+  "nCounties": 951,
+  "nVerified": 549,
+  "nGaps": 514,
   "counties": {
     "10001": {
       "state": "DE",
@@ -9337,14 +9337,48 @@
     "34001": {
       "state": "NJ",
       "county": "Atlantic",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "34001",
+          "state": "NJ",
+          "url": "https://www.acnj.gov/News/View/2410/city-of-atlantic-city-2025-tax-lien-sale",
+          "host": "www.acnj.gov",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "34003": {
       "state": "NJ",
       "county": "Bergen",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "34003",
+          "state": "NJ",
+          "url": "https://www.teanecknj.gov/living-in-teaneck/property-taxes/tax-sale/",
+          "host": "www.teanecknj.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "34005": {
       "state": "NJ",
@@ -9353,8 +9387,8 @@
         {
           "fips": "34005",
           "state": "NJ",
-          "url": "https://co.burlington.nj.us/169/Sheriffs-Sales-Foreclosures",
-          "host": "co.burlington.nj.us",
+          "url": "https://www.burlingtoncountynj.gov/169/Sheriffs-Sales-Foreclosures",
+          "host": "www.burlingtoncountynj.gov",
           "origin": "link_followed",
           "kind": "rules",
           "isGovernment": true,
@@ -9363,7 +9397,7 @@
             "foreclosure auction",
             "sheriff sale"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -9372,8 +9406,26 @@
     "34007": {
       "state": "NJ",
       "county": "Camden",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "34007",
+          "state": "NJ",
+          "url": "https://www.camdennj.gov/revenue-collections/",
+          "host": "www.camdennj.gov",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.83,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "34009": {
       "state": "NJ",
@@ -9392,7 +9444,7 @@
             "foreclosure auction",
             "sheriff sale"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -9407,8 +9459,27 @@
     "34013": {
       "state": "NJ",
       "county": "Essex",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "34013",
+          "state": "NJ",
+          "url": "https://www.essexsheriff.com/foreclosure-listings/",
+          "host": "www.essexsheriff.com",
+          "origin": "atlas",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "redemption period",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "34015": {
       "state": "NJ",
@@ -9429,8 +9500,8 @@
         {
           "fips": "34019",
           "state": "NJ",
-          "url": "https://co.hunterdon.nj.us/428/Sheriffs-Sales",
-          "host": "co.hunterdon.nj.us",
+          "url": "https://www.co.hunterdon.nj.us/428/Sheriffs-Sales",
+          "host": "www.co.hunterdon.nj.us",
           "origin": "link_followed",
           "kind": "results",
           "isGovernment": true,
@@ -9440,7 +9511,7 @@
             "redemption period",
             "sheriff sale"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -9455,6 +9526,12 @@
     "34023": {
       "state": "NJ",
       "county": "Middlesex",
+      "sources": [],
+      "isGap": true
+    },
+    "34025": {
+      "state": "NJ",
+      "county": "Monmouth",
       "sources": [],
       "isGap": true
     },
@@ -9477,11 +9554,107 @@
             "redemption period",
             "sheriff sale"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
       "isGap": false
+    },
+    "34029": {
+      "state": "NJ",
+      "county": "Ocean",
+      "sources": [
+        {
+          "fips": "34029",
+          "state": "NJ",
+          "url": "https://sheriff.co.ocean.nj.us/frmForeclosures.aspx",
+          "host": "sheriff.co.ocean.nj.us",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "foreclosure auction",
+            "redemption period",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "34031": {
+      "state": "NJ",
+      "county": "Passaic",
+      "sources": [],
+      "isGap": true
+    },
+    "34033": {
+      "state": "NJ",
+      "county": "Salem",
+      "sources": [],
+      "isGap": true
+    },
+    "34035": {
+      "state": "NJ",
+      "county": "Somerset",
+      "sources": [],
+      "isGap": true
+    },
+    "34037": {
+      "state": "NJ",
+      "county": "Sussex",
+      "sources": [
+        {
+          "fips": "34037",
+          "state": "NJ",
+          "url": "https://www.sussexcountysheriff.com/about-sheriff-s-sales",
+          "host": "www.sussexcountysheriff.com",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.55,
+          "signals": [
+            "foreclosure auction",
+            "redemption period",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "34039": {
+      "state": "NJ",
+      "county": "Union",
+      "sources": [
+        {
+          "fips": "34039",
+          "state": "NJ",
+          "url": "https://ucnj.org/sheriff/functions/sheriffs-sale-information/",
+          "host": "ucnj.org",
+          "origin": "link_followed",
+          "kind": "results",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "foreclosure auction",
+            "minimum/opening bid",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "34041": {
+      "state": "NJ",
+      "county": "Warren",
+      "sources": [],
+      "isGap": true
     },
     "35001": {
       "state": "NM",
@@ -9502,7 +9675,7 @@
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -9542,17 +9715,17 @@
           "state": "NM",
           "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
           "host": "www.tax.newmexico.gov",
-          "origin": "platform_pattern",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.8,
+          "confidence": 0.85,
           "signals": [
             "delinquent tax",
             "tax sale",
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -9677,7 +9850,7 @@
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -9692,17 +9865,17 @@
           "state": "NM",
           "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
           "host": "www.tax.newmexico.gov",
-          "origin": "platform_pattern",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.8,
+          "confidence": 0.85,
           "signals": [
             "delinquent tax",
             "tax sale",
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -9817,17 +9990,17 @@
           "state": "NM",
           "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
           "host": "www.tax.newmexico.gov",
-          "origin": "platform_pattern",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.8,
+          "confidence": 0.85,
           "signals": [
             "delinquent tax",
             "tax sale",
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -9917,17 +10090,17 @@
           "state": "NM",
           "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
           "host": "www.tax.newmexico.gov",
-          "origin": "platform_pattern",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.8,
+          "confidence": 0.85,
           "signals": [
             "delinquent tax",
             "tax sale",
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -9967,17 +10140,17 @@
           "state": "NM",
           "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
           "host": "www.tax.newmexico.gov",
-          "origin": "platform_pattern",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.8,
+          "confidence": 0.85,
           "signals": [
             "delinquent tax",
             "tax sale",
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10067,17 +10240,17 @@
           "state": "NM",
           "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
           "host": "www.tax.newmexico.gov",
-          "origin": "platform_pattern",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.8,
+          "confidence": 0.85,
           "signals": [
             "delinquent tax",
             "tax sale",
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10092,17 +10265,17 @@
           "state": "NM",
           "url": "https://www.tax.newmexico.gov/businesses/property-tax-overview/delinquent-property-tax-auctions/",
           "host": "www.tax.newmexico.gov",
-          "origin": "platform_pattern",
+          "origin": "atlas",
           "kind": "results",
           "isGovernment": true,
-          "confidence": 0.8,
+          "confidence": 0.85,
           "signals": [
             "delinquent tax",
             "tax sale",
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-07-31",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10152,7 +10325,7 @@
             "minimum/opening bid",
             "redemption period"
           ],
-          "verifiedOn": "2026-08-01",
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],
@@ -10278,6 +10451,29 @@
             "redemption period"
           ],
           "verifiedOn": "2026-07-31",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "35061": {
+      "state": "NM",
+      "county": "Valencia",
+      "sources": [
+        {
+          "fips": "35061",
+          "state": "NM",
+          "url": "https://co.valencia.nm.us/226/Treasurer",
+          "host": "co.valencia.nm.us",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-10",
           "httpStatus": 200
         }
       ],

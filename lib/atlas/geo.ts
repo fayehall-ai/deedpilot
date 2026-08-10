@@ -24,8 +24,34 @@ import { STATE_NAMES, stateSlug } from "./state-names";
 import { countiesInState, countyLabel, countySlug, isCovered, researchedCountCount, toSaleType } from "./index";
 import type { CountyRule, SaleType } from "./types";
 
-/** The viewBox the Albers-projected 10m topology is authored against. */
-export const NATIONAL_VIEWBOX = { width: 975, height: 610 };
+/**
+ * The national viewBox.
+ *
+ * The topology itself spans x −58…957. The box is widened to 1065 to open a
+ * gutter on the right for the states too small to hold a label — the Northeast
+ * is nine states inside 80×180 units, and DC is 4×5.
+ */
+export const NATIONAL_VIEWBOX = { x: -60, y: 5, width: 1125, height: 612 };
+
+/**
+ * Where the small states' labels go, and roughly at their own latitude so the
+ * leader lines fan out without crossing.
+ *
+ * Hardcoded because there is no general solution: a placement algorithm that
+ * handles Rhode Island also has to know that Maryland wraps around Delaware,
+ * and the Northeast is the only place in the country where it matters.
+ */
+const EXTERNAL_LABELS: Record<string, { x: number; y: number }> = {
+  VT: { x: 995, y: 100 },
+  NH: { x: 995, y: 126 },
+  MA: { x: 995, y: 152 },
+  RI: { x: 995, y: 178 },
+  CT: { x: 995, y: 204 },
+  NJ: { x: 995, y: 230 },
+  DE: { x: 995, y: 256 },
+  MD: { x: 995, y: 282 },
+  DC: { x: 995, y: 308 },
+};
 
 /** Padding around a state's bounding box, in projected units. */
 const STATE_PAD = 12;
@@ -40,6 +66,10 @@ export interface StatePath {
   counties: number;
   researched: number;
   covered: boolean;
+  /** Where the two-letter code is drawn. */
+  label: { x: number; y: number; external: boolean };
+  /** Present only for external labels: the line back to the state. */
+  leader?: { x1: number; y1: number; x2: number; y2: number };
 }
 
 export interface CountyPath {
@@ -79,7 +109,14 @@ export const STATE_PATHS: StatePath[] = (() => {
       const rule = abbr ? STATE_DATA[abbr] : undefined;
       const d = toPath(f);
       if (!abbr || !rule || !d) return null;
-      return {
+
+      const [cx, cy] = toPath.centroid(f);
+      const external = EXTERNAL_LABELS[abbr];
+      const label = external
+        ? { x: external.x, y: external.y, external: true }
+        : { x: cx, y: cy, external: false };
+
+      const path: StatePath = {
         fips,
         abbr,
         name: STATE_NAMES[abbr] ?? f.properties?.name ?? abbr,
@@ -89,7 +126,10 @@ export const STATE_PATHS: StatePath[] = (() => {
         counties: countiesInState(abbr).length,
         researched: researchedCountCount(abbr),
         covered: isCovered(abbr),
+        label,
+        leader: external ? { x1: cx, y1: cy, x2: external.x - 6, y2: external.y } : undefined,
       };
+      return path;
     })
     .filter((s): s is StatePath => s !== null);
 })();

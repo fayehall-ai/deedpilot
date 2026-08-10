@@ -184,7 +184,7 @@ export function AtlasExplorer({ states }: { states: StatePath[] }) {
             </svg>
           ) : (
             <svg
-              viewBox={`0 0 ${NATIONAL_VIEWBOX.width} ${NATIONAL_VIEWBOX.height}`}
+              viewBox={`${NATIONAL_VIEWBOX.x} ${NATIONAL_VIEWBOX.y} ${NATIONAL_VIEWBOX.width} ${NATIONAL_VIEWBOX.height}`}
               className="h-auto w-full"
               role="img"
               aria-label="United States map, each state shaded by how it sells tax-defaulted property"
@@ -214,6 +214,48 @@ export function AtlasExplorer({ states }: { states: StatePath[] }) {
                   />
                 </a>
               ))}
+
+              {/*
+                Labels last, in one pass after every shape, so a neighbouring
+                state can never paint over another's code. They are
+                pointer-events:none so the letters do not swallow the click
+                meant for the state under them.
+              */}
+              <g className="pointer-events-none">
+                {states.map((s) =>
+                  s.leader ? (
+                    <line
+                      key={`l${s.fips}`}
+                      x1={s.leader.x1}
+                      y1={s.leader.y1}
+                      x2={s.leader.x2}
+                      y2={s.leader.y2}
+                      stroke="var(--muted)"
+                      strokeWidth={0.6}
+                    />
+                  ) : null,
+                )}
+                {states.map((s) => (
+                  <text
+                    key={`t${s.fips}`}
+                    x={s.label.x}
+                    y={s.label.y}
+                    textAnchor={s.label.external ? "start" : "middle"}
+                    dominantBaseline="central"
+                    fontSize={s.label.external ? 13 : 14}
+                    fontWeight={600}
+                    /*
+                     * White on the sale-type fills, which are mid-tone enough
+                     * to carry it in both themes; the gutter labels sit on the
+                     * page background and take the page's own text colour.
+                     */
+                    fill={s.label.external ? "var(--foreground)" : "#fff"}
+                    className="select-none"
+                  >
+                    {s.abbr}
+                  </text>
+                ))}
+              </g>
             </svg>
           )}
         </div>
