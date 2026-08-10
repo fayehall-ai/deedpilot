@@ -161,6 +161,8 @@ export interface GroupableSale {
   lotCount: number;
   status: string;
   title: string | null;
+  /** Summed across the group when present. Absent is fine — see `bidTotal`. */
+  totalOpeningBids?: string | null;
 }
 
 export interface SaleGroup<T> {
@@ -169,6 +171,13 @@ export interface SaleGroup<T> {
   /** Per-sale labels distinguishing members, e.g. "precinct 1". Null if none. */
   labels: (string | null)[];
   lotTotal: number;
+  /**
+   * Summed opening bids, or null when not one member published any.
+   *
+   * Null rather than 0 on purpose: "$0" claims every parcel in this county
+   * opens free, and a missing bid sheet must not be able to say that.
+   */
+  bidTotal: number | null;
   cancelledCount: number;
   allCancelled: boolean;
 }
@@ -204,11 +213,20 @@ export function groupSalesByCounty<T extends GroupableSale>(sales: T[]): SaleGro
   return [...groups.entries()]
     .map(([key, members]) => {
       const cancelledCount = members.filter((m) => isCancelled(m.status)).length;
+      // Filtered before the cast, not after: `Number(null)` is 0, so summing
+      // the raw values would turn "this county published no opening bids" into
+      // a confident $0.
+      const bids = members
+        .map((m) => m.totalOpeningBids)
+        .filter((v): v is string => v !== null && v !== undefined && v !== "")
+        .map(Number)
+        .filter(Number.isFinite);
       return {
         key,
         sales: members,
         labels: distinguishingLabels(members.map((m) => m.title)),
         lotTotal: members.reduce((n, m) => n + m.lotCount, 0),
+        bidTotal: bids.length ? bids.reduce((a, b) => a + b, 0) : null,
         cancelledCount,
         allCancelled: cancelledCount === members.length,
       };
@@ -272,8 +290,20 @@ export interface CalendarFilters {
   basePath: string;
   /** YYYY-MM currently shown. */
   month: string;
-  /** The month containing today — omitted from hrefs to keep `/calendar` clean. */
+  /** The month containing today. What the "Today" chip returns to. */
   currentMonth: string;
+  /**
+   * The month a bare URL resolves to — omitted from hrefs to keep `/calendar`
+   * clean.
+   *
+   * Usually the current month, but the caller may hand us a later one when
+   * this month has no sales left. It has to travel with the filters rather than
+   * be recomputed from `currentMonth`, because `calendarHref` decides whether
+   * to write `?m=` by comparing against it: if the two disagreed, the bare URL
+   * and the "Today" chip would resolve to different months and one of them
+   * would be wrong.
+   */
+  defaultMonth: string;
   /** State abbreviations. Empty means all. */
   states: string[];
   /** Sale-type labels ("Tax Deed"), decoded from URL slugs. Empty means all. */
@@ -309,12 +339,16 @@ export function parseCalendarFilters(
   params: RawParams,
   today: string,
   basePath = "/calendar",
+  /** Where a bare URL lands. Defaults to today's month; see `CalendarFilters`. */
+  defaultMonth?: string,
 ): CalendarFilters {
   const currentMonth = monthOf(today);
+  const landing = defaultMonth && MONTH_RE.test(defaultMonth) ? defaultMonth : currentMonth;
   return {
     basePath,
-    month: parseMonth(params.m, currentMonth),
+    month: parseMonth(params.m, landing),
     currentMonth,
+    defaultMonth: landing,
     states: csv(params.state)
       .map((s) => s.toUpperCase())
       .filter((s) => /^[A-Z]{2}$/.test(s))
@@ -334,7 +368,10 @@ export function calendarHref(
 ): string {
   const next = { ...filters, ...patch };
   const p = new URLSearchParams();
-  if (next.month !== next.currentMonth) p.set("m", next.month);
+  // Against the landing month, not today's: those differ whenever this month
+  // has run out of sales, and writing `?m=` by the wrong one either dirties
+  // every URL or points "Today" at the month it is already on.
+  if (next.month !== next.defaultMonth) p.set("m", next.month);
   if (next.states.length) p.set("state", [...next.states].sort().join(","));
   if (next.saleTypes.length) {
     p.set("type", next.saleTypes.map((t) => SLUG_BY_SALE_TYPE[t] ?? t).join(","));

@@ -189,6 +189,51 @@ const backToNow = new URLSearchParams(
 assert(!backToNow.has("m"), "current month is implicit in the URL");
 assert(backToNow.get("platform") === "lgbs", "…while the other filters stay");
 
+// --- landing on a month that has inventory -----------------------------------
+
+// Sales cluster into a few months a year, so the current month is often empty.
+// The caller resolves the first month that still has one and hands it over.
+const quiet = parseCalendarFilters({}, today, "/calendar", "2026-11");
+assert(quiet.month === "2026-11", `lands on the month with sales, got ${quiet.month}`);
+assert(quiet.currentMonth === "2026-08", "today's month is still recorded separately");
+assert(quiet.defaultMonth === "2026-11", "landing month recorded");
+
+// An explicit `?m=` always wins — the reader asked for that month.
+assert(
+  parseCalendarFilters({ m: "2026-08" }, today, "/calendar", "2026-11").month === "2026-08",
+  "an explicit month beats the landing month",
+);
+
+// Junk in the landing month falls back to today's rather than to NaN.
+assert(
+  parseCalendarFilters({}, today, "/calendar", "nope").month === "2026-08",
+  "an invalid landing month falls back to the current one",
+);
+
+// The two rules that have to agree: a bare URL means the landing month, so the
+// landing month is the one omitted from hrefs — and today's month, being a
+// different month now, has to be written out. Getting this backwards is how
+// "Today" ends up linking to the page it is already on.
+assert(calendarHref(quiet) === "/calendar", "the landing month is implicit in the URL");
+assert(
+  calendarHref(quiet, { month: "2026-08" }) === "/calendar?m=2026-08",
+  `"Today" is explicit when it is not the landing month, got ${calendarHref(quiet, { month: "2026-08" })}`,
+);
+
+// Round-trip: following the bare URL comes back to the same month, so a filter
+// chip clicked on the landing month does not silently jump the reader forward.
+const chipHref = calendarHref(quiet, { states: ["MI"] });
+assert(chipHref === "/calendar?state=MI", `no month written, got ${chipHref}`);
+assert(
+  parseCalendarFilters(
+    Object.fromEntries(new URLSearchParams(chipHref.split("?")[1] ?? "")),
+    today,
+    "/calendar",
+    "2026-11",
+  ).month === "2026-11",
+  "the landing month survives a filter click",
+);
+
 // --- distinguishing labels ---------------------------------------------------
 
 // The real case: Harris County TX sells through eight constable precincts.
@@ -288,6 +333,42 @@ const out = groupSalesByCounty(all).flatMap((g) => g.sales);
 assert(out.length === all.length, `${all.length} in, ${out.length} out`);
 
 assert(groupSalesByCounty([]).length === 0, "empty input → no groups");
+
+// --- opening-bid totals ------------------------------------------------------
+
+// Summed as numbers, not concatenated as the strings Postgres returns for a
+// numeric sum.
+const bids = groupSalesByCounty([
+  sale({ totalOpeningBids: "1500.00" }),
+  sale({ totalOpeningBids: "2500.50" }),
+]);
+assert(bids[0].bidTotal === 4000.5, `bids summed, got ${bids[0].bidTotal}`);
+
+// The one that matters: no published bids is null, never 0. "$0" would claim
+// every parcel in the county opens free.
+assert(groupSalesByCounty([sale()])[0].bidTotal === null, "no bid data → null, not 0");
+assert(
+  groupSalesByCounty([sale({ totalOpeningBids: null })])[0].bidTotal === null,
+  "an explicit null → null",
+);
+
+// A partial group reports what it knows rather than nothing — the figure is an
+// incomplete floor everywhere it is shown, and labelled as one.
+const partial = groupSalesByCounty([sale({ totalOpeningBids: "900" }), sale()]);
+assert(partial[0].bidTotal === 900, `partial data still totals, got ${partial[0].bidTotal}`);
+
+// A county that genuinely published zero is not the same as one that published
+// nothing, and must survive as 0.
+assert(
+  groupSalesByCounty([sale({ totalOpeningBids: "0" })])[0].bidTotal === 0,
+  "a real zero stays zero",
+);
+
+// Garbage from the driver must not become NaN on the page.
+assert(
+  groupSalesByCounty([sale({ totalOpeningBids: "abc" })])[0].bidTotal === null,
+  "unparseable bid total → null",
+);
 
 // --- todayIso ---------------------------------------------------------------
 

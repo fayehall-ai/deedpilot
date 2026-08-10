@@ -3,9 +3,8 @@ import { Suspense } from "react";
 import { getPlatformStats } from "@/lib/queries";
 import { num } from "@/lib/format";
 import { COUNTY_DATA, ALL_COUNTIES } from "@/lib/atlas";
-import { AuctionListSkeleton, CalendarSkeleton } from "@/components/skeleton";
+import { CalendarSkeleton } from "@/components/skeleton";
 import { CalendarView } from "@/components/calendar-view";
-import { AuctionsList } from "@/components/auctions-list";
 import { AtlasStates } from "@/components/atlas-states";
 import { AtlasExplorer } from "@/components/atlas-explorer";
 import { STATE_PATHS } from "@/lib/atlas/geo";
@@ -29,7 +28,7 @@ import { PricingPlans } from "@/components/pricing-plans";
  * boundaries flat means each section resolves on its own and none of them can
  * ever contain another.
  *
- * There are exactly two boundaries, and the count is the point. An earlier
+ * There is exactly one boundary now, and the count is the point. An earlier
  * four-boundary version passed every local check and then failed on Vercel:
  * the server sent complete HTML — 386 auction links, all four
  * `$RC("B:n","S:n")` completion scripts — and the browser left every one of
@@ -37,10 +36,11 @@ import { PricingPlans } from "@/components/pricing-plans";
  * permanent skeleton. Behind a CDN the whole stream replays at once rather
  * than progressively, and the reveal scheduler never ran them.
  *
- * So only the two genuinely request-time sections get a boundary. The hero
- * figures and the coverage report read `use cache` data and prerender into the
- * static shell instead, which is both faster and one less thing that has to
- * reveal correctly.
+ * So only the genuinely request-time section gets one. The hero figures and the
+ * coverage report read `use cache` data and prerender into the static shell
+ * instead, which is both faster and one less thing that has to reveal
+ * correctly. Anything added here should keep that shape: cached and prerendered
+ * unless it truly cannot be, and never nested inside another boundary.
  */
 export default function HomePage(props: PageProps<"/">) {
   return (
@@ -63,7 +63,7 @@ export default function HomePage(props: PageProps<"/">) {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                href="/#auctions"
+                href="/#calendar"
                 className="rounded-lg bg-accent px-5 py-2.5 font-medium text-accent-fg hover:opacity-90"
               >
                 Browse upcoming auctions
@@ -92,31 +92,6 @@ export default function HomePage(props: PageProps<"/">) {
           </div>
           <Suspense fallback={<CalendarSkeleton />}>
             <CalendarView searchParams={props.searchParams} basePath="/" />
-          </Suspense>
-        </div>
-      </section>
-
-      {/* --- Auctions ------------------------------------------------------ */}
-      <section id="auctions" className="scroll-mt-16 border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight">Upcoming auctions</h2>
-              <p className="mt-1 text-sm text-muted">
-                The same sales as a list, following the state filter above.
-              </p>
-            </div>
-            <Link href="/auctions" className="text-sm text-muted underline hover:text-foreground">
-              Open the full list
-            </Link>
-          </div>
-          <Suspense fallback={<AuctionListSkeleton groups={2} />}>
-            <AuctionsList
-              searchParams={props.searchParams}
-              basePath="/"
-              maxGroups={4}
-              showFilters={false}
-            />
           </Suspense>
         </div>
       </section>

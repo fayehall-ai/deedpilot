@@ -1,31 +1,33 @@
 /**
- * The upcoming-auction list. Shared by `/auctions` and the home page.
+ * The upcoming-auction list, as rendered by `/auctions`.
  *
- * `maxGroups` is what keeps the home section from becoming the whole page: the
- * route shows every scheduled day, the section shows the next few and links on.
- * Capping is stated on the page rather than silently truncating — a list that
- * quietly stops is indistinguishable from a list that has run out.
+ * It used to render on the home page too, under the calendar and showing the
+ * same sales; that section came out once the calendar could show lot counts and
+ * opening bids on its own. The flat list stays as a route because it is the
+ * better view for scanning a whole season at once, which a month grid cannot do.
+ *
+ * `maxGroups` and `showFilters` are what the home section used and no caller
+ * passes today. They are kept because an embedded, capped copy is the obvious
+ * next thing anyone wants from this component — and because capping is stated
+ * on the page rather than silently truncating, which is the part worth keeping.
  */
 import Link from "next/link";
-import { Suspense } from "react";
 import { connection } from "next/server";
 import { getUpcomingAuctions } from "@/lib/queries";
 import { money, num, relativeDays, saleDate } from "@/lib/format";
 import { EmptyState, SaleTypeBadge, StatusBadge } from "@/components/ui";
-import { AuctionListSkeleton } from "@/components/skeleton";
 import { STATE_NAMES } from "@/lib/atlas";
 
 export async function AuctionsList(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
   /** Route the state chips point back at. */
   basePath?: string;
-  /** Cap the day-groups shown. The home section uses it; the page does not. */
+  /** Cap the day-groups shown. Uncapped on the route; see the note above. */
   maxGroups?: number;
   /**
-   * Show the state chips. Off on the home page, where the calendar above
-   * already renders them and both read the same `?state=` — two identical
-   * filter rows on one page invite the reader to wonder which one is in
-   * charge.
+   * Show the state chips. Turn them off wherever another control on the page
+   * already reads the same `?state=` — two identical filter rows invite the
+   * reader to wonder which one is in charge.
    */
   showFilters?: boolean;
 }) {

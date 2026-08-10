@@ -16,11 +16,12 @@ import { connection } from "next/server";
 import {
   getCalendarAuctions,
   getCalendarFacets,
+  getDefaultCalendarMonth,
   getNextCalendarDate,
   type CalendarAuctionRow,
   type CalendarFacet,
 } from "@/lib/queries";
-import { num, platformLabel, relativeDays, saleDate, saleTypeColor } from "@/lib/format";
+import { money, num, platformLabel, relativeDays, saleDate, saleTypeColor } from "@/lib/format";
 import { STATE_NAMES, countyLabel } from "@/lib/atlas";
 import {
   calendarHref,
@@ -76,7 +77,18 @@ export async function CalendarView(props: {
   await connection();
   const params = await props.searchParams;
   const today = todayIso();
-  const filters = parseCalendarFilters(params, today, props.basePath ?? "/calendar");
+  /*
+   * Resolved even when `?m=` is present: `calendarHref` compares against it to
+   * decide whether to write the parameter at all, so a request that skipped the
+   * lookup would emit a different URL for the same month than one that didn't.
+   * It is a cached, filter-independent value, so this costs one memoised read.
+   */
+  const filters = parseCalendarFilters(
+    params,
+    today,
+    props.basePath ?? "/calendar",
+    await getDefaultCalendarMonth(),
+  );
 
   const { start, end } = gridRange(filters.month);
   const { first, last } = monthBounds(filters.month);
@@ -175,7 +187,9 @@ export async function CalendarView(props: {
                   {sales.length > 0 ? (
                     <span
                       className="tnum text-[10px] text-muted"
-                      title={`${num(sales.reduce((n, a) => n + a.lotCount, 0))} lots across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}`}
+                      title={`${num(sales.reduce((n, a) => n + a.lotCount, 0))} lots across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
+                        sumBids(sales),
+                      )}`}
                     >
                       {num(sales.reduce((n, a) => n + a.lotCount, 0))}
                     </span>
@@ -335,7 +349,7 @@ function SaleEntry({
   return (
     <details className="group/entry">
       <summary
-        title={`${county}, ${stateName} — ${num(group.sales.length)} separate ${lead.saleType} sales, ${num(group.lotTotal)} lots total, ${platformLabel(lead.platform)}${
+        title={`${county}, ${stateName} — ${num(group.sales.length)} separate ${lead.saleType} sales, ${num(group.lotTotal)} lots total${bidPhrase(group.bidTotal)}, ${platformLabel(lead.platform)}${
           group.cancelledCount ? ` (${num(group.cancelledCount)} cancelled)` : ""
         }`}
         className={[
@@ -376,11 +390,7 @@ function SaleEntry({
             </span>
           ) : null}
         </span>
-        {verbose ? (
-          <span className="tnum ml-auto shrink-0 pl-2 text-xs text-muted">
-            {num(group.lotTotal)}
-          </span>
-        ) : null}
+        {verbose ? <Totals lots={group.lotTotal} bids={group.bidTotal} /> : null}
       </summary>
 
       <ul className="mt-0.5 space-y-0.5 border-l border-border pl-2 ml-2">
@@ -390,7 +400,7 @@ function SaleEntry({
             <li key={a.id}>
               <Link
                 href={`/auctions/${a.id}`}
-                title={`${a.title ?? county} — ${num(a.lotCount)} lots${cancelled ? `, ${a.status}` : ""}`}
+                title={`${a.title ?? county} — ${num(a.lotCount)} lots${bidPhrase(sumBids([a]))}${cancelled ? `, ${a.status}` : ""}`}
                 className={`flex items-baseline gap-2 rounded px-1 py-0.5 transition-colors hover:bg-surface-2 ${
                   verbose ? "text-sm" : "text-[11px]"
                 }`}
@@ -427,7 +437,9 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
   return (
     <Link
       href={`/auctions/${auction.id}`}
-      title={`${county}, ${stateName} — ${auction.saleType}, ${num(auction.lotCount)} lots, ${platformLabel(auction.platform)}`}
+      title={`${county}, ${stateName} — ${auction.saleType}, ${num(auction.lotCount)} lots${bidPhrase(
+        sumBids([auction]),
+      )}, ${platformLabel(auction.platform)}`}
       className={[
         // Wraps rather than truncates: the county name is the whole point of
         // the entry, and a lead tag alongside it turns "SC · Greenville" into
@@ -457,13 +469,56 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
         </span>
         {isLead ? <LeadTag auction={auction} /> : null}
       </span>
-      {verbose ? (
-        <span className="tnum ml-auto shrink-0 pl-2 text-xs text-muted">
-          {num(auction.lotCount)}
-        </span>
-      ) : null}
+      {verbose ? <Totals lots={auction.lotCount} bids={sumBids([auction])} /> : null}
     </Link>
   );
+}
+
+/**
+ * What a sale is worth looking at, in the agenda's right-hand column.
+ *
+ * Two numbers rather than one because they answer different questions: lots is
+ * how much there is to work through, opening bids is whether it is worth the
+ * drive. The grid squares stay lots-only — there is no room for a second figure
+ * at 11px, and it hangs off the tooltip there instead.
+ *
+ * "lots" is spelled out now that the column carries two figures; a bare pair of
+ * numbers side by side gives no clue which is which.
+ */
+function Totals({ lots, bids }: { lots: number; bids: number | null }) {
+  return (
+    <span className="ml-auto shrink-0 pl-2 text-right text-xs text-muted">
+      <span className="tnum whitespace-nowrap">{num(lots)} lots</span>
+      {bids === null ? null : (
+        <>
+          <span aria-hidden> · </span>
+          <span className="tnum whitespace-nowrap">{money(bids, { compact: true })}</span>
+        </>
+      )}
+    </span>
+  );
+}
+
+/**
+ * Opening bids across a set of sales, or null when none published any.
+ *
+ * Mirrors `groupSalesByCounty`'s `bidTotal` for the callers that hold loose
+ * rows rather than a group — and drops nulls before the cast for the same
+ * reason it does: `Number(null)` is 0, and a missing bid sheet must not be
+ * able to claim every parcel opens free.
+ */
+function sumBids(sales: CalendarAuctionRow[]): number | null {
+  const present = sales
+    .map((s) => s.totalOpeningBids)
+    .filter((v): v is string => v !== null && v !== "")
+    .map(Number)
+    .filter(Number.isFinite);
+  return present.length ? present.reduce((a, b) => a + b, 0) : null;
+}
+
+/** "$1.2M in opening bids", or nothing — a tooltip should not trail into "—". */
+function bidPhrase(total: number | null): string {
+  return total === null ? "" : `, ${money(total, { compact: true })} in opening bids`;
 }
 
 /**

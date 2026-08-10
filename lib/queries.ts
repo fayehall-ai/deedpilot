@@ -118,6 +118,14 @@ export interface CalendarAuctionRow {
    * only thing separating eight otherwise identical rows.
    */
   title: string | null;
+  /**
+   * Sum of opening bids where known — an incomplete floor, labelled as such.
+   *
+   * Null when no lot in the sale carries an opening bid, which is a different
+   * statement from "$0" and is rendered differently. Lot count answers how much
+   * there is to work through; this answers whether it is worth the drive.
+   */
+  totalOpeningBids: string | null;
 }
 
 export interface CalendarFilterOpts {
@@ -172,6 +180,12 @@ export async function getCalendarAuctions(
       listingKind: auctions.listingKind,
       saleDateConfirmed: auctions.saleDateConfirmed,
       title: auctions.title,
+      // Correlated rather than joined-and-grouped: `lots_auction_idx` turns each
+      // one into an index scan, and grouping would have to survive the county
+      // join above without double-counting.
+      totalOpeningBids: sql<string | null>`(
+        SELECT sum(${lots.openingBid}) FROM ${lots} WHERE ${lots.auctionId} = ${auctions.id}
+      )`,
     })
     .from(auctions)
     .innerJoin(counties, eq(counties.fips, auctions.countyFips))
@@ -253,6 +267,32 @@ export async function getNextCalendarDate(
     .orderBy(asc(auctions.saleDate))
     .limit(1);
   return row?.saleDate ?? null;
+}
+
+/**
+ * The month the calendar opens on when the URL names none.
+ *
+ * This month whenever it still has a sale to come, and otherwise the month of
+ * the next one. Sales cluster into a few months a year, so the literal current
+ * month is empty for much of it — and a landing page whose main section says
+ * "nothing scheduled in August" reads as no inventory rather than as a quiet
+ * August.
+ *
+ * Deliberately blind to the reader's filter chips, for the same reason
+ * `getCalendarFacets` is: a month that jumps when a chip is toggled makes the
+ * control feel broken. The empty-state's "the next matching sale is …" link is
+ * the filtered answer, and it is one the reader chooses rather than one that
+ * happens to them.
+ */
+export async function getDefaultCalendarMonth(): Promise<string> {
+  /*
+   * Cached because it reads the clock — Cache Components only permits that
+   * inside a cache scope — and because the answer moves at most once a day.
+   */
+  "use cache";
+  cacheLife("hours");
+  const today = todayIso();
+  return (await getNextCalendarDate({ after: today }))?.slice(0, 7) ?? today.slice(0, 7);
 }
 
 export async function getAuction(id: string) {

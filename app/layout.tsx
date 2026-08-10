@@ -17,20 +17,26 @@ export const metadata: Metadata = {
 };
 
 /**
- * Every nav item is a section of the home page.
+ * Mostly sections of the home page, in the order they appear there.
  *
  * Ordered by how often each is looked at rather than alphabetically or by
  * marketing logic: the calendar is what a subscriber opens daily, pricing is
  * read once. That order is also the order the sections appear in, because an
  * anchor nav whose order disagrees with the page reads as broken.
  *
- * Each still has a real route (`/calendar`, `/atlas`, …) — anchors are for
- * moving around the page, routes are for deep links, sharing, and the search
- * engines that index the 1,010 county pages.
+ * Each anchored item still has a real route (`/calendar`, `/atlas`, …) —
+ * anchors are for moving around the page, routes are for deep links, sharing,
+ * and the search engines that index the 1,010 county pages.
+ *
+ * Auctions is the exception, and points at its route. The home page used to
+ * carry the same sales twice, as a calendar and as a list below it; the list
+ * came out once the calendar could show lots and opening bids on its own. The
+ * route stays because a flat list is still the better view for scanning a whole
+ * season at once, and there is no longer a section for the anchor to reach.
  */
 const NAV = [
   { href: "/#calendar", label: "Calendar" },
-  { href: "/#auctions", label: "Auctions" },
+  { href: "/auctions", label: "Auctions" },
   { href: "/#atlas", label: "Atlas" },
   { href: "/#coverage", label: "Coverage" },
   { href: "/#pricing", label: "Pricing" },
