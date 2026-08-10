@@ -7,6 +7,47 @@
  */
 
 import type { AssessorLink } from "./types";
+import directory from "@/data/county-directory.json";
+import { pickLink, type CountyDirectory, type OfficeKind } from "@/lib/directory/onlinesearches";
+
+/**
+ * Crawled county office links, keyed by FIPS.
+ *
+ * Filled by `npm run crawl:directory`. The hand-authored blocks below stay
+ * ahead of it: someone who sat with Brevard's search form and worked out that
+ * the clerk's "parcel" is a tax-deed account number rather than a BCPAO APN
+ * knows something a directory listing does not.
+ */
+const DIRECTORY = directory as Record<string, CountyDirectory>;
+
+/** Directory links worth offering, in the order a bidder wants them. */
+const OFFERED: { kind: OfficeKind; suffix: string }[] = [
+  { kind: "assessor", suffix: "" },
+  { kind: "tax_portal", suffix: "" },
+  { kind: "delinquent", suffix: "" },
+  { kind: "foreclosure", suffix: "" },
+  { kind: "recorder", suffix: "" },
+  { kind: "gis", suffix: "" },
+];
+
+/**
+ * County offices from the crawled directory.
+ *
+ * Marked `searchOnly` without exception: these are office landing pages, not
+ * parcel-specific deep links, and telling someone a link will show them their
+ * parcel when it will show them a search form is the kind of small lie that
+ * makes the rest of the page less believable.
+ */
+function directoryLinks(fips: string): AssessorLink[] {
+  const entry = DIRECTORY[fips];
+  if (!entry) return [];
+  const out: AssessorLink[] = [];
+  for (const { kind } of OFFERED) {
+    const hit = pickLink(entry, kind);
+    if (hit) out.push({ label: hit.label, url: hit.url, searchOnly: true });
+  }
+  return out;
+}
 
 export function assessorLinks(opts: {
   state: string;
@@ -227,6 +268,19 @@ export function assessorLinks(opts: {
         )}`,
         searchOnly: true,
       });
+    }
+  }
+
+  /*
+   * Crawled county offices, after anything hand-authored for this county and
+   * before the Google fallback. Deduped by URL so a county that is both
+   * researched and crawled does not list its assessor twice.
+   */
+  const have = new Set(links.map((l) => l.url));
+  for (const l of directoryLinks(opts.fips)) {
+    if (!have.has(l.url)) {
+      links.push(l);
+      have.add(l.url);
     }
   }
 

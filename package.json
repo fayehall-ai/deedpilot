@@ -23,7 +23,8 @@
     "scan:html": "tsx scripts/scan-html-lots.ts",
     "ingest:found": "tsx scripts/ingest-found-lists.ts",
     "ingest:fl": "tsx scripts/ingest.ts -- --adapter fl-clerks",
-    "enrich:lots": "tsx scripts/enrich-lots.ts"
+    "enrich:lots": "tsx scripts/enrich-lots.ts",
+    "crawl:directory": "tsx scripts/crawl-directory.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
