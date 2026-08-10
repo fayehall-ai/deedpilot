@@ -13,6 +13,7 @@ import {
   toSaleType,
 } from "@/lib/atlas";
 import { num } from "@/lib/format";
+import { AtlasCountyMap } from "@/components/atlas-county-map";
 import { Breadcrumbs, Card, SaleTypeBadge } from "@/components/ui";
 
 export function generateStaticParams() {
@@ -64,6 +65,16 @@ export default async function StatePage(props: PageProps<"/atlas/[state]">) {
           </div>
         </div>
       </header>
+
+      {/*
+        The county map, above the prose.
+        
+        Same drill-down thetaxdeed does with client state, but as routes: the
+        national map sent you here, and each county here is a real page.
+      */}
+      <section className="mb-8 rounded-xl border border-border bg-surface p-4">
+        <AtlasCountyMap stateAbbr={abbr} stateFips={counties[0]?.fips.slice(0, 2) ?? ""} stateName={name} />
+      </section>
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
         <Card>
