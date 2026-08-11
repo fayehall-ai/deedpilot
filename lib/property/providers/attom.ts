@@ -13,6 +13,7 @@
 
 import type { EnrichInput, PropertyProvider, PropertyRecord } from "../types";
 import { ProviderUnavailableError } from "../types";
+import { fetchWithBackoff } from "../retry";
 
 const BASE = "https://api.gateway.attomdata.com/propertyapi/v1.0.0";
 
@@ -103,7 +104,13 @@ async function fetchProperty(
   headers: Record<string, string>,
   input: EnrichInput,
 ): Promise<PropertyRecord | null> {
-  const res = await fetch(url, { headers });
+  /*
+   * Throttling is retried here rather than surfacing as an outage. ATTOM's 400
+   * "SuccessWithoutResult" and its 401 both still arrive as responses for the
+   * checks below — only 429 and the 5xx family are retried, and only until the
+   * attempts are spent.
+   */
+  const res = await fetchWithBackoff(url, { headers }, { provider: "attom" });
   const text = await res.text();
   let data: {
     status?: { code?: number; msg?: string; total?: number };
@@ -137,8 +144,13 @@ async function fetchProperty(
         "invalid, unauthorized, or out-of-quota API key",
       );
     }
+    /*
+     * A 429 reaching this point has already survived `fetchWithBackoff`'s
+     * retries, so it is a sustained throttle rather than a passing one and the
+     * provider genuinely is unusable for now.
+     */
     if (res.status === 429) {
-      throw new ProviderUnavailableError("attom", 429, "rate limited");
+      throw new ProviderUnavailableError("attom", 429, "rate limited after retries");
     }
     throw new Error(`attom ${res.status}: ${text.slice(0, 200)}`);
   }

@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-08-10T02:59:37.154Z",
+  "builtAt": "2026-08-11T18:04:10.979Z",
   "nCounties": 1312,
   "nVerified": 921,
   "nGaps": 602,
@@ -9019,7 +9019,7 @@
           "url": "https://www.clarkcountynv.gov/government/elected_officials/county_treasurer/faqs",
           "host": "www.clarkcountynv.gov",
           "origin": "atlas",
-          "kind": "results",
+          "kind": "rules",
           "isGovernment": true,
           "confidence": 0.88,
           "signals": [
@@ -9029,7 +9029,8 @@
             "redemption period",
             "parcel id"
           ],
-          "verifiedOn": "2026-08-10",
+          "scheduleHint": "The Treasurer's Office may conduct at least one tax auction per year, usually in Spring. There may also be a second auction held in the Fall.",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         }
       ],
@@ -9068,14 +9069,15 @@
           "url": "https://www.elkocountynv.net/departments/treasurer20/trustee_property_sales.php",
           "host": "www.elkocountynv.net",
           "origin": "atlas",
-          "kind": "results",
+          "kind": "rules",
           "isGovernment": false,
           "confidence": 0.55,
           "signals": [
             "tax sale",
             "minimum/opening bid"
           ],
-          "verifiedOn": "2026-08-10",
+          "scheduleHint": "ELKO COUNTY'S NEXT TRUSTEE PROPERTY SALE IS SCHEDULED FOR NEXT SPRING - 2027",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         }
       ],
@@ -9129,7 +9131,8 @@
             "tax sale",
             "minimum/opening bid"
           ],
-          "verifiedOn": "2026-08-10",
+          "scheduleHint": "public auction every odd year; June 17th, 2025 auction closed; Next Tax Receiver auction will be held in June of 2027.",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         },
         {
@@ -9146,7 +9149,8 @@
             "tax sale",
             "minimum/opening bid"
           ],
-          "verifiedOn": "2026-08-10",
+          "scheduleHint": "public auction every odd year; June 17th, 2025 Auction is closed... Next Tax Receiver auction will be held in June of 2027.",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         },
         {
@@ -9163,7 +9167,8 @@
             "tax sale",
             "minimum/opening bid"
           ],
-          "verifiedOn": "2026-08-10",
+          "scheduleHint": "Properties with delinquent taxes offered for sale at public auction every odd year. June 17th, 2025 auction is closed; next Tax Receiver auction will be held in June of 2027.",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         },
         {
@@ -9180,7 +9185,8 @@
             "tax sale",
             "minimum/opening bid"
           ],
-          "verifiedOn": "2026-08-10",
+          "scheduleHint": "Properties with delinquent taxes offered for sale at public auction every odd year; June 17th, 2025 auction is closed; next Tax Receiver auction will be held in June of 2027. Hosted online with Bid4Assets.",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         }
       ],
@@ -9203,7 +9209,7 @@
             "delinquent tax",
             "tax sale"
           ],
-          "verifiedOn": "2026-08-10",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         }
       ],
@@ -21531,17 +21537,35 @@
         {
           "fips": "02020",
           "state": "AK",
+          "url": "https://www.muni.org/Departments/hlb/Pages/realestateservices.aspx",
+          "host": "www.muni.org",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "redemption period"
+          ],
+          "scheduleHint": "\"Following Assembly approval, sales are conducted annually of these properties by sealed bid sale.\" 2026 sale: Clerk's Deed giving Municipality ownership on June 24, 2026; taxes must be paid by 5pm, July 10, 2026.",
+          "verifiedOn": "2026-08-11",
+          "httpStatus": 200
+        },
+        {
+          "fips": "02020",
+          "state": "AK",
           "url": "https://www.muni.org/Departments/hlb/pages/resforeclosedproperties.aspx",
           "host": "www.muni.org",
           "origin": "atlas",
-          "kind": "results",
+          "kind": "listing",
           "isGovernment": false,
           "confidence": 0.45,
           "signals": [
             "delinquent tax",
             "foreclosure auction"
           ],
-          "verifiedOn": "2026-08-09",
+          "scheduleHint": "A Second 2026 Tax-Foreclosed Property Sale is scheduled to take place September 16, 2026",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         },
         {
@@ -21550,30 +21574,15 @@
           "url": "https://www.muni.org/Departments/hlb/Pages/RESForeclosedProperties.aspx",
           "host": "www.muni.org",
           "origin": "link_followed",
-          "kind": "results",
+          "kind": "listing",
           "isGovernment": false,
           "confidence": 0.4,
           "signals": [
             "delinquent tax",
             "foreclosure auction"
           ],
-          "verifiedOn": "2026-08-09",
-          "httpStatus": 200
-        },
-        {
-          "fips": "02020",
-          "state": "AK",
-          "url": "https://www.muni.org/Departments/hlb/Pages/realestateservices.aspx",
-          "host": "www.muni.org",
-          "origin": "atlas",
-          "kind": "calendar",
-          "isGovernment": false,
-          "confidence": 0.45,
-          "signals": [
-            "delinquent tax",
-            "redemption period"
-          ],
-          "verifiedOn": "2026-08-09",
+          "scheduleHint": "A Second 2026 Tax-Foreclosed Property Sale is scheduled to take place September 16, 2026",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         }
       ],
@@ -21827,14 +21836,15 @@
           "url": "https://www.fnsb.gov/169/Tax-Foreclosure",
           "host": "www.fnsb.gov",
           "origin": "atlas",
-          "kind": "calendar",
+          "kind": "rules",
           "isGovernment": true,
           "confidence": 0.75,
           "signals": [
             "delinquent tax",
             "foreclosure auction"
           ],
-          "verifiedOn": "2026-08-09",
+          "scheduleHint": "Fairbanks North Star Borough holds sales of properties acquired through tax foreclosure at least once every two years. UPCOMING IMPORTANT DATES: August 28, 2026 - Tax Foreclosure Sale",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         }
       ],
@@ -23267,14 +23277,14 @@
           "url": "https://www.kpb.us/departments/property-tax/property-tax-resources/tax-foreclosure-sales",
           "host": "www.kpb.us",
           "origin": "atlas",
-          "kind": "results",
+          "kind": "listing",
           "isGovernment": true,
           "confidence": 0.75,
           "signals": [
             "delinquent tax",
             "foreclosure auction"
           ],
-          "verifiedOn": "2026-08-09",
+          "verifiedOn": "2026-08-11",
           "httpStatus": 200
         }
       ],

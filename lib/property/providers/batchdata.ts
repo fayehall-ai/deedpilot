@@ -13,6 +13,7 @@
  */
 
 import type { EnrichInput, PropertyProvider, PropertyRecord } from "../types";
+import { fetchWithBackoff } from "../retry";
 
 const BASE = "https://api.batchdata.com/api/v1";
 
@@ -132,15 +133,19 @@ async function postJson(
   url: string,
   body: Record<string, unknown>,
 ): Promise<Record<string, unknown> | null> {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
+  const res = await fetchWithBackoff(
+    url,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-  });
+    { provider: "batchdata" },
+  );
 
   const text = await res.text();
   let data: Record<string, unknown> = {};

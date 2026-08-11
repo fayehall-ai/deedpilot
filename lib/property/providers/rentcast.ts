@@ -7,6 +7,7 @@
  */
 
 import type { EnrichInput, PropertyProvider, PropertyRecord } from "../types";
+import { fetchWithBackoff } from "../retry";
 
 const BASE = "https://api.rentcast.io/v1";
 
@@ -25,9 +26,11 @@ export const rentcastProvider: PropertyProvider = {
     if (!address) return null;
 
     const qs = new URLSearchParams({ address });
-    const propRes = await fetch(`${BASE}/properties?${qs}`, {
-      headers: { "X-Api-Key": key, Accept: "application/json" },
-    });
+    const propRes = await fetchWithBackoff(
+      `${BASE}/properties?${qs}`,
+      { headers: { "X-Api-Key": key, Accept: "application/json" } },
+      { provider: "rentcast" },
+    );
     if (!propRes.ok) {
       const err = await propRes.text();
       if (propRes.status === 403 && /subscription-inactive|billing/i.test(err)) {
@@ -44,9 +47,11 @@ export const rentcastProvider: PropertyProvider = {
     // Optional AVM for market estimate
     let marketValue: number | undefined;
     try {
-      const avmRes = await fetch(`${BASE}/avm/value?${qs}`, {
-        headers: { "X-Api-Key": key, Accept: "application/json" },
-      });
+      const avmRes = await fetchWithBackoff(
+        `${BASE}/avm/value?${qs}`,
+        { headers: { "X-Api-Key": key, Accept: "application/json" } },
+        { provider: "rentcast" },
+      );
       if (avmRes.ok) {
         const avm = (await avmRes.json()) as { price?: number; value?: number };
         marketValue = num(avm.price ?? avm.value);
