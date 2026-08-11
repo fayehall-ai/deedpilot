@@ -133,7 +133,7 @@ export async function AuctionsList(props: {
 
                     <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <dt className="text-xs text-muted">Lots</dt>
+                        <dt className="text-xs text-muted">Parcels</dt>
                         <dd className="tnum font-medium">{num(a.lotCount)}</dd>
                       </div>
                       <div>

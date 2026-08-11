@@ -180,7 +180,7 @@ async function HeroStats() {
         <HeroStat label="Researched in depth" value={num(Object.keys(COUNTY_DATA).length)} />
         <HeroStat label="States with inventory" value={num(stats.byState.length)} />
         <HeroStat label="Upcoming auctions" value={num(stats.upcomingAuctions)} />
-        <HeroStat label="Lots on published sale lists" value={num(stats.totalLots)} />
+        <HeroStat label="Parcels on published sale lists" value={num(stats.totalLots)} />
       </dl>
 
       {/*

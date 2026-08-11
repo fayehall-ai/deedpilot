@@ -8,7 +8,7 @@ import { AuctionsList } from "@/components/auctions-list";
 export const metadata: Metadata = {
   title: "Upcoming tax sale auctions",
   description:
-    "Every upcoming tax deed, tax lien, and redeemable deed auction we track, with lot counts and opening bids.",
+    "Every upcoming tax deed, tax lien, and redeemable deed auction we track, with parcel counts and opening bids.",
 };
 
 export const unstable_instant = {

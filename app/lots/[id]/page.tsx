@@ -24,7 +24,7 @@ import type { SaleType } from "@/lib/atlas/types";
 export async function generateMetadata(props: PageProps<"/lots/[id]">): Promise<Metadata> {
   const { id } = await props.params;
   const row = await getLot(id);
-  if (!row) return { title: "Lot not found" };
+  if (!row) return { title: "Parcel not found" };
   const label = row.lot.addressLine ?? row.lot.parcelNumber ?? "Parcel";
   return { title: `${label} — ${row.county.name} County, ${row.county.state}` };
 }
@@ -167,7 +167,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             href: `/auctions/${auction.id}`,
             label: `${county.name} County · ${saleDate(auction.saleDate)}`,
           },
-          { label: lot.parcelNumber ?? "Lot" },
+          { label: lot.parcelNumber ?? "Parcel" },
         ]}
       />
 

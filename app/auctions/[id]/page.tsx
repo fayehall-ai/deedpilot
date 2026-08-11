@@ -105,13 +105,13 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
       </header>
 
       <div className="mb-6 grid gap-4 rounded-xl border border-border bg-surface p-5 sm:grid-cols-4">
-        <Stat label="Lots" value={num(lots.length)} />
+        <Stat label="Parcels" value={num(lots.length)} />
         <Stat
           label="Opening bids"
           value={money(totalOpening)}
           hint={
             withBid.length === lots.length
-              ? "all lots priced"
+              ? "all parcels priced"
               : `${num(lots.length - withBid.length)} lot(s) have no published opening bid`
           }
         />
@@ -157,14 +157,14 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
       ) : null}
 
       <h2 className="mb-3 text-lg font-semibold">
-        Lots{" "}
+        Parcels{" "}
         <span className="text-sm font-normal text-muted">
           — ranked by assessed value over opening bid
         </span>
       </h2>
 
       {lots.length === 0 ? (
-        <EmptyState title="No lots published yet">
+        <EmptyState title="No parcels published yet">
           Counties often publish the parcel list only days before the sale. The auction date is
           confirmed; check back closer to {saleDate(auction.saleDate)}.
         </EmptyState>
@@ -245,7 +245,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
         {statute
           ? statute.assessmentBasis
           : "assessment practice varies by state"}{" "}
-        Open a lot to run the full max-bid analysis, which accounts for the assessment ratio,
+        Open a parcel to run the full max-bid analysis, which accounts for the assessment ratio,
         surviving liens, quiet title, and holding costs.
       </p>
     </div>

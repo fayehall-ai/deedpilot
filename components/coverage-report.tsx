@@ -86,7 +86,7 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
                 <span className="text-base font-normal text-muted"> / 51</span>
               </div>
               <p className="mt-1 text-xs text-muted">
-                {num(board.live.totalLotsUpcoming)} lots · {num(board.live.countiesWithLots)}{" "}
+                {num(board.live.totalLotsUpcoming)} parcels · {num(board.live.countiesWithLots)}{" "}
                 counties · {num(board.live.upcomingAuctionsWithLots)} sales
               </p>
             </Card>
@@ -109,7 +109,7 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
                 <span className="text-base font-normal text-muted"> statutes</span>
               </div>
               <p className="mt-1 text-xs text-muted">
-                {num(board.live.lotsAutoPriceable)} auto-priceable lots (
+                {num(board.live.lotsAutoPriceable)} auto-priceable parcels (
                 {(board.maxbid.autoPriceableRate * 100).toFixed(0)}% of inventory)
               </p>
             </Card>
@@ -117,7 +117,7 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
 
           {board.live.skeletonAuctions > 0 ? (
             <Callout tone="warn" title="Skeleton auctions">
-              {num(board.live.skeletonAuctions)} upcoming auction row(s) have zero lots and are
+              {num(board.live.skeletonAuctions)} upcoming auction row(s) have zero parcels and are
               hidden from browse. Purge with{" "}
               <code className="font-mono">npm run purge:skeletons</code>.
             </Callout>
@@ -167,7 +167,7 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
           <div className="text-xs uppercase tracking-wide text-muted">Real inventory</div>
           <div className="tnum mt-1 text-2xl font-semibold">{num(stats.totalLots)}</div>
           <p className="mt-1 text-xs text-muted">
-            {num(stats.upcomingAuctions)} sales with lots
+            {num(stats.upcomingAuctions)} sales with parcels
             {stats.lotsWithAssessed != null
               ? ` · ${num(stats.lotsWithAssessed)} assessed (${(autoRate * 100).toFixed(0)}%)`
               : ""}
@@ -194,12 +194,12 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
                 <dd className="tnum mt-1 text-2xl font-semibold">{num(stats.totalLots)}</dd>
                 <p className="mt-1 text-xs text-muted">
                   Parcels on a county&apos;s list for a specific, published sale date. These are
-                  the only lots counted as inventory anywhere on the site.
+                  the only parcels counted as inventory anywhere on the site.
                 </p>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-muted">
-                  Leads, not lots
+                  Leads, not parcels
                 </dt>
                 <dd className="tnum mt-1 text-2xl font-semibold text-muted">
                   {num(stats.leadLots)}
@@ -227,7 +227,7 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
                     <th className="px-4 py-2.5 font-medium">State</th>
                     <th className="px-4 py-2.5 text-right font-medium">Counties</th>
                     <th className="px-4 py-2.5 text-right font-medium">Auctions</th>
-                    <th className="px-4 py-2.5 text-right font-medium">Lots</th>
+                    <th className="px-4 py-2.5 text-right font-medium">Parcels</th>
                     <th className="px-4 py-2.5 text-right font-medium">Assessed</th>
                     <th className="px-4 py-2.5 text-right font-medium">Auto max-bid</th>
                   </tr>
@@ -300,7 +300,7 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
                     <th className="px-4 py-2.5 font-medium">Source</th>
                     <th className="px-4 py-2.5 font-medium">Status</th>
                     <th className="px-4 py-2.5 text-right font-medium">Auctions</th>
-                    <th className="px-4 py-2.5 text-right font-medium">Lots</th>
+                    <th className="px-4 py-2.5 text-right font-medium">Parcels</th>
                     <th className="px-4 py-2.5 text-right font-medium">Rejected</th>
                     <th className="px-4 py-2.5 text-right font-medium">Repaired</th>
                     <th className="px-4 py-2.5 font-medium">Last run</th>

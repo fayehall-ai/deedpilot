@@ -139,7 +139,7 @@ export async function CalendarView(props: {
         summary={
           inMonth.length === 0
             ? `No sales in ${monthLabel(filters.month)} matching these filters`
-            : `${num(inMonth.length)} ${inMonth.length === 1 ? "sale" : "sales"} · ${num(countyTotal)} ${countyTotal === 1 ? "county" : "counties"} · ${num(lotTotal)} lots`
+            : `${num(inMonth.length)} ${inMonth.length === 1 ? "sale" : "sales"} · ${num(countyTotal)} ${countyTotal === 1 ? "county" : "counties"} · ${num(lotTotal)} parcels`
         }
       />
 
@@ -194,7 +194,7 @@ export async function CalendarView(props: {
                   {sales.length > 0 ? (
                     <span
                       className="tnum text-[10px] text-muted"
-                      title={`${num(sales.reduce((n, a) => n + a.lotCount, 0))} lots across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
+                      title={`${num(sales.reduce((n, a) => n + a.lotCount, 0))} parcels across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
                         sumBids(sales),
                       )}`}
                     >
@@ -322,7 +322,7 @@ export async function CalendarView(props: {
           </>
         ) : (
           <>
-            Showing only published sale lists on county-published dates. Sale dates and lot counts
+            Showing only published sale lists on county-published dates. Sale dates and parcel counts
             change; confirm with the county before travelling or wiring funds.
           </>
         )}
@@ -356,7 +356,7 @@ function SaleEntry({
   return (
     <details className="group/entry">
       <summary
-        title={`${county}, ${stateName} — ${num(group.sales.length)} separate ${lead.saleType} sales, ${num(group.lotTotal)} lots total${bidPhrase(group.bidTotal)}, ${platformLabel(lead.platform)}${
+        title={`${county}, ${stateName} — ${num(group.sales.length)} separate ${lead.saleType} sales, ${num(group.lotTotal)} parcels total${bidPhrase(group.bidTotal)}, ${platformLabel(lead.platform)}${
           group.cancelledCount ? ` (${num(group.cancelledCount)} cancelled)` : ""
         }`}
         className={[
@@ -407,7 +407,7 @@ function SaleEntry({
             <li key={a.id}>
               <Link
                 href={`/auctions/${a.id}`}
-                title={`${a.title ?? county} — ${num(a.lotCount)} lots${bidPhrase(sumBids([a]))}${cancelled ? `, ${a.status}` : ""}`}
+                title={`${a.title ?? county} — ${num(a.lotCount)} parcels${bidPhrase(sumBids([a]))}${cancelled ? `, ${a.status}` : ""}`}
                 className={`flex items-baseline gap-2 rounded px-1 py-0.5 transition-colors hover:bg-surface-2 ${
                   verbose ? "text-sm" : "text-[11px]"
                 }`}
@@ -444,7 +444,7 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
   return (
     <Link
       href={`/auctions/${auction.id}`}
-      title={`${county}, ${stateName} — ${auction.saleType}, ${num(auction.lotCount)} lots${bidPhrase(
+      title={`${county}, ${stateName} — ${auction.saleType}, ${num(auction.lotCount)} parcels${bidPhrase(
         sumBids([auction]),
       )}, ${platformLabel(auction.platform)}`}
       className={[
@@ -495,7 +495,7 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
 function Totals({ lots, bids }: { lots: number; bids: number | null }) {
   return (
     <span className="ml-auto shrink-0 pl-2 text-right text-xs text-muted">
-      <span className="tnum whitespace-nowrap">{num(lots)} lots</span>
+      <span className="tnum whitespace-nowrap">{num(lots)} parcels</span>
       {bids === null ? null : (
         <>
           <span aria-hidden> · </span>
