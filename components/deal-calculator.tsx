@@ -185,9 +185,11 @@ export function DealCalculator({
           Confidence: <span className="capitalize text-foreground">{result.confidence}</span>
           {result.arv.assumed
             ? " — built on an assumed floor from the opening bid, not a valuation of this parcel."
-            : result.arv.derived
-              ? " — ARV derived from assessed value, not comps."
-              : ""}
+            : result.arv.fromMarket
+              ? " — ARV from a provider market estimate, not comps."
+              : result.arv.derived
+                ? " — ARV derived from assessed value, not comps."
+                : ""}
         </div>
       </div>
 

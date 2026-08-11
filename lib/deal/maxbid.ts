@@ -124,6 +124,8 @@ export interface DealResult {
      * than implying the statewide one always applies.
      */
     countyOverride?: boolean;
+    /** True when the ARV came from a provider market estimate. */
+    fromMarket?: boolean;
     /**
      * True when the value is a statistical floor from the opening bid rather
      * than a valuation of this parcel.
@@ -209,12 +211,16 @@ function deriveArv(
   basis: string;
   derived: boolean;
   countyOverride?: boolean;
-  /**
-   * True when the figure is a statistical placeholder rather than a valuation
-   * of this parcel — see `floorFrom`. The UI must render it differently; a
-   * number nobody measured must not look like one somebody did.
-   */
   assumed?: boolean;
+  /**
+   * True when the ARV came from a provider market estimate.
+   *
+   * Separate from `derived` because both the market path and the assessed
+   * path set that flag, and the UI was captioning every derived ARV "derived
+   * from assessed value" — including the ones that came from a market figure
+   * and never touched an assessment ratio.
+   */
+  fromMarket?: boolean;
 } {
   if (inputs.arvOverride !== undefined && inputs.arvOverride > 0) {
     return {
@@ -237,6 +243,7 @@ function deriveArv(
   if (inputs.marketValue !== undefined && inputs.marketValue > 0) {
     return {
       value: inputs.marketValue,
+      fromMarket: true,
       basis:
         `Provider market estimate of ${inputs.marketValue.toLocaleString("en-US", {
           style: "currency",

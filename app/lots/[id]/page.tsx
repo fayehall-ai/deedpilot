@@ -12,6 +12,7 @@ import { DealCalculator } from "@/components/deal-calculator";
 import { ParcelBrief } from "@/components/parcel-brief";
 import { HistoricalComps } from "@/components/historical-comps";
 import { PropertyEnrichButton } from "@/components/property-enrich-button";
+import { PropertyDetail } from "@/components/property-detail";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
 import { getComparables } from "@/lib/history/comparables";
 import { assessorLinks } from "@/lib/property/assessor-links";
@@ -66,6 +67,15 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
    * for showing anything.
    */
   const valRaw = (valuations[0]?.raw ?? {}) as Record<string, unknown>;
+  /*
+   * ATTOM's payload specifically, for the full-record panel. Picked by source
+   * rather than by recency: it is the provider that returns the 179-field
+   * profile, and a newer RentCast row carrying a market estimate and little
+   * else would otherwise blank the whole panel.
+   */
+  const attomRaw = (valuations.find((v) => v.source === "attom")?.raw ?? null) as
+    | Record<string, unknown>
+    | null;
   const beds = latestVal?.beds ?? (typeof valRaw.beds === "number" ? valRaw.beds : null);
   const baths =
     latestVal?.baths !== null && latestVal?.baths !== undefined
@@ -324,6 +334,8 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
               </p>
             ) : null}
           </Card>
+
+          <PropertyDetail raw={attomRaw} />
 
           <Card>
             <h3 className="mb-2 text-sm font-semibold">County records</h3>
