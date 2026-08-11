@@ -4,6 +4,7 @@
  */
 import { computeMaxBid } from "./maxbid";
 import { STATUTE_PARAMS, coveredStateList, statuteFor } from "./statute";
+import { FLOOR_RATIOS } from "./floor-ratios";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) throw new Error(msg);
@@ -211,13 +212,25 @@ assert(
   /Assumed floor, not a valuation of this parcel/.test(arFloor.arv.basis),
   "the basis leads with what it is not",
 );
-assert(/889/.test(arFloor.arv.basis), "and cites its sample size");
-
-// Conservative quartile, not the median — wrong low beats wrong high at an
-// auction. AR p25 is 10.82 and its median is 17.23.
 assert(
-  arFloor.arv.value === 10_820,
-  `p25 is used, not the median, got ${arFloor.arv.value}`,
+  arFloor.arv.basis.includes(FLOOR_RATIOS.AR.n.toLocaleString()),
+  "and cites its sample size",
+);
+
+/*
+ * Conservative quartile, not the median — wrong low beats wrong high at an
+ * auction. Derived from the table rather than pinned to a number: the ratios
+ * are regenerated as enrichment shifts the distribution, and an assertion on
+ * today's value fails on a healthy re-run while saying nothing about the rule.
+ * AR's p25 has already moved 10.82 → 10.39 once.
+ */
+assert(
+  arFloor.arv.value === 1_000 * FLOOR_RATIOS.AR.p25,
+  `p25 is used, got ${arFloor.arv.value} against p25 ${FLOOR_RATIOS.AR.p25}`,
+);
+assert(
+  FLOOR_RATIOS.AR.p25 < FLOOR_RATIOS.AR.median,
+  "and p25 really is the conservative end",
 );
 
 // States with no measured entry get nothing. Louisiana is 1,638 unpriceable

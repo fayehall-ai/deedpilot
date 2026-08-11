@@ -28,7 +28,7 @@ export interface FloorRatio {
 }
 
 export const FLOOR_RATIOS: Record<string, FloorRatio> = {
-  AR: { n: 889, p25: 10.82, median: 17.23, p75: 24.28 },
+  AR: { n: 1669, p25: 10.39, median: 15.47, p75: 21.59 },
   MI: { n: 2189, p25: 2.24, median: 5.82, p75: 11.51 },
   TX: { n: 669, p25: 2.57, median: 5.18, p75: 10.99 },
 };
