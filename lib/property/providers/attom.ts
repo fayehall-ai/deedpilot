@@ -208,13 +208,34 @@ function mapProperty(p: Record<string, unknown>, input: EnrichInput): PropertyRe
     lastSaleAmount: num(saleAmount.saleamt) ?? num(saleAmount.saleAmt),
     lastSaleDate: dateStr(sale.salesearchdate ?? sale.saleTransDate),
     beds: num(rooms.beds),
-    baths: num(rooms.bathstotal) ?? num(rooms.bathsTotal),
-    buildingSqft: num(size.universalsize) ?? num(size.bldgsize),
-    lotSqft: num(lot.lotsize1) ?? num(lot.lotSize1),
-    acreage: num(lot.lotsize2) ?? num(lot.lotSize2),
-    yearBuilt: num(summary.yearbuilt) ?? num(summary.yearBuilt),
-    landUse: str(summary.proptype) ?? str(summary.propType),
-    propertyType: str(summary.propsubtype),
+    baths: num(rooms.bathsTotal) ?? num(rooms.bathstotal),
+    /*
+     * ATTOM's camelCase, with the lowercase spellings kept as fallbacks.
+     *
+     * `livingSize` leads because it is the figure a comp is drawn against;
+     * `universalSize` and `bldgSize` back it up. The previous mapping listed
+     * only lowercase keys for this one and no camelCase alternate at all, so it
+     * resolved to undefined on every record ATTOM has ever returned here.
+     */
+    buildingSqft:
+      num(size.livingSize) ??
+      num(size.universalSize) ??
+      num(size.bldgSize) ??
+      num(size.universalsize) ??
+      num(size.bldgsize),
+    /*
+     * lotSize1 is ACRES and lotSize2 is SQUARE FEET. These two were assigned to
+     * each other's fields, which put square feet into `lots.acreage` — the lot
+     * page has been rendering "ACREAGE 43,560" for a parcel of exactly one acre
+     * — and put acres into `lot_sqft`. `lot_sqft` is an integer column, so a
+     * value of 0.279 was rejected outright by Postgres and took the whole write
+     * with it: 216 of 250 enrichments failed on this in one run.
+     */
+    lotSqft: num(lot.lotSize2) ?? num(lot.lotsize2),
+    acreage: num(lot.lotSize1) ?? num(lot.lotsize1),
+    yearBuilt: num(summary.yearBuilt) ?? num(summary.yearbuilt),
+    landUse: str(summary.propType) ?? str(summary.proptype),
+    propertyType: str(summary.propertyType) ?? str(summary.propSubType) ?? str(summary.propsubtype),
     latitude: num(geo.latitude),
     longitude: num(geo.longitude),
     raw: p,

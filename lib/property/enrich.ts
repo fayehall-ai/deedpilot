@@ -229,9 +229,14 @@ export async function applyRecordToLot(lotId: string, record: PropertyRecord): P
       // written only into the JSON blob, so nothing could query them.
       beds: record.beds ?? null,
       baths: record.baths !== undefined ? String(record.baths) : null,
-      lotSqft: record.lotSqft ?? null,
-      buildingSqft: record.buildingSqft ?? null,
-      yearBuilt: record.yearBuilt ?? null,
+      /*
+       * Rounded at the boundary. These are integer columns, and a provider that
+       * hands over a float — as ATTOM's acres-in-a-sqft-field did — should
+       * lose precision rather than abort the insert and lose the record.
+       */
+      lotSqft: record.lotSqft === undefined ? null : Math.round(record.lotSqft),
+      buildingSqft: record.buildingSqft === undefined ? null : Math.round(record.buildingSqft),
+      yearBuilt: record.yearBuilt === undefined ? null : Math.round(record.yearBuilt),
       propertyType: record.propertyType ?? null,
       // `raw` keeps the whole response. It is what let the assdImprValue typo
       // be repaired without re-paying ATTOM, so it stays complete rather than
