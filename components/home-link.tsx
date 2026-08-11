@@ -12,7 +12,6 @@
  * On any other route it stays an ordinary link and Next handles it.
  */
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 /** A modified click means the reader wants a new tab — never intercept it. */
 function opensElsewhere(e: React.MouseEvent) {
@@ -26,14 +25,22 @@ export function HomeLink({
   children: React.ReactNode;
   className?: string;
 }) {
-  const pathname = usePathname();
-
   return (
     <Link
       href="/"
       className={className}
       onClick={(e) => {
-        if (pathname !== "/" || opensElsewhere(e)) return;
+        /*
+         * Read at click time, not at render.
+         *
+         * The first version called `usePathname()`, which is request data, and
+         * this component sits in the root layout — so every route inherited the
+         * dependency and Next refused to prerender `/auctions/[id]` with
+         * "Uncached data was accessed outside of <Suspense>". The Vercel build
+         * failed on it. A click handler already runs in the browser with the
+         * real URL in hand, so nothing needs to be known while rendering.
+         */
+        if (opensElsewhere(e) || window.location.pathname !== "/") return;
         e.preventDefault();
         /*
          * Instant, not smooth, for two reasons.
