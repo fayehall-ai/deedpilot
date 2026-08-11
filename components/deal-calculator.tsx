@@ -183,7 +183,11 @@ export function DealCalculator({
 
         <div className="mt-3 text-xs text-muted">
           Confidence: <span className="capitalize text-foreground">{result.confidence}</span>
-          {result.arv.derived ? " — ARV derived from assessed value, not comps." : ""}
+          {result.arv.assumed
+            ? " — built on an assumed floor from the opening bid, not a valuation of this parcel."
+            : result.arv.derived
+              ? " — ARV derived from assessed value, not comps."
+              : ""}
         </div>
       </div>
 
@@ -317,8 +321,23 @@ export function DealCalculator({
 
           <dl className="space-y-2 text-sm">
             <div className="flex items-baseline justify-between gap-4 border-b border-border pb-2">
-              <dt className="font-medium">After-repair value</dt>
-              <dd className="tnum font-medium">{money(result.arv.value)}</dd>
+              {/*
+                Renamed, not just annotated, when the figure is a floor. "After-repair
+                value" is a claim about this parcel; the floor is a quartile of a
+                state-wide ratio and calling it an ARV would be the page asserting
+                something nobody measured.
+              */}
+              <dt className="font-medium">
+                {result.arv.assumed ? "Assumed floor (not an ARV)" : "After-repair value"}
+              </dt>
+              <dd className="tnum font-medium">
+                {money(result.arv.value)}
+                {result.arv.assumed ? (
+                  <span className="ml-1.5 rounded bg-warn/15 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-warn">
+                    assumed
+                  </span>
+                ) : null}
+              </dd>
             </div>
             {result.costs.map((c) => (
               <div key={c.label} className="flex items-baseline justify-between gap-4">

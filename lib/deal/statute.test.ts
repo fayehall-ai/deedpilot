@@ -195,3 +195,73 @@ assert(
   nothing.warnings.some((w) => /comparable-sales estimate/i.test(w)),
   "and what to do about it",
 );
+
+// --- the assumed floor -------------------------------------------------------
+
+// Arkansas is 5,420 of the unpriceable parcels and has 889 measured pairs.
+const arFloor = computeMaxBid({ state: "AR", saleType: "Tax Deed", openingBid: 1_000 });
+assert(arFloor.arv.assumed === true, "flagged as assumed");
+assert(arFloor.arv.value !== null, "a floor exists where the state is measured");
+assert(
+  arFloor.recommendation !== "insufficient-data",
+  `the page stops saying not-enough-data, got ${arFloor.recommendation}`,
+);
+assert(arFloor.confidence === "low", "an assumed floor is always low confidence");
+assert(
+  /Assumed floor, not a valuation of this parcel/.test(arFloor.arv.basis),
+  "the basis leads with what it is not",
+);
+assert(/889/.test(arFloor.arv.basis), "and cites its sample size");
+
+// Conservative quartile, not the median — wrong low beats wrong high at an
+// auction. AR p25 is 10.82 and its median is 17.23.
+assert(
+  arFloor.arv.value === 10_820,
+  `p25 is used, not the median, got ${arFloor.arv.value}`,
+);
+
+// States with no measured entry get nothing. Louisiana is 1,638 unpriceable
+// parcels and no observed pairs; inventing a ratio for it would be worse than
+// the message it replaces.
+const laFloor = computeMaxBid({ state: "LA", saleType: "Tax Deed", openingBid: 1_000 });
+assert(
+  laFloor.recommendation === "insufficient-data",
+  "an unmeasured state gets no floor, not a national average",
+);
+assert(laFloor.arv.assumed !== true, "and is not flagged as assumed");
+
+// A floor never outranks something real.
+const realBeatsFloor = computeMaxBid({
+  state: "AR",
+  saleType: "Tax Deed",
+  openingBid: 1_000,
+  marketValue: 90_000,
+});
+assert(realBeatsFloor.arv.value === 90_000, "a provider estimate beats the floor");
+assert(realBeatsFloor.arv.assumed !== true, "and is not assumed");
+assert(
+  computeMaxBid({ state: "AR", saleType: "Tax Deed", openingBid: 1_000, arvOverride: 50_000 })
+    .arv.assumed !== true,
+  "nor does the reader's own figure become assumed",
+);
+
+// No opening bid, no floor — there is nothing to multiply.
+assert(
+  computeMaxBid({ state: "AR", saleType: "Tax Deed" }).recommendation === "insufficient-data",
+  "no opening bid means no floor",
+);
+for (const bad of [0, -5]) {
+  assert(
+    computeMaxBid({ state: "AR", saleType: "Tax Deed", openingBid: bad }).arv.assumed !== true,
+    `an opening bid of ${bad} is not a basis for a floor`,
+  );
+}
+
+// A green light off a placeholder is the most dangerous output here, so it is
+// never allowed to stand unqualified.
+if (arFloor.recommendation === "bid") {
+  assert(
+    arFloor.warnings.some((w) => /not a green light/.test(w)),
+    "a bid off an assumed floor carries its own warning",
+  );
+}

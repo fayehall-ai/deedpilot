@@ -19,6 +19,7 @@
 
 import type { SaleType } from "../atlas/types";
 import { coveredStateList, statuteFor, type StatuteParams } from "./statute";
+import { FLOOR_RATIOS, FLOOR_RATIOS_AS_OF } from "./floor-ratios";
 
 export interface DealInputs {
   state: string;
@@ -123,6 +124,15 @@ export interface DealResult {
      * than implying the statewide one always applies.
      */
     countyOverride?: boolean;
+    /**
+     * True when the value is a statistical floor from the opening bid rather
+     * than a valuation of this parcel.
+     *
+     * Load-bearing for the UI: a figure nobody measured must not be rendered
+     * like one somebody did. Everything downstream of it — max bid, projected
+     * profit, bid room — inherits the same uncertainty.
+     */
+    assumed?: boolean;
   };
   costs: CostLine[];
   totalCosts: number;
@@ -153,10 +163,59 @@ function round2(n: number): number {
  * ratio. Returns null when we have neither an override nor an assessment —
  * guessing an ARV is how a bidder ends up 3x over market.
  */
+/**
+ * A last-resort floor from the opening bid, where the state has been measured.
+ *
+ * Tax-sale opening bids are taxes plus costs, so they carry *some* signal about
+ * value — but only some. Across observed inventory the ratio runs 0.76 at the
+ * 10th percentile to 24.20 at the 90th, and state medians differ from each
+ * other by 6x, so this is per-state or it is nothing. States without a
+ * `FLOOR_RATIOS` entry get no floor at all rather than a national average that
+ * would be wrong in both directions at once.
+ *
+ * The conservative quartile is used, not the median. A floor exists to stop the
+ * page saying "not enough data" and to give research a starting magnitude; if
+ * it is going to be wrong, it should be wrong low, because the expensive
+ * direction at an auction is the optimistic one. The basis carries the range so
+ * the reader can see how wide the underlying spread is.
+ */
+function floorFrom(inputs: DealInputs): { arv: number; basis: string } | null {
+  const bid = inputs.openingBid;
+  if (bid === undefined || bid <= 0) return null;
+  const ratio = FLOOR_RATIOS[inputs.state];
+  if (!ratio) return null;
+
+  const money = (n: number) =>
+    n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+
+  return {
+    arv: bid * ratio.p25,
+    basis:
+      `Assumed floor, not a valuation of this parcel. No assessed value, provider estimate or ` +
+      `comps were available, so this is the opening bid of ${money(bid)} times ${ratio.p25} — the ` +
+      `conservative quartile of the value-to-opening-bid ratio across ${ratio.n.toLocaleString()} ` +
+      `${inputs.state} parcels where both figures are known (measured ${FLOOR_RATIOS_AS_OF}). ` +
+      `The middle half of those parcels ran ${ratio.p25}x to ${ratio.p75}x, so the true figure ` +
+      `could plausibly be ${money(bid * ratio.p75)}. Treat this as a starting magnitude for ` +
+      `research, never as a reason to bid — enter real comps before you do.`,
+  };
+}
+
 function deriveArv(
   inputs: DealInputs,
   statute: StatuteParams | null,
-): { value: number | null; basis: string; derived: boolean; countyOverride?: boolean } {
+): {
+  value: number | null;
+  basis: string;
+  derived: boolean;
+  countyOverride?: boolean;
+  /**
+   * True when the figure is a statistical placeholder rather than a valuation
+   * of this parcel — see `floorFrom`. The UI must render it differently; a
+   * number nobody measured must not look like one somebody did.
+   */
+  assumed?: boolean;
+} {
   if (inputs.arvOverride !== undefined && inputs.arvOverride > 0) {
     return {
       value: inputs.arvOverride,
@@ -190,23 +249,28 @@ function deriveArv(
   }
 
   if (inputs.assessedValue === undefined || inputs.assessedValue <= 0) {
+    const floor = floorFrom(inputs);
     return {
-      value: null,
+      value: floor?.arv ?? null,
       basis:
+        floor?.basis ??
         "The county published no assessed value for this parcel, no property provider returned " +
-        "a market estimate, and no comparable-sales figure has been entered.",
-      derived: false,
+          "a market estimate, and no comparable-sales figure has been entered.",
+      derived: floor !== null,
+      assumed: floor !== null,
     };
   }
 
   if (!statute) {
     return {
-      value: null,
+      value: floorFrom(inputs)?.arv ?? null,
       basis:
+        floorFrom(inputs)?.basis ??
         `This parcel has an assessed value, but ${inputs.state} has no verified assessment ratio ` +
-        `in lib/deal/statute.ts, so it cannot be converted to a market value. Enter a ` +
-        `comparable-sales estimate to price it.`,
-      derived: false,
+          `in lib/deal/statute.ts, so it cannot be converted to a market value. Enter a ` +
+          `comparable-sales estimate to price it.`,
+      derived: true,
+      assumed: floorFrom(inputs) !== null,
     };
   }
 
@@ -432,8 +496,27 @@ export function computeMaxBid(inputs: DealInputs): DealResult {
     );
   }
 
-  const confidence: DealResult["confidence"] =
-    !arv.derived && inputs.rehabCost !== undefined && statute
+  /*
+   * A "bid" off an assumed floor is the most dangerous output this function can
+   * produce: a green light computed from a number nobody measured. It is not
+   * suppressed — a floor with no recommendation is just "not enough data" with
+   * extra steps — but it never stands unqualified.
+   */
+  if (arv.assumed && recommendation === "bid") {
+    warnings.push(
+      "This ceiling rests on an assumed floor, not a valuation of this parcel. It is a research " +
+        "starting point, not a green light — get comps or an assessor figure before bidding.",
+    );
+  }
+
+  /*
+   * An assumed floor is always low confidence, whatever else lines up. The
+   * middle half of the observed spread is a 2-5x band depending on the state,
+   * so every figure computed from one carries that band with it.
+   */
+  const confidence: DealResult["confidence"] = arv.assumed
+    ? "low"
+    : !arv.derived && inputs.rehabCost !== undefined && statute
       ? "high"
       : statute && arv.value !== null
         ? "medium"
