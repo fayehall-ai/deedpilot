@@ -10,6 +10,7 @@ import { newMexicoPtdAdapter } from "./new-mexico";
 import { sriAdapter } from "./sri";
 import { taxSaleInfoAdapter } from "./taxsaleinfo";
 import { floridaAdapter, floridaClerksAdapter } from "./florida";
+import { clarkNvAdapter } from "./clark-nv";
 
 /**
  * Order is precedence. Bespoke first, generic last.
@@ -25,12 +26,14 @@ export const ADAPTERS: SourceAdapter[] = [
   missouriCollectorAdapter,
   goveaseAdapter,
   sriAdapter,
+  clarkNvAdapter,
   genericAdapter,
 ];
 
 export function getAdapter(name: string): SourceAdapter | undefined {
   // Historic alias: fl-counties → fl-clerks
   if (name === "fl-counties" || name === "florida") return floridaClerksAdapter;
+  if (name === "clark" || name === "clark-nv" || name === "32003") return clarkNvAdapter;
   return ADAPTERS.find((a) => a.name === name);
 }
 
@@ -46,5 +49,6 @@ export {
   missouriCollectorAdapter,
   goveaseAdapter,
   sriAdapter,
+  clarkNvAdapter,
   genericAdapter,
 };
