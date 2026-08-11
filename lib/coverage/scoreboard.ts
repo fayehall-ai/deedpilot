@@ -11,6 +11,7 @@ import { and, count, eq, gte, gt, sql } from "drizzle-orm";
 import { db } from "../db";
 import { auctions, counties, lots } from "../db/schema";
 import { coveredStateList, hasStatuteParams } from "../deal/statute";
+import { computeMaxBid } from "../deal/maxbid";
 import { ALL_COUNTIES } from "../atlas";
 import type { SourceRegistry } from "../prospector/types";
 import { cacheLife } from "next/cache";
@@ -422,6 +423,21 @@ export async function buildCoverageScoreboard(): Promise<CoverageScoreboard> {
       lots: sql<number>`count(${lots.id})::int`,
       withAssessed: sql<number>`count(${lots.id}) filter (where ${lots.assessedValue} is not null)::int`,
       withOpening: sql<number>`count(${lots.id}) filter (where ${lots.openingBid} is not null)::int`,
+      /*
+       * Counted so the priceable rule can ask the engine rather than restate
+       * it. A lot is priceable on the strongest signal it has, so these are
+       * layered: a market value alone is enough, an assessed value needs a
+       * state ratio, and an opening bid needs a measured floor.
+       */
+      withMarket: sql<number>`count(DISTINCT ${lots.id}) filter (where exists (
+        select 1 from lot_valuations lv
+        where lv.lot_id = ${lots.id} and lv.market_value is not null))::int`,
+      assessedNoMarket: sql<number>`count(${lots.id}) filter (where ${lots.assessedValue} is not null and not exists (
+        select 1 from lot_valuations lv
+        where lv.lot_id = ${lots.id} and lv.market_value is not null))::int`,
+      bidOnly: sql<number>`count(${lots.id}) filter (where ${lots.assessedValue} is null and ${lots.openingBid} is not null and not exists (
+        select 1 from lot_valuations lv
+        where lv.lot_id = ${lots.id} and lv.market_value is not null))::int`,
       counties: sql<number>`count(DISTINCT ${auctions.countyFips})::int`,
     })
     .from(auctions)
@@ -431,9 +447,45 @@ export async function buildCoverageScoreboard(): Promise<CoverageScoreboard> {
     .groupBy(counties.state)
     .orderBy(sql`count(${lots.id}) desc`);
 
+  /*
+   * Ask the engine whether a signal yields an ARV, rather than restating its
+   * rule here.
+   *
+   * This read `hasStatuteParams(state) ? withAssessed : 0` — a hand-rolled copy
+   * of a rule that has since changed twice, and it drifted both times. It did
+   * not know a market value prices a parcel with no statutory ratio at all, nor
+   * that an opening bid now yields a labelled floor in measured states, so
+   * /coverage under-reported exactly the states where the gap had been closed.
+   *
+   * The magnitudes are sentinels: `deriveArv` branches on which inputs are
+   * present and on the state, never on how large they are, so a 1 answers the
+   * question as well as a real figure would.
+   */
+  const pricesOn = (state: string, signal: "market" | "assessed" | "bid") =>
+    computeMaxBid({
+      state,
+      saleType: "Tax Deed",
+      marketValue: signal === "market" ? 1 : undefined,
+      assessedValue: signal === "assessed" ? 1 : undefined,
+      openingBid: signal === "bid" ? 1 : undefined,
+    }).arv.value !== null;
+
   const byState: StateLiveRow[] = lotStats.map((r) => {
+    /*
+     * Three mutually exclusive buckets that between them cover every lot: has a
+     * market value; has an assessed value and no market value; has neither but
+     * an opening bid.
+     *
+     * The first version layered `withAssessed` and a market-only count, which
+     * double-excluded the overlap — a parcel with both an assessed value and a
+     * market estimate in a state with no statutory ratio fell in neither bucket
+     * and went uncounted. That was 779 lots, and it showed up as the rendered
+     * page reading 7,706 against a direct measurement of 8,485.
+     */
     const autoPriceable =
-      hasStatuteParams(r.state) ? r.withAssessed : 0;
+      (pricesOn(r.state, "market") ? r.withMarket : 0) +
+      (pricesOn(r.state, "assessed") ? r.assessedNoMarket : 0) +
+      (pricesOn(r.state, "bid") ? r.bidOnly : 0);
     return {
       state: r.state,
       auctions: r.auctions,

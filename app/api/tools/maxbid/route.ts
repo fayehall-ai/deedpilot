@@ -27,6 +27,9 @@ function parseBody(raw: unknown): DealInputs | { error: string } {
     fips: typeof b.fips === "string" ? b.fips : undefined,
     openingBid: typeof b.openingBid === "number" ? b.openingBid : undefined,
     assessedValue: typeof b.assessedValue === "number" ? b.assessedValue : undefined,
+    // Accepted so a caller holding an AVM is not forced down to the assessed
+    // path — the engine ranks it above assessed ÷ ratio and it needs no ratio.
+    marketValue: typeof b.marketValue === "number" ? b.marketValue : undefined,
     arvOverride: typeof b.arvOverride === "number" ? b.arvOverride : undefined,
     rehabCost: typeof b.rehabCost === "number" ? b.rehabCost : undefined,
     targetMargin: typeof b.targetMargin === "number" ? b.targetMargin : undefined,

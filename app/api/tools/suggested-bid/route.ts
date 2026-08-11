@@ -49,6 +49,8 @@ export async function GET(req: NextRequest) {
   const saleType = saleTypeRaw as SaleType;
   const openingBid = numParam(sp.get("openingBid"));
   const assessedValue = numParam(sp.get("assessedValue"));
+  /* Accepted so a caller with an AVM is not pushed down the assessed path. */
+  const marketValue = numParam(sp.get("marketValue"));
   const arvOverride = numParam(sp.get("arvOverride"));
   const rehabCost = numParam(sp.get("rehabCost"));
   const survivingLiens = numParam(sp.get("survivingLiens"));
@@ -57,8 +59,10 @@ export async function GET(req: NextRequest) {
   const deal = computeMaxBid({
     state,
     saleType,
+    fips,
     openingBid,
     assessedValue,
+    marketValue,
     arvOverride,
     rehabCost,
     survivingLiens,

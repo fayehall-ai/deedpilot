@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { dealAnalyses } from "@/lib/db/schema";
-import { getLot } from "@/lib/queries";
+import { getLot, getLotValuations } from "@/lib/queries";
 import { resolveCountyRule } from "@/lib/atlas";
+import { mergeValuations } from "@/lib/property/merge";
 import { computeMaxBid } from "@/lib/deal/maxbid";
 import {
   BriefUnavailableError,
@@ -41,11 +42,28 @@ export async function POST(
     arvOverride?: number;
   };
 
+  /*
+   * The same inputs the page prices with.
+   *
+   * This call omitted `marketValue` and `fips`, so the brief was written about
+   * a different parcel from the one in the sidebar next to it: without the
+   * market estimate it fell through to an assumed floor, and without the FIPS
+   * it used the statewide assessment ratio where a county overrides it — Cook
+   * County assesses residential at 10% against Illinois' 33 1/3, which
+   * overstates the property threefold. An AI narrative arguing for a ceiling
+   * the page does not show is worse than no narrative.
+   */
+  const merged = mergeValuations(await getLotValuations(row.lot.id));
   const deal = computeMaxBid({
     state: row.county.state,
     saleType: row.auction.saleType as SaleType,
+    fips: row.county.fips,
     openingBid: row.lot.openingBid === null ? undefined : Number(row.lot.openingBid),
     assessedValue: row.lot.assessedValue === null ? undefined : Number(row.lot.assessedValue),
+    marketValue:
+      merged?.marketValue === null || merged?.marketValue === undefined
+        ? undefined
+        : Number(merged.marketValue),
     rehabCost: body.rehabCost,
     targetMargin: body.targetMargin,
     survivingLiens: body.survivingLiens,
