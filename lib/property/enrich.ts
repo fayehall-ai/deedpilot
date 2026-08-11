@@ -28,41 +28,78 @@ export function configuredEnrichmentProviders(): string[] {
 
 /**
  * Try providers in order until one returns a record.
- * ATTOM first when parcel# present; RentCast needs an address.
+ *
+ * ATTOM first when only a parcel number is known; RentCast needs an address.
+ *
+ * A provider that is unusable — dead key, exhausted quota, rate limited — is
+ * skipped rather than fatal. The earlier version rethrew immediately, which was
+ * right about the danger and too broad about the remedy: a 401 from ATTOM
+ * aborted an entire 250-lot run before RentCast or BatchData were asked
+ * anything at all, treating one dead provider as a dead pipeline.
+ *
+ * What must never happen is returning null after asking nobody, because that is
+ * indistinguishable from a genuine no-match and is what turned an exhausted
+ * ATTOM key into 799 phantom misses on a single Arkansas run. So the rule is
+ * narrower now: null is only returned when at least one provider actually
+ * answered. If every configured provider was unusable, this throws.
+ *
+ * `unavailable` is shared across a batch by the caller, so a provider that dies
+ * on the first lot is not retried on the next two hundred.
  */
-export async function lookupProperty(input: EnrichInput): Promise<PropertyRecord | null> {
-  const order = [...PROVIDERS].sort((a, b) => {
+export async function lookupProperty(
+  input: EnrichInput,
+  unavailable: Set<string> = new Set(),
+  /** Injectable for tests, so the rule below is exercised rather than restated. */
+  providers: PropertyProvider[] = PROVIDERS,
+): Promise<PropertyRecord | null> {
+  const order = [...providers].sort((a, b) => {
     // Prefer ATTOM when we only have parcel
     if (!input.addressLine && a.name === "attom") return -1;
     if (!input.addressLine && b.name === "attom") return 1;
     return 0;
   });
 
+  const configured = order.filter((p) => p.configured());
+  if (configured.length === 0) return null;
+
   const errors: string[] = [];
-  for (const p of order) {
-    if (!p.configured()) continue;
+  /** Providers that actually returned — a record or an honest nothing. */
+  let answered = 0;
+
+  for (const p of configured) {
+    if (unavailable.has(p.name)) continue;
     try {
       const rec = await p.lookup(input);
+      answered++;
       if (rec) return rec;
     } catch (e) {
-      // An unusable provider is not a miss on this parcel. Rethrow at once
-      // rather than falling through to the others and returning null, which
-      // is what turned an exhausted ATTOM key into 799 phantom "no match"
-      // results on a single Arkansas run.
-      if (e instanceof ProviderUnavailableError) throw e;
+      if (e instanceof ProviderUnavailableError) {
+        // Remembered for the rest of the batch, then move on to the next one.
+        unavailable.add(p.name);
+        continue;
+      }
       errors.push(`${p.name}: ${e instanceof Error ? e.message : e}`);
     }
   }
-  if (errors.length && !configuredEnrichmentProviders().length) {
-    return null;
-  }
-  if (errors.length) {
-    // Surface last errors only when all configured providers failed
-    const configured = order.filter((p) => p.configured());
-    if (configured.length && errors.length >= configured.length) {
-      throw new Error(errors.join(" | "));
+
+  if (answered === 0) {
+    /*
+     * Nobody was successfully asked, so there is nothing to conclude about this
+     * parcel. Thrown rather than returned as null — the caller has to be able
+     * to tell "no provider could answer" from "no provider had a record", and
+     * only one of those is a fact about the property.
+     */
+    if (unavailable.size > 0) {
+      const dead = [...unavailable].join(", ");
+      throw new ProviderUnavailableError(
+        dead,
+        0,
+        `every configured provider is unavailable (${dead})`,
+      );
     }
+    if (errors.length) throw new Error(errors.join(" | "));
   }
+
   return null;
 }
 
@@ -78,6 +115,8 @@ export interface ApplyEnrichmentResult {
 export async function enrichLotById(
   lotId: string,
   opts: { force?: boolean } = {},
+  /** Providers already known dead this run; see `lookupProperty`. */
+  unavailable?: Set<string>,
 ): Promise<ApplyEnrichmentResult> {
   const [row] = await db
     .select({
@@ -124,7 +163,7 @@ export async function enrichLotById(
     zip: row.lot.zip,
   };
 
-  const record = await lookupProperty(input);
+  const record = await lookupProperty(input, unavailable);
   if (!record) {
     return {
       lotId,
@@ -287,10 +326,17 @@ export async function enrichLotsMissingAssessed(opts: {
   let updated = 0;
   let skipped = 0;
   let failed = 0;
+  /*
+   * Shared across the run so a provider that dies on the first lot is not
+   * retried on the remaining two hundred and forty-nine. The run only stops
+   * when every configured provider is in here, which `lookupProperty` signals
+   * by throwing rather than returning a null nobody could stand behind.
+   */
+  const unavailable = new Set<string>();
 
   for (const [i, r] of filtered.entries()) {
     try {
-      const result = await enrichLotById(r.id, { force: opts.force });
+      const result = await enrichLotById(r.id, { force: opts.force }, unavailable);
       if (result.updated) {
         updated++;
         log(`[${i + 1}/${filtered.length}] ${r.id.slice(0, 8)} ← ${result.provider}`);
@@ -299,10 +345,13 @@ export async function enrichLotsMissingAssessed(opts: {
         log(`[${i + 1}/${filtered.length}] skip: ${result.reason}`);
       }
     } catch (e) {
-      // Stop the run. Grinding through the remaining lots against a dead
-      // provider costs wall-clock, may cost quota, and — worse — buries the
-      // real cause under a pile of per-lot noise. Report where it stopped so
-      // the operator can resume from there once the key is fixed.
+      /*
+       * Every configured provider is now dead — `lookupProperty` only throws
+       * this once none of them can answer, so a single bad key no longer stops
+       * a run the others could have finished. At that point grinding on costs
+       * wall-clock, may cost quota, and buries the real cause under per-lot
+       * noise. Report where it stopped so the operator can resume from there.
+       */
       if (e instanceof ProviderUnavailableError) {
         log(
           `\n[${i + 1}/${filtered.length}] ABORTED — ${e.message}\n` +
