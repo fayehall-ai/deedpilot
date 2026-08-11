@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HomeLink } from "@/components/home-link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cacheLife } from "next/cache";
 import "./globals.css";
@@ -63,10 +64,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             slivers rather than overflowing into a scrollable strip.
           */}
           <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:gap-6 sm:px-6">
-            <Link
-              href="/"
-              className="flex shrink-0 items-center gap-2 font-semibold tracking-tight"
-            >
+            <HomeLink className="flex shrink-0 items-center gap-2 font-semibold tracking-tight">
               <span
                 aria-hidden
                 className="grid h-7 w-7 place-items-center rounded-md bg-accent text-sm font-bold text-accent-fg"
@@ -74,7 +72,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 §
               </span>
               DeedPilot
-            </Link>
+            </HomeLink>
             <nav
               className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               aria-label="Primary"
