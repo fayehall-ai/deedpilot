@@ -91,6 +91,23 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
       ? undefined
       : Number(latestVal.marketValue);
 
+  /*
+   * One object, two consumers. The cached-brief hash and the visible calculator
+   * both price this parcel, and they drifted: `marketValue` was threaded into
+   * the server-side computeMaxBid but the DealCalculator JSX never got the
+   * prop, so the number on screen fell through to an assumed floor while a
+   * $137,500 AVM sat in the card directly above it. Spreading one object into
+   * both makes that divergence a type error instead of a silent disagreement.
+   */
+  const dealInputs = {
+    state: county.state,
+    saleType: auction.saleType as SaleType,
+    openingBid,
+    assessedValue,
+    marketValue,
+    fips: county.fips,
+  };
+
   const history = getComparables({
     state: county.state,
     saleType: auction.saleType,
@@ -107,14 +124,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
           lot,
           auction,
           rule,
-          deal: computeMaxBid({
-            state: county.state,
-            saleType: auction.saleType as SaleType,
-            openingBid,
-            assessedValue,
-            marketValue,
-            fips: county.fips,
-          }),
+          deal: computeMaxBid(dealInputs),
         }),
       ).catch(() => null)
     : null;
@@ -419,11 +429,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
           <div>
             <h2 className="mb-3 text-lg font-semibold">Deal analysis</h2>
             <DealCalculator
-              state={county.state}
-              saleType={auction.saleType as SaleType}
-              openingBid={openingBid}
-              assessedValue={assessedValue}
-              fips={county.fips}
+              {...dealInputs}
               historyBucket={history.bucket}
               historyKey={history.key}
               thinListing={thinListing}
