@@ -220,8 +220,38 @@ export function isGovernmentSource(host: string): boolean {
   return GOV_SUFFIXES.some((s) => host.endsWith(s));
 }
 
+/**
+ * Operator overrides, loaded once per process.
+ *
+ * `policyFor` is called from inside `politeFetch` on every request, so it has
+ * to stay synchronous — making it async to read a table would push `await`
+ * through the whole fetch path for a value that changes perhaps twice a month.
+ * Instead the overrides are loaded deliberately, by whatever is about to do
+ * ingest work, and consulted from memory.
+ *
+ * A process that never calls `loadPolicyOverrides` sees exactly the decisions
+ * in this file. That is the safe direction to fail: the code is the
+ * conservative baseline, and an override can only be applied by something that
+ * went looking for it.
+ */
+const overrides = new Map<string, SourcePolicy>();
+
+export function setPolicyOverrides(rows: SourcePolicy[]): void {
+  overrides.clear();
+  for (const r of rows) overrides.set(r.host.toLowerCase(), r);
+}
+
+export function policyOverrideCount(): number {
+  return overrides.size;
+}
+
 export function policyFor(host: string): SourcePolicy | null {
   const h = host.toLowerCase();
+  // An override wins over the compiled-in decision for the same host, matched
+  // on the same suffix rule so subdomains inherit either way.
+  for (const [key, p] of overrides) {
+    if (h === key || h.endsWith(`.${key}`)) return p;
+  }
   return SOURCE_POLICIES.find((p) => h === p.host || h.endsWith(`.${p.host}`)) ?? null;
 }
 

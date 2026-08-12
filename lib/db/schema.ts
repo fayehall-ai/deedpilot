@@ -512,6 +512,164 @@ export const ingestRuns = pgTable(
   ],
 );
 
+// ---------------------------------------------------------------------------
+// Operations: the run queue, schedules, and registry overrides
+// ---------------------------------------------------------------------------
+
+/**
+ * Lifecycle of one queued piece of ingest work.
+ *
+ * `leased` exists because a Vercel function is capped at 300 seconds and a
+ * full adapter pass takes ten minutes or more, so work must be claimed in
+ * chunks by a dispatcher that may itself be killed mid-flight. A lease with an
+ * expiry is what makes that safe: a worker that dies stops renewing, the lease
+ * lapses, and the job returns to `queued` instead of sitting forever in a state
+ * nobody reconciles.
+ *
+ * That failure is not hypothetical. `ingest_runs` currently holds 51 rows
+ * stuck at `running` — tx-lgbs 29, mi-taxsaleinfo 17, generic-county 5, the
+ * oldest from 31 July — because the runner writes `running` up front and only
+ * resolves it on completion. Every one of those is a process that died.
+ */
+export const jobStatusEnum = pgEnum("job_status", [
+  "queued",
+  "leased",
+  "done",
+  "failed",
+  "cancelled",
+]);
+
+/**
+ * Work waiting to be done, or recently done.
+ *
+ * One row per (adapter, county) chunk rather than per adapter: a county is the
+ * unit that fits comfortably inside a function invocation, and it is also the
+ * unit `runAdapter` already accepts via `countyFips`.
+ */
+export const runJobs = pgTable(
+  "run_jobs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    adapter: text("adapter").notNull(),
+    /** Null means "whatever counties the adapter discovers", bounded by limit. */
+    countyFips: text("county_fips").references(() => counties.fips),
+    limit: integer("limit"),
+    dryRun: boolean("dry_run").notNull().default(false),
+    status: jobStatusEnum("status").notNull().default("queued"),
+    /** Higher runs first. A hand-pressed "run now" outranks the nightly sweep. */
+    priority: integer("priority").notNull().default(0),
+    /** Who or what created this — an operator token, or a schedule id. */
+    requestedBy: text("requested_by").notNull().default("system"),
+    scheduleId: uuid("schedule_id"),
+    /**
+     * While held, no other dispatcher may claim this row. Renewed by the
+     * worker; once it lapses the job is claimable again.
+     */
+    leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
+    attempts: integer("attempts").notNull().default(0),
+    lastError: text("last_error"),
+    result: jsonb("result"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+  },
+  (t) => [
+    /* The dispatcher's claim query: pending work, best first. */
+    index("run_jobs_claim_idx").on(t.status, t.priority, t.createdAt),
+    index("run_jobs_adapter_idx").on(t.adapter, t.createdAt),
+  ],
+);
+
+/**
+ * A recurring instruction to enqueue work.
+ *
+ * Deliberately not a cron expression evaluated in the database: schedules here
+ * are an interval plus an anchor, which is enough for "sweep this adapter
+ * nightly" and cannot express a schedule nobody can reason about at 3am. The
+ * dispatcher is what turns a due schedule into `run_jobs` rows.
+ */
+export const runSchedules = pgTable(
+  "run_schedules",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    adapter: text("adapter").notNull(),
+    /** Minutes between enqueues. 1440 is nightly. */
+    intervalMinutes: integer("interval_minutes").notNull().default(1440),
+    /** Counties per enqueue, so one schedule cannot flood the queue. */
+    limit: integer("limit"),
+    enabled: boolean("enabled").notNull().default(true),
+    lastEnqueuedAt: timestamp("last_enqueued_at", { withTimezone: true }),
+    nextDueAt: timestamp("next_due_at", { withTimezone: true }).notNull().defaultNow(),
+    note: text("note"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("run_schedules_adapter_key").on(t.adapter)],
+);
+
+/**
+ * Operator overrides on the code-held source registry.
+ *
+ * The registries in `lib/ingest/adapters/*` remain the baseline; this table
+ * only ever overlays them. Keeping the baseline in git means a URL that was
+ * verified by hand still carries its verification in the commit that added it,
+ * while an operator can correct a moved page without a deploy.
+ */
+export const sourceOverrides = pgTable(
+  "source_overrides",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    adapter: text("adapter").notNull(),
+    countyFips: text("county_fips")
+      .notNull()
+      .references(() => counties.fips),
+    /** Null keeps the registry URL and only changes `enabled`. */
+    url: text("url"),
+    /** False removes the county from the adapter's bindings without deleting it. */
+    enabled: boolean("enabled").notNull().default(true),
+    note: text("note"),
+    updatedBy: text("updated_by").notNull().default("admin"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("source_overrides_key").on(t.adapter, t.countyFips)],
+);
+
+/**
+ * Operator overrides on access policy.
+ *
+ * `lib/ingest/policy.ts` holds the reviewed decisions and their reasoning, and
+ * remains the baseline. This table exists because the operator asked to change
+ * decisions without a deploy; `reason` is `notNull` on purpose, so loosening a
+ * host's access always leaves a written justification next to it. The decision
+ * to stay off a host is the kind that is expensive to get wrong — USTLA and
+ * the Georgia Press Association are both blocked by terms rather than by
+ * robots — so every change is recorded rather than merely applied.
+ */
+export const policyOverrides = pgTable(
+  "policy_overrides",
+  {
+    host: text("host").primaryKey(),
+    decision: text("decision").notNull(),
+    minDelayMs: integer("min_delay_ms").notNull().default(5000),
+    reason: text("reason").notNull(),
+    updatedBy: text("updated_by").notNull().default("admin"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+);
+
+/** Every write the console makes, kept whether or not anyone reads it. */
+export const adminAudit = pgTable(
+  "admin_audit",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    action: text("action").notNull(),
+    target: text("target"),
+    detail: jsonb("detail"),
+    actor: text("actor").notNull().default("admin"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("admin_audit_created_idx").on(t.createdAt)],
+);
+
 export type County = typeof counties.$inferSelect;
 export type Auction = typeof auctions.$inferSelect;
 export type NewAuction = typeof auctions.$inferInsert;
@@ -522,3 +680,8 @@ export type User = typeof users.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type DealAnalysis = typeof dealAnalyses.$inferSelect;
 export type IngestRun = typeof ingestRuns.$inferSelect;
+export type RunJob = typeof runJobs.$inferSelect;
+export type NewRunJob = typeof runJobs.$inferInsert;
+export type RunSchedule = typeof runSchedules.$inferSelect;
+export type SourceOverride = typeof sourceOverrides.$inferSelect;
+export type PolicyOverride = typeof policyOverrides.$inferSelect;

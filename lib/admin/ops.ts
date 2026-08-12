@@ -217,3 +217,17 @@ export async function getInventorySnapshot(): Promise<InventorySnapshot> {
     })),
   };
 }
+
+/** Operator overrides currently overlaying the code registry. */
+export async function getSourceOverrides() {
+  const { sourceOverrides } = await import("../db/schema");
+  const { desc } = await import("drizzle-orm");
+  return db.select().from(sourceOverrides).orderBy(desc(sourceOverrides.updatedAt));
+}
+
+/** Operator overrides currently overlaying the reviewed access decisions. */
+export async function getPolicyOverrides() {
+  const { policyOverrides } = await import("../db/schema");
+  const { desc } = await import("drizzle-orm");
+  return db.select().from(policyOverrides).orderBy(desc(policyOverrides.updatedAt));
+}

@@ -105,3 +105,40 @@ assert(!isGovernmentSource("notreally-gov.com"), "suffix match, not substring");
 assert(policyFor("some-random-county.org") === null, "unlisted hosts defer to robots.txt");
 
 console.log("policy: all assertions passed");
+
+// --- operator overrides ------------------------------------------------------
+
+// The console can change a decision without a deploy. Two properties matter:
+// an override wins for its host, and a process that never loads them sees only
+// the reviewed decisions in this file.
+import { setPolicyOverrides, policyOverrideCount } from "./policy";
+
+assert(policyOverrideCount() === 0, "no overrides are loaded by default");
+assert(
+  policyFor("ustla.com")?.decision === "requires_agreement",
+  "baseline decision applies before any override is loaded",
+);
+
+setPolicyOverrides([
+  { host: "example.gov", decision: "deny", minDelayMs: 9000, reason: "operator test" },
+]);
+assert(policyFor("example.gov")?.decision === "deny", "an override applies to its host");
+assert(policyFor("data.example.gov")?.decision === "deny", "an override covers subdomains");
+assert(
+  policyFor("ustla.com")?.decision === "requires_agreement",
+  "an unrelated override does not disturb the compiled-in decisions",
+);
+
+setPolicyOverrides([
+  { host: "ustla.com", decision: "allow", minDelayMs: 5000, reason: "operator test" },
+]);
+assert(
+  policyFor("ustla.com")?.decision === "allow",
+  "an override takes precedence over the compiled-in decision for the same host",
+);
+
+setPolicyOverrides([]);
+assert(
+  policyFor("ustla.com")?.decision === "requires_agreement",
+  "clearing overrides restores the reviewed decision",
+);

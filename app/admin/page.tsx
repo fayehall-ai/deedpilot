@@ -6,7 +6,10 @@ import { TableSkeleton } from "@/components/skeleton";
 import { adminConfigured, isAdmin } from "@/lib/admin/auth";
 import { getAdapterHealth, getRecentRuns, getPolicies, getInventorySnapshot } from "@/lib/admin/ops";
 import { getCapeOps } from "@/lib/admin/cape-ops";
+import { getQueue, getSchedules } from "@/lib/admin/queue";
+import { getSourceOverrides, getPolicyOverrides } from "@/lib/admin/ops";
 import { signIn, signOut } from "./actions";
+import { OpsControls } from "./controls";
 
 export const metadata: Metadata = {
   title: "Operations",
@@ -135,12 +138,17 @@ async function Body() {
    */
   await connection();
 
-  const [adapters, runs, inventory, cape] = await Promise.all([
-    getAdapterHealth(),
-    getRecentRuns(40),
-    getInventorySnapshot(),
-    getCapeOps(),
-  ]);
+  const [adapters, runs, inventory, cape, queue, schedules, sourceOv, policyOv] =
+    await Promise.all([
+      getAdapterHealth(),
+      getRecentRuns(40),
+      getInventorySnapshot(),
+      getCapeOps(),
+      getQueue(20),
+      getSchedules(),
+      getSourceOverrides(),
+      getPolicyOverrides(),
+    ]);
   const policies = getPolicies();
 
   const stale = adapters.filter((a) => a.lastRunAt === null);
@@ -175,6 +183,14 @@ async function Body() {
           </ul>
         </Callout>
       )}
+
+      <OpsControls
+        adapters={adapters.map((a) => a.name)}
+        queue={queue}
+        schedules={schedules}
+        sourceOverrides={sourceOv}
+        policyOverrides={policyOv}
+      />
 
       {/* ---- sources ---- */}
       <section>
