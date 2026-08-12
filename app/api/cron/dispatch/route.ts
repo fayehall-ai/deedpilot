@@ -16,7 +16,7 @@
  * ## Tick frequency
  *
  * `vercel.json` schedules this daily, because a Hobby account rejects any cron
- * that would run more than once a day — a `*/10` expression fails the *build*,
+ * that would run more than once a day — an every-ten-minutes expression fails the *build*,
  * not the run, so an over-frequent schedule takes the whole deployment down.
  *
  * One tick a day drains one function budget's worth of queue, which is enough
