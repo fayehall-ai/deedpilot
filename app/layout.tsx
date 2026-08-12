@@ -35,17 +35,13 @@ export const metadata: Metadata = {
  * route stays because a flat list is still the better view for scanning a whole
  * season at once, and there is no longer a section for the anchor to reach.
  *
- * CAPE is here rather than only linked from /coverage. It was left off on the
- * reasoning that a production board is a research surface and the row was
- * already tight — which was a judgement about the nav made at the cost of the
- * feature being findable at all. A page reachable only by typing its URL is not
- * shipped. The row scrolls on narrow screens, so a sixth item costs nothing it
- * did not already cost.
+ * CAPE is deliberately not here. It is a production board for research and
+ * operations rather than something a visitor is looking for, and it is reached
+ * from /coverage, which is where the rest of the data-health surface lives.
  */
 const NAV = [
   { href: "/#calendar", label: "Calendar" },
   { href: "/auctions", label: "Auctions" },
-  { href: "/cape", label: "CAPE" },
   { href: "/#atlas", label: "Atlas" },
   { href: "/#coverage", label: "Coverage" },
   { href: "/#pricing", label: "Pricing" },
