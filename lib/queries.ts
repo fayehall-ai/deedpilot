@@ -540,3 +540,29 @@ export async function getCapeAuctions(): Promise<CapeAuctionRow[]> {
     .orderBy(asc(auctions.saleDate), asc(counties.state), asc(counties.name))
     .limit(1000);
 }
+
+/** Per-sale parcel coverage, for CAPE Component Four. */
+export async function getCapeParcelCoverage(): Promise<
+  Record<string, { total: number; withParcelNumber: number; withAssessed: number; withAddress: number; withZoning: number; withGeo: number }>
+> {
+  "use cache";
+  cacheLife("minutes");
+  const rows = await db
+    .select({
+      auctionId: lots.auctionId,
+      total: sql<number>`count(*)::int`,
+      withParcelNumber: sql<number>`count(${lots.parcelNumber})::int`,
+      withAssessed: sql<number>`count(${lots.assessedValue})::int`,
+      withAddress: sql<number>`count(${lots.addressLine})::int`,
+      /* Zoning lives on the valuation row, not the lot — ATTOM returns it. */
+      withZoning: sql<number>`count(distinct ${lots.id}) filter (where exists (
+        select 1 from lot_valuations lv where lv.lot_id = ${lots.id} and lv.zoning is not null))::int`,
+      withGeo: sql<number>`count(${lots.latitude})::int`,
+    })
+    .from(lots)
+    .innerJoin(auctions, eq(auctions.id, lots.auctionId))
+    .where(gte(auctions.saleDate, todayIso()))
+    .groupBy(lots.auctionId);
+
+  return Object.fromEntries(rows.map((r) => [r.auctionId, r]));
+}

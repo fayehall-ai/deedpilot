@@ -1,24 +1,27 @@
 /**
- * CAPE — the auction intake and source-verification board.
+ * CAPE — the county auction production board.
  *
- * Components One and Two of the TDC CAPE Auction Workflow System, which asks
- * that every upcoming sale be entered against a fixed set of fields and that a
- * researcher can see, per sale, "which details still require verification".
+ * All nine components of the TDC CAPE Auction Workflow System, evaluated per
+ * upcoming sale. The document's own statement of purpose is what this renders:
+ * that a researcher can see "which details still require verification", and
+ * that anything unconfirmed is "clearly marked as requiring manual
+ * verification".
  *
- * This is the answer to that question rather than a place to type it. Every one
- * of the nine intake fields already has somewhere to live in the schema, so the
- * work is not capture — it is showing which are filled, where each came from,
- * and what is outstanding.
+ * It reports; it does not write. Components Five, Six and Seven describe
+ * authored and produced deliverables, and this board says what inputs exist for
+ * them and whether they have been produced rather than generating them.
  */
 import Link from "next/link";
 import { Suspense } from "react";
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import { Breadcrumbs, Card } from "@/components/ui";
 import { DetailSkeleton } from "@/components/skeleton";
-import { getCapeAuctions } from "@/lib/queries";
-import { assessIntake } from "@/lib/cape/intake";
+import { getCapeAuctions, getCapeParcelCoverage } from "@/lib/queries";
+import { buildPackage, type ItemState } from "@/lib/cape/components";
 import { TIER_LABEL, TIER_RANK, type SourceTier } from "@/lib/cape/sources";
 import { resolveCountyRule } from "@/lib/atlas";
+import { statuteFor } from "@/lib/deal/statute";
 import { num, saleDate } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -32,14 +35,12 @@ export default function CapePage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "CAPE" }]} />
       <header className="mb-6 max-w-3xl">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          CAPE — auction intake
-        </h1>
+        <h1 className="text-3xl font-semibold tracking-tight">CAPE — production board</h1>
         <p className="mt-2 leading-relaxed text-muted">
-          The County Auction Production Engine checks every upcoming sale against a fixed intake
-          set and tiers the source it came from. A sale is ready when all nine fields are present,
-          the county published the date, and the document is a parcel list rather than a
-          delinquent roll.
+          The County Auction Production Engine, run across every upcoming sale. Each package is
+          measured against the nine components, its source tiered by how close the publisher sits
+          to the authority for the sale, and its deadline set by Component Eight — Monday night for
+          live auctions, Tuesday night for online.
         </p>
       </header>
       <Suspense fallback={<DetailSkeleton />}>
@@ -50,13 +51,23 @@ export default function CapePage() {
 }
 
 async function Board() {
-  const rows = await getCapeAuctions();
+  /*
+   * Component Eight is a deadline model, so "today" is genuinely a per-request
+   * answer and this is where prerendering has to stop. Without `connection()`
+   * the build refuses the clock read outright — the same rule that puts
+   * `CopyrightYear` behind `use cache` in the layout and `connection()` at the
+   * top of `CalendarView`. Baking today into the static shell would freeze
+   * every overdue badge at build time.
+   */
+  await connection();
+  const [rows, coverage] = await Promise.all([getCapeAuctions(), getCapeParcelCoverage()]);
+  const today = new Date().toISOString().slice(0, 10);
+  const empty = { total: 0, withParcelNumber: 0, withAssessed: 0, withAddress: 0, withZoning: 0, withGeo: 0 };
 
   const assessed = rows.map((r) => ({
     row: r,
-    cape: assessIntake({
+    cape: buildPackage({
       auctionId: r.id,
-      countyFips: r.countyFips,
       countyName: r.countyName,
       state: r.state,
       saleDate: r.saleDate,
@@ -64,27 +75,54 @@ async function Board() {
       saleType: r.saleType,
       sourceUrl: r.sourceUrl,
       platform: r.platform,
+      startTime: null,
       registrationDeadline: r.registrationDeadline,
       depositDeadline: r.depositDeadline,
       lotCount: r.lotCount,
       listingKind: r.listingKind,
       rule: resolveCountyRule(r.countyFips),
+      statute: statuteFor(r.state) ?? null,
+      offices: {},
+      parcels: coverage[r.id] ?? empty,
+      today,
     }),
   }));
 
-  const ready = assessed.filter((a) => a.cape.ready);
+  const ready = assessed.filter((a) => a.cape.releasable);
+
+  /* Component-level completion across every upcoming package. */
+  const byComponent = assessed.length
+    ? assessed[0].cape.components.map((c, idx) => ({
+        n: c.n,
+        title: c.title,
+        mean: assessed.reduce((n, a) => n + a.cape.components[idx].score, 0) / assessed.length,
+        counts: assessed.reduce(
+          (acc, a) => {
+            for (const k of ["have", "verify", "absent"] as ItemState[]) {
+              acc[k] += a.cape.components[idx].counts[k];
+            }
+            return acc;
+          },
+          { have: 0, verify: 0, absent: 0 } as Record<ItemState, number>,
+        ),
+      }))
+    : [];
+
+  const overdue = assessed.filter((a) => a.cape.deadline.overdue);
 
   // Which of the nine is outstanding most often — the engineering work-list.
   const gaps = new Map<string, { label: string; n: number }>();
   for (const a of assessed) {
-    for (const f of a.cape.fields) {
-      if (f.present) continue;
-      const g = gaps.get(f.key) ?? { label: f.label, n: 0 };
-      g.n++;
-      gaps.set(f.key, g);
+    for (const c of a.cape.components) {
+      for (const it of c.items) {
+        if (it.state !== "verify") continue;
+        const g = gaps.get(it.label) ?? { label: it.label, n: 0 };
+        g.n++;
+        gaps.set(it.label, g);
+      }
     }
   }
-  const ranked = [...gaps.values()].sort((a, b) => b.n - a.n);
+  const ranked = [...gaps.values()].sort((a, b) => b.n - a.n).slice(0, 12);
 
   const byTier = new Map<SourceTier, { auctions: number; parcels: number }>();
   for (const a of assessed) {
@@ -99,26 +137,26 @@ async function Board() {
     <>
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <Card>
-          <div className="text-xs uppercase tracking-wide text-muted">Investor-ready</div>
+          <div className="text-xs uppercase tracking-wide text-muted">Releasable</div>
           <div className="tnum mt-1 text-3xl font-semibold" style={{ color: "var(--accent)" }}>
             {num(ready.length)}
             <span className="text-base font-normal text-muted"> / {num(assessed.length)}</span>
           </div>
           <p className="mt-1 text-xs text-muted">
-            All nine intake fields, a county-published date, and a parcel list
+Passes Component Nine&apos;s quality gate
           </p>
         </Card>
         <Card>
-          <div className="text-xs uppercase tracking-wide text-muted">Mean intake</div>
+          <div className="text-xs uppercase tracking-wide text-muted">Mean package</div>
           <div className="tnum mt-1 text-3xl font-semibold">
             {assessed.length
               ? Math.round(
-                  (assessed.reduce((n, a) => n + a.cape.intakeScore, 0) / assessed.length) * 100,
+                  (assessed.reduce((n, a) => n + a.cape.score, 0) / assessed.length) * 100,
                 )
               : 0}
             %
           </div>
-          <p className="mt-1 text-xs text-muted">Share of the nine fields present, averaged</p>
+          <p className="mt-1 text-xs text-muted">Across the nine components, averaged</p>
         </Card>
         <Card>
           <div className="text-xs uppercase tracking-wide text-muted">
@@ -136,13 +174,13 @@ async function Board() {
       {/* The work-list: which intake field is missing most often. */}
       {ranked.length > 0 ? (
         <section className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold">What is outstanding</h2>
+          <h2 className="mb-3 text-lg font-semibold">Requiring manual verification</h2>
           <Card className="overflow-hidden p-0">
             <table className="w-full text-sm">
               <thead className="border-b border-border bg-surface-2/50 text-left text-xs uppercase tracking-wide text-muted">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Intake field</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Sales missing it</th>
+                  <th className="px-4 py-2.5 font-medium">Item</th>
+                  <th className="px-4 py-2.5 text-right font-medium">Packages</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -155,6 +193,48 @@ async function Board() {
               </tbody>
             </table>
           </Card>
+        </section>
+      ) : null}
+
+      {byComponent.length > 0 ? (
+        <section className="mb-8">
+          <h2 className="mb-3 text-lg font-semibold">The nine components</h2>
+          <Card className="overflow-hidden p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-border bg-surface-2/50 text-left text-xs uppercase tracking-wide text-muted">
+                  <tr>
+                    <th className="px-4 py-2.5 font-medium">Component</th>
+                    <th className="px-4 py-2.5 text-right font-medium">Mean</th>
+                    <th className="px-4 py-2.5 text-right font-medium">On record</th>
+                    <th className="px-4 py-2.5 text-right font-medium">Needs verifying</th>
+                    <th className="px-4 py-2.5 text-right font-medium">No source</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {byComponent.map((c) => (
+                    <tr key={c.n}>
+                      <td className="px-4 py-2.5">
+                        <span className="text-muted">{c.n}.</span> {c.title}
+                      </td>
+                      <td className="tnum px-4 py-2.5 text-right">{Math.round(c.mean * 100)}%</td>
+                      <td className="tnum px-4 py-2.5 text-right">{num(c.counts.have)}</td>
+                      <td className="tnum px-4 py-2.5 text-right">{num(c.counts.verify)}</td>
+                      <td className="tnum px-4 py-2.5 text-right text-muted">
+                        {c.counts.absent ? num(c.counts.absent) : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+          <p className="mt-2 text-xs text-muted">
+            &ldquo;No source&rdquo; is not a gap to close — those are items no source available to
+            this product can answer, so they are excluded from the mean rather than counted
+            against it.
+            {overdue.length > 0 ? ` ${num(overdue.length)} package(s) are past their Component Eight deadline.` : ""}
+          </p>
         </section>
       ) : null}
 
@@ -213,15 +293,19 @@ async function Board() {
                       <div className="font-mono text-[11px] text-muted">{cape.source.host}</div>
                     </td>
                     <td className="tnum px-4 py-2.5 text-right">
-                      {Math.round(cape.intakeScore * 100)}%
+                      {Math.round(cape.score * 100)}%
+                      <div className="text-[11px] text-muted">
+                        due {cape.deadline.dueDate}
+                        {cape.deadline.overdue ? " · overdue" : ""}
+                      </div>
                     </td>
                     <td className="px-4 py-2.5">
-                      {cape.ready ? (
+                      {cape.releasable ? (
                         <span className="rounded bg-accent/15 px-1.5 py-0.5 text-xs text-accent">
-                          Ready
+                          Releasable
                         </span>
                       ) : (
-                        <span className="text-xs text-muted">{cape.blockedBy}</span>
+                        <span className="text-xs text-muted">{cape.blockedBy[0]}</span>
                       )}
                     </td>
                   </tr>
