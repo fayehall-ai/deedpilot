@@ -12,6 +12,19 @@
  * stops before the function's own ceiling rather than being killed at it. A
  * job that outlives its slot simply loses its lease and is picked up by the
  * next tick, which is why the queue leases rather than assigns.
+ *
+ * ## Tick frequency
+ *
+ * `vercel.json` schedules this daily, because a Hobby account rejects any cron
+ * that would run more than once a day — a `*/10` expression fails the *build*,
+ * not the run, so an over-frequent schedule takes the whole deployment down.
+ *
+ * One tick a day drains one function budget's worth of queue, which is enough
+ * for the nightly sweep and not enough for anything interactive. The endpoint
+ * is therefore also callable directly with the admin token, so a queued run
+ * can be drained on demand from anywhere — an external scheduler, a terminal,
+ * or a laptop — without waiting for 02:00. Raising the cadence properly means
+ * a Pro plan.
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { getAdapter } from "@/lib/ingest/adapters";
