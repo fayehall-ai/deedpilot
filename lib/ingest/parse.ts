@@ -33,7 +33,7 @@ export const EXCLUDE_LINKS =
  * A list published *for a specific sale* — the only thing that is inventory.
  */
 const SALE_LIST_LINK =
-  /tax.?sale.?list|sale.?list|auction.?advert|properties.?for.?sale|sheriff.?sale|lien.?sale|deed.?sale|tax.?sale|foreclos/i;
+  /tax.?sale.?list|sale.?list|auction.?advert|properties.?for.?sale|sheriff.?sale|levy.?sale|lien.?sale|deed.?sale|tax.?sale|foreclos/i;
 
 /**
  * Everyone behind on taxes. Counties publish this beside the sale list and it
@@ -56,6 +56,20 @@ const LANDS_AVAILABLE_LINK =
 const PARCEL_ISH_LINK = /parcel|booklet|list\b/i;
 
 /**
+ * The how-to, not the what.
+ *
+ * A county's "Tax Sale Booklet" or "Tax Sale Flyer" carries exactly the
+ * vocabulary a real list does, so it scored identically and sorted first:
+ * Cobb GA and Douglas GA both offered their procedure booklet ahead of every
+ * other document on the page, and the adapter opens only the top three.
+ *
+ * Demoted to `unknown` rather than excluded — that leaves it in the queue,
+ * just last, so a county that calls its only parcel list a booklet is still
+ * read. A label naming a list as well ("Sale List Booklet") keeps its claim.
+ */
+const PROCEDURE_DOC = /booklet|flyer|pamphlet|handbook/i;
+
+/**
  * What a link's text and filename claim the document is.
  *
  * Deliberately name-based: the county tells you in the anchor text, and reading
@@ -63,6 +77,9 @@ const PARCEL_ISH_LINK = /parcel|booklet|list\b/i;
  * where a delinquent list and a sale list are genuinely indistinguishable.
  */
 export function classifyListingLink(label: string): ListingKind {
+  // Before anything else: a booklet or flyer is procedure, not inventory,
+  // unless it also calls itself a list.
+  if (PROCEDURE_DOC.test(label) && !/\blists?\b/i.test(label)) return "unknown";
   // Order matters — "Delinquent Tax Sale List" is a sale list; "Delinquent Tax
   // List" is not. The more specific sale vocabulary wins where both appear.
   if (/sale.?list|tax.?sale.?list|auction.?advert|properties.?for.?sale/i.test(label)) {
@@ -103,18 +120,42 @@ export function parseHtmlTable(
   let best: DiscoveredLot[] | null = null;
 
   $("table").each((_, table) => {
-    const headerText = $(table).find("th").text().replace(/\s+/g, " ");
+    /*
+     * Plenty of county tables mark up their header row with `<td>` and no
+     * `<th>` at all — Columbia County GA publishes twenty parcels that way and
+     * a `th`-only reader saw nothing. Fall back to the first row's cells, and
+     * remember its index so it is not also ingested as a parcel.
+     */
+    const thCells = $(table)
+      .find("th")
+      .map((__, th) => $(th).text().replace(/\s+/g, " ").trim())
+      .get();
+    const firstRow = $(table).find("tr").first();
+    const headerCells = thCells.length
+      ? thCells
+      : firstRow
+          .find("td")
+          .map((__, td) => $(td).text().replace(/\s+/g, " ").trim())
+          .get();
+    const headerRowEl = thCells.length ? null : firstRow.get(0);
+
+    const headerText = headerCells.join(" ");
     if (!PARCEL_HEADERS.test(headerText)) return;
     if (EXCLUDE_HEADERS.test(headerText)) return;
 
-    const headers = $(table)
-      .find("th")
-      .map((__, th) => $(th).text().replace(/\s+/g, " ").trim().toLowerCase())
-      .get();
+    const headers = headerCells.map((h) => h.toLowerCase());
 
     const col = (re: RegExp) => headers.findIndex((h) => re.test(h));
     const iParcel = col(/parcel|map/);
-    const iOwner = col(/owner|defendant|name/);
+    /*
+     * CRH and DIF are Georgia's abbreviations for Current Record Holder and
+     * Defendant in Fi-Fa. Both name a person, but only the record holder owns
+     * the parcel — Douglas County's defendant column reads "SAME AS CRH(S)"
+     * on most rows, so matching `defendant` first put that string in the owner
+     * field for 172 parcels. Record holder is listed first here and appears
+     * first in the table, and `findIndex` takes the earlier column.
+     */
+    const iOwner = col(/record.?holder|\bcrh\b|owner|defendant|\bdif\b|name/);
     const iAddr = col(/address|location|situs/);
     const iBid = col(/bid|amount|due|total/);
 
@@ -124,6 +165,7 @@ export function parseHtmlTable(
     $(table)
       .find("tr")
       .each((__, tr) => {
+        if (headerRowEl && tr === headerRowEl) return;
         const cells = $(tr)
           .find("td")
           .map((___, td) => $(td).text().replace(/\s+/g, " ").trim())

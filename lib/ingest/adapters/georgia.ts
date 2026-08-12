@@ -28,7 +28,13 @@
 import * as cheerio from "cheerio";
 import { politeFetch } from "../fetch";
 import { extractLots, NoProviderAvailableError } from "../extract";
-import { parseHtmlTable, parseStructuredPdfText, pdfLinks, pdfToText } from "../parse";
+import {
+  classifiedPdfLinks,
+  parseHtmlTable,
+  parseStructuredPdfText,
+  pdfLinks,
+  pdfToText,
+} from "../parse";
 import { findCountyByName } from "../../atlas";
 import type {
   CountyBinding,
@@ -93,7 +99,134 @@ export const GA_COUNTIES: GaCounty[] = [
     name: "Gwinnett",
     url: "https://www.gwinnetttaxcommissioner.com/property-tax/delinquent_tax/tax-liens-tax-sales",
   },
+
+  /*
+   * Added 2026-08-12. Every one was probed first and publishes a parcel list
+   * that this pipeline can actually read — verified by parsing it, not by the
+   * page looking plausible. Eleven other crawled Georgia counties were
+   * rejected in the same pass: Camden's "table" is a calendar widget, Chatham
+   * annotates its list links "(No Tax Sale)", and Bibb, Catoosa, Cherokee,
+   * Muscogee, Newton, Richmond, Rockdale, Walker and Walton publish neither a
+   * list nor a date.
+   */
+  {
+    name: "Hall",
+    url: "https://hallcountytax.org/property/tax-sale/",
+    note: "Sale date appears only in the list filename, not the page text.",
+  },
+  {
+    name: "Douglas",
+    url: "https://www.douglastax.org/property-tax-sales",
+    note: "Publishes the fi-fa list as an HTML table — 172 parcels at last probe.",
+  },
+  {
+    name: "Columbia",
+    url: "https://www.columbiacountyga.gov/186/Delinquent-Taxes",
+    note: "Header row is <td>, not <th>; columns are the CRH/DIF abbreviations.",
+  },
+  {
+    name: "Carroll",
+    url: "https://carrollcountygatax.com/tax-sales-2/",
+    note: "Posts the newspaper legal advertisement as a text PDF.",
+  },
 ];
+
+/**
+ * O.C.G.A. § 9-13-161 puts sheriff's sales on the first Tuesday of the month.
+ *
+ * Used as a filter rather than a formatter. A county page names many dates —
+ * registration deadlines, advertisement runs, payment due dates, past sales —
+ * and the statutory sale day is the one property that separates the sale from
+ * all of them. A date that is not a first Tuesday is not a Georgia tax sale.
+ */
+export function isFirstTuesday(iso: string): boolean {
+  const d = new Date(`${iso}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.getUTCDay() === 2 && d.getUTCDate() <= 7;
+}
+
+const MONTHS = [
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december",
+];
+const MONTH_ALT = MONTHS.join("|");
+
+function iso(year: number, monthIndex: number, day: number): string {
+  return `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+/**
+ * Sale dates a county has actually published, newest-first.
+ *
+ * Two sources, because counties use both. Most name the date in the page text
+ * ("the November 3, 2026 tax sale"); Hall County names it only in the filename
+ * of the list itself — `September-1-Website-Tax-Sale-List-1.pdf` — with no
+ * year at all.
+ *
+ * A bare month and day is resolved against this year and next, and kept only
+ * if exactly one candidate is a future first Tuesday. That is a narrow enough
+ * gate to be safe: it cannot invent a date the statute does not allow, and it
+ * cannot resurrect a past one.
+ */
+export function parseSaleDates(
+  pageText: string,
+  filenames: string[],
+  today: string,
+): { upcoming: string[]; past: string[] } {
+  const found = new Set<string>();
+
+  const withYear = new RegExp(`\\b(${MONTH_ALT})[\\s\\-_,]+(\\d{1,2})(?:st|nd|rd|th)?[\\s\\-_,]+(20\\d\\d)\\b`, "gi");
+  for (const src of [pageText, ...filenames]) {
+    for (const m of src.matchAll(withYear)) {
+      found.add(iso(Number(m[3]), MONTHS.indexOf(m[1].toLowerCase()), Number(m[2])));
+    }
+  }
+
+  /*
+   * Year-less, filenames only. Page prose says "the first Tuesday in March"
+   * far too often for this to be safe there; a filename that carries a month
+   * and a day is naming a specific document.
+   *
+   * The negative lookahead stops `Carroll-July-2026-Legals.pdf` from reading
+   * 2026 as the twentieth of July.
+   */
+  const noYear = new RegExp(`\\b(${MONTH_ALT})[\\s\\-_]?(\\d{1,2})\\b(?![\\s\\-_]?\\d)`, "gi");
+  const thisYear = Number(today.slice(0, 4));
+  for (const name of filenames) {
+    for (const m of name.matchAll(noYear)) {
+      const mo = MONTHS.indexOf(m[1].toLowerCase());
+      const day = Number(m[2]);
+      const candidates = [thisYear, thisYear + 1]
+        .map((y) => iso(y, mo, day))
+        .filter((d) => isFirstTuesday(d) && d >= today);
+      if (candidates.length === 1) found.add(candidates[0]);
+    }
+  }
+
+  const saleDays = [...found].filter(isFirstTuesday).sort();
+  return {
+    upcoming: saleDays.filter((d) => d >= today),
+    /*
+     * Kept rather than discarded. A county whose only named sale day has
+     * already happened is not a county with an unknown schedule — it has told
+     * us its schedule, and the sale is over. Douglas still displays the June 2
+     * list and Columbia the August 4 one, weeks after each sale; projecting a
+     * fresh window over those would hang 191 sold parcels off a date nobody
+     * announced, which is the Cobb failure wearing a different hat.
+     */
+    past: saleDays.filter((d) => d < today),
+  };
+}
+
+/**
+ * The county saying, in its own words, that the listing is empty.
+ *
+ * Chatham publishes a permanent set of links and annotates them in place —
+ * "Tax Sale List (No Tax Sale)", "Judicial Tax Sale List (No Sale Scheduled)"
+ * — while other dates elsewhere on the page still parse as first Tuesdays.
+ * Matched only inside parentheses so that prose about what happens when there
+ * is no sale does not silence a county that has one.
+ */
+export const NO_SALE_MARKER = /\((?:\s*no\s+(?:tax\s+)?sale[^)]*|\s*no\s+sale\s+scheduled\s*)\)/i;
 
 /** Georgia sales are the first Tuesday of the month. */
 export function nextFirstTuesday(from = new Date()): string {
@@ -148,31 +281,99 @@ export const georgiaAdapter: SourceAdapter = {
       listPdf?: string;
       listKind?: ListingKind;
     };
-    // Georgia's statute sets first-Tuesday *as the sale day*, but says nothing
-    // about which months a county chooses to sell in — Cobb runs two a year.
-    // So this is a crawl window, never a published date.
-    const saleDate = nextFirstTuesday();
+    /*
+     * Georgia's statute sets first-Tuesday as the sale *day*, but says nothing
+     * about which months a county chooses to sell in — Cobb runs two a year.
+     * Projecting the next first Tuesday therefore invents a sale: it put Cobb
+     * under 2026-09-01 when Cobb's own page named May 5 and November 3, and
+     * only `saleDateConfirmed: false` kept 2,825 delinquent taxpayers out of
+     * inventory. So read the county's dates first and project only as a last
+     * resort, with the flag that says nobody should bid on it.
+     */
+    const today = new Date().toISOString().slice(0, 10);
+    let dates: string[] = [];
+    let stale: string[] = [];
+    let saysNoSale = false;
+    let discovered: { url: string; kind: ListingKind } | undefined;
 
-    return [
-      {
-        countyFips: binding.countyFips,
-        platform: "county_site",
-        // Georgia conveys a redeemable deed: 12 months at a 20% flat penalty,
-        // and the right persists until barred by statutory notice.
-        saleType: "Redeemable Deed",
-        externalId: `${binding.countyFips}|${saleDate}`,
-        saleDate,
-        // Projected from the statutory sale day, never read off the county.
-        saleDateConfirmed: false,
-        listingKind: listKind ?? "unknown",
-        title: `${name} County tax sale (courthouse steps)`,
-        status: "scheduled",
-        // Prefer the direct list PDF when known — landing pages often only
-        // carry the procedure booklet.
-        sourceUrl: listPdf || url,
-        raw: { registryUrl: url, listPdf },
-      },
-    ];
+    try {
+      const res = await politeFetch(url);
+      const $ = cheerio.load(res.body);
+      const text = res.body
+        .replace(/<script[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[\s\S]*?<\/style>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/g, " ")
+        .replace(/\s+/g, " ");
+
+      const candidates = classifiedPdfLinks($, url);
+      discovered = candidates.find((c) => c.kind === "sale_list");
+
+      saysNoSale = NO_SALE_MARKER.test(text);
+      if (!saysNoSale) {
+        const parsed = parseSaleDates(
+          text,
+          candidates.map((c) => decodeURIComponent(c.url.split("/").pop() ?? "")),
+          today,
+        );
+        dates = parsed.upcoming;
+        stale = parsed.past;
+      }
+    } catch (e) {
+      // A page we cannot read is not a county without a sale. Fall through to
+      // the projected window so the county still gets crawled.
+      console.warn(`[ga-counties] ${name}: ${e instanceof Error ? e.message : e}`);
+    }
+
+    const confirmed = dates.length > 0;
+
+    /*
+     * The county said so itself. Chatham labels its own links "(No Tax Sale)"
+     * and "(No Sale Scheduled)" while leaving a permanent set of handouts on
+     * the page, so a projected window here does not just invent a date — it
+     * sends a new-homeowner leaflet and a tax-bill glossary to the LLM for
+     * transcription on every single run.
+     */
+    if (saysNoSale) {
+      console.log(`[ga-counties] ${name}: page states there is no sale — skipping`);
+      return [];
+    }
+
+    /*
+     * The county named its sale days and every one of them has passed. Emit
+     * nothing: the list still on the page belongs to a sale that is over, and
+     * a projected window would give those parcels a future date the county
+     * never announced. Bindings drive the crawl, not auction rows, so the
+     * county is re-read on the next run and picks up its next sale then.
+     */
+    if (!confirmed && stale.length) {
+      console.log(
+        `[ga-counties] ${name}: last published sale was ${stale[stale.length - 1]} — no upcoming sale, skipping`,
+      );
+      return [];
+    }
+
+    const saleDates = confirmed ? dates : [nextFirstTuesday()];
+    // A declared registry kind is a human judgement about a specific document
+    // and outranks anything read off the page.
+    const kind: ListingKind = listKind ?? (confirmed ? (discovered ? "sale_list" : "unknown") : "unknown");
+    const source = listPdf || (confirmed && discovered ? discovered.url : url);
+
+    return saleDates.map((saleDate) => ({
+      countyFips: binding.countyFips,
+      platform: "county_site" as const,
+      // Georgia conveys a redeemable deed: 12 months at a 20% flat penalty,
+      // and the right persists until barred by statutory notice.
+      saleType: "Redeemable Deed" as const,
+      externalId: `${binding.countyFips}|${saleDate}`,
+      saleDate,
+      saleDateConfirmed: confirmed,
+      listingKind: kind,
+      title: `${name} County tax sale (courthouse steps)`,
+      status: "scheduled" as const,
+      sourceUrl: source,
+      raw: { registryUrl: url, listPdf, discoveredList: discovered?.url, datesFromPage: dates },
+    }));
   },
 
   async listLots(auction: DiscoveredAuction): Promise<DiscoveredLot[]> {
@@ -209,8 +410,22 @@ export const georgiaAdapter: SourceAdapter = {
     const fromTable = parseHtmlTable($, auction.sourceUrl);
     if (fromTable?.length) return fromTable;
 
-    // 2. Otherwise try the linked PDFs, most-likely first.
-    for (const pdf of pdfLinks($, auction.sourceUrl).slice(0, 3)) {
+    /*
+     * 2. Otherwise try the linked PDFs, most-likely first.
+     *
+     * Prefer documents the county's own wording claims are a listing. Reading
+     * the top three by score regardless of kind sent Chatham's "New Homeowner
+     * Information" and "Understanding Your Property Tax Bill" to the LLM on
+     * every run — two paid transcriptions of a glossary, on a page whose sale
+     * links say "(No Tax Sale)". Only when nothing classifies does it fall
+     * back to the unclassified ranking, so a county with an unhelpful filename
+     * is still reached.
+     */
+    const classified = classifiedPdfLinks($, auction.sourceUrl);
+    const plausible = classified.filter((c) => c.kind !== "unknown").map((c) => c.url);
+    const candidates = plausible.length ? plausible : pdfLinks($, auction.sourceUrl);
+
+    for (const pdf of candidates.slice(0, 3)) {
       let text: string;
       try {
         text = await pdfToText(pdf);
