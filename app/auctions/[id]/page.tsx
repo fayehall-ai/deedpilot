@@ -95,12 +95,6 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
           >
             Official listing ↗
           </a>
-          <Link
-            href={`/atlas/${stateSlug(county.state)}/${countySlug(county.name)}`}
-            className="rounded-lg bg-accent px-4 py-2 text-sm text-accent-fg hover:opacity-90"
-          >
-            County rules
-          </Link>
         </div>
       </header>
 
@@ -154,6 +148,65 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
             </ul>
           </Callout>
         </div>
+      ) : null}
+
+      {/*
+        County rules, in place of the button that used to sit in the header.
+        The button sent the reader to a different page mid-decision; the rules
+        are context for the list below, so they belong next to it. Closed by
+        default because the parcels are what the page is for — and the two
+        things a bid is most often wrong about, surviving liens and the
+        statutory caveats, are already open above this rather than folded away
+        in here.
+      */}
+      {rule ? (
+        <details className="group/rules mb-6 rounded-xl border border-border bg-surface">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-sm font-semibold hover:text-accent [&::-webkit-details-marker]:hidden">
+            <span aria-hidden className="text-muted transition-transform group-open/rules:rotate-90">
+              ›
+            </span>
+            {county.name} County rules
+            {rule.isStateDefault ? (
+              <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wide text-muted">
+                state defaults
+              </span>
+            ) : null}
+          </summary>
+
+          <div className="border-t border-border px-5 py-4">
+            <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+              <Row label="Sale type" value={rule.type} />
+              <Row label="Redemption" value={rule.redemption} />
+              <Row label="Return if redeemed" value={rule.returns} />
+              <Row label="Governing statute" value={rule.statute} />
+              <Row label="Format" value={rule.auctionFormat} />
+              <Row label="Frequency" value={rule.auctionFrequency} />
+              <Row label="Deposit rules" value={rule.depositRules} />
+              <Row label="Quiet title" value={rule.quietTitle} />
+              <Row label="Checked" value={rule.asOf} />
+            </dl>
+
+            {/*
+              Named so the reader can tell researched from inherited. A county
+              showing its state's redemption window is a different claim from
+              one whose own was read off the county's notice, and the atlas has
+              always labelled which is which.
+            */}
+            {rule.inherited.length > 0 ? (
+              <p className="mt-4 border-t border-border pt-3 text-xs text-muted">
+                Inherited from {STATE_NAMES[county.state] ?? county.state} rather than researched
+                for {county.name}: {rule.inherited.join(", ")}.
+              </p>
+            ) : null}
+
+            <Link
+              href={`/atlas/${stateSlug(county.state)}/${countySlug(county.name)}`}
+              className="mt-4 inline-block text-sm text-accent hover:underline"
+            >
+              Full {county.name} County profile →
+            </Link>
+          </div>
+        </details>
       ) : null}
 
       <h2 className="mb-3 text-lg font-semibold">
@@ -248,6 +301,25 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
         Open a parcel to run the full max-bid analysis, which accounts for the assessment ratio,
         surviving liens, quiet title, and holding costs.
       </p>
+    </div>
+  );
+}
+
+/**
+ * One county-rule field, label above value.
+ *
+ * Renders nothing when there is no value. A rules panel padded with dashes
+ * implies the county was researched and found to have no answer, when the truth
+ * is usually that nobody has looked — and the `inherited` line below the grid
+ * is where that distinction is actually made.
+ */
+function Row({ label, value }: { label: string; value?: string | null }) {
+  const v = value?.trim();
+  if (!v) return null;
+  return (
+    <div>
+      <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
+      <dd className="mt-0.5 leading-relaxed">{v}</dd>
     </div>
   );
 }
