@@ -23,6 +23,21 @@ import type { z } from "zod";
 export class NoProviderAvailableError extends Error {}
 export class ProviderRefusedError extends Error {}
 
+/**
+ * A rendered page image, for documents that carry no text layer.
+ *
+ * Roughly one county sale list in thirteen is a scan — Fulton County GA
+ * publishes its levy sale as 8 pages of images with 128 characters of
+ * extractable text, all of it page markers. The words are on the page; they
+ * are simply not characters. Reading them needs the model's eyes.
+ */
+export interface ImageInput {
+  /** `image/png` or `image/jpeg`. */
+  mediaType: "image/png" | "image/jpeg";
+  /** Raw base64, no data: prefix — each provider wraps it its own way. */
+  base64: string;
+}
+
 export interface StructuredRequest<T extends z.ZodType> {
   system: string;
   prompt: string;
@@ -30,6 +45,12 @@ export interface StructuredRequest<T extends z.ZodType> {
   /** Schema name sent to the provider; must be a bare identifier. */
   schemaName: string;
   maxTokens?: number;
+  /**
+   * Page images to read alongside the prompt. Send few and large rather than
+   * many and small: a dense parcel table needs the resolution, and every
+   * provider caps total request size.
+   */
+  images?: ImageInput[];
 }
 
 export interface ProviderResult<T> {
@@ -75,7 +96,20 @@ const grokProvider: Provider = {
       max_completion_tokens: req.maxTokens ?? 16000,
       messages: [
         { role: "system", content: req.system },
-        { role: "user", content: req.prompt },
+        {
+          role: "user",
+          // Images first, then the instruction: both providers attend better
+          // to a question asked after the evidence than before it.
+          content: req.images?.length
+            ? [
+                ...req.images.map((img) => ({
+                  type: "image_url" as const,
+                  image_url: { url: `data:${img.mediaType};base64,${img.base64}`, detail: "high" as const },
+                })),
+                { type: "text" as const, text: req.prompt },
+              ]
+            : req.prompt,
+        },
       ],
       response_format: zodResponseFormat(req.schema, req.schemaName),
     });
@@ -127,7 +161,20 @@ const claudeProvider: Provider = {
         effort: maxTokens >= 16000 ? "medium" : "high",
         format: zodOutputFormat(req.schema),
       },
-      messages: [{ role: "user", content: req.prompt }],
+      messages: [
+        {
+          role: "user",
+          content: req.images?.length
+            ? [
+                ...req.images.map((img) => ({
+                  type: "image" as const,
+                  source: { type: "base64" as const, media_type: img.mediaType, data: img.base64 },
+                })),
+                { type: "text" as const, text: req.prompt },
+              ]
+            : req.prompt,
+        },
+      ],
     });
 
     const response = await stream.finalMessage();

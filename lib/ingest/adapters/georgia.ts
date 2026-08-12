@@ -27,7 +27,8 @@
 
 import * as cheerio from "cheerio";
 import { politeFetch } from "../fetch";
-import { extractLots, NoProviderAvailableError } from "../extract";
+import { extractLots, extractLotsFromImages, NoProviderAvailableError } from "../extract";
+import { renderPdfFromUrl, textDensity, SCAN_TEXT_PER_PAGE } from "../render";
 import {
   classifiedPdfLinks,
   parseHtmlTable,
@@ -246,6 +247,71 @@ export function nextFirstTuesday(from = new Date()): string {
 
 
 
+/**
+ * Read one PDF, cheapest route first.
+ *
+ *   deterministic parse -> free and exact when the layout is known
+ *   LLM over text       -> costs a call, needs a text layer
+ *   LLM over pixels     -> costs a call per page, needs nothing
+ *
+ * The last rung exists because Fulton County publishes its levy sale list as
+ * 8 pages of scanned images: `pdfToText` returns 128 characters, all of them
+ * page markers, so every earlier rung correctly concludes there is no list and
+ * a real September sale in Georgia's largest county reads as empty. Roughly
+ * one reachable county list in thirteen is a scan.
+ *
+ * Rendering is only attempted when the text layer is genuinely absent, not
+ * merely thin — a document we can read is never re-read as pictures.
+ */
+async function lotsFromPdf(
+  url: string,
+  context: { countyName: string; state: string; sourceUrl: string },
+): Promise<DiscoveredLot[]> {
+  let text: string;
+  try {
+    text = await pdfToText(url);
+  } catch (e) {
+    console.warn(`[ga-counties] ${url}: ${e instanceof Error ? e.message : e}`);
+    return [];
+  }
+
+  const structured = parseStructuredPdfText(text, url);
+  if (structured?.length) {
+    console.log(`[ga-counties] ${url}: structured PDF parse → ${structured.length} lot(s)`);
+    return structured;
+  }
+
+  const pageMarkers = (text.match(/--\s*\d+\s+of\s+\d+\s*--/g) ?? []).length;
+  const pages = Math.max(1, pageMarkers);
+  const scanned = textDensity(text, pages) < SCAN_TEXT_PER_PAGE;
+
+  try {
+    if (!scanned) {
+      const result = await extractLots(text, context);
+      if (result.containsParcelList && result.lots.length) return result.lots;
+      console.log(`[ga-counties] ${url}: no parcel list — ${result.note ?? "unspecified"}`);
+      return [];
+    }
+
+    console.log(`[ga-counties] ${url}: no text layer over ${pages} page(s) — rendering for vision`);
+    const rendered = await renderPdfFromUrl(url, { maxPages: 20, scale: 2 });
+    const result = await extractLotsFromImages(rendered, context);
+    if (result.containsParcelList && result.lots.length) {
+      console.log(`[ga-counties] ${url}: vision → ${result.lots.length} lot(s) from ${rendered.length} page(s)`);
+      return result.lots;
+    }
+    console.log(`[ga-counties] ${url}: vision found no parcel list — ${result.note ?? "unspecified"}`);
+    return [];
+  } catch (e) {
+    if (e instanceof NoProviderAvailableError) {
+      // Distinguish "we couldn't look" from "there is no sale". Returning []
+      // here would mark the county as having no inventory.
+      throw new Error(`${url} needs LLM extraction — ${e.message}`);
+    }
+    throw e;
+  }
+}
+
 export const georgiaAdapter: SourceAdapter = {
   name: "ga-counties",
   platform: "county_site",
@@ -377,30 +443,15 @@ export const georgiaAdapter: SourceAdapter = {
   },
 
   async listLots(auction: DiscoveredAuction): Promise<DiscoveredLot[]> {
-    // Direct PDF auction source (e.g. Cobb delinquent roll).
+    const context = {
+      countyName: auction.title ?? auction.countyFips,
+      state: "GA",
+      sourceUrl: auction.sourceUrl,
+    };
+
+    // Direct PDF auction source (e.g. Cobb delinquent roll, Fulton levy list).
     if (/\.pdf(\?|$)/i.test(auction.sourceUrl)) {
-      const text = await pdfToText(auction.sourceUrl);
-      const structured = parseStructuredPdfText(text, auction.sourceUrl);
-      if (structured?.length) {
-        console.log(
-          `[ga-counties] ${auction.sourceUrl}: structured PDF parse → ${structured.length} lot(s)`,
-        );
-        return structured;
-      }
-      try {
-        const result = await extractLots(text, {
-          countyName: auction.title ?? auction.countyFips,
-          state: "GA",
-          sourceUrl: auction.sourceUrl,
-        });
-        if (result.containsParcelList && result.lots.length) return result.lots;
-      } catch (e) {
-        if (e instanceof NoProviderAvailableError) {
-          throw new Error(`${auction.sourceUrl} needs LLM extraction — ${e.message}`);
-        }
-        throw e;
-      }
-      return [];
+      return lotsFromPdf(auction.sourceUrl, context);
     }
 
     const res = await politeFetch(auction.sourceUrl);
@@ -426,38 +477,8 @@ export const georgiaAdapter: SourceAdapter = {
     const candidates = plausible.length ? plausible : pdfLinks($, auction.sourceUrl);
 
     for (const pdf of candidates.slice(0, 3)) {
-      let text: string;
-      try {
-        text = await pdfToText(pdf);
-      } catch (e) {
-        console.warn(`[ga-counties] ${pdf}: ${e instanceof Error ? e.message : e}`);
-        continue;
-      }
-
-      const structured = parseStructuredPdfText(text, pdf);
-      if (structured?.length) {
-        console.log(`[ga-counties] ${pdf}: structured PDF parse → ${structured.length} lot(s)`);
-        return structured;
-      }
-
-      try {
-        const result = await extractLots(text, {
-          countyName: auction.title ?? auction.countyFips,
-          state: "GA",
-          sourceUrl: pdf,
-        });
-        if (result.containsParcelList && result.lots.length) return result.lots;
-        console.log(`[ga-counties] ${pdf}: no parcel list — ${result.note ?? "unspecified"}`);
-      } catch (e) {
-        if (e instanceof NoProviderAvailableError) {
-          // Distinguish "we couldn't look" from "there is no sale". Silently
-          // returning [] here would mark the county as having no inventory.
-          // Surface the real failure (credits, bad key, model name) — not a
-          // misleading "no provider configured" when keys are set but failing.
-          throw new Error(`${pdf} needs LLM extraction — ${e.message}`);
-        }
-        throw e;
-      }
+      const lots = await lotsFromPdf(pdf, { ...context, sourceUrl: pdf });
+      if (lots.length) return lots;
     }
 
     // 3. Nothing published. In Georgia this is common and legitimate: not

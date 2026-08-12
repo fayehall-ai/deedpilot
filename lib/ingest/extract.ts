@@ -14,6 +14,7 @@
 import { z } from "zod";
 import { runStructured, NoProviderAvailableError } from "../ai/providers";
 import type { DiscoveredLot } from "./types";
+import type { RenderedPage } from "./render";
 
 const ExtractedLotSchema = z.object({
   parcelNumber: z
@@ -162,6 +163,117 @@ ${chunk}`,
     note: lastNote,
     model,
   };
+}
+
+/**
+ * The same transcription job, done with the model's eyes.
+ *
+ * Identical rules to the text path — transcribe, never infer — with two
+ * additions that only matter when reading pixels: say when a character is
+ * genuinely illegible rather than guessing at it, and do not treat a page of
+ * statutory preamble as a parcel list. A misread digit in a parcel number is
+ * worse than a null, because a null is visible and a wrong parcel is not.
+ */
+const VISION_SYSTEM = `${SYSTEM}
+- You are reading a scanned image of a printed document, not digital text.
+- If a character or figure is genuinely illegible, return null for that field
+  rather than guessing. A missing value is recoverable; a misread parcel
+  number or bid amount is not.
+- Read the whole page including rows that continue past a page break.
+- Column headers, page numbers, county letterhead and statutory preamble are
+  not parcels.`;
+
+/**
+ * Transcribe parcels from rendered page images.
+ *
+ * One request per page rather than one per document: a rendered page runs
+ * ~1.2 MB before base64, so a booklet would exceed every provider's request
+ * cap, and a per-page loop also means one unreadable page costs one page
+ * rather than the whole list.
+ *
+ * A page that yields nothing is not fatal — scanned lists routinely open with
+ * a cover page of statutory text. `containsParcelList` is true if any page
+ * had one.
+ */
+export async function extractLotsFromImages(
+  pages: RenderedPage[],
+  context: { countyName: string; state: string; sourceUrl: string },
+): Promise<ExtractionResult> {
+  if (pages.length === 0) {
+    return {
+      lots: [],
+      containsParcelList: false,
+      note: "No pages could be rendered from this document.",
+      model: "none",
+    };
+  }
+
+  const merged: DiscoveredLot[] = [];
+  const seen = new Set<string>();
+  let model = "none";
+  let anyList = false;
+  let lastNote: string | null = null;
+  let blankPages = 0;
+
+  for (const page of pages) {
+    const result = await runStructured({
+      system: VISION_SYSTEM,
+      schema: ExtractionSchema,
+      schemaName: "tax_sale_listing",
+      maxTokens: 12000,
+      images: [{ mediaType: page.mediaType, base64: page.base64 }],
+      prompt: `Source: ${context.countyName} County, ${context.state}
+URL: ${context.sourceUrl}
+Page ${page.pageNumber} of ${pages.length} of a scanned tax sale document.
+
+Transcribe every parcel visible on this page. If this page carries no parcel
+rows — a cover sheet, terms of sale, or an index — set containsParcelList=false
+and say which it is in note.`,
+    });
+
+    model = result.model;
+    lastNote = result.data.note;
+    if (result.data.containsParcelList) anyList = true;
+
+    let added = 0;
+    for (const l of result.data.lots) {
+      const key = (l.parcelNumber ?? l.lotNumber ?? l.addressLine ?? JSON.stringify(l)).toString();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      added++;
+      merged.push({
+        parcelNumber: l.parcelNumber ?? undefined,
+        lotNumber: l.lotNumber ?? undefined,
+        ownerName: l.ownerName ?? undefined,
+        addressLine: l.addressLine ?? undefined,
+        city: l.city ?? undefined,
+        openingBid: l.openingBid ?? undefined,
+        legalDescription: l.legalDescription ?? undefined,
+        sourceUrl: context.sourceUrl,
+        raw: { extracted: true, vision: true, model: result.model, page: page.pageNumber },
+      });
+    }
+
+    /*
+     * Stop after two consecutive empty pages once something has been found.
+     * Scanned lists end with blank backs and excess-funds appendices, and each
+     * page is a paid call. Two rather than one because a list can be
+     * interrupted by a single continuation or map page.
+     */
+    if (added === 0) {
+      blankPages++;
+      if (anyList && blankPages >= 2) {
+        console.log(
+          `[extract] ${context.sourceUrl}: stopping at page ${page.pageNumber} — two consecutive pages with no parcels`,
+        );
+        break;
+      }
+    } else {
+      blankPages = 0;
+    }
+  }
+
+  return { lots: merged, containsParcelList: anyList || merged.length > 0, note: lastNote, model };
 }
 
 export { NoProviderAvailableError };
