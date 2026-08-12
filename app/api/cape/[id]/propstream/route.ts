@@ -16,6 +16,10 @@ import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { auctions, counties, lots } from "@/lib/db/schema";
 import { getCounty } from "@/lib/atlas";
+import { computeMaxBid } from "@/lib/deal/maxbid";
+import { mergeValuations } from "@/lib/property/merge";
+import { getLotValuations } from "@/lib/queries";
+import type { SaleType } from "@/lib/atlas/types";
 import {
   exportFilename,
   qualifies,
@@ -55,6 +59,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
   const parcels = await db
     .select({
+      id: lots.id,
       parcelNumber: lots.parcelNumber,
       addressLine: lots.addressLine,
       city: lots.city,
@@ -62,7 +67,10 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       ownerName: lots.ownerName,
       openingBid: lots.openingBid,
       assessedValue: lots.assessedValue,
+      taxesOwed: lots.taxesOwed,
       acreage: lots.acreage,
+      buildingSqft: lots.buildingSqft,
+      yearBuilt: lots.yearBuilt,
       landUse: lots.landUse,
     })
     .from(lots)
@@ -70,12 +78,79 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     .orderBy(asc(lots.parcelNumber))
     .limit(10_000);
 
-  const rows: PropStreamRow[] = parcels.map((p) => ({
-    ...p,
-    countyName: row.county.name,
-    state: row.county.state,
-    saleDate: row.auction.saleDate,
-  }));
+  /*
+   * One valuation read per parcel, for the beds/baths and lot-size the sheet
+   * asks for and for the market estimate the max-bid engine ranks above
+   * assessed ÷ ratio. Bounded by the 10,000 limit above; the largest live sale
+   * is 1,638 parcels.
+   */
+  const merged = await Promise.all(
+    parcels.map(async (p) => mergeValuations(await getLotValuations(p.id))),
+  );
+
+  const cityStateZip = (p: (typeof parcels)[number]) =>
+    [p.city, row.county.state, p.zip].filter(Boolean).join(", ") || null;
+
+  const rows: PropStreamRow[] = parcels.map((p, idx) => {
+    const v = merged[idx];
+    const deal = computeMaxBid({
+      state: row.county.state,
+      saleType: row.auction.saleType as SaleType,
+      fips: row.county.fips,
+      openingBid: p.openingBid === null ? undefined : Number(p.openingBid),
+      assessedValue: p.assessedValue === null ? undefined : Number(p.assessedValue),
+      marketValue:
+        v?.marketValue === null || v?.marketValue === undefined ? undefined : Number(v.marketValue),
+    });
+
+    const beds = v?.beds ?? null;
+    const baths = v?.baths ?? null;
+    const bedsBaths =
+      beds !== null || baths !== null ? [beds ?? "?", baths ?? "?"].join("/") : null;
+
+    const lotSqft = v?.lotSqft ?? null;
+    const lotSize = p.acreage
+      ? `${p.acreage} acres`
+      : lotSqft
+        ? `${lotSqft} sqft`
+        : null;
+
+    return {
+      subjectProperty: p.addressLine ?? p.parcelNumber,
+      countyName: row.county.name,
+      auctionType: row.auction.saleType,
+      saleDate: row.auction.saleDate,
+      openingBid: p.openingBid,
+      parcelNumber: p.parcelNumber,
+      addressLine: p.addressLine,
+      cityStateZip: cityStateZip(p),
+      taxesOwed: p.taxesOwed,
+      assessedValue: p.assessedValue,
+      ownerName: p.ownerName,
+      buildingSqft: p.buildingSqft ?? v?.buildingSqft ?? null,
+      landUse: p.landUse ?? v?.propertyType ?? null,
+      yearBuilt: p.yearBuilt ?? v?.yearBuilt ?? null,
+      bedsBaths,
+      lotSize,
+      lastSaleDate: v?.lastSaleDate ?? null,
+      arv: deal.arv.value === null ? null : Math.round(deal.arv.value),
+      maxBid: deal.maxBid === null ? null : Math.round(deal.maxBid),
+      /*
+       * Shipped beside the numbers because an ARV from an assumed floor and one
+       * from a provider estimate are different claims, and a spreadsheet strips
+       * every caveat the page carries.
+       */
+      arvBasis: deal.arv.assumed
+        ? "ASSUMED FLOOR — not a valuation of this parcel"
+        : deal.arv.fromMarket
+          ? "Provider market estimate"
+          : deal.arv.derived
+            ? "Derived from assessed value"
+            : deal.arv.value === null
+              ? "No valuation available"
+              : "Comparable sales",
+    };
+  });
 
   /* BOM so Excel reads it as UTF-8. See the Content-Type note below. */
   const csv = "\uFEFF" + toPropStreamCsv(rows);

@@ -29,43 +29,81 @@
 export const MIN_POPULATION = 50_000;
 
 export interface PropStreamRow {
+  subjectProperty: string | null;
+  countyName: string;
+  auctionType: string | null;
+  saleDate: string;
+  openingBid: string | number | null;
   parcelNumber: string | null;
   addressLine: string | null;
-  city: string | null;
-  zip: string | null;
-  countyName: string;
-  state: string;
-  ownerName: string | null;
-  openingBid: string | number | null;
+  cityStateZip: string | null;
+  taxesOwed: string | number | null;
   assessedValue: string | number | null;
-  acreage: string | number | null;
+  ownerName: string | null;
+  buildingSqft: string | number | null;
   landUse: string | null;
-  saleDate: string;
+  yearBuilt: string | number | null;
+  bedsBaths: string | null;
+  lotSize: string | null;
+  lastSaleDate: string | null;
+  arv: string | number | null;
+  maxBid: string | number | null;
+  arvBasis: string | null;
 }
 
 /**
- * Column order and headers.
+ * Column order and headers, taken from the TDC 2026 Excel Analysis template.
  *
- * These are PropStream's standard property-list import fields. The exact header
- * row in the TDC template has not been seen, and the document is explicit that
- * matching it matters — "make sure to match the format to get the best results.
- * This is usually obtained by being exact in importing the template". So this
- * lives in one place, as data, and reconciling it against the real template is
- * an edit to this array rather than a change to the exporter.
+ * The earlier version of this array guessed at PropStream's generic import
+ * fields. The real template is an analysis workbook — four tabs, one property
+ * per workbook, with "Property Info" carrying a form of labels down column B
+ * and a computed expense stack down column I. Headers here are that form's own
+ * labels, verbatim, so a row lines up with the sheet it is meant to fill.
+ *
+ * Only the Property Summary block is emitted. The expense stack is the
+ * workbook's own arithmetic — All-In Factor 70%, title insurance at 0.70%,
+ * fixed carry for insurance, electric, gas and water — and re-deriving it here
+ * would put two versions of the same model in circulation. What the sheet
+ * cannot compute for itself is the ARV, so that is supplied, and DeedPilot's
+ * own maximum bid rides alongside as a separate column rather than overwriting
+ * the sheet's.
+ *
+ * Fields with no source in this system are absent rather than empty-headed:
+ * HOA, amenities, and the Homes/Xome/Movoto/Realtor/Redfin/Zillow value rows,
+ * which are the sites this product has no licensed access to.
  */
 export const PROPSTREAM_COLUMNS: { header: string; key: keyof PropStreamRow }[] = [
-  { header: "APN", key: "parcelNumber" },
+  { header: "Subject Property", key: "subjectProperty" },
   { header: "County", key: "countyName" },
-  { header: "State", key: "state" },
-  { header: "Address", key: "addressLine" },
-  { header: "City", key: "city" },
-  { header: "Zip", key: "zip" },
-  { header: "Owner Name", key: "ownerName" },
+  { header: "Auction Type", key: "auctionType" },
+  { header: "Auction Date", key: "saleDate" },
   { header: "Opening Bid", key: "openingBid" },
-  { header: "Assessed Value", key: "assessedValue" },
-  { header: "Acres", key: "acreage" },
-  { header: "Land Use", key: "landUse" },
-  { header: "Sale Date", key: "saleDate" },
+  { header: "APN#", key: "parcelNumber" },
+  { header: "Prop. Address", key: "addressLine" },
+  { header: "City/State/Zip", key: "cityStateZip" },
+  { header: "Taxes", key: "taxesOwed" },
+  { header: "Asses. Value", key: "assessedValue" },
+  { header: "Current Owner", key: "ownerName" },
+  { header: "Total Sqft", key: "buildingSqft" },
+  { header: "Property Type", key: "landUse" },
+  { header: "Year Built", key: "yearBuilt" },
+  { header: "Beds/Bath", key: "bedsBaths" },
+  { header: "Lot Size", key: "lotSize" },
+  { header: "WD Date", key: "lastSaleDate" },
+  /*
+   * The sheet's E8. Everything in its expense stack keys off this one number,
+   * and it is the number the sheet has no way to work out for itself.
+   */
+  { header: "After Rehab Value = ARV", key: "arv" },
+  /*
+   * Kept apart from the sheet's own "Maximum Bid =" cell on purpose. This one
+   * is statute-aware — redemption window, quiet-title requirement and the
+   * assessment ratio for the state — where the sheet applies a flat 70%
+   * all-in factor. Two different models; the reader should see both rather
+   * than have one silently replace the other.
+   */
+  { header: "DeedPilot Max Bid", key: "maxBid" },
+  { header: "DeedPilot ARV Basis", key: "arvBasis" },
 ];
 
 /**

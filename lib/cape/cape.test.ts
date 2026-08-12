@@ -319,24 +319,41 @@ assert(/under the 50,000/.test(qualifies(1_000).reason), "the reason names the t
 // --- CSV correctness ---------------------------------------------------------
 
 const row = (o: Partial<PropStreamRow> = {}): PropStreamRow => ({
+  subjectProperty: "7410 SARNES RD",
+  countyName: "Saline",
+  auctionType: "Tax Deed",
+  saleDate: "2026-09-01",
+  openingBid: 2973,
   parcelNumber: "001-02194-000",
   addressLine: "7410 SARNES RD",
-  city: "MABELVALE",
-  zip: "72103",
-  countyName: "Saline",
-  state: "AR",
-  ownerName: "CASH, BILLY R & ROSIE N",
-  openingBid: 2973,
+  cityStateZip: "MABELVALE, AR, 72103",
+  taxesOwed: 2973,
   assessedValue: 19690,
-  acreage: 1.13,
+  ownerName: "CASH, BILLY R & ROSIE N",
+  buildingSqft: 1248,
   landUse: "SFR",
-  saleDate: "2026-09-01",
+  yearBuilt: 1981,
+  bedsBaths: "3/1",
+  lotSize: "1.13 acres",
+  lastSaleDate: "2017-11-17",
+  arv: 98450,
+  maxBid: 60153,
+  arvBasis: "Provider market estimate",
   ...o,
 });
 
 const csv = toPropStreamCsv([row()]);
 const lines = csv.split("\r\n");
-assert(lines[0].startsWith("APN,County,State,Address"), `header order, got ${lines[0]}`);
+/* The template's own labels, in its own order. */
+assert(
+  lines[0].startsWith("Subject Property,County,Auction Type,Auction Date,Opening Bid,APN#"),
+  `header matches the TDC Property Info form, got ${lines[0]}`,
+);
+assert(lines[0].includes("After Rehab Value = ARV"), "the sheet's E8 label, verbatim");
+assert(
+  lines[0].includes("DeedPilot Max Bid"),
+  "our max bid is a separate column, not the sheet's own cell",
+);
 assert(csv.endsWith("\r\n"), "CRLF line endings and a trailing newline, per RFC 4180");
 assert(
   lines[0].split(",").length === PROPSTREAM_COLUMNS.length,
@@ -366,12 +383,21 @@ assert(csvField("-0012-345") === "'-0012-345", "a parcel number is not a subtrac
 assert(csvField("@x") === "'@x" && csvField("+x") === "'+x", "@ and + too");
 
 // A missing address must not shift the row — empty fields hold their position.
-const sparse = toPropStreamCsv([row({ addressLine: null, city: null, zip: null })]).split("\r\n")[1];
+const sparse = toPropStreamCsv([
+  row({ addressLine: null, cityStateZip: null, subjectProperty: "001-02194-000" }),
+]).split("\r\n")[1];
 assert(
   sparse.split(",").length >= PROPSTREAM_COLUMNS.length,
   `absent fields keep their columns, got ${sparse}`,
 );
-assert(sparse.startsWith("001-02194-000,Saline,AR,,,"), `APN-keyed row, got ${sparse}`);
+/* With no street line the subject falls back to the APN — the sheet's first
+   field should never be blank. */
+assert(sparse.startsWith("001-02194-000,Saline,Tax Deed,"), `APN-keyed row, got ${sparse}`);
+
+/* An assumed floor must reach the spreadsheet labelled. A CSV strips every
+   caveat the page carries, so the basis travels as its own column. */
+const floored = toPropStreamCsv([row({ arvBasis: "ASSUMED FLOOR — not a valuation of this parcel" })]);
+assert(/ASSUMED FLOOR/.test(floored), "the ARV basis survives into the file");
 
 assert(
   exportFilename("St. Francis", "AR", "2026-09-01") === "st-francis-ar-2026-09-01-propstream.csv",
