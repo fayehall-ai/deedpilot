@@ -14,7 +14,8 @@ import {
   Stat,
 } from "@/components/ui";
 import { DetailSkeleton } from "@/components/skeleton";
-import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
+import { resolveCountyRule, STATE_NAMES } from "@/lib/atlas";
+import type { LinkRef } from "@/lib/atlas/types";
 import { statuteFor } from "@/lib/deal/statute";
 
 
@@ -173,38 +174,116 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
             ) : null}
           </summary>
 
-          <div className="border-t border-border px-5 py-4">
+          <div className="space-y-5 border-t border-border px-5 py-4">
             <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
               <Row label="Sale type" value={rule.type} />
-              <Row label="Redemption" value={rule.redemption} />
-              <Row label="Return if redeemed" value={rule.returns} />
+              <Row label="Redemption period" value={rule.redemption} />
+              <Row label="Investor return" value={rule.returns} />
               <Row label="Governing statute" value={rule.statute} />
-              <Row label="Format" value={rule.auctionFormat} />
-              <Row label="Frequency" value={rule.auctionFrequency} />
-              <Row label="Deposit rules" value={rule.depositRules} />
-              <Row label="Quiet title" value={rule.quietTitle} />
+              <Row label="Population" value={rule.county.population ? `${num(rule.county.population)} residents` : null} />
               <Row label="Checked" value={rule.asOf} />
             </dl>
 
+            {/* Heading only when something sits under it — an empty section
+                header reads as a section that failed to load. */}
+            {rule.auctionFormat || rule.auctionFrequency || rule.auctionPlatform?.label || rule.depositRules ? (
+            <section className="border-t border-border pt-4">
+              <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">Auction logistics</h3>
+              <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                <Row label="Format" value={rule.auctionFormat} />
+                <Row label="Frequency" value={rule.auctionFrequency} />
+                <RefRow label="Platform" link={rule.auctionPlatform} />
+                <Row label="Deposit rules" value={rule.depositRules} />
+              </dl>
+            </section>
+            ) : null}
+
             {/*
-              Named so the reader can tell researched from inherited. A county
-              showing its state's redemption window is a different claim from
-              one whose own was read off the county's notice, and the atlas has
-              always labelled which is which.
+              Quiet title only. `survivingLiens` is already open above this in
+              its own callout, and it is the single most expensive thing to miss
+              — repeating it inside a closed disclosure would suggest it can be
+              read here instead of there.
             */}
+            {rule.quietTitle ? (
+              <section className="border-t border-border pt-4">
+                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">Title risk</h3>
+                <p className="text-sm leading-relaxed">{rule.quietTitle}</p>
+              </section>
+            ) : null}
+
+            {rule.taxCollector || rule.clerkOfCourt || rule.propertyAppraiser || rule.gisMap ? (
+              <section className="border-t border-border pt-4">
+                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">
+                  Offices and records
+                </h3>
+                <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                  <RefRow label="Tax collector" link={rule.taxCollector} />
+                  <RefRow label="Clerk of court" link={rule.clerkOfCourt} />
+                  <RefRow label="Property appraiser" link={rule.propertyAppraiser} />
+                  <RefRow label="GIS / parcel map" link={rule.gisMap} />
+                </dl>
+              </section>
+            ) : null}
+
+            {rule.growthNeighborhoods?.length ? (
+              <section className="border-t border-border pt-4">
+                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">
+                  Areas trending up
+                </h3>
+                <ul className="space-y-1.5 text-sm">
+                  {rule.growthNeighborhoods.map((g) => (
+                    <li key={g.name} className="leading-relaxed">
+                      <span className="font-medium">{g.name}</span>
+                      <span className="text-muted"> — {g.why}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {rule.notes ? (
+              <section className="border-t border-border pt-4">
+                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">Notes</h3>
+                <p className="text-sm leading-relaxed text-muted">{rule.notes}</p>
+              </section>
+            ) : null}
+
+            {/*
+              Dated and sourced, or it is just an assertion. Folded because the
+              citations matter on challenge rather than on every read.
+            */}
+            {rule.sources?.length ? (
+              <details className="group/src border-t border-border pt-4">
+                <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-xs uppercase tracking-wide text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+                  <span aria-hidden className="transition-transform group-open/src:rotate-90">
+                    ›
+                  </span>
+                  {rule.sources.length} source{rule.sources.length === 1 ? "" : "s"}
+                </summary>
+                <ul className="mt-2 space-y-1 border-l border-border pl-3">
+                  {rule.sources.map((src) => (
+                    <li key={src} className="truncate">
+                      <a
+                        href={src}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={src}
+                        className="text-xs text-muted underline hover:text-foreground"
+                      >
+                        {src.replace(/^https?:\/\/(www\.)?/, "")}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+
             {rule.inherited.length > 0 ? (
-              <p className="mt-4 border-t border-border pt-3 text-xs text-muted">
+              <p className="border-t border-border pt-3 text-xs text-muted">
                 Inherited from {STATE_NAMES[county.state] ?? county.state} rather than researched
                 for {county.name}: {rule.inherited.join(", ")}.
               </p>
             ) : null}
-
-            <Link
-              href={`/atlas/${stateSlug(county.state)}/${countySlug(county.name)}`}
-              className="mt-4 inline-block text-sm text-accent hover:underline"
-            >
-              Full {county.name} County profile →
-            </Link>
           </div>
         </details>
       ) : null}
@@ -320,6 +399,37 @@ function Row({ label, value }: { label: string; value?: string | null }) {
     <div>
       <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
       <dd className="mt-0.5 leading-relaxed">{v}</dd>
+    </div>
+  );
+}
+
+/**
+ * A county office: linked when there is a URL, plain when there is not.
+ *
+ * The phone number rides along because half of what these offices answer is not
+ * on their website, and a bidder with a question two days before a sale needs
+ * the number rather than another page to read.
+ */
+function RefRow({ label, link }: { label: string; link?: LinkRef | null }) {
+  if (!link?.label) return null;
+  return (
+    <div>
+      <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
+      <dd className="mt-0.5 leading-relaxed">
+        {link.url ? (
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-accent"
+          >
+            {link.label}
+          </a>
+        ) : (
+          link.label
+        )}
+        {link.phone ? <span className="block text-xs text-muted">{link.phone}</span> : null}
+      </dd>
     </div>
   );
 }
