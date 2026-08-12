@@ -487,3 +487,56 @@ export async function getIngestHealth() {
     .orderBy(desc(ingestRuns.startedAt))
     .limit(200);
 }
+
+// ---------------------------------------------------------------------------
+// CAPE — auction intake and source verification
+// ---------------------------------------------------------------------------
+
+export interface CapeAuctionRow {
+  id: string;
+  countyFips: string;
+  countyName: string;
+  state: string;
+  saleDate: string;
+  saleDateConfirmed: boolean;
+  saleType: string;
+  sourceUrl: string;
+  platform: string;
+  listingKind: string;
+  lotCount: number;
+  registrationDeadline: Date | null;
+  depositDeadline: Date | null;
+}
+
+/**
+ * Upcoming sales with the fields CAPE Component One asks for.
+ *
+ * Unfiltered by `listingKind` on purpose. A delinquent roll under a projected
+ * date is exactly the thing intake is supposed to flag, so excluding it here
+ * would hide the cases the report exists to surface.
+ */
+export async function getCapeAuctions(): Promise<CapeAuctionRow[]> {
+  "use cache";
+  cacheLife("minutes");
+  return await db
+    .select({
+      id: auctions.id,
+      countyFips: auctions.countyFips,
+      countyName: counties.name,
+      state: counties.state,
+      saleDate: auctions.saleDate,
+      saleDateConfirmed: auctions.saleDateConfirmed,
+      saleType: auctions.saleType,
+      sourceUrl: auctions.sourceUrl,
+      platform: auctions.platform,
+      listingKind: auctions.listingKind,
+      lotCount: auctions.lotCount,
+      registrationDeadline: auctions.registrationDeadline,
+      depositDeadline: auctions.depositDeadline,
+    })
+    .from(auctions)
+    .innerJoin(counties, eq(counties.fips, auctions.countyFips))
+    .where(and(gte(auctions.saleDate, todayIso()), sql`${auctions.lotCount} >= 0`))
+    .orderBy(asc(auctions.saleDate), asc(counties.state), asc(counties.name))
+    .limit(1000);
+}

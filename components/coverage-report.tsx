@@ -46,7 +46,13 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
   return (
     <>
       <header className="mb-6 max-w-3xl">
-        <h1 className="text-3xl font-semibold tracking-tight">Coverage and data health</h1>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h1 className="text-3xl font-semibold tracking-tight">Coverage and data health</h1>
+          {/* CAPE answers the per-sale version of this page's question. */}
+          <Link href="/cape" className="text-sm text-muted underline hover:text-foreground">
+            CAPE auction intake →
+          </Link>
+        </div>
         <p className="mt-2 leading-relaxed text-muted">
           What we ingest, where it comes from, and what is not covered. A county that stopped
           returning lots looks exactly like a county with no sale scheduled — this page is how you
