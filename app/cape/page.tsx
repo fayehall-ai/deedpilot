@@ -20,7 +20,7 @@ import { DetailSkeleton } from "@/components/skeleton";
 import { getCapeAuctions, getCapeParcelCoverage } from "@/lib/queries";
 import { buildPackage, type ItemState } from "@/lib/cape/components";
 import { TIER_LABEL, TIER_RANK, type SourceTier } from "@/lib/cape/sources";
-import { resolveCountyRule } from "@/lib/atlas";
+import { getCounty, resolveCountyRule } from "@/lib/atlas";
 import { statuteFor } from "@/lib/deal/statute";
 import { num, saleDate } from "@/lib/format";
 
@@ -40,7 +40,8 @@ export default function CapePage() {
           The County Auction Production Engine, run across every upcoming sale. Each package is
           measured against the nine components, its source tiered by how close the publisher sits
           to the authority for the sale, and its deadline set by Component Eight — Monday night for
-          live auctions, Tuesday night for online.
+          live auctions, Tuesday night for online. Sales in counties over 50,000 population carry a
+          PropStream CSV, keyed on APN.
         </p>
       </header>
       <Suspense fallback={<DetailSkeleton />}>
@@ -83,6 +84,7 @@ async function Board() {
       rule: resolveCountyRule(r.countyFips),
       statute: statuteFor(r.state) ?? null,
       offices: {},
+      population: getCounty(r.countyFips)?.population ?? null,
       parcels: coverage[r.id] ?? empty,
       today,
     }),
@@ -297,6 +299,17 @@ Passes Component Nine&apos;s quality gate
                       <div className="text-[11px] text-muted">
                         due {cape.deadline.dueDate}
                         {cape.deadline.overdue ? " · overdue" : ""}
+                        {cape.components[9]?.items[0]?.state === "have" ? (
+                          <>
+                            {" · "}
+                            <a
+                              href={`/api/cape/${row.id}/propstream`}
+                              className="underline hover:text-foreground"
+                            >
+                              PropStream CSV
+                            </a>
+                          </>
+                        ) : null}
                       </div>
                     </td>
                     <td className="px-4 py-2.5">

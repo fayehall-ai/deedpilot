@@ -26,6 +26,7 @@ import type { CountyRule } from "@/lib/atlas/types";
 import type { StatuteParams } from "@/lib/deal/statute";
 import { classifySource, type SourceClassification } from "./sources";
 import { productionDeadline, type ProductionDeadline } from "./deadline";
+import { qualifies } from "./propstream";
 
 export type ItemState = "have" | "verify" | "absent";
 
@@ -63,6 +64,8 @@ export interface PackageInput {
   statute: StatuteParams | null;
   /** Directory office links for this county, by kind. */
   offices: Partial<Record<string, string>>;
+  /** Census population for the county, for Component Ten's threshold. */
+  population: number | null;
   /** Parcel-level coverage across the sale, for Component Four. */
   parcels: {
     total: number;
@@ -346,7 +349,35 @@ export function buildPackage(i: PackageInput): CapePackage {
     verify("Video formatting and audio", "No video produced"),
   ]);
 
-  const components = [one, two, three, four, five, six, seven, eight, nine];
+  // --- Ten: PropStream export and downstream automations -------------------
+  const q = qualifies(i.population);
+  const ten = component(10, "PropStream list and automations", [
+    q.qualifies
+      ? have("Population threshold", q.reason)
+      : verify("Population threshold", q.reason),
+    p.total > 0
+      ? have("Parcel list to export", `${p.total} parcels`)
+      : verify("Parcel list to export", "Nothing to export yet"),
+    p.withParcelNumber > 0
+      ? have("APN match key", `${pct(p.withParcelNumber)}% carry a parcel number`)
+      : verify("APN match key", "No parcel numbers — PropStream has nothing to match on"),
+    /*
+     * Reported separately from the APN key because the difference is the point.
+     * Across qualifying counties a complete address sits on about one parcel in
+     * nine, so an address-keyed list would look like PropStream having no data
+     * rather than like us having sent none.
+     */
+    p.withAddress > 0
+      ? have("Address match key", `${pct(p.withAddress)}% carry a street line`)
+      : verify("Address match key", "No addresses — export matches on APN alone"),
+    have("Export format", "PropStream CSV, headers pending the TDC template"),
+    absent("Detailed PDF reports (Viktor / Slack)", "External to this system"),
+    absent("Google Drive upload", "External to this system"),
+    absent("GHL course attachment", "External to this system"),
+    absent("County video (ChatGPT / ElevenLabs)", "External to this system"),
+  ]);
+
+  const components = [one, two, three, four, five, six, seven, eight, nine, ten];
 
   return {
     auctionId: i.auctionId,

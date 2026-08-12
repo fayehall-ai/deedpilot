@@ -10,6 +10,14 @@ import { assessIntake, INTAKE_KEYS, type IntakeInput } from "./intake";
 import { classifySource, TIER_RANK } from "./sources";
 import { productionDeadline } from "./deadline";
 import { buildPackage } from "./components";
+import {
+  csvField,
+  exportFilename,
+  PROPSTREAM_COLUMNS,
+  qualifies,
+  toPropStreamCsv,
+  type PropStreamRow,
+} from "./propstream";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) throw new Error(msg);
@@ -237,15 +245,29 @@ const pkgBase = {
   rule: null,
   statute: null,
   offices: {},
+  population: 250_000,
   parcels: { total: 120, withParcelNumber: 120, withAssessed: 60, withAddress: 40, withZoning: 0, withGeo: 12 },
   today: "2026-08-11",
 };
 
 const pkg = buildPackage(pkgBase as never);
-assert(pkg.components.length === 9, `all nine components, got ${pkg.components.length}`);
+assert(pkg.components.length === 10, `nine documented components plus the export, got ${pkg.components.length}`);
 assert(
-  pkg.components.map((c) => c.n).join() === "1,2,3,4,5,6,7,8,9",
+  pkg.components.map((c) => c.n).join() === "1,2,3,4,5,6,7,8,9,10",
   "numbered in the document's order",
+);
+
+// Component Ten gates on the population rule and reports both match keys.
+const ten = pkg.components.find((c) => c.n === 10)!;
+assert(ten.items[0].state === "have", "a 250k county clears the threshold");
+const small = buildPackage({ ...pkgBase, population: 12_000 } as never);
+assert(
+  small.components.find((c) => c.n === 10)!.items[0].state === "verify",
+  "a 12k county does not, and is flagged rather than silently exported",
+);
+assert(
+  ten.items.filter((it) => it.state === "absent").length === 4,
+  "the four downstream automations are external, not gaps to close here",
 );
 
 // Arkansas has no statute entry, so the package cannot be released however
@@ -278,3 +300,82 @@ assert(
 );
 
 console.log("cape components: all assertions passed");
+
+// --- Component Ten: PropStream export ----------------------------------------
+
+// The document's threshold, and "more than" means more than.
+assert(qualifies(50_001).qualifies, "above the bar");
+assert(!qualifies(50_000).qualifies, "exactly 50,000 is not more than 50,000");
+assert(!qualifies(49_999).qualifies, "below the bar");
+/*
+ * Unknown is not a pass. The Census table is missing precisely the smallest
+ * counties, so treating unknown as qualifying would fill a list defined by
+ * being large with the ones we could not measure.
+ */
+assert(!qualifies(null).qualifies, "unknown population does not qualify");
+assert(/No population figure/.test(qualifies(null).reason), "and says why");
+assert(/under the 50,000/.test(qualifies(1_000).reason), "the reason names the threshold");
+
+// --- CSV correctness ---------------------------------------------------------
+
+const row = (o: Partial<PropStreamRow> = {}): PropStreamRow => ({
+  parcelNumber: "001-02194-000",
+  addressLine: "7410 SARNES RD",
+  city: "MABELVALE",
+  zip: "72103",
+  countyName: "Saline",
+  state: "AR",
+  ownerName: "CASH, BILLY R & ROSIE N",
+  openingBid: 2973,
+  assessedValue: 19690,
+  acreage: 1.13,
+  landUse: "SFR",
+  saleDate: "2026-09-01",
+  ...o,
+});
+
+const csv = toPropStreamCsv([row()]);
+const lines = csv.split("\r\n");
+assert(lines[0].startsWith("APN,County,State,Address"), `header order, got ${lines[0]}`);
+assert(csv.endsWith("\r\n"), "CRLF line endings and a trailing newline, per RFC 4180");
+assert(
+  lines[0].split(",").length === PROPSTREAM_COLUMNS.length,
+  "header column count matches the definition",
+);
+
+/*
+ * The failure that makes an import look like garbage data rather than a
+ * formatting bug: an unquoted comma shifts every later column on the row.
+ * Owner names here carry commas as a matter of course.
+ */
+assert(
+  lines[1].includes('"CASH, BILLY R & ROSIE N"'),
+  `a comma-bearing field is quoted, got ${lines[1]}`,
+);
+assert(
+  csvField('He said "hi"') === '"He said ""hi"""',
+  "inner quotes are doubled",
+);
+assert(csvField("a\nb") === '"a\nb"', "newlines force quoting");
+assert(csvField(null) === "" && csvField(undefined) === "", "null and undefined are empty");
+assert(csvField(0) === "0", "zero is a value, not an absence");
+
+// Formula injection: this file is opened in a spreadsheet by design.
+assert(csvField("=1+1") === "'=1+1", "a leading = is defused");
+assert(csvField("-0012-345") === "'-0012-345", "a parcel number is not a subtraction");
+assert(csvField("@x") === "'@x" && csvField("+x") === "'+x", "@ and + too");
+
+// A missing address must not shift the row — empty fields hold their position.
+const sparse = toPropStreamCsv([row({ addressLine: null, city: null, zip: null })]).split("\r\n")[1];
+assert(
+  sparse.split(",").length >= PROPSTREAM_COLUMNS.length,
+  `absent fields keep their columns, got ${sparse}`,
+);
+assert(sparse.startsWith("001-02194-000,Saline,AR,,,"), `APN-keyed row, got ${sparse}`);
+
+assert(
+  exportFilename("St. Francis", "AR", "2026-09-01") === "st-francis-ar-2026-09-01-propstream.csv",
+  `filename slug, got ${exportFilename("St. Francis", "AR", "2026-09-01")}`,
+);
+
+console.log("cape propstream: all assertions passed");
