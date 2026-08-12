@@ -247,6 +247,13 @@ function mapProperty(p: Record<string, unknown>, input: EnrichInput): PropertyRe
     acreage: num(lot.lotSize1) ?? num(lot.lotsize1),
     yearBuilt: num(summary.yearBuilt) ?? num(summary.yearbuilt),
     landUse: str(summary.propType) ?? str(summary.proptype),
+    /*
+     * `lot.zoningType`, present on every ATTOM payload we hold and mapped by
+     * none of them until now — 1,695 rows carried it in `raw` and 0 reached the
+     * column. Found because CAPE Component Four reported zoning outstanding on
+     * all 159 packages, which is the checklist doing its job.
+     */
+    zoning: str(lot.zoningType) ?? str(lot.zoningtype),
     propertyType: str(summary.propertyType) ?? str(summary.propSubType) ?? str(summary.propsubtype),
     latitude: num(geo.latitude),
     longitude: num(geo.longitude),

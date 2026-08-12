@@ -22,6 +22,8 @@ import { buildPackage, type ItemState } from "@/lib/cape/components";
 import { TIER_LABEL, TIER_RANK, type SourceTier } from "@/lib/cape/sources";
 import { getCounty, resolveCountyRule } from "@/lib/atlas";
 import { statuteFor } from "@/lib/deal/statute";
+import directory from "@/data/county-directory.json";
+import { pickLink, type CountyDirectory, type OfficeKind } from "@/lib/directory/onlinesearches";
 import { num, saleDate } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -65,6 +67,26 @@ async function Board() {
   const today = new Date().toISOString().slice(0, 10);
   const empty = { total: 0, withParcelNumber: 0, withAssessed: 0, withAddress: 0, withZoning: 0, withGeo: 0 };
 
+  /*
+   * The crawled county offices, which the first version of this board never
+   * read: it passed `offices: {}` and Components Two, Three and Four duly
+   * reported county contacts, the assessor, the tax office, the clerk and GIS
+   * as outstanding on all 159 packages — while 751 counties sat in
+   * `data/county-directory.json` with 314 assessor links and 263 GIS links.
+   * The gap was in the wiring, not the data.
+   */
+  const dir = directory as Record<string, CountyDirectory>;
+  const officesFor = (fips: string): Partial<Record<string, string>> => {
+    const entry = dir[fips];
+    if (!entry) return {};
+    const out: Partial<Record<string, string>> = {};
+    for (const kind of ["assessor", "collector", "recorder", "gis", "tax_portal"] as OfficeKind[]) {
+      const hit = pickLink(entry, kind);
+      if (hit) out[kind] = hit.url;
+    }
+    return out;
+  };
+
   const assessed = rows.map((r) => ({
     row: r,
     cape: buildPackage({
@@ -83,7 +105,7 @@ async function Board() {
       listingKind: r.listingKind,
       rule: resolveCountyRule(r.countyFips),
       statute: statuteFor(r.state) ?? null,
-      offices: {},
+      offices: officesFor(r.countyFips),
       population: getCounty(r.countyFips)?.population ?? null,
       parcels: coverage[r.id] ?? empty,
       today,
