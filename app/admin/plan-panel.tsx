@@ -4,6 +4,7 @@ import { adminAudit } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import { backlogStates, buildPlan, planGaps } from "@/lib/admin/plan-jobs";
 import { buildCoverageFunnel } from "@/lib/coverage/funnel";
+import { deskDateTime } from "@/lib/desk-time";
 
 const REASON_COPY: Record<string, string> = {
   no_source: "due for a crawl with no verified source — the Prospector's backlog",
@@ -205,7 +206,7 @@ export async function PlanPanel() {
                 {audit.map((a) => (
                   <tr key={a.id} className="border-b border-border/50 align-top last:border-0">
                     <td className="py-1.5 pr-3 whitespace-nowrap text-muted">
-                      {a.createdAt.toISOString().slice(0, 16).replace("T", " ")}
+                      {deskDateTime(a.createdAt)}
                     </td>
                     <td className="py-1.5 pr-3 font-mono text-xs">{a.action}</td>
                     <td className="py-1.5 pr-3 font-mono text-xs">{a.target ?? "—"}</td>

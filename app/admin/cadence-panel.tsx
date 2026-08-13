@@ -1,7 +1,7 @@
 import { Card, Callout, Stat } from "@/components/ui";
 import { AdminTable, type AdminColumn } from "@/components/admin-table";
 import { getPipelineConfig, LIMITS, WEEKDAYS } from "@/lib/admin/pipeline-settings";
-import { deskWeekday, DESK_TIMEZONE } from "@/lib/admin/research-day";
+import { deskWeekday, deskZoneLabel, deskDateTime, DISPATCH_UTC_HOUR } from "@/lib/desk-time";
 import { spendReport, DEFAULT_RATES, type SpendRow } from "@/lib/ai/usage";
 import { runCrawlPlanNow, runResearchNow, savePipelineSettings } from "./run-actions";
 
@@ -113,8 +113,8 @@ export async function CadencePanel() {
         <h3 className="mb-1 font-medium">Run now</h3>
         <p className="mb-3 text-xs text-muted">
           Both queue rather than crawl — a full pass is hundreds of fetches and a form submission
-          cannot hold that open. The dispatcher drains what they queue, so pressing before 02:00 UTC
-          brings the day&rsquo;s work forward rather than duplicating it.
+          cannot hold that open. The dispatcher drains what they queue, so pressing before the
+          overnight tick brings the day&rsquo;s work forward rather than duplicating it.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <form action={runCrawlPlanNow}>
@@ -150,7 +150,7 @@ export async function CadencePanel() {
             <>
               {" "}
               Last changed by <strong>{config.updatedBy}</strong> on{" "}
-              {config.updatedAt.toISOString().slice(0, 10)}.
+              {deskDateTime(config.updatedAt)}.
             </>
           ) : (
             " Currently on the built-in defaults."
@@ -176,8 +176,8 @@ export async function CadencePanel() {
                 />
               </label>
               <span className="pb-2 text-xs text-muted">
-                runs nightly at 02:00 UTC · ~3.0s a county against a 195s claiming budget, so past
-                ~60 the queue grows rather than the throughput
+                runs overnight at the desk ({DISPATCH_UTC_HOUR}:00 UTC) · ~3.0s a county against a
+                195s claiming budget, so past ~60 the queue grows rather than the throughput
               </span>
             </div>
           </div>
@@ -223,9 +223,10 @@ export async function CadencePanel() {
               </label>
             </div>
             <p className="text-xs text-muted">
-              The day is read in {DESK_TIMEZONE}, not UTC — the 02:00 UTC tick on a UTC Sunday is
-              Saturday 22:00 at the desk, so a UTC check would run this a day early every week. Today
-              is <strong>{deskWeekday(now)}</strong> at the desk.
+              The day is read at the desk, not in UTC. The tick fires overnight Pacific on the same
+              calendar day; at the old 02:00 UTC hour it landed the previous evening, so a UTC check
+              would have run this a day early every week. Today is{" "}
+              <strong>{deskWeekday(now)}</strong>, {deskZoneLabel(now)}.
             </p>
           </div>
 

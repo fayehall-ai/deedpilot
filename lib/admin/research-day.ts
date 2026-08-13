@@ -1,19 +1,16 @@
 /**
  * When the standing weekly research pass is due.
  *
- * Pure and free of `server-only` so it can be tested directly, which matters
- * more here than it looks: the dispatcher fires at 02:00 UTC, and a UTC
- * day-of-week check would put "Sunday" research on **Saturday** 21:00 Eastern.
- * The tick that actually lands on a US Sunday is Monday 02:00 UTC — Sunday
- * 22:00 ET — so the day must be read in the desk's timezone, not the server's.
- *
- * The failure mode is silent. Research would queue, drain and produce a report
- * every week, a day earlier than intended, and nothing in the output would say
- * so.
+ * Pure and free of `server-only` so it can be tested directly. The clock itself
+ * lives in `lib/desk-time`, which explains why the desk zone rather than UTC
+ * decides what day it is — at the old 02:00 UTC tick the two differed by a
+ * whole day in Pacific, and a UTC check would have queued "Sunday" research on
+ * Saturday evening every week with nothing in the output saying so.
  */
 
-/** The desk's timezone. Tax sales, deadlines and working days are all US-local. */
-export const DESK_TIMEZONE = "America/New_York";
+import { deskWeekday } from "../desk-time";
+
+export { DESK_TIMEZONE, deskWeekday } from "../desk-time";
 
 /** How many days must pass before a new weekly pass may queue. */
 export const RESEARCH_COOLDOWN_DAYS = 6;
@@ -21,20 +18,12 @@ export const RESEARCH_COOLDOWN_DAYS = 6;
 /** Day the pass runs unless an operator has changed it in pipeline settings. */
 export const DEFAULT_RESEARCH_WEEKDAY = "Sun";
 
-/** Day of the week at the desk, e.g. "Sun". */
-export function deskWeekday(now: Date): string {
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: DESK_TIMEZONE,
-    weekday: "short",
-  }).format(now);
-}
-
 /**
  * Is this tick the weekly research slot?
  *
- * True on exactly one 02:00-UTC tick per week — the one falling on a Sunday at
- * the desk. Daylight saving is handled by `Intl` rather than a fixed offset,
- * which is why this is not `getUTCDay() === 0` with four subtracted.
+ * True on exactly one dispatcher tick per week — the one falling on the chosen
+ * weekday at the desk. Daylight saving is handled by `Intl` rather than a fixed
+ * offset, which is why this is not arithmetic on `getUTCDay()`.
  */
 export function isResearchDay(now: Date, weekday: string = DEFAULT_RESEARCH_WEEKDAY): boolean {
   return deskWeekday(now) === weekday;
