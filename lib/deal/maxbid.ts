@@ -395,10 +395,33 @@ export function computeMaxBid(inputs: DealInputs): DealResult {
       note: `Typical ${statute.state} recording and deed issuance cost.`,
       assumed: true,
     });
+    /*
+     * Listed separately rather than summed into the line above, so a reader can
+     * see which part came off a published fee schedule and which part is a
+     * margin somebody chose.
+     */
+    if (statute.extraClosingBuffer) {
+      costs.push({
+        label: "Closing contingency",
+        amount: statute.extraClosingBuffer,
+        note: "Publication, service and filing incidentals. Not a lien allowance — surviving assessments are parcel-specific and are not covered by this.",
+        assumed: true,
+      });
+    }
   }
 
+  /*
+   * Auction-to-marketable, not filing-to-decree. Where a state makes a
+   * purchaser wait out a challenge window before suing, the lawsuit's length
+   * is not the holding period — Arkansas's five-month action sits inside an
+   * eighteen-month hold. Falls back to the lawsuit plus two months for states
+   * with no such window.
+   */
   const holdingMonths =
-    inputs.holdingMonths ?? (statute ? statute.quietTitle.typicalMonths + 2 : 6);
+    inputs.holdingMonths ??
+    (statute
+      ? (statute.auctionToMarketableMonths ?? statute.quietTitle.typicalMonths + 2)
+      : 6);
   const monthlyHolding = Math.max(
     arv.value * DEFAULTS.monthlyHoldingRate,
     DEFAULTS.minMonthlyHolding,
