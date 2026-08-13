@@ -3,6 +3,7 @@ import { getScoutReport } from "@/lib/admin/scout-jobs";
 import { SCAN_STATES } from "@/lib/ai/scout-report";
 import { getScoutPrompt } from "@/lib/admin/scout-prompt";
 import { generateScoutReport, saveScoutPromptAction } from "./scout-actions";
+import { SubmitButton } from "@/components/submit-button";
 
 const button =
   "rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90";
@@ -48,9 +49,7 @@ export async function ScoutPanel() {
               </option>
             ))}
           </select>
-          <button type="submit" className={button}>
-            Generate Auction Scout Report
-          </button>
+          <SubmitButton pendingLabel="Queueing research…">Generate Auction Scout Report</SubmitButton>
         </form>
       </div>
 
