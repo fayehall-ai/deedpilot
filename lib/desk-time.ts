@@ -37,7 +37,10 @@ export const DESK_TIMEZONE = "America/Los_Angeles";
  * are UTC-only, so the Pacific hour drifts by one across daylight saving; both
  * ends of that drift are still overnight, which is what matters.
  *
- * Keep this in step with `vercel.json`.
+ * Keep this in step with the `/api/cron/dispatch` schedule in `vercel.json`.
+ * That file takes no comments: it is validated against a strict schema before
+ * the build runs, and an unrecognised key — even `$comment` — rejects the whole
+ * deployment with no build log to explain it. The reasoning lives here instead.
  */
 export const DISPATCH_UTC_HOUR = 9;
 
