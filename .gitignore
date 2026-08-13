@@ -74,3 +74,6 @@ data/results-crawl-report.json
 
 # Unrelated projects that end up in the repo root — not DeedPilot source.
 lca-lc-foundations/
+
+# Adapter fixtures captured during a crawl — large, regenerable, not reviewed.
+data/samples/

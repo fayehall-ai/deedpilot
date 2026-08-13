@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Breadcrumbs, Callout, Card, EmptyState, Stat } from "@/components/ui";
+import { Breadcrumbs, Callout, Card } from "@/components/ui";
 import { TableSkeleton } from "@/components/skeleton";
 import { adminConfigured, isAdmin } from "@/lib/admin/auth";
 import { getAdapterHealth, getRecentRuns, getPolicies, getInventorySnapshot } from "@/lib/admin/ops";
@@ -13,6 +13,15 @@ import { OpsControls } from "./controls";
 import { ScoutPanel } from "./scout-panel";
 import { AuctionOverridesPanel } from "./auction-overrides-panel";
 import { PlanPanel } from "./plan-panel";
+import { Stage, Collapsed } from "@/components/stage";
+import { whatNeedsAttention } from "@/lib/admin/attention";
+import { buildCoverageFunnel } from "@/lib/coverage/funnel";
+import { SourcesPanel } from "./sources-panel";
+import { CapePanel } from "./cape-panel";
+import { PolicyPanel } from "./policy-panel";
+import { RunsPanel } from "./runs-panel";
+import { InventoryPanel } from "./inventory-panel";
+
 import { LabelQueuePanel } from "./label-queue-panel";
 import { PipelinePanel } from "./pipeline-panel";
 import { CadencePanel } from "./cadence-panel";
@@ -125,17 +134,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-const ago = (iso: string | null): string => {
-  if (!iso) return "never";
-  const ms = Date.now() - new Date(iso).getTime();
-  if (!Number.isFinite(ms)) return "—";
-  const h = ms / 3_600_000;
-  if (h < 1) return `${Math.max(1, Math.round(ms / 60_000))}m ago`;
-  if (h < 48) return `${Math.round(h)}h ago`;
-  return `${Math.round(h / 24)}d ago`;
-};
 
-const pct = (n: number) => `${Math.round(n * 100)}%`;
 
 async function Body({
   outcome,
@@ -150,7 +149,7 @@ async function Body({
    */
   await connection();
 
-  const [adapters, runs, inventory, cape, queue, schedules, sourceOv, policyOv] =
+  const [adapters, runs, inventory, cape, queue, schedules, sourceOv, policyOv, attention, funnel] =
     await Promise.all([
       getAdapterHealth(),
       getRecentRuns(40),
@@ -160,344 +159,191 @@ async function Body({
       getSchedules(),
       getSourceOverrides(),
       getPolicyOverrides(),
+      whatNeedsAttention(),
+      buildCoverageFunnel(),
     ]);
   const policies = getPolicies();
 
   const stale = adapters.filter((a) => a.lastRunAt === null);
   const failing = adapters.filter((a) => a.recentFailures > 0);
+  const blocked = attention.filter((a) => a.state === "blocked");
+  const needsRun = attention.filter((a) => a.state === "attention");
 
   return (
-    <div className="space-y-8">
-      {/* ---- headline state ---- */}
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Biddable auctions" value={inventory.inventoryAuctions.toLocaleString()} />
-        <Stat label="Biddable parcels" value={inventory.inventoryParcels.toLocaleString()} />
-        <Stat label="Lead-list parcels" value={inventory.leadParcels.toLocaleString()} />
-        <Stat label="CAPE releasable" value={`${cape.releasable} / ${cape.packages}`} />
-      </section>
-
-      {(stale.length > 0 || failing.length > 0) && (
-        <Callout tone="warn" title="Needs attention">
-          <ul className="ml-4 list-disc space-y-1 text-sm">
-            {stale.length > 0 && (
-              <li>
-                <strong>{stale.length}</strong> adapter{stale.length === 1 ? "" : "s"} registered but
-                never run: {stale.map((a) => a.name).join(", ")}
-              </li>
-            )}
-            {failing.length > 0 && (
-              <li>
-                <strong>{failing.length}</strong> adapter{failing.length === 1 ? "" : "s"} with
-                failures in the last 7 days:{" "}
-                {failing.map((a) => `${a.name} (${a.recentFailures})`).join(", ")}
-              </li>
-            )}
-          </ul>
-        </Callout>
-      )}
-
+    <div className="space-y-6">
       {/*
-        Its own boundary, like the Scout report: it reads every corrected
-        auction, which has no business holding up the rest of the console.
+        ---- what needs a person -------------------------------------------
+        Above everything, because the page previously answered this only by
+        being read end to end. `blocked` needs Faye; `attention` is work the
+        system can do and hasn't.
       */}
-      {/*
-        Order is deliberate, and was not always: panels were appended as they
-        were built, which left the single most important number — priceable
-        coverage — below a research report. An operator opens this console to
-        answer "what needs doing", so the plan and its coverage funnel lead;
-        observation health follows; queues needing a person come next; and the
-        reference tables that answer "is anything broken" sit at the bottom.
-
-        Each heavy panel gets its own boundary so the shell paints without
-        waiting on 3,142 counties of calendar arithmetic.
-      */}
-      <Suspense fallback={<TableSkeleton />}>
-        <PlanPanel />
-      </Suspense>
-
-      <Suspense fallback={<TableSkeleton />}>
-        <CadencePanel outcome={outcome} />
-      </Suspense>
-
-      <Suspense fallback={<TableSkeleton />}>
-        <PipelinePanel />
-      </Suspense>
-
-      <Suspense fallback={<TableSkeleton />}>
-        <ScoutPanel />
-      </Suspense>
-
-      {/*
-        Reads a file rather than the database, so it needs no boundary of its
-        own — and it renders nothing at all when there is no candidate batch.
-      */}
-      <LabelQueuePanel />
-
-      <Suspense fallback={<TableSkeleton />}>
-        <AuctionOverridesPanel />
-      </Suspense>
-
-      <OpsControls
-        adapters={adapters.map((a) => a.name)}
-        queue={queue}
-        schedules={schedules}
-        sourceOverrides={sourceOv}
-        policyOverrides={policyOv}
-      />
-
-      {/* ---- sources ---- */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Sources</h2>
+      {attention.length === 0 ? (
         <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[52rem] text-sm">
-              <thead className="text-left text-xs uppercase tracking-wide text-muted">
-                <tr className="border-b border-border">
-                  <th className="py-2 pr-3">Adapter</th>
-                  <th className="py-2 pr-3">Last run</th>
-                  <th className="py-2 pr-3">Status</th>
-                  <th className="py-2 pr-3 text-right">Runs</th>
-                  <th className="py-2 pr-3 text-right">Counties</th>
-                  <th className="py-2 pr-3 text-right">Producing</th>
-                  <th className="py-2 pr-3 text-right">Auctions</th>
-                  <th className="py-2 pr-3 text-right">Parcels</th>
-                  <th className="py-2 pr-3 text-right">Median</th>
-                </tr>
-              </thead>
-              <tbody>
-                {adapters.map((a) => (
-                  <tr key={a.name} className="border-b border-border/50 align-top last:border-0">
-                    <td className="py-2 pr-3">
-                      <div className="font-medium">{a.name}</div>
-                      <div className="text-xs text-muted">{a.platform}</div>
-                      {a.lastError ? (
-                        <div className="mt-1 max-w-md text-xs text-danger">{a.lastError.slice(0, 160)}</div>
-                      ) : null}
-                    </td>
-                    <td className="py-2 pr-3 whitespace-nowrap">{ago(a.lastRunAt)}</td>
-                    <td className="py-2 pr-3">{a.lastStatus ?? "—"}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums">{a.runs.toLocaleString()}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums">{a.countiesTouched}</td>
-                    {/*
-                      Counties that ever produced a parcel, against counties touched.
-                      This column is why the generic adapter's real contribution is
-                      visible at a glance rather than buried in a run count.
-                    */}
-                    <td className="py-2 pr-3 text-right tabular-nums">
-                      {a.countiesProducing}
-                      {a.countiesTouched > 0 ? (
-                        <span className="ml-1 text-xs text-muted">
-                          {pct(a.countiesProducing / a.countiesTouched)}
-                        </span>
-                      ) : null}
-                    </td>
-                    <td className="py-2 pr-3 text-right tabular-nums">{a.auctionsFound.toLocaleString()}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums">{a.lotsFound.toLocaleString()}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums">
-                      {a.medianDurationMs == null ? "—" : `${(a.medianDurationMs / 1000).toFixed(1)}s`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <p className="text-sm text-muted">
+            Nothing needs attention. The queue is clear, every crawled parcel is priceable, and no
+            source has failed.
+          </p>
         </Card>
-      </section>
-
-      {/* ---- CAPE stages ---- */}
-      <section>
-        <h2 className="mb-1 text-lg font-semibold">CAPE stages</h2>
-        <p className="mb-3 text-sm text-muted">
-          Across {cape.packages} upcoming package{cape.packages === 1 ? "" : "s"}, mean score{" "}
-          {pct(cape.meanScore)}. Ranked by how many packages each stage holds back.
-        </p>
-        {cape.stages.length === 0 ? (
-          <EmptyState title="No upcoming packages to assess." />
-        ) : (
-          <div className="space-y-3">
-            {[...cape.stages]
-              .sort((a, b) => b.packagesBlocked - a.packagesBlocked || a.n - b.n)
-              .map((s) => (
-                <Card key={s.n}>
-                  <details className="group">
-                    <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1">
-                      <span className="font-medium">
-                        {s.n}. {s.title}
-                      </span>
-                      <span className="text-sm text-muted">{pct(s.mean)} mean</span>
-                      <span className="ml-auto text-sm">
-                        {s.packagesBlocked > 0 ? (
-                          <span className="text-danger">{s.packagesBlocked} blocked</span>
-                        ) : (
-                          <span className="text-muted">complete</span>
-                        )}
-                      </span>
-                    </summary>
-                    <table className="mt-3 w-full text-sm">
-                      <thead className="text-left text-xs uppercase tracking-wide text-muted">
-                        <tr className="border-b border-border">
-                          <th className="py-1.5 pr-3">Item</th>
-                          <th className="py-1.5 pr-3 text-right">Have</th>
-                          <th className="py-1.5 pr-3 text-right">Verify</th>
-                          <th className="py-1.5 pr-3 text-right">Absent</th>
-                          <th className="py-1.5 pr-3">Why</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {s.items.map((it) => (
-                          <tr key={it.label} className="border-b border-border/50 align-top last:border-0">
-                            <td className="py-1.5 pr-3">{it.label}</td>
-                            <td className="py-1.5 pr-3 text-right tabular-nums">{it.have}</td>
-                            <td className="py-1.5 pr-3 text-right tabular-nums">
-                              {it.verify || <span className="text-muted">—</span>}
-                            </td>
-                            <td className="py-1.5 pr-3 text-right tabular-nums">
-                              {it.absent ? <span className="text-danger">{it.absent}</span> : <span className="text-muted">—</span>}
-                            </td>
-                            <td className="py-1.5 pr-3 text-xs text-muted">{it.sample ?? ""}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </details>
-                </Card>
-              ))}
-          </div>
-        )}
-      </section>
-
-      {/* ---- blockers ---- */}
-      {cape.blockers.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-lg font-semibold">What blocks release</h2>
-          <Card>
-            <ul className="space-y-1.5 text-sm">
-              {cape.blockers.map((b) => (
-                <li key={b.reason} className="flex gap-3">
-                  <span className="w-12 shrink-0 text-right tabular-nums text-muted">{b.packages}</span>
-                  <span>{b.reason}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </section>
-      )}
-
-      {/* ---- access policy ---- */}
-      <section>
-        <h2 className="mb-1 text-lg font-semibold">Access decisions</h2>
-        <p className="mb-3 text-sm text-muted">
-          Reviewed per host and held in version control, not in the database — a decision not to
-          crawl a source is a judgement with reasoning attached.
-        </p>
+      ) : (
         <Card>
-          <ul className="space-y-3 text-sm">
-            {policies.map((p) => (
-              <li key={p.host}>
-                <div className="flex flex-wrap items-baseline gap-2">
-                  <span className="font-mono text-xs">{p.host}</span>
-                  <span
-                    className={
-                      p.decision === "allow"
-                        ? "text-xs text-muted"
-                        : "text-xs font-medium text-danger"
-                    }
-                  >
-                    {p.decision.replace(/_/g, " ")}
-                  </span>
-                  <span className="text-xs text-muted">{p.minDelayMs / 1000}s delay</span>
+          <h2 className="mb-3 text-base font-semibold">What needs you</h2>
+          <ul className="space-y-3">
+            {attention.map((a) => (
+              <li key={a.label} className="flex gap-3">
+                <span
+                  className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
+                    a.state === "blocked" ? "bg-danger" : "bg-warn"
+                  }`}
+                  aria-hidden
+                />
+                <div className="min-w-0">
+                  <div className="text-sm font-medium">{a.label}</div>
+                  <div className="text-xs text-muted">
+                    {a.consequence} <span className="text-faint">— {a.stage}</span>
+                  </div>
                 </div>
-                <p className="mt-0.5 text-xs leading-relaxed text-muted">{p.reason}</p>
               </li>
             ))}
           </ul>
         </Card>
-      </section>
+      )}
 
-      {/* ---- recent runs ---- */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Recent runs</h2>
-        <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[44rem] text-sm">
-              <thead className="text-left text-xs uppercase tracking-wide text-muted">
-                <tr className="border-b border-border">
-                  <th className="py-2 pr-3">When</th>
-                  <th className="py-2 pr-3">Adapter</th>
-                  <th className="py-2 pr-3">County</th>
-                  <th className="py-2 pr-3">Status</th>
-                  <th className="py-2 pr-3 text-right">Auctions</th>
-                  <th className="py-2 pr-3 text-right">Parcels</th>
-                  <th className="py-2 pr-3 text-right">Took</th>
-                </tr>
-              </thead>
-              <tbody>
-                {runs.map((r, i) => (
-                  <tr key={`${r.adapter}-${r.startedAt}-${i}`} className="border-b border-border/50 last:border-0">
-                    <td className="py-1.5 pr-3 whitespace-nowrap text-muted">{ago(r.startedAt)}</td>
-                    <td className="py-1.5 pr-3">{r.adapter}</td>
-                    <td className="py-1.5 pr-3">
-                      {r.county ? (
-                        r.countyFips ? (
-                          <a href={`/admin/county/${r.countyFips}`} className="underline">
-                            {r.county}, {r.state}
-                          </a>
-                        ) : (
-                          `${r.county}, ${r.state}`
-                        )
-                      ) : (
-                        <span className="text-muted">—</span>
-                      )}
-                    </td>
-                    <td className="py-1.5 pr-3">
-                      <span className={r.status === "ok" ? "" : "text-danger"}>{r.status}</span>
-                      {r.error ? (
-                        <div className="max-w-sm text-xs text-danger">{r.error.slice(0, 120)}</div>
-                      ) : null}
-                    </td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums">{r.auctionsFound}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums">{r.lotsFound}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums text-muted">
-                      {r.durationMs == null ? "—" : `${(r.durationMs / 1000).toFixed(1)}s`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </section>
+      {/*
+        ---- the pipeline, in the order work flows through it ---------------
+        Borrowed from the CAPE board: numbered stages, each collapsed to a
+        line carrying the number that decides whether to open it. The console
+        previously had fourteen peer sections, all expanded, with Run now and
+        Schedules each appearing twice.
+      */}
+      <div className="space-y-3">
+        <Stage
+          n={1}
+          title="Discover"
+          question="Where does each county publish its sale list?"
+          state={funnel.stages[1].counties < funnel.totalCounties / 2 ? "attention" : "ok"}
+          summary={`${funnel.stages[1].counties.toLocaleString()} counties sourced`}
+        >
+          <Suspense fallback={<TableSkeleton />}>
+            <ScoutPanel />
+          </Suspense>
+          <LabelQueuePanel />
+        </Stage>
 
-      {/* ---- inventory by state ---- */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Inventory by state</h2>
-        <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[28rem] text-sm">
-              <thead className="text-left text-xs uppercase tracking-wide text-muted">
-                <tr className="border-b border-border">
-                  <th className="py-2 pr-3">State</th>
-                  <th className="py-2 pr-3 text-right">Auctions</th>
-                  <th className="py-2 pr-3 text-right">Parcels held</th>
-                  <th className="py-2 pr-3 text-right">Biddable auctions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inventory.states.map((s) => (
-                  <tr key={s.state} className="border-b border-border/50 last:border-0">
-                    <td className="py-1.5 pr-3 font-medium">{s.state}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums">{s.auctions.toLocaleString()}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums">{s.parcels.toLocaleString()}</td>
-                    <td className="py-1.5 pr-3 text-right tabular-nums">
-                      {s.inventory > 0 ? s.inventory : <span className="text-muted">0</span>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </section>
+        <Stage
+          n={2}
+          title="Crawl"
+          question="What are we fetching today, and did it work?"
+          state={queue.failed > 0 ? "attention" : "ok"}
+          summary={`${queue.queued.toLocaleString()} queued · ${queue.failed} failed`}
+          defaultOpen={needsRun.length > 0}
+        >
+          <Suspense fallback={<TableSkeleton />}>
+            <PlanPanel />
+          </Suspense>
+          {(stale.length > 0 || failing.length > 0) && (
+            <Callout tone="warn" title="Adapter health">
+              <ul className="ml-4 list-disc space-y-1 text-sm">
+                {stale.length > 0 && (
+                  <li>
+                    <strong>{stale.length}</strong> registered but never run:{" "}
+                    {stale.map((a) => a.name).join(", ")}
+                  </li>
+                )}
+                {failing.length > 0 && (
+                  <li>
+                    <strong>{failing.length}</strong> with failures in the last 7 days:{" "}
+                    {failing.map((a) => `${a.name} (${a.recentFailures})`).join(", ")}
+                  </li>
+                )}
+              </ul>
+            </Callout>
+          )}
+          <Collapsed label="Adapter health, all sources" count={adapters.length}>
+            <SourcesPanel adapters={adapters} />
+          </Collapsed>
+          <Collapsed label="Recent runs" count={runs.length}>
+            <RunsPanel runs={runs} />
+          </Collapsed>
+        </Stage>
+
+        <Stage
+          n={3}
+          title="Observe"
+          question="What did the crawler see, including what it stopped seeing?"
+          summary={`${inventory.inventoryParcels.toLocaleString()} parcels listed`}
+        >
+          <Suspense fallback={<TableSkeleton />}>
+            <PipelinePanel />
+          </Suspense>
+          <Suspense fallback={<TableSkeleton />}>
+            <AuctionOverridesPanel />
+          </Suspense>
+        </Stage>
+
+        <Stage
+          n={4}
+          title="Price"
+          question="How much of what we hold can a subscriber actually act on?"
+          state={blocked.length > 0 ? "blocked" : "ok"}
+          summary={`${funnel.headline.toLocaleString()} of ${funnel.totalCounties.toLocaleString()} counties priceable`}
+          defaultOpen={blocked.length > 0}
+        >
+          <Card>
+            <div className="space-y-1.5">
+              {funnel.stages.map((st) => (
+                <div key={st.key} className="flex items-center gap-3 text-sm">
+                  <span className="w-16 shrink-0 text-right tabular-nums font-medium">
+                    {st.counties.toLocaleString()}
+                  </span>
+                  <span
+                    className="h-2 shrink-0 rounded-sm bg-accent"
+                    style={{ width: `${Math.max(2, st.share * 160)}px` }}
+                    aria-hidden
+                  />
+                  <span className="min-w-0">
+                    {st.label}
+                    {st.needs !== "—" && <span className="ml-2 text-xs text-muted">needs {st.needs}</span>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+          <Collapsed label="Inventory by state" count={inventory.states.length}>
+            <InventoryPanel inventory={inventory} />
+          </Collapsed>
+        </Stage>
+
+        <Stage
+          n={5}
+          title="Package"
+          question="Is a sale complete enough to send to a subscriber?"
+          state={cape.releasable === 0 && cape.packages > 0 ? "attention" : "ok"}
+          summary={`${cape.releasable} of ${cape.packages} releasable`}
+        >
+          <CapePanel cape={cape} />
+        </Stage>
+
+        <Stage
+          n={6}
+          title="Operate"
+          question="How hard does it run, what does it cost, and who changed what?"
+          summary={`${schedules.filter((s) => s.enabled).length} schedule(s) on`}
+        >
+          <Suspense fallback={<TableSkeleton />}>
+            <CadencePanel outcome={outcome} />
+          </Suspense>
+          <OpsControls
+            adapters={adapters.map((a) => a.name)}
+            queue={queue}
+            schedules={schedules}
+            sourceOverrides={sourceOv}
+            policyOverrides={policyOv}
+          />
+          <Collapsed label="Access decisions" count={policies.length}>
+            <PolicyPanel policies={policies} />
+          </Collapsed>
+        </Stage>
+      </div>
     </div>
   );
 }

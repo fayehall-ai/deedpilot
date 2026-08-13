@@ -15,7 +15,15 @@ const near = (a: number, b: number, tol = 1) => Math.abs(a - b) <= tol;
 
 const covered = coveredStateList();
 assert(covered.includes("IL") && covered.includes("CA"), "IL and CA are now priceable");
-assert(covered.length === 7, `expected 7 covered states, got ${covered.length}`);
+/*
+ * Asserted as an invariant, not a count. This line read `covered.length === 7`
+ * and started failing the moment Arkansas was promoted — a passing test turned
+ * red by a change it was never guarding, which teaches an operator to ignore it.
+ * What actually matters is that the list is derived from the table rather than
+ * maintained by hand beside it.
+ */
+assert(covered.length === Object.keys(STATUTE_PARAMS).length, "covered list must be derived from the table");
+assert(new Set(covered).size === covered.length, "covered list has duplicates");
 
 // The warning for an uncovered state must be derived, not a stale hardcoded list.
 const wy = computeMaxBid({ state: "WY", saleType: "Tax Deed", assessedValue: 50_000 });
@@ -133,17 +141,24 @@ console.log("statute tests ok", {
 
 // --- market value as an ARV source ------------------------------------------
 
-// The case this was added for: Arkansas has no STATUTE_PARAMS entry, so a
+// The case this was added for: a state with no STATUTE_PARAMS entry, so a
 // parcel with an assessed value still returned insufficient-data because there
-// was no ratio to convert it with. 779 upcoming parcels sat in that state while
-// carrying a market estimate nobody read.
-const arNoRatio = computeMaxBid({ state: "AR", saleType: "Tax Deed", assessedValue: 30_000 });
+// was no ratio to convert it with. 779 upcoming Arkansas parcels sat in that
+// state while carrying a market estimate nobody read.
+//
+// Arkansas was the example until it was promoted, which turned this into a test
+// asserting that a *covered* state cannot be priced — it failed for the one
+// reason we most wanted to be able to cause. The subject is now derived, so
+// promoting any particular state can never invalidate the case again.
+const NOT_COVERED = ["WY", "VT", "ND", "NH"].find((s) => !statuteFor(s));
+assert(NOT_COVERED, "this case needs a state with no statutory entry; all candidates are covered");
+const arNoRatio = computeMaxBid({ state: NOT_COVERED!, saleType: "Tax Deed", assessedValue: 30_000 });
 assert(
   arNoRatio.recommendation === "insufficient-data",
   "assessed value alone is still unpriceable without a ratio",
 );
 const arWithMarket = computeMaxBid({
-  state: "AR",
+  state: NOT_COVERED!,
   saleType: "Tax Deed",
   assessedValue: 30_000,
   marketValue: 120_000,

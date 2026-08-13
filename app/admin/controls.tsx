@@ -86,7 +86,7 @@ export function OpsControls({
             <input type="checkbox" name="dryRun" /> dry run
           </label>
           <button type="submit" className={button}>
-            Queue run
+            Queue an adapter run
           </button>
           <p className="w-full text-xs text-muted">
             Queued, not executed — the dispatcher picks it up within the minute. An adapter that
@@ -98,7 +98,7 @@ export function OpsControls({
       {/* ---- queue ---- */}
       <Card>
         <div className="mb-2 flex items-baseline gap-3">
-          <h3 className="font-medium">Queue</h3>
+          <h3 className="font-medium">Job queue</h3>
           <span className="text-sm text-muted">
             {queue.queued} queued · {queue.leased} running · {queue.failed} failed
           </span>
@@ -155,11 +155,13 @@ export function OpsControls({
 
       {/* ---- schedules ---- */}
       <Card>
-        <h3 className="mb-1 font-medium">Schedules</h3>
+        <h3 className="mb-1 font-medium">Adapter sweeps — superseded</h3>
         <p className="mb-3 text-xs text-muted">
-          An interval and an anchor rather than a cron expression — enough for &ldquo;sweep this
-          nightly&rdquo;, and incapable of expressing something nobody can reason about later. The
-          dispatcher turns a due schedule into queued work.
+          The old per-adapter cadence, kept switchable but no longer how crawling is scheduled. These
+          swept every county an adapter serves regardless of when it sells, and a capped adapter
+          permanently starved its tail because the runner slices the first N bindings each time. The
+          calendar planner replaced them; the cadence that governs the pipeline lives in{" "}
+          <strong>Operate → Cadence and spend</strong> above.
         </p>
         <div className="space-y-2">
           {adapters.map((a) => {
