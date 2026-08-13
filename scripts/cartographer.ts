@@ -4,6 +4,7 @@
  *   npm run cartographer -- --gaps                 # which states cannot be priced
  *   npm run cartographer -- --market AR            # only the searched pass
  *   npm run cartographer -- --state AR --no-market # statutory draft only
+ *   npm run cartographer -- --verify <url> --claim "..."   # check a citation
  *   npm run cartographer -- --state IL --state CA  # draft proposals
  *   npm run cartographer -- --state IL --pr        # draft and open a PR
  *
@@ -68,6 +69,47 @@ async function main() {
    * are estimates by nature and are labelled as such rather than waiting on a
    * citation nobody can produce.
    */
+  /*
+   * Verify a claim against its citation.
+   *
+   * Exists because the Arkansas draft's `redemption: null` sat unverified for a
+   * week behind a review note saying a person should open two links. Fetching a
+   * page is retrieval, not judgement — the gate is that nobody writes
+   * STATUTE_PARAMS unreviewed, not that a human does the reading.
+   */
+  const verifyUrls = args("verify");
+  if (verifyUrls.length > 0) {
+    const claim = args("claim")[0];
+    if (!claim) {
+      console.error("--verify <url> needs --claim \"the assertion to check\".");
+      process.exit(1);
+    }
+    const { verifyClaims } = await import("../lib/cartographer/verify-statute");
+    console.log(`\nChecking against ${verifyUrls.length} citation(s):\n  ${claim}\n`);
+    const results = await verifyClaims(verifyUrls.map((url) => ({ url, claim })));
+    for (const r of results) {
+      const mark =
+        r.verdict === "supported" ? "SUPPORTED" :
+        r.verdict === "contradicted" ? "CONTRADICTED" :
+        r.verdict === "silent" ? "silent" : "UNREADABLE";
+      console.log(`${mark}  ${r.url}`);
+      if (r.section) console.log(`  section   ${r.section}`);
+      if (r.quote) console.log(`  quote     "${r.quote}"`);
+      console.log(`  reasoning ${r.reasoning}`);
+      for (const n of r.alsoNoted) console.log(`  ALSO      ${n}`);
+      if (r.via === "search") {
+        console.log(`  via       search — the cited URL was unfetchable`);
+        for (const f of r.foundAt ?? []) console.log(`            read at ${f}`);
+      } else {
+        console.log(`  via       fetched the citation (${r.charsRead.toLocaleString()} chars)`);
+      }
+      console.log("");
+    }
+    const bad = results.filter((r) => r.verdict === "contradicted");
+    if (bad.length) console.log(`${bad.length} citation(s) CONTRADICT the claim — do not promote.`);
+    return;
+  }
+
   const marketStates = args("market");
   if (marketStates.length > 0) {
     for (const raw of marketStates) {
