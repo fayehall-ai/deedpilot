@@ -96,3 +96,24 @@ export function deskZoneLabel(now: Date = new Date()): string {
 export function asDeskDay(now: Date = new Date()): Date {
   return new Date(`${deskDate(now)}T12:00:00Z`);
 }
+
+/**
+ * The dispatcher's firing time, written the way the desk reads a clock.
+ *
+ * The schedule is expressed in UTC because Vercel offers no alternative, but
+ * nobody operating this reasons in UTC — they want to know whether the crawl
+ * has already run this morning. Computed rather than hardcoded so it stays true
+ * across daylight saving, where the same UTC hour is 02:00 PDT and 01:00 PST.
+ *
+ * e.g. "2:00 AM PDT".
+ */
+export function dispatchTimeAtDesk(now: Date = new Date()): string {
+  const today = deskDate(now);
+  const at = new Date(`${today}T${String(DISPATCH_UTC_HOUR).padStart(2, "0")}:00:00Z`);
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: DESK_TIMEZONE,
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(at);
+}

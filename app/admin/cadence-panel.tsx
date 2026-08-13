@@ -1,7 +1,7 @@
 import { Card, Callout, Stat } from "@/components/ui";
 import { AdminTable, type AdminColumn } from "@/components/admin-table";
 import { getPipelineConfig, LIMITS, WEEKDAYS } from "@/lib/admin/pipeline-settings";
-import { deskWeekday, deskZoneLabel, deskDateTime, DISPATCH_UTC_HOUR } from "@/lib/desk-time";
+import { deskWeekday, deskZoneLabel, deskDateTime, dispatchTimeAtDesk } from "@/lib/desk-time";
 import { spendReport, DEFAULT_RATES, type SpendRow } from "@/lib/ai/usage";
 import { runCrawlPlanNow, runResearchNow, savePipelineSettings } from "./run-actions";
 
@@ -176,8 +176,8 @@ export async function CadencePanel() {
                 />
               </label>
               <span className="pb-2 text-xs text-muted">
-                runs overnight at the desk ({DISPATCH_UTC_HOUR}:00 UTC) · ~3.0s a county against a
-                195s claiming budget, so past ~60 the queue grows rather than the throughput
+                runs nightly at {dispatchTimeAtDesk(now)} · ~3.0s a county against a 195s claiming
+                budget, so past ~60 the queue grows rather than the throughput
               </span>
             </div>
           </div>
@@ -223,10 +223,9 @@ export async function CadencePanel() {
               </label>
             </div>
             <p className="text-xs text-muted">
-              The day is read at the desk, not in UTC. The tick fires overnight Pacific on the same
-              calendar day; at the old 02:00 UTC hour it landed the previous evening, so a UTC check
-              would have run this a day early every week. Today is{" "}
-              <strong>{deskWeekday(now)}</strong>, {deskZoneLabel(now)}.
+              Days are counted at the desk, so a Sunday pass runs on Sunday here rather than on
+              whatever day the server thinks it is. Today is <strong>{deskWeekday(now)}</strong>,{" "}
+              {deskZoneLabel(now)}.
             </p>
           </div>
 

@@ -51,9 +51,9 @@ assert(!isResearchDay(oldHourSunday), "a UTC Sunday that is Saturday at the desk
 // --- daylight saving is handled, not assumed --------------------------------
 
 /*
- * Eastern is UTC-4 in August and UTC-5 in January, so a hard-coded offset would
- * drift by an hour and, at 02:00 UTC, by a whole day. Both winter and summer
- * must still fire on exactly one tick.
+ * Pacific is UTC-7 in August and UTC-8 in January, so a hard-coded offset would
+ * drift by an hour and, at the wrong tick hour, by a whole day. Both winter and
+ * summer must still fire on exactly one tick.
  */
 for (const [label, days] of [
   ["winter", ["2026-01-11","2026-01-12","2026-01-13","2026-01-14","2026-01-15","2026-01-16","2026-01-17"]],
