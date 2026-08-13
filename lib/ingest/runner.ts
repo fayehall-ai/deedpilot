@@ -17,6 +17,7 @@ import { judgeAuctions, judgeLots } from "./judge";
 import { PolicyBlockedError } from "./fetch";
 import { nowFromDb, reconcileAuction, reconcileCountyAuctions } from "./reconcile";
 import { observeAuction } from "./observe";
+import { applyOverrides, loadOverridesFor } from "./source-overrides";
 import type { DiscoveredAuction, DiscoveredLot, SourceAdapter } from "./types";
 
 export interface RunOptions {
@@ -231,6 +232,31 @@ export async function runAdapter(
 
   log(`[${adapter.name}] discovering counties…`);
   let bindings = await adapter.discoverCounties();
+
+  /*
+   * Operator corrections, applied at the one point every adapter passes
+   * through. `source_overrides` previously had a console form, a save action,
+   * an audit entry and a listing — and no reader, so correcting a moved county
+   * URL changed nothing about what got fetched.
+   *
+   * Applied before the county filter and the limit so a disabled county cannot
+   * consume a slot, and so `--county` on an overridden county uses the
+   * corrected source rather than the stale one.
+   */
+  const applied = applyOverrides(bindings, await loadOverridesFor(adapter.name));
+  bindings = applied.bindings;
+  if (applied.disabled.length) {
+    log(`[${adapter.name}] ${applied.disabled.length} county/counties switched off by an operator`);
+  }
+  if (applied.rewritten.length) {
+    log(`[${adapter.name}] ${applied.rewritten.length} source URL(s) overridden: ${applied.rewritten.join(", ")}`);
+  }
+  for (const bad of applied.inapplicable) {
+    // Loudly. An operator who set a URL this adapter cannot use has an edit
+    // that saved, listed, and does nothing — which is the bug being fixed.
+    log(`[${adapter.name}] ${bad.countyFips}: override NOT applied — ${bad.reason}`);
+  }
+
   if (opts.countyFips) bindings = bindings.filter((b) => b.countyFips === opts.countyFips);
   if (opts.limit) bindings = bindings.slice(0, opts.limit);
   log(`[${adapter.name}] ${bindings.length} county binding(s)`);
