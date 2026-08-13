@@ -313,21 +313,49 @@ export const newMexicoPtdAdapter: SourceAdapter = {
           ? { indexDate: sale.saleDate, noticeDate: header.saleDate }
           : undefined;
 
+      /*
+       * The same rule, applied to the county — which is where it was actually
+       * needed.
+       *
+       * The index infers a county from the anchor text beside each link. That
+       * holds while the link names one (`AuctionAdvertisement-Lincoln.pdf` under
+       * "Lincoln County") and fails silently when it does not. The 2026 notice
+       * published as `AuctionAdvertisement-22-2.pdf` names no county at all, was
+       * listed under two, and so had its 93 Albuquerque parcels ingested twice:
+       * once as Bernalillo, which is right, and once as Catron, which is a
+       * different corner of the state. 186 rows for 93 parcels, and nothing in
+       * the data said which copy to believe.
+       *
+       * The notice states its own county in the statutory phrase "public auction,
+       * in X County". That string was already parsed and already stored in
+       * `raw.noticeCounty` — it was simply never read. Reading it collapses the
+       * duplicate at the source rather than de-duplicating downstream, because
+       * `externalId` is keyed on FIPS: both bindings now resolve to the same id
+       * and upsert onto one auction.
+       */
+      const noticeCounty = header?.county ? findCountyByName("NM", header.county) : null;
+      const countyFips = noticeCounty?.fips ?? sale.countyFips;
+      const countyName = noticeCounty?.name ?? sale.countyName;
+      const countyMismatch =
+        noticeCounty && noticeCounty.fips !== sale.countyFips
+          ? { indexCounty: sale.countyName, noticeCounty: noticeCounty.name, pdf: sale.pdfUrl }
+          : undefined;
+
       out.push({
-        countyFips: sale.countyFips,
+        countyFips,
         platform: "in_person",
         // NMSA 1978 § 7-38-67: a properly made sale extinguishes the tax lien
         // and conveys by deed. There is no post-sale redemption to price, so
         // this is a deed sale, not a redeemable one.
         saleType: "Tax Deed",
-        externalId: `nm-ptd:${sale.countyFips}:${saleDate}`,
+        externalId: `nm-ptd:${countyFips}:${saleDate}`,
         saleDate,
         // The state published this date on both the index and the notice.
         // Nothing here comes from projecting a typical schedule.
         saleDateConfirmed: true,
         listingKind: "sale_list",
         startTime: header?.startTime ?? sale.startTime,
-        title: `${sale.countyName} County delinquent property tax auction`,
+        title: `${countyName} County delinquent property tax auction`,
         status: "scheduled",
         sourceUrl: sale.pdfUrl,
         raw: {
@@ -335,6 +363,7 @@ export const newMexicoPtdAdapter: SourceAdapter = {
           location: header?.location,
           noticeCounty: header?.county,
           ...(mismatch ? { saleDateMismatch: mismatch } : {}),
+          ...(countyMismatch ? { countyMismatch } : {}),
         },
       });
     }

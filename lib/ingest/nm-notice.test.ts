@@ -15,6 +15,7 @@ import {
   parseUsDate,
 } from "./adapters/new-mexico";
 import { judgeLots } from "./judge";
+import { findCountyByName } from "../atlas";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) throw new Error(msg);
@@ -243,5 +244,42 @@ assert(money[2].openingBid === undefined, "absent bid is undefined, never 0");
 
 assert(parseNotice("", "u").length === 0, "empty notice yields nothing");
 assert(parseNotice("no parcels here at all", "u").length === 0, "prose yields nothing");
+
+// --- the notice names its own county, and that is the one that counts ---------
+
+/*
+ * The bug this guards: `AuctionAdvertisement-22-2.pdf` names no county in its
+ * filename, was listed on the index under two, and so had its 93 Albuquerque
+ * parcels ingested twice — once as Bernalillo (right) and once as Catron
+ * (wrong, and a different corner of the state). 186 rows for 93 parcels.
+ *
+ * The statutory notice states its own county in a fixed phrase. The header
+ * parser already extracted it; nothing read it. These assertions pin the two
+ * steps that turn that string into the correct FIPS.
+ */
+const NOTICE_COUNTY = `DATE: Thursday, August 27, 2026
+TIME: 10:00AM
+LOCATION: County Commission Chambers
+The Property Tax Division of the Taxation and Revenue Department will offer for
+public auction, in Bernalillo County, the following described real property.`;
+
+const nc = parseNoticeHeader(NOTICE_COUNTY);
+assert(nc.county === "Bernalillo", `notice county extracted, got ${nc.county}`);
+assert(findCountyByName("NM", nc.county!)?.fips === "35001", "Bernalillo resolves to 35001");
+// The county the index guessed for that PDF — a real place, and the wrong one.
+assert(findCountyByName("NM", "Catron")?.fips === "35003", "Catron is a different county");
+
+// The phrase varies in punctuation across notices; both forms must parse.
+assert(
+  parseNoticeHeader("public auction in Sandoval County, the following").county === "Sandoval",
+  "no comma after 'auction'",
+);
+assert(
+  parseNoticeHeader("public auction, in San Juan County the following").county === "San Juan",
+  "two-word county names survive",
+);
+// Silence is not a county. A notice that omits the phrase must not invent one,
+// because the fallback — the index's guess — is still better than a bad parse.
+assert(parseNoticeHeader("DATE: Thursday, August 27, 2026").county === undefined, "absent stays absent");
 
 console.log("nm notice: all assertions passed");
