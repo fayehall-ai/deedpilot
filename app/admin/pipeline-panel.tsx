@@ -110,9 +110,9 @@ export async function PipelinePanel() {
             {isResearchDay(now) ? " — research is due on tonight's tick." : "."}
           </li>
           <li>
-            Adapter-wide sweeps in <em>Schedules</em> below are disabled and superseded: they
-            re-fetched counties selling months away, and a capped adapter permanently starved its tail
-            because the runner slices the first N bindings every time.
+            Adapter-wide sweeps are disabled and superseded — they re-fetched counties selling
+            months away, and a capped adapter permanently starved its tail. They remain switchable
+            under <em>Operate</em> if a source ever needs sweeping directly.
           </li>
         </ul>
       </Card>
