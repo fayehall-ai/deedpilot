@@ -13,9 +13,13 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { runSchedules, sourceOverrides, policyOverrides } from "@/lib/db/schema";
-import { isAdmin } from "@/lib/admin/auth";
+import { currentActor, isAdmin } from "@/lib/admin/auth";
 import { audit, cancelJob, enqueue, inFlightFor } from "@/lib/admin/queue";
 import { getAdapter } from "@/lib/ingest/adapters";
+import { clearOverrides, isOverridable, setOverrides } from "@/lib/admin/auction-overrides";
+import { backlogStates, buildPlan, enqueuePlan } from "@/lib/admin/plan-jobs";
+import { getPipelineConfig, resetPipelineConfig, savePipelineConfig } from "@/lib/admin/pipeline-settings";
+import { enqueueScoutReport, scoutAdapter } from "@/lib/admin/scout-jobs";
 
 class NotAuthorised extends Error {
   constructor() {
@@ -25,6 +29,21 @@ class NotAuthorised extends Error {
 
 async function requireAdmin(): Promise<void> {
   if (!(await isAdmin())) throw new NotAuthorised();
+}
+
+/**
+ * Audit a change against the person who made it.
+ *
+ * `audit()` defaults its actor to the literal "admin", which is what every row
+ * in the table said until named tokens existed. Resolving the actor here rather
+ * than at each call site means a new action cannot forget to attribute itself.
+ */
+async function auditAs(
+  action: string,
+  target: string | null,
+  detail: Record<string, unknown>,
+): Promise<void> {
+  await audit(action, target, detail, await currentActor());
 }
 
 const str = (f: FormData, k: string): string => String(f.get(k) ?? "").trim();
@@ -58,7 +77,7 @@ export async function runNow(formData: FormData): Promise<void> {
 
   const inFlight = await inFlightFor(adapter);
   if (inFlight > 0) {
-    await audit("run_now.rejected", adapter, { reason: "already in flight", inFlight });
+    await auditAs("run_now.rejected", adapter, { reason: "already in flight", inFlight });
     revalidatePath("/admin");
     return;
   }
@@ -75,7 +94,7 @@ export async function runNow(formData: FormData): Promise<void> {
     priority: 10,
     requestedBy: "admin",
   });
-  await audit("run_now", adapter, { jobId: job.id, countyFips, limit, dryRun });
+  await auditAs("run_now", adapter, { jobId: job.id, countyFips, limit, dryRun });
   revalidatePath("/admin");
 }
 
@@ -83,7 +102,7 @@ export async function cancelRun(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = str(formData, "jobId");
   await cancelJob(id);
-  await audit("run.cancel", id, {});
+  await auditAs("run.cancel", id, {});
   revalidatePath("/admin");
 }
 
@@ -116,7 +135,7 @@ export async function saveSchedule(formData: FormData): Promise<void> {
       set: { intervalMinutes, limit, enabled, note, updatedAt: new Date() },
     });
 
-  await audit("schedule.save", adapter, { intervalMinutes, limit, enabled });
+  await auditAs("schedule.save", adapter, { intervalMinutes, limit, enabled });
   revalidatePath("/admin");
 }
 
@@ -124,7 +143,7 @@ export async function deleteSchedule(formData: FormData): Promise<void> {
   await requireAdmin();
   const adapter = str(formData, "adapter");
   await db.delete(runSchedules).where(eq(runSchedules.adapter, adapter));
-  await audit("schedule.delete", adapter, {});
+  await auditAs("schedule.delete", adapter, {});
   revalidatePath("/admin");
 }
 
@@ -174,7 +193,7 @@ export async function saveSource(formData: FormData): Promise<void> {
       set: { url, enabled, note, updatedAt: new Date() },
     });
 
-  await audit("source.save", `${adapter}/${countyFips}`, { url, enabled });
+  await auditAs("source.save", `${adapter}/${countyFips}`, { url, enabled });
   revalidatePath("/admin");
 }
 
@@ -182,7 +201,7 @@ export async function deleteSource(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = str(formData, "id");
   await db.delete(sourceOverrides).where(eq(sourceOverrides.id, id));
-  await audit("source.delete", id, {});
+  await auditAs("source.delete", id, {});
   revalidatePath("/admin");
 }
 
@@ -229,7 +248,7 @@ export async function savePolicy(formData: FormData): Promise<void> {
       set: { decision, minDelayMs, reason, updatedAt: new Date() },
     });
 
-  await audit("policy.save", host, { decision, minDelayMs, reason });
+  await auditAs("policy.save", host, { decision, minDelayMs, reason });
   revalidatePath("/admin");
 }
 
@@ -237,6 +256,127 @@ export async function deletePolicy(formData: FormData): Promise<void> {
   await requireAdmin();
   const host = str(formData, "host");
   await db.delete(policyOverrides).where(eq(policyOverrides.host, host));
-  await audit("policy.delete", host, { note: "reverted to the decision in code" });
+  await auditAs("policy.delete", host, { note: "reverted to the decision in code" });
+  revalidatePath("/admin");
+}
+
+// ---------------------------------------------------------------------------
+// Auction corrections
+// ---------------------------------------------------------------------------
+
+/**
+ * Correct a field on one auction.
+ *
+ * The write goes to `auctions.operator_overrides`, never to the column itself.
+ * Writing the column directly would look identical in the console and be
+ * reverted by the next crawl, because `upsertAuction` sets these fields from
+ * `excluded.*` — the failure this whole tier exists to prevent.
+ *
+ * An empty value clears that one correction, so reverting a single field never
+ * means retyping the others.
+ */
+export async function saveAuctionOverride(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const auctionId = str(formData, "auctionId");
+  const field = str(formData, "field");
+  const raw = str(formData, "value");
+
+  if (!isOverridable(field)) {
+    throw new Error(`${field} is not overridable`);
+  }
+
+  // Typed before validation, because the form gives everything back as a
+  // string and `saleDateConfirmed` is the one field where "false" is a value
+  // rather than an absence.
+  let value: unknown = raw;
+  if (raw === "") value = null;
+  else if (field === "saleDateConfirmed") value = raw === "true";
+
+  await setOverrides(auctionId, { [field]: value }, await currentActor());
+  await auditAs("auction.override", `${auctionId}/${field}`, { value });
+  revalidatePath("/admin");
+}
+
+/** Drop every correction on an auction, returning it wholly to the county. */
+export async function clearAuctionOverrides(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const auctionId = str(formData, "auctionId");
+  await clearOverrides(auctionId);
+  await auditAs("auction.override.clear", auctionId, {});
+  revalidatePath("/admin");
+}
+
+// ---------------------------------------------------------------------------
+// Pipeline cadence
+// ---------------------------------------------------------------------------
+
+/**
+ * Queue today's calendar plan immediately.
+ *
+ * Enqueues rather than crawls: a full plan is hundreds of county fetches and a
+ * Server Function cannot hold the request open for that. The dispatcher drains
+ * what this queues, so pressing it before 02:00 UTC brings the day's work
+ * forward rather than duplicating it — `enqueuePlan` skips any county already
+ * queued or leased.
+ */
+export async function runCrawlPlanNow(): Promise<void> {
+  await requireAdmin();
+  const config = await getPipelineConfig();
+  const result = await enqueuePlan({ maxTasks: config.crawlMaxTasks });
+  await auditAs("plan.run_now", null, {
+    planned: result.planned,
+    enqueued: result.enqueued,
+    alreadyQueued: result.alreadyQueued,
+  });
+  revalidatePath("/admin");
+}
+
+/**
+ * Queue the weekly research pass now, ignoring the day check.
+ *
+ * The cooldown still applies. That is the guard worth keeping under a manual
+ * press: the day check exists to pick a slot, but the cooldown exists to stop
+ * the same four states being researched twice in a week at full price.
+ */
+export async function runResearchNow(): Promise<void> {
+  await requireAdmin();
+  const config = await getPipelineConfig();
+  const ranked = backlogStates(await buildPlan());
+  const states = ranked.slice(0, config.researchStates).map((s) => s.state);
+
+  const fresh: string[] = [];
+  for (const state of states) {
+    if ((await inFlightFor(scoutAdapter(state))) === 0) fresh.push(state);
+  }
+  if (fresh.length > 0) await enqueueScoutReport(fresh, await currentActor());
+
+  await auditAs("research.run_now", null, { queued: fresh, skipped: states.length - fresh.length });
+  revalidatePath("/admin");
+}
+
+/** Change how hard the pipeline runs. */
+export async function savePipelineSettings(formData: FormData): Promise<void> {
+  await requireAdmin();
+
+  if (str(formData, "intent") === "reset") {
+    await resetPipelineConfig();
+    await auditAs("pipeline.settings.reset", null, {});
+    revalidatePath("/admin");
+    return;
+  }
+
+  const patch = {
+    // Checkboxes are absent from the payload when unticked, which is what makes
+    // a bare `formData.get` the wrong read for a boolean.
+    crawlEnabled: str(formData, "crawlEnabled") === "on",
+    crawlMaxTasks: Number(str(formData, "crawlMaxTasks")),
+    researchEnabled: str(formData, "researchEnabled") === "on",
+    researchWeekday: str(formData, "researchWeekday"),
+    researchStates: Number(str(formData, "researchStates")),
+    researchCooldownDays: Number(str(formData, "researchCooldownDays")),
+  };
+
+  const next = await savePipelineConfig(patch, await currentActor());
+  await auditAs("pipeline.settings.save", null, next as unknown as Record<string, unknown>);
   revalidatePath("/admin");
 }

@@ -27,11 +27,57 @@ function digest(s: string): Buffer {
   return createHash("sha256").update(s, "utf8").digest();
 }
 
-/** Constant-time equality against the configured token. */
-export function tokenMatches(candidate: string | undefined | null): boolean {
-  const expected = (process.env.DEEDPILOT_ADMIN_TOKEN ?? "").trim();
-  if (!expected) return false;
+/**
+ * Configured tokens, optionally named.
+ *
+ * `DEEDPILOT_ADMIN_TOKEN` may hold one secret, or several as
+ * `name:secret` pairs separated by commas:
+ *
+ *     DEEDPILOT_ADMIN_TOKEN="faye:s3cret,ops-bot:t0ken"
+ *
+ * A bare secret with no name is still valid and resolves to the actor `admin`,
+ * so nothing that exists today has to change.
+ *
+ * The reason to bother: every row in `admin_audit` said `actor: "admin"`, which
+ * is adequate for a read-mostly console and stops being adequate the moment it
+ * can withdraw parcels, correct sale dates and override access policy. A log
+ * that cannot say who is a log that answers the wrong question.
+ */
+function configuredTokens(): { actor: string; secret: string }[] {
+  const raw = (process.env.DEEDPILOT_ADMIN_TOKEN ?? "").trim();
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const at = part.indexOf(":");
+      // A secret containing no colon is the whole token, unnamed.
+      if (at <= 0) return { actor: "admin", secret: part };
+      return { actor: part.slice(0, at).trim() || "admin", secret: part.slice(at + 1).trim() };
+    })
+    .filter((t) => t.secret.length > 0);
+}
+
+/**
+ * Which person a candidate token belongs to, or null.
+ *
+ * Every configured token is compared even after a match, so the work done does
+ * not depend on which one matched or on how many are configured.
+ */
+export function actorFor(candidate: string | undefined | null): string | null {
   const given = (candidate ?? "").trim();
-  if (!given) return false;
-  return timingSafeEqual(digest(given), digest(expected));
+  if (!given) return null;
+  const givenDigest = digest(given);
+
+  let actor: string | null = null;
+  for (const t of configuredTokens()) {
+    if (timingSafeEqual(givenDigest, digest(t.secret))) actor ??= t.actor;
+  }
+  return actor;
+}
+
+/** Constant-time equality against any configured token. */
+export function tokenMatches(candidate: string | undefined | null): boolean {
+  return actorFor(candidate) !== null;
 }

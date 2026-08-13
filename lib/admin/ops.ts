@@ -95,6 +95,8 @@ export async function getAdapterHealth(): Promise<AdapterHealth[]> {
 export interface RunRow {
   adapter: string;
   county: string | null;
+  /** Carried so the console can link a run to its county operations page. */
+  countyFips: string | null;
   state: string | null;
   status: string;
   auctionsFound: number;
@@ -108,7 +110,7 @@ export interface RunRow {
 /** The most recent runs, newest first — the tail an operator reads after a cron. */
 export async function getRecentRuns(limit = 40): Promise<RunRow[]> {
   const rows = (await db.execute(sql.raw(`
-    SELECT r.adapter, c.name AS county, c.state, r.status,
+    SELECT r.adapter, c.name AS county, c.state, r.county_fips, r.status,
            coalesce(r.auctions_found,0)::int AS auctions_found,
            coalesce(r.lots_found,0)::int     AS lots_found,
            coalesce(r.rejected,0)::int       AS rejected,
@@ -122,6 +124,7 @@ export async function getRecentRuns(limit = 40): Promise<RunRow[]> {
   return rows.map((r) => ({
     adapter: String(r.adapter),
     county: (r.county as string | null) ?? null,
+    countyFips: (r.county_fips as string | null) ?? null,
     state: (r.state as string | null) ?? null,
     status: String(r.status),
     auctionsFound: Number(r.auctions_found),

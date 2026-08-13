@@ -14,9 +14,9 @@
  */
 import "server-only";
 import { cookies } from "next/headers";
-import { tokenMatches } from "./token";
+import { actorFor, tokenMatches } from "./token";
 
-export { adminConfigured, tokenMatches } from "./token";
+export { actorFor, adminConfigured, tokenMatches } from "./token";
 
 export const ADMIN_COOKIE = "dp_admin";
 
@@ -24,6 +24,19 @@ export const ADMIN_COOKIE = "dp_admin";
 export async function isAdmin(): Promise<boolean> {
   const jar = await cookies();
   return tokenMatches(jar.get(ADMIN_COOKIE)?.value);
+}
+
+/**
+ * Who is making this request, for the audit log.
+ *
+ * Derived from the cookie on every call rather than stored at sign-in, so a
+ * revoked or rotated token stops attributing actions immediately instead of
+ * until the cookie expires. Falls back to `admin` for an unnamed token, which
+ * is what a single-secret deployment has always been.
+ */
+export async function currentActor(): Promise<string> {
+  const jar = await cookies();
+  return actorFor(jar.get(ADMIN_COOKIE)?.value) ?? "admin";
 }
 
 /**

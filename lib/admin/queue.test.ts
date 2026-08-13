@@ -5,6 +5,20 @@
  * Talks to the real database and cleans up after itself — the behaviour worth
  * testing here is the atomicity of the claim, which a mock cannot show.
  *
+ * ## It must not assume an idle queue
+ *
+ * The first version asserted `claimNext() === null` to mean "nothing else is
+ * claimable", which was only ever true because the pipeline never actually ran.
+ * Once the calendar planner began queuing real county crawls at priority 113,
+ * every one of those assertions started claiming somebody else's work — and the
+ * invariants being tested were never about the queue being empty. They are about
+ * *this* job: that it cannot be claimed twice while leased, that it returns after
+ * its lease expires, that it stops being claimed once complete.
+ *
+ * So the test now enqueues above any real priority and asserts on job identity
+ * rather than emptiness. It also releases anything it claims by accident, so
+ * running it never strands production work in a lease.
+ *
  * The bug this file exists to prevent already happened once: `db.execute`
  * returns the database's own column names, so casting a raw row to `RunJob`
  * type-checks while every camelCase field reads `undefined`. The dispatcher
@@ -38,7 +52,9 @@ async function main() {
     countyFips: "13121",
     limit: 3,
     dryRun: true,
-    priority: 10,
+    // Above `priorityOf`'s ceiling of 115, so the claim under test wins against
+    // whatever real work the planner has queued.
+    priority: 10_000,
     requestedBy: TAG,
   });
   eq(job.status, "queued", "a new job starts queued");
@@ -56,7 +72,24 @@ async function main() {
 
   // --- a held lease excludes other workers -----------------------------------
 
-  eq(await claimNext(), null, "a leased job cannot be claimed twice");
+  /**
+   * Claim, and immediately release anything that is not ours.
+   *
+   * Returns whether *this* job came back. Running the suite must never leave a
+   * real county crawl leased to a test process that has already exited.
+   */
+  const claimIsOurs = async (): Promise<boolean> => {
+    const c = await claimNext();
+    if (!c) return false;
+    if (c.id === job.id || c.requestedBy === TAG) return c.id === job.id;
+    await db.execute(
+      sql`UPDATE run_jobs SET status = 'queued', lease_expires_at = NULL,
+          attempts = greatest(attempts - 1, 0) WHERE id = ${c.id}`,
+    );
+    return false;
+  };
+
+  assert(!(await claimIsOurs()), "a leased job cannot be claimed twice");
 
   // --- an expired lease returns the job to the pool --------------------------
 
@@ -70,17 +103,24 @@ async function main() {
   // --- completion takes it out of circulation --------------------------------
 
   await completeJob(job.id, { note: TAG });
-  eq(await claimNext(), null, "a completed job is not claimable");
+  assert(!(await claimIsOurs()), "a completed job is not claimable");
 
   // --- retries are bounded ---------------------------------------------------
 
-  const doomed = await enqueue({ adapter: "ga-counties", requestedBy: TAG });
+  const doomed = await enqueue({ adapter: "ga-counties", requestedBy: TAG, priority: 10_000 });
   for (let i = 0; i < MAX_ATTEMPTS; i++) {
     const c = await claimNext();
     assert(c?.id === doomed.id, `attempt ${i + 1} claims the failing job`);
     await failJob(doomed.id, `synthetic failure ${i + 1}`);
   }
-  eq(await claimNext(), null, "a job that exhausts its attempts stops being claimed");
+  const after = await claimNext();
+  assert(after?.id !== doomed.id, "a job that exhausts its attempts stops being claimed");
+  if (after && after.requestedBy !== TAG) {
+    await db.execute(
+      sql`UPDATE run_jobs SET status = 'queued', lease_expires_at = NULL,
+          attempts = greatest(attempts - 1, 0) WHERE id = ${after.id}`,
+    );
+  }
 
   const q = await getQueue(5);
   assert(q.failed >= 1, "the exhausted job is recorded as failed");

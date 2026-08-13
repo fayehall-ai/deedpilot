@@ -63,12 +63,39 @@ export const auctionStatusEnum = pgEnum("auction_status", [
   "postponed",
 ]);
 
+/**
+ * What happened to a parcel.
+ *
+ * ## `redeemed` here is the PRE-sale cure, not the statutory redemption
+ *
+ * These are two different events and the word is the same, which is exactly the
+ * shape of confusion that inverted the Illinois model once already:
+ *
+ * - **This enum's `redeemed`** — the owner paid the delinquency *before* the
+ *   sale, so the parcel never sold. Adapters set it when a county page says
+ *   REDEEMED or PAID.
+ * - **`p_redeem` in the copilot's simulator** — the owner reclaimed the
+ *   property *from the buyer* during the statutory window after a sale. That is
+ *   the return an investor in a redeemable-deed state is actually buying.
+ *
+ * The corpus already tripped over this and had to flag San Diego's 1,404 rows
+ * as pre-sale cures that are explicitly *not* post-sale redemptions. Feeding
+ * one into anything fitting the other rebuilds the Cook County bug with better
+ * provenance: a redemption rate inflated by events that are not redemptions.
+ *
+ * The value is kept rather than renamed because three adapters write it and a
+ * rename is a migration; what was missing was anywhere stating which event it
+ * observes. Anything that fits a redemption rate must read post-sale outcomes
+ * from the corpus, never this column.
+ */
 export const lotStatusEnum = pgEnum("lot_status", [
   "pending", // listed, not yet sold
   "sold",
-  "redeemed", // owner paid before the sale
+  /** PRE-sale cure: owner paid before the sale. NOT a post-sale redemption. */
+  "redeemed",
   "cancelled",
   "struck", // no bid; struck to the county/state
+  /** Observed absence — the county stopped publishing it, reason unknown. */
   "withdrawn",
 ]);
 
@@ -186,6 +213,41 @@ export const auctions = pgTable(
     lotCount: integer("lot_count").notNull().default(0),
     /** Untouched payload from the source, for re-parsing without re-fetching. */
     raw: jsonb("raw").$type<Record<string, unknown>>(),
+    /**
+     * When a still-future sale stopped appearing on its county's listing.
+     *
+     * Deliberately *not* `status = 'cancelled'`. A county publishes an absence,
+     * not a reason — cancelled, postponed, moved to an archive page, or simply
+     * dropped from a calendar that only shows the next sale are indistinguishable
+     * from outside, and `status` stays adapter-owned so an adapter that reads a
+     * real "CANCELLED" off the page keeps the only claim about cause.
+     *
+     * Cleared the moment the sale reappears, so this records a current condition
+     * rather than a permanent verdict.
+     */
+    delistedAt: timestamp("delisted_at", { withTimezone: true }),
+    /**
+     * Operator corrections, which outrank the source.
+     *
+     * The third tier. `upsertLots` already distinguishes adapter-owned columns
+     * (overwritten, because the source is authoritative) from enrichment-owned
+     * ones (coalesced, so a re-ingest cannot erase paid API work). A person
+     * correcting a wrong sale date is neither: without somewhere to put it, the
+     * 02:00 upsert sets `sale_date` from `excluded.sale_date` and the fix is
+     * gone by morning — an edit that appeared to work and undid itself.
+     *
+     * Keyed by column name in camelCase, values as JSON scalars. Only fields in
+     * `OVERRIDABLE` may be written, and every value is validated against the
+     * column's own domain before it lands, because these are read back through
+     * a Postgres cast: an invalid enum string here would fail the upsert for
+     * this auction on every future crawl.
+     *
+     * Deleting a key reverts to whatever the county publishes. Nothing is
+     * destroyed, so a correction is always reversible to the source of truth.
+     */
+    operatorOverrides: jsonb("operator_overrides").$type<Record<string, unknown>>(),
+    editedBy: text("edited_by"),
+    editedAt: timestamp("edited_at", { withTimezone: true }),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -644,6 +706,26 @@ export const sourceOverrides = pgTable(
  * the Georgia Press Association are both blocked by terms rather than by
  * robots — so every change is recorded rather than merely applied.
  */
+/**
+ * The Auction Scout research prompt, editable from the console.
+ *
+ * In the database rather than in the source because the prompt IS the product
+ * here: it is the standing brief for what a report must cover, and it changes
+ * when the desk's priorities change — a new state, a new platform, a source
+ * that stopped publishing. Requiring a deploy to add "scan every county in
+ * Georgia" would mean the brief lives in someone's chat history instead of in
+ * the thing that runs.
+ *
+ * One row, id `default`. Absent means nobody has edited it and the built-in
+ * brief applies, so a fresh deployment is not a broken one.
+ */
+export const scoutPrompts = pgTable("scout_prompts", {
+  id: text("id").primaryKey(),
+  template: text("template").notNull(),
+  updatedBy: text("updated_by").notNull().default("admin"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const policyOverrides = pgTable(
   "policy_overrides",
   {
@@ -685,3 +767,146 @@ export type NewRunJob = typeof runJobs.$inferInsert;
 export type RunSchedule = typeof runSchedules.$inferSelect;
 export type SourceOverride = typeof sourceOverrides.$inferSelect;
 export type PolicyOverride = typeof policyOverrides.$inferSelect;
+export type ScoutPrompt = typeof scoutPrompts.$inferSelect;
+
+/**
+ * Append-only record of what each crawl saw.
+ *
+ * Every other table holds *current* state: `upsertLots` overwrites
+ * `opening_bid` from the source on each run, so a parcel moving from $14,000 to
+ * $16,200 leaves only the second number, and a parcel that vanishes leaves no
+ * trace it was ever listed. The crawler observes a great deal and remembers
+ * almost none of it.
+ *
+ * This is one row per parcel per crawl. It costs an insert and no extra fetch,
+ * and it is the only dataset here that **self-labels**: "on run R, at time T,
+ * from URL U, this parcel was present with opening bid X" carries no unstated
+ * semantics, so it clears the Archivist's admission rule by construction. That
+ * is precisely what the imported 92k-row corpus could not do — `redeemed=False`
+ * as a schema default was read as an observed non-redemption and pinned
+ * Illinois at p_redeem = 0.02.
+ *
+ * What it makes computable, none of which exists today: pre-sale attrition
+ * curves per county, opening-bid drift, re-offer chains across sales, measured
+ * `publishLeadDays`, and per-county re-crawl intervals to replace the fixed
+ * 7/3/1.
+ *
+ * Never updated, never deleted by the pipeline. A correction is a new row.
+ */
+export const lotObservations = pgTable(
+  "lot_observations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    lotId: uuid("lot_id")
+      .notNull()
+      .references(() => lots.id, { onDelete: "cascade" }),
+    auctionId: uuid("auction_id")
+      .notNull()
+      .references(() => auctions.id, { onDelete: "cascade" }),
+    countyFips: text("county_fips").notNull(),
+    /** The crawl that saw it, so an observation can be traced to its run. */
+    runId: uuid("run_id"),
+    observedAt: timestamp("observed_at", { withTimezone: true }).notNull().defaultNow(),
+    /**
+     * True when this crawl returned the parcel; false when the row is recording
+     * that it was absent. An absence is an observation and the single most
+     * valuable one here — it is what an attrition curve is made of.
+     */
+    present: boolean("present").notNull().default(true),
+    status: lotStatusEnum("status").notNull(),
+    openingBid: numeric("opening_bid", { precision: 14, scale: 2 }),
+    /** Days from this observation to the sale. Negative after the sale. */
+    daysToSale: integer("days_to_sale"),
+    sourceUrl: text("source_url"),
+  },
+  (t) => [
+    index("lot_observations_lot_idx").on(t.lotId, t.observedAt),
+    index("lot_observations_auction_idx").on(t.auctionId, t.observedAt),
+    /* Attrition is asked per county over time; this is the shape of that query. */
+    index("lot_observations_county_idx").on(t.countyFips, t.observedAt),
+  ],
+);
+
+export type LotObservation = typeof lotObservations.$inferSelect;
+
+/**
+ * Operator-tunable pipeline cadence.
+ *
+ * These numbers were hardcoded in three places — the plan cap in the dispatcher
+ * route, the weekly day and state count in `scout-jobs`, the cooldown in
+ * `research-day` — which meant changing how hard the pipeline runs was a deploy.
+ * That is the wrong shape for the one setting most likely to need changing at
+ * short notice: the crawl cap exists to stop the queue outgrowing what a tick
+ * can drain, and the right value moves the moment the dispatcher cadence does.
+ *
+ * One row, id `default`, same pattern as `scout_prompts`. Absent means the
+ * built-in defaults apply, so a fresh deployment is not a broken one.
+ */
+export const pipelineSettings = pgTable("pipeline_settings", {
+  id: text("id").primaryKey(),
+  /** Master switch for calendar-driven crawling. */
+  crawlEnabled: boolean("crawl_enabled").notNull().default(true),
+  /**
+   * Counties queued per dispatcher tick.
+   *
+   * Sized to what one tick drains — measured 3.0s median, p90 8.1s, against a
+   * 195-second claiming budget. Raising it past that grows the queue rather
+   * than the throughput, because `enqueue` does not dedupe across days.
+   */
+  crawlMaxTasks: integer("crawl_max_tasks").notNull().default(50),
+  /** Master switch for the standing research pass. */
+  researchEnabled: boolean("research_enabled").notNull().default(true),
+  /** Three-letter weekday at the desk, e.g. `Sun`. */
+  researchWeekday: text("research_weekday").notNull().default("Sun"),
+  /** States queued per weekly pass. Each is a paid searched call of 1-2 minutes. */
+  researchStates: integer("research_states").notNull().default(4),
+  /** Days that must pass before another pass may queue. Guards double-firing. */
+  researchCooldownDays: integer("research_cooldown_days").notNull().default(6),
+  updatedBy: text("updated_by").notNull().default("admin"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type PipelineSettings = typeof pipelineSettings.$inferSelect;
+
+/**
+ * Every call that costs money, in the units the vendor bills.
+ *
+ * Nothing recorded spend before this, and unrecorded usage cannot be recovered
+ * — a searched call that ran last Tuesday is gone. So this stores what was
+ * *consumed* (exact, from the provider's own response) rather than a dollar
+ * figure, and the money is computed at read time against rates the operator
+ * sets. Vendor pricing changes and contracts differ; a price baked into a row
+ * is wrong the moment either does, and silently.
+ *
+ * `operation` is what the call was for, not which function made it — "why did
+ * this week cost more" is answered by purpose (research, PDF extraction,
+ * property enrichment), never by call site.
+ */
+export const apiUsage = pgTable(
+  "api_usage",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+    /** `xai`, `anthropic`, `attom`, `rentcast`, `batchdata`. */
+    provider: text("provider").notNull(),
+    /** Model id where one applies, e.g. `grok-4.5`. Null for REST lookups. */
+    model: text("model"),
+    /** `scout-research`, `pdf-extract`, `cartographer`, `brief`, `enrich`. */
+    operation: text("operation").notNull(),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+    /** Billed web searches — the dominant cost of a research pass. */
+    searchCalls: integer("search_calls"),
+    /** REST lookups, for the per-request property APIs. */
+    requests: integer("requests"),
+    /** What it was about, so spend can be attributed to a state or county. */
+    countyFips: text("county_fips"),
+    note: text("note"),
+  },
+  (t) => [
+    index("api_usage_at_idx").on(t.at),
+    index("api_usage_op_idx").on(t.operation, t.at),
+  ],
+);
+
+export type ApiUsage = typeof apiUsage.$inferSelect;

@@ -10,6 +10,12 @@ import { getQueue, getSchedules } from "@/lib/admin/queue";
 import { getSourceOverrides, getPolicyOverrides } from "@/lib/admin/ops";
 import { signIn, signOut } from "./actions";
 import { OpsControls } from "./controls";
+import { ScoutPanel } from "./scout-panel";
+import { AuctionOverridesPanel } from "./auction-overrides-panel";
+import { PlanPanel } from "./plan-panel";
+import { LabelQueuePanel } from "./label-queue-panel";
+import { PipelinePanel } from "./pipeline-panel";
+import { CadencePanel } from "./cadence-panel";
 
 export const metadata: Metadata = {
   title: "Operations",
@@ -183,6 +189,47 @@ async function Body() {
           </ul>
         </Callout>
       )}
+
+      {/*
+        Its own boundary, like the Scout report: it reads every corrected
+        auction, which has no business holding up the rest of the console.
+      */}
+      {/*
+        Order is deliberate, and was not always: panels were appended as they
+        were built, which left the single most important number — priceable
+        coverage — below a research report. An operator opens this console to
+        answer "what needs doing", so the plan and its coverage funnel lead;
+        observation health follows; queues needing a person come next; and the
+        reference tables that answer "is anything broken" sit at the bottom.
+
+        Each heavy panel gets its own boundary so the shell paints without
+        waiting on 3,142 counties of calendar arithmetic.
+      */}
+      <Suspense fallback={<TableSkeleton />}>
+        <PlanPanel />
+      </Suspense>
+
+      <Suspense fallback={<TableSkeleton />}>
+        <CadencePanel />
+      </Suspense>
+
+      <Suspense fallback={<TableSkeleton />}>
+        <PipelinePanel />
+      </Suspense>
+
+      <Suspense fallback={<TableSkeleton />}>
+        <ScoutPanel />
+      </Suspense>
+
+      {/*
+        Reads a file rather than the database, so it needs no boundary of its
+        own — and it renders nothing at all when there is no candidate batch.
+      */}
+      <LabelQueuePanel />
+
+      <Suspense fallback={<TableSkeleton />}>
+        <AuctionOverridesPanel />
+      </Suspense>
 
       <OpsControls
         adapters={adapters.map((a) => a.name)}
@@ -384,7 +431,17 @@ async function Body() {
                     <td className="py-1.5 pr-3 whitespace-nowrap text-muted">{ago(r.startedAt)}</td>
                     <td className="py-1.5 pr-3">{r.adapter}</td>
                     <td className="py-1.5 pr-3">
-                      {r.county ? `${r.county}, ${r.state}` : <span className="text-muted">—</span>}
+                      {r.county ? (
+                        r.countyFips ? (
+                          <a href={`/admin/county/${r.countyFips}`} className="underline">
+                            {r.county}, {r.state}
+                          </a>
+                        ) : (
+                          `${r.county}, ${r.state}`
+                        )
+                      ) : (
+                        <span className="text-muted">—</span>
+                      )}
                     </td>
                     <td className="py-1.5 pr-3">
                       <span className={r.status === "ok" ? "" : "text-danger"}>{r.status}</span>

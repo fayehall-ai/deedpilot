@@ -1,0 +1,192 @@
+/**
+ * Record what a paid call consumed, and price it at read time.
+ *
+ * ## Why units are stored and dollars are not
+ *
+ * Vendor prices change and contracts differ. A dollar figure written into a row
+ * is wrong the moment either happens, and wrong silently — the row still looks
+ * authoritative. Storing tokens and search counts, which come from the
+ * provider's own response and never change after the fact, keeps the record
+ * true and moves the pricing to a place an operator can correct.
+ *
+ * ## Why the rates below are defaults, not facts
+ *
+ * These are list prices as configured, and they are the one thing here nobody
+ * should trust without checking: rates move, and a negotiated contract is not
+ * list. They are labelled as estimates everywhere they surface, and an operator
+ * can override them per provider. The units they multiply are exact.
+ *
+ * Recording never throws. A failure to log usage must not fail the work that
+ * produced it — losing a cost row is an accounting gap, losing a research pass
+ * is an hour and a paid call.
+ */
+
+import { sql } from "drizzle-orm";
+
+export type Operation =
+  | "scout-research"
+  | "pdf-extract"
+  | "cartographer"
+  | "brief"
+  | "enrich";
+
+export interface UsageRecord {
+  provider: string;
+  model?: string | null;
+  operation: Operation;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  searchCalls?: number | null;
+  requests?: number | null;
+  countyFips?: string | null;
+  note?: string | null;
+}
+
+/**
+ * Rates in US cents, per million tokens and per call.
+ *
+ * `searchCall` dominates a research pass: one state run makes tens of searches,
+ * and at these rates the searches cost more than the tokens they produce.
+ */
+export interface RateCard {
+  inputPerMTok: number;
+  outputPerMTok: number;
+  perSearchCall: number;
+  perRequest: number;
+}
+
+export const DEFAULT_RATES: Record<string, RateCard> = {
+  xai: { inputPerMTok: 20, outputPerMTok: 100, perSearchCall: 2.5, perRequest: 0 },
+  anthropic: { inputPerMTok: 300, outputPerMTok: 1500, perSearchCall: 1, perRequest: 0 },
+  attom: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 4 },
+  rentcast: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 2 },
+  batchdata: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 3 },
+};
+
+const FALLBACK: RateCard = { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 0 };
+
+/** Estimated cost of one usage row, in cents. */
+export function estimateCents(u: UsageRecord, rates: Record<string, RateCard> = DEFAULT_RATES): number {
+  const r = rates[u.provider] ?? FALLBACK;
+  return (
+    ((u.inputTokens ?? 0) / 1_000_000) * r.inputPerMTok +
+    ((u.outputTokens ?? 0) / 1_000_000) * r.outputPerMTok +
+    (u.searchCalls ?? 0) * r.perSearchCall +
+    (u.requests ?? 0) * r.perRequest
+  );
+}
+
+/**
+ * Write one usage row. Never throws.
+ *
+ * Deliberately fire-and-forget from the caller's point of view: the work that
+ * produced the usage has already happened and already been paid for, so a
+ * logging failure must not turn a completed research pass into a failed job.
+ */
+export async function recordUsage(u: UsageRecord): Promise<void> {
+  try {
+    const [{ db }, { apiUsage }] = await Promise.all([import("../db"), import("../db/schema")]);
+    await db.insert(apiUsage).values({
+      provider: u.provider,
+      model: u.model ?? null,
+      operation: u.operation,
+      inputTokens: u.inputTokens ?? null,
+      outputTokens: u.outputTokens ?? null,
+      searchCalls: u.searchCalls ?? null,
+      requests: u.requests ?? null,
+      countyFips: u.countyFips ?? null,
+      note: u.note ?? null,
+    });
+  } catch (e) {
+    console.warn(`[usage] not recorded: ${e instanceof Error ? e.message : String(e)}`);
+  }
+}
+
+export interface SpendRow {
+  operation: string;
+  provider: string;
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  searchCalls: number;
+  requests: number;
+  cents: number;
+}
+
+export interface SpendReport {
+  days: number;
+  rows: SpendRow[];
+  totalCents: number;
+  /** Day-by-day totals, so a spike is visible rather than averaged away. */
+  daily: { day: string; cents: number; calls: number }[];
+}
+
+/** What has been spent, over the last N days. */
+export async function spendReport(days = 30, rates = DEFAULT_RATES): Promise<SpendReport> {
+  const [{ db }] = await Promise.all([import("../db")]);
+
+  const grouped = (await db.execute(sql`
+    SELECT operation, provider,
+           count(*)::int                            AS calls,
+           coalesce(sum(input_tokens), 0)::bigint   AS input_tokens,
+           coalesce(sum(output_tokens), 0)::bigint  AS output_tokens,
+           coalesce(sum(search_calls), 0)::int      AS search_calls,
+           coalesce(sum(requests), 0)::int          AS requests
+    FROM api_usage
+    WHERE at > now() - make_interval(days => ${days})
+    GROUP BY operation, provider
+    ORDER BY calls DESC
+  `)) as unknown as Record<string, string | number>[];
+
+  const rows: SpendRow[] = grouped.map((g) => {
+    const row = {
+      operation: String(g.operation),
+      provider: String(g.provider),
+      calls: Number(g.calls),
+      inputTokens: Number(g.input_tokens),
+      outputTokens: Number(g.output_tokens),
+      searchCalls: Number(g.search_calls),
+      requests: Number(g.requests),
+    };
+    return { ...row, cents: estimateCents({ ...row, operation: row.operation as Operation }, rates) };
+  });
+
+  const byDay = (await db.execute(sql`
+    SELECT to_char(date_trunc('day', at), 'YYYY-MM-DD') AS day,
+           provider,
+           count(*)::int                            AS calls,
+           coalesce(sum(input_tokens), 0)::bigint   AS input_tokens,
+           coalesce(sum(output_tokens), 0)::bigint  AS output_tokens,
+           coalesce(sum(search_calls), 0)::int      AS search_calls,
+           coalesce(sum(requests), 0)::int          AS requests
+    FROM api_usage
+    WHERE at > now() - make_interval(days => ${days})
+    GROUP BY 1, 2
+    ORDER BY 1 DESC
+  `)) as unknown as Record<string, string | number>[];
+
+  const dailyMap = new Map<string, { cents: number; calls: number }>();
+  for (const d of byDay) {
+    const day = String(d.day);
+    const cents = estimateCents(
+      {
+        provider: String(d.provider),
+        operation: "brief",
+        inputTokens: Number(d.input_tokens),
+        outputTokens: Number(d.output_tokens),
+        searchCalls: Number(d.search_calls),
+        requests: Number(d.requests),
+      },
+      rates,
+    );
+    const held = dailyMap.get(day) ?? { cents: 0, calls: 0 };
+    dailyMap.set(day, { cents: held.cents + cents, calls: held.calls + Number(d.calls) });
+  }
+
+  return {
+    days,
+    rows,
+    totalCents: rows.reduce((n, r) => n + r.cents, 0),
+    daily: [...dailyMap].map(([day, v]) => ({ day, ...v })).sort((a, b) => b.day.localeCompare(a.day)),
+  };
+}
