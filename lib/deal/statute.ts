@@ -229,6 +229,8 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "Quiet-title cost is market practice, not statute — no Arkansas bar fee survey publishes one. The range is an operator estimate; a contested action or curative work costs materially more.",
       "SURVIVING LIENS ARE NOT PRICED HERE. Municipal code-enforcement and clean-up liens (§ 14-54-903) and special improvement district assessments can survive and are parcel-specific — 'HARDING DRAIN IMP DISTRICT' appears on Jefferson County parcels in our own data. IRS liens turn on notice and keep a 120-day redemption right if notice was defective. Mortgages, state tax liens and judgment liens are generally extinguished where COSL gave proper statutory notice. Check each parcel; the closing contingency does not cover these.",
       "The published opening bid is taxes, penalties, interest and costs — the statutory minimum bid under § 26-37-202, never an assessed or market value.",
+      "The 90-day contest bar is not absolute. § 26-37-203(d) preserves a taxpayer's right to contest the deed on the ground that the taxes were actually paid, with no 90-day limit stated — a residual challenge route that outlives the window and is the reason to check payment history rather than only the notice trail. § 26-37-203(b)(2) tolls the bar for two years after removal of disability for minors, the mentally incapacitated, and those serving in the armed forces in time of war.",
+      "§ 26-37-203(c) cuts the other way and favours the purchaser: a deed issued after 1 January 1987 is not void or voidable merely because the county failed to strictly comply with the tax-delinquent land laws.",
     ],
   },
   TX: {
