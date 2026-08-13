@@ -13,9 +13,10 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { runSchedules, sourceOverrides, policyOverrides } from "@/lib/db/schema";
-import { isAdmin } from "@/lib/admin/auth";
+import { currentActor, isAdmin } from "@/lib/admin/auth";
 import { audit, cancelJob, enqueue, inFlightFor } from "@/lib/admin/queue";
 import { getAdapter } from "@/lib/ingest/adapters";
+import { clearOverrides, isOverridable, setOverrides } from "@/lib/admin/auction-overrides";
 
 class NotAuthorised extends Error {
   constructor() {
@@ -25,6 +26,21 @@ class NotAuthorised extends Error {
 
 async function requireAdmin(): Promise<void> {
   if (!(await isAdmin())) throw new NotAuthorised();
+}
+
+/**
+ * Audit a change against the person who made it.
+ *
+ * `audit()` defaults its actor to the literal "admin", which is what every row
+ * in the table said until named tokens existed. Resolving the actor here rather
+ * than at each call site means a new action cannot forget to attribute itself.
+ */
+async function auditAs(
+  action: string,
+  target: string | null,
+  detail: Record<string, unknown>,
+): Promise<void> {
+  await audit(action, target, detail, await currentActor());
 }
 
 const str = (f: FormData, k: string): string => String(f.get(k) ?? "").trim();
@@ -58,7 +74,7 @@ export async function runNow(formData: FormData): Promise<void> {
 
   const inFlight = await inFlightFor(adapter);
   if (inFlight > 0) {
-    await audit("run_now.rejected", adapter, { reason: "already in flight", inFlight });
+    await auditAs("run_now.rejected", adapter, { reason: "already in flight", inFlight });
     revalidatePath("/admin");
     return;
   }
@@ -75,7 +91,7 @@ export async function runNow(formData: FormData): Promise<void> {
     priority: 10,
     requestedBy: "admin",
   });
-  await audit("run_now", adapter, { jobId: job.id, countyFips, limit, dryRun });
+  await auditAs("run_now", adapter, { jobId: job.id, countyFips, limit, dryRun });
   revalidatePath("/admin");
 }
 
@@ -83,7 +99,7 @@ export async function cancelRun(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = str(formData, "jobId");
   await cancelJob(id);
-  await audit("run.cancel", id, {});
+  await auditAs("run.cancel", id, {});
   revalidatePath("/admin");
 }
 
@@ -116,7 +132,7 @@ export async function saveSchedule(formData: FormData): Promise<void> {
       set: { intervalMinutes, limit, enabled, note, updatedAt: new Date() },
     });
 
-  await audit("schedule.save", adapter, { intervalMinutes, limit, enabled });
+  await auditAs("schedule.save", adapter, { intervalMinutes, limit, enabled });
   revalidatePath("/admin");
 }
 
@@ -124,7 +140,7 @@ export async function deleteSchedule(formData: FormData): Promise<void> {
   await requireAdmin();
   const adapter = str(formData, "adapter");
   await db.delete(runSchedules).where(eq(runSchedules.adapter, adapter));
-  await audit("schedule.delete", adapter, {});
+  await auditAs("schedule.delete", adapter, {});
   revalidatePath("/admin");
 }
 
@@ -174,7 +190,7 @@ export async function saveSource(formData: FormData): Promise<void> {
       set: { url, enabled, note, updatedAt: new Date() },
     });
 
-  await audit("source.save", `${adapter}/${countyFips}`, { url, enabled });
+  await auditAs("source.save", `${adapter}/${countyFips}`, { url, enabled });
   revalidatePath("/admin");
 }
 
@@ -182,7 +198,7 @@ export async function deleteSource(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = str(formData, "id");
   await db.delete(sourceOverrides).where(eq(sourceOverrides.id, id));
-  await audit("source.delete", id, {});
+  await auditAs("source.delete", id, {});
   revalidatePath("/admin");
 }
 
@@ -229,7 +245,7 @@ export async function savePolicy(formData: FormData): Promise<void> {
       set: { decision, minDelayMs, reason, updatedAt: new Date() },
     });
 
-  await audit("policy.save", host, { decision, minDelayMs, reason });
+  await auditAs("policy.save", host, { decision, minDelayMs, reason });
   revalidatePath("/admin");
 }
 
@@ -237,6 +253,52 @@ export async function deletePolicy(formData: FormData): Promise<void> {
   await requireAdmin();
   const host = str(formData, "host");
   await db.delete(policyOverrides).where(eq(policyOverrides.host, host));
-  await audit("policy.delete", host, { note: "reverted to the decision in code" });
+  await auditAs("policy.delete", host, { note: "reverted to the decision in code" });
+  revalidatePath("/admin");
+}
+
+// ---------------------------------------------------------------------------
+// Auction corrections
+// ---------------------------------------------------------------------------
+
+/**
+ * Correct a field on one auction.
+ *
+ * The write goes to `auctions.operator_overrides`, never to the column itself.
+ * Writing the column directly would look identical in the console and be
+ * reverted by the next crawl, because `upsertAuction` sets these fields from
+ * `excluded.*` — the failure this whole tier exists to prevent.
+ *
+ * An empty value clears that one correction, so reverting a single field never
+ * means retyping the others.
+ */
+export async function saveAuctionOverride(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const auctionId = str(formData, "auctionId");
+  const field = str(formData, "field");
+  const raw = str(formData, "value");
+
+  if (!isOverridable(field)) {
+    throw new Error(`${field} is not overridable`);
+  }
+
+  // Typed before validation, because the form gives everything back as a
+  // string and `saleDateConfirmed` is the one field where "false" is a value
+  // rather than an absence.
+  let value: unknown = raw;
+  if (raw === "") value = null;
+  else if (field === "saleDateConfirmed") value = raw === "true";
+
+  await setOverrides(auctionId, { [field]: value }, await currentActor());
+  await auditAs("auction.override", `${auctionId}/${field}`, { value });
+  revalidatePath("/admin");
+}
+
+/** Drop every correction on an auction, returning it wholly to the county. */
+export async function clearAuctionOverrides(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const auctionId = str(formData, "auctionId");
+  await clearOverrides(auctionId);
+  await auditAs("auction.override.clear", auctionId, {});
   revalidatePath("/admin");
 }

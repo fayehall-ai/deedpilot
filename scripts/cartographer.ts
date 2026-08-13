@@ -65,8 +65,16 @@ async function main() {
       `Atlas markets ${covered.length + uncovered.length}; ` +
         `${uncovered.length} cannot be priced:\n  ${uncovered.join(" ")}`,
     );
+    /*
+     * This line used to say IL and CA were in the uncovered list, holding 78%
+     * of the corpus. Both were reviewed and promoted, so it contradicted the
+     * line printed directly above it. The pressure has moved to live inventory:
+     * AR, LA and NM carry thousands of crawled lots and no entry here, so the
+     * engine returns insufficient-data on every one of them.
+     */
     console.log(
-      "\nIL and CA hold 78% of the recorded historical corpus and are both in that list.\n",
+      "\nAR, LA and NM hold live crawled inventory and cannot be priced — " +
+        "see proposals/ for drafts awaiting review.\n",
     );
     return;
   }

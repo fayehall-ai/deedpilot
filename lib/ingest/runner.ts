@@ -15,6 +15,8 @@ import { db } from "../db";
 import { auctions, counties, ingestRuns, lots, lotValuations } from "../db/schema";
 import { judgeAuctions, judgeLots } from "./judge";
 import { PolicyBlockedError } from "./fetch";
+import { nowFromDb, reconcileAuction, reconcileCountyAuctions } from "./reconcile";
+import { observeAuction } from "./observe";
 import type { DiscoveredAuction, DiscoveredLot, SourceAdapter } from "./types";
 
 export interface RunOptions {
@@ -34,6 +36,20 @@ export interface CountyRunResult {
   lotsFound: number;
   rejected: number;
   repaired: number;
+  /** Parcels marked `withdrawn` because the county stopped publishing them. */
+  lotsWithdrawn: number;
+  /** Still-future sales this county stopped publishing. */
+  auctionsDelisted: number;
+  /** Rows written to the append-only observation log. */
+  observations: number;
+  /**
+   * Auctions where absences were seen and deliberately not acted on.
+   *
+   * Counted rather than logged-and-forgotten: a skip means the retention guard
+   * refused, which is either a source that moved or a sale shedding parcels
+   * unusually fast. Both are things a person should see.
+   */
+  reconcileSkipped: number;
   error?: string;
 }
 
@@ -45,6 +61,8 @@ export interface RunSummary {
     lots: number;
     rejected: number;
     repaired: number;
+    withdrawn: number;
+    reconcileSkipped: number;
     failed: number;
     blocked: number;
   };
@@ -86,13 +104,24 @@ async function upsertAuction(a: DiscoveredAuction): Promise<string> {
         // through a full re-ingest after the adapter was corrected to
         // "Tax Deed". The TDC drive lists 12 more states whose sale type may
         // need correcting, so this would have bitten again.
-        saleType: sql`excluded.sale_type`,
-        saleDate: sql`excluded.sale_date`,
-        saleDateConfirmed: sql`excluded.sale_date_confirmed`,
-        listingKind: sql`excluded.listing_kind`,
-        startTime: sql`excluded.start_time`,
-        status: sql`excluded.status`,
-        title: sql`excluded.title`,
+        //
+        // Operator-owned beats adapter-owned. Each of these reads its own key
+        // out of `operator_overrides` first and falls back to what the county
+        // published, so a corrected sale date survives the 02:00 crawl instead
+        // of being reverted by it. Absent key → NULL → the source value wins,
+        // which is the ordinary case for every auction nobody has touched.
+        //
+        // The casts are why `lib/admin/auction-overrides.ts` validates against
+        // the pgEnum rather than a hand-written list: an out-of-domain string
+        // stored here raises inside this statement and would fail this auction's
+        // ingest on every future run.
+        saleType: sql`coalesce((${auctions.operatorOverrides}->>'saleType')::sale_type, excluded.sale_type)`,
+        saleDate: sql`coalesce((${auctions.operatorOverrides}->>'saleDate')::date, excluded.sale_date)`,
+        saleDateConfirmed: sql`coalesce((${auctions.operatorOverrides}->>'saleDateConfirmed')::boolean, excluded.sale_date_confirmed)`,
+        listingKind: sql`coalesce((${auctions.operatorOverrides}->>'listingKind')::listing_kind, excluded.listing_kind)`,
+        startTime: sql`coalesce(${auctions.operatorOverrides}->>'startTime', excluded.start_time)`,
+        status: sql`coalesce((${auctions.operatorOverrides}->>'status')::auction_status, excluded.status)`,
+        title: sql`coalesce(${auctions.operatorOverrides}->>'title', excluded.title)`,
         sourceUrl: sql`excluded.source_url`,
         registrationDeadline: sql`excluded.registration_deadline`,
         depositDeadline: sql`excluded.deposit_deadline`,
@@ -225,7 +254,20 @@ export async function runAdapter(
       lotsFound: 0,
       rejected: 0,
       repaired: 0,
+      lotsWithdrawn: 0,
+      auctionsDelisted: 0,
+      observations: 0,
+      reconcileSkipped: 0,
     };
+
+    /*
+     * Taken before anything is written for this county, so auctions refreshed
+     * by this crawl land after it and whatever stays behind it is the set the
+     * county stopped publishing. Null on a dry run, which skips reconciliation
+     * entirely along with every other write.
+     */
+    let countyCutoff: Date | null = null;
+    if (!opts.dryRun) countyCutoff = await nowFromDb();
 
     try {
       const rawAuctions = await adapter.listAuctions(binding);
@@ -263,7 +305,54 @@ export async function runAdapter(
             // (calendar date only, no table/PDF success) that show up as county cards with Lots: 0.
             if (judgedLots.accepted.length > 0) {
               const auctionId = await upsertAuction(auction);
+              /*
+               * Taken before the upsert, from the database rather than this
+               * process: every parcel this crawl returned has its `lastSeenAt`
+               * pushed past it, so whatever still sits behind it afterwards is
+               * exactly the set the county stopped publishing.
+               */
+              const cutoff = await nowFromDb();
               result.lotsFound += await upsertLots(auctionId, binding.countyFips, judgedLots.accepted);
+
+              const rec = await reconcileAuction({
+                auctionId,
+                cutoff,
+                seen: judgedLots.accepted.length,
+                status: result.status,
+              });
+              result.lotsWithdrawn += rec.withdrawn;
+              if (rec.withdrawn > 0) {
+                log(
+                  `[${adapter.name}] ${auction.externalId}: withdrew ${rec.withdrawn} parcel(s) no longer listed`,
+                );
+              }
+              /*
+               * Snapshot after reconciliation, so a withdrawn parcel is
+               * recorded with the status it actually ended the crawl in rather
+               * than the `pending` it held moments earlier.
+               */
+              try {
+                const obs = await observeAuction({
+                  auctionId,
+                  countyFips: binding.countyFips,
+                  saleDate: auction.saleDate,
+                  cutoff,
+                  runId,
+                });
+                result.observations += obs.present + obs.absent;
+              } catch (e) {
+                // Observation is a side-channel. Losing a snapshot must never
+                // cost the ingest that produced it.
+                log(`[${adapter.name}] ${auction.externalId}: observation failed: ${String(e)}`);
+              }
+
+              if (rec.skippedReason) {
+                // Loudly, not silently: a county that trips the retention guard
+                // is either shedding parcels unusually fast or has moved its
+                // markup, and both want a person to look.
+                result.reconcileSkipped++;
+                log(`[${adapter.name}] ${auction.externalId}: reconcile SKIPPED — ${rec.skippedReason}`);
+              }
             } else {
               log(`[${adapter.name}] ${auction.externalId}: skipped persist (0 lots after judgment)`);
             }
@@ -281,6 +370,28 @@ export async function runAdapter(
       result.status = blocked ? "blocked" : "failed";
       result.error = e instanceof Error ? e.message : String(e);
       log(`[${adapter.name}] ${binding.countyFips} ${result.status}: ${result.error}`);
+    }
+
+    if (countyCutoff) {
+      const cal = await reconcileCountyAuctions({
+        countyFips: binding.countyFips,
+        cutoff: countyCutoff,
+        seenAuctions: result.auctionsFound,
+        status: result.status,
+      });
+      result.auctionsDelisted = cal.delisted;
+      if (cal.delisted > 0) {
+        log(
+          `[${adapter.name}] ${binding.countyFips}: ${cal.delisted} future sale(s) no longer on the county's calendar`,
+        );
+      }
+      if (cal.relisted > 0) {
+        log(`[${adapter.name}] ${binding.countyFips}: ${cal.relisted} sale(s) reappeared`);
+      }
+      if (cal.skippedReason) {
+        result.reconcileSkipped++;
+        log(`[${adapter.name}] ${binding.countyFips}: calendar reconcile SKIPPED — ${cal.skippedReason}`);
+      }
     }
 
     if (runId) {
@@ -323,6 +434,8 @@ export async function runAdapter(
       lots: results.reduce((n, r) => n + r.lotsFound, 0),
       rejected: results.reduce((n, r) => n + r.rejected, 0),
       repaired: results.reduce((n, r) => n + r.repaired, 0),
+      withdrawn: results.reduce((n, r) => n + r.lotsWithdrawn, 0),
+      reconcileSkipped: results.reduce((n, r) => n + r.reconcileSkipped, 0),
       failed: results.filter((r) => r.status === "failed").length,
       blocked: results.filter((r) => r.status === "blocked").length,
     },

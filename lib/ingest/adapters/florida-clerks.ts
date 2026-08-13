@@ -14,6 +14,7 @@ import { politeFetch } from "../fetch";
 import { extractLots, NoProviderAvailableError } from "../extract";
 import { parseStructuredPdfText, pdfToText } from "../parse";
 import { findCountyByName, getCounty } from "../../atlas";
+import { parseLotStatus } from "../lot-status";
 import type {
   CountyBinding,
   DiscoveredAuction,
@@ -300,13 +301,10 @@ function wpRowToLot(row: WpTaxdeedRow, pageUrl: string): DiscoveredLot | null {
     if (Number.isFinite(n) && n > 0) openingBid = n;
   }
 
-  const statusRaw = (row.status ?? "").toLowerCase();
-  let status: DiscoveredLot["status"] = "pending";
-  if (/sold/.test(statusRaw)) status = "sold";
-  else if (/redeem/.test(statusRaw)) status = "redeemed";
-  else if (/cancel/.test(statusRaw)) status = "cancelled";
-  else if (/withdraw|pulled/.test(statusRaw)) status = "withdrawn";
-  // "scheduled" / empty → pending (open for bid / lands available)
+  // Shared vocabulary — see lib/ingest/lot-status.ts. This adapter had its own
+  // copy, missing "struck" and "stayed", and a second path below that read every
+  // sold and cancelled parcel as redeemed.
+  const status: DiscoveredLot["status"] = parseLotStatus(row.status);
 
   return {
     externalId: file || cert || parcel || String(row.ID ?? ""),
@@ -509,7 +507,12 @@ async function listTaxSmartWebAuctions(
       caseNumber: caseNumber || cert || undefined,
       ownerName: owners || undefined,
       openingBid: baseBid,
-      status: /redeem|cancel|sold/.test(statusRaw) ? "redeemed" : "pending",
+      /*
+       * Was `/redeem|cancel|sold/.test(raw) ? "redeemed" : "pending"`, which
+       * recorded every sold and every cancelled parcel as redeemed — a cause
+       * nobody published, written into the column a redemption analysis reads.
+       */
+      status: parseLotStatus(statusRaw),
       sourceUrl: cfg.indexUrl,
       raw: {
         pattern: "taxSmartWeb",

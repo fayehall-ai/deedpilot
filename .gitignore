@@ -63,3 +63,11 @@ data/govease-capture/
 
 # SRI browser captures (working artifacts, not source)
 data/sri-capture/
+
+# Results-crawl output. Regenerable with `npm run crawl:results`, and
+# deliberately outside the corpus until each source has a rule in labels.py —
+# a 3,724-row candidate batch sitting in git reads as data, and it is not yet.
+# The review queue is a local tool by construction: crawl-results writes to
+# disk, and a Vercel filesystem is read-only.
+data/results-candidates.jsonl
+data/results-crawl-report.json

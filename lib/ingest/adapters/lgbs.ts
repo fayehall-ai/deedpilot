@@ -16,6 +16,7 @@
 import { fetchJson } from "../fetch";
 import { parseMoney } from "../judge";
 import { findCountyByName } from "../../atlas";
+import { parseLotStatus } from "../lot-status";
 import type {
   CountyBinding,
   DiscoveredAuction,
@@ -95,13 +96,9 @@ async function fetchAll<T>(path: string, params: Record<string, string>): Promis
  * and distinct buying opportunity, not a dead listing.
  */
 function mapStatus(status: string | null): LotStatus {
-  const s = (status ?? "").toLowerCase();
-  if (s.includes("sold")) return "sold";
-  if (s.includes("redeem")) return "redeemed";
-  if (s.includes("cancel") || s.includes("stayed")) return "cancelled";
-  if (s.includes("withdraw") || s.includes("pulled")) return "withdrawn";
-  if (s.includes("struck")) return "struck";
-  return "pending";
+  // Kept as a named function because the surrounding comment explains why a
+  // struck parcel is a live opportunity here; the vocabulary itself is shared.
+  return parseLotStatus(status);
 }
 
 /** A sale is one (county, date) pair — that is how Texas runs them. */

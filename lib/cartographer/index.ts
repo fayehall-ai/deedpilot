@@ -1,10 +1,11 @@
 /**
  * Statute Cartographer — draft statutory parameters for review.
  *
- * `lib/deal/statute.ts` covers five states. The atlas markets fifty plus DC, so
+ * `lib/deal/statute.ts` covers seven states. The atlas markets fifty plus DC, so
  * `compute_maxbid` returns `insufficient-data` everywhere else — including
- * Illinois and California, where 78% of the recorded historical corpus lives.
- * Closing that gap means authoring eight numbers per state.
+ * Arkansas, Louisiana and New Mexico, which carry thousands of crawled lots
+ * that cannot be priced. Closing that gap means authoring eight numbers per
+ * state.
  *
  * Those numbers are the single most dangerous thing in this codebase. An
  * assessment ratio that is wrong by a factor of 2.5 does not throw, does not

@@ -201,6 +201,22 @@ adapter does not ship if held-out metrics regress. Promotion is decided on the
 validation split; the test split is reported and never gated on, so it can still
 answer whether we fooled ourselves on validation.
 
+**History improves inputs, never the output.** The observation log
+(`lib/ingest/observe.ts`) records what each crawl saw, including what it did not,
+and that series feeds clearing ratios, attrition curves and re-crawl intervals.
+It must not feed a bid. Cook County is the standing proof that a fitted parameter
+can be confidently and invisibly wrong — 70,109 rows of schema-default
+`redeemed=False` pinned Illinois at `p_redeem = 0.02` and grew *more* confident
+as more rows arrived. Two further rules follow:
+
+- `lots.status = 'redeemed'` is the **pre-sale cure**; `p_redeem` in the
+  simulator is the **post-sale statutory redemption**. Same word, different
+  events. Feeding one into the other rebuilds the Cook bug with better
+  provenance.
+- An absence is never a cause. `reconcile.ts` writes `withdrawn`, which records
+  what was observed; only an adapter reading an explicit REDEEMED or PAID off a
+  county page may assert why.
+
 **Nothing an agent produces is a walk-away price.** `compute_maxbid` remains the
 only thing that computes a number a subscriber acts on, and it consumes agent
 output only after that output has been reviewed and merged.

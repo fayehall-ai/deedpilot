@@ -38,6 +38,10 @@ import {
 } from "@/lib/admin/queue";
 import { tokenMatches } from "@/lib/admin/token";
 import { loadPolicyOverrides } from "@/lib/admin/policy-load";
+import { enqueueWeeklyResearch, isScoutJob, scoutState } from "@/lib/admin/scout-jobs";
+import { enqueuePlan, planGaps } from "@/lib/admin/plan-jobs";
+import { getScoutPrompt } from "@/lib/admin/scout-prompt";
+import { scoutState as researchState } from "@/lib/ai/scout-report";
 
 /*
  * Fluid Compute allows far longer than the old 60s ceiling. The budget below
@@ -85,9 +89,97 @@ export async function GET(req: NextRequest) {
   const promoted = await enqueueDueSchedules();
   if (promoted > 0) log.push(`enqueued ${promoted} due schedule(s)`);
 
+  /*
+   * The calendar decides the day's crawl work.
+   *
+   * `run_schedules` sweeps an adapter's whole binding list regardless of when
+   * its counties actually sell, and a `limit` on a large adapter permanently
+   * starves its tail because `runAdapter` slices the first N bindings every
+   * time. `enqueuePlan` instead asks which counties are inside a crawl window
+   * today, and queues one job per county carrying the planner's own priority —
+   * so a listing crawl three days from a sale (near 115) drains ahead of a
+   * routine sweep (0) and ahead of research (5).
+   *
+   * Failure here must not take the tick down: draining whatever is already
+   * queued is more valuable than planning, and a planner fault would otherwise
+   * stop the pipeline entirely.
+   */
+  try {
+    /*
+     * Capped to what one tick can actually drain.
+     *
+     * Today's plan has 446 runnable counties. At a measured 3.0s median (p90
+     * 8.1s) that is ~1,340 seconds of work against a 195-second daily claiming
+     * budget, so enqueuing all of it would grow the queue by ~380 jobs a day
+     * forever — `enqueue` does not dedupe across days.
+     *
+     * Tasks are priority-sorted, so a cap takes the most perishable work and
+     * genuinely leaves the rest for tomorrow: a county crawled today falls out
+     * of the next plan under its re-crawl interval (7d / 3d / 1d), so the queue
+     * rotates rather than starving a fixed tail the way an adapter `limit` does.
+     *
+     * Raise this the moment the dispatcher ticks hourly.
+     */
+    const planned = await enqueuePlan({ maxTasks: 50 });
+    if (planned.enqueued > 0) {
+      log.push(
+        `planned ${planned.enqueued} county crawl(s) from the calendar` +
+          (planned.alreadyQueued > 0 ? `, ${planned.alreadyQueued} already in flight` : ""),
+      );
+    }
+    const gaps = planGaps(planned.plan);
+    if (gaps.no_source) log.push(`${gaps.no_source} county/counties due with no verified source`);
+
+    /*
+     * The weekly research pass, on the Sunday tick.
+     *
+     * Queued after the plan and at priority 5, so it can only ever consume
+     * budget the day's county crawls did not want. Research that outranked a
+     * near-sale listing crawl is the exact inversion that made two searched
+     * calls eat an entire tick.
+     */
+    const weekly = await enqueueWeeklyResearch();
+    if (weekly.ran) log.push(`weekly research queued: ${weekly.states.join(", ")}`);
+  } catch (e) {
+    log.push(`plan failed (queue still draining): ${e instanceof Error ? e.message : String(e)}`);
+  }
+
   while (Date.now() - started < BUDGET_MS - RESERVE_MS) {
     const job = await claimNext();
     if (!job) break;
+
+    /*
+     * Auction Scout research runs, which are not adapters and have no county
+     * to crawl — the state is carried in the job name. Handled before the
+     * adapter lookup because `getAdapter` would reject them as unknown and
+     * fail a job that is perfectly well formed.
+     *
+     * Errors are NOT swallowed into an empty report. A searched call that
+     * cannot reach a browsing provider must fail the job loudly, because the
+     * alternative is a report that looks complete and is simply blank for
+     * that state — the one outcome nobody would think to question.
+     */
+    if (isScoutJob(job.adapter)) {
+      const state = scoutState(job.adapter);
+      try {
+        // The edited brief, read per job rather than per tick, so a prompt
+        // saved while the queue is draining takes effect on the next state.
+        const { template } = await getScoutPrompt();
+        const result = await researchState(state, { template });
+        await completeJob(job.id, result as unknown as Record<string, unknown>);
+        log.push(
+          `${job.adapter}: ${result.report.rows.length} rows from ${result.searchCount} searches ` +
+            `across ${result.report.countiesChecked} counties`,
+        );
+        done.push({ job: job.id, adapter: job.adapter, rows: result.report.rows.length });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        await failJob(job.id, msg);
+        log.push(`${job.adapter}: ${msg}`);
+        done.push({ job: job.id, adapter: job.adapter, error: msg });
+      }
+      continue;
+    }
 
     const adapter = getAdapter(job.adapter);
     if (!adapter) {

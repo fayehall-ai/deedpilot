@@ -24,7 +24,9 @@
     "ingest:found": "tsx scripts/ingest-found-lists.ts",
     "ingest:fl": "tsx scripts/ingest.ts -- --adapter fl-clerks",
     "enrich:lots": "tsx scripts/enrich-lots.ts",
-    "crawl:directory": "tsx scripts/crawl-directory.ts"
+    "crawl:directory": "tsx scripts/crawl-directory.ts",
+    "seed:schedules": "tsx scripts/seed-schedules.ts",
+    "promote:sources": "tsx scripts/promote-scout-sources.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
@@ -33,6 +35,7 @@
     "d3-geo": "^3.1.1",
     "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.2",
+    "exceljs": "^4.4.0",
     "lucide-react": "^1.27.0",
     "next": "16.2.12",
     "openai": "^7.0.0",
@@ -44,6 +47,7 @@
     "stripe": "^22.3.2",
     "tailwind-merge": "^3.6.0",
     "topojson-client": "^3.1.0",
+    "undici": "^8.10.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

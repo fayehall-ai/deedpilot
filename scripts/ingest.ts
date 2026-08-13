@@ -79,6 +79,14 @@ async function main() {
     console.log(`lots:               ${summary.totals.lots}`);
     console.log(`rejected:           ${summary.totals.rejected}`);
     console.log(`fields repaired:    ${summary.totals.repaired}`);
+    console.log(`withdrawn:          ${summary.totals.withdrawn}`);
+    if (summary.totals.reconcileSkipped > 0) {
+      // Only printed when non-zero, and worded as something to act on: a skip
+      // means absences were seen and deliberately not believed.
+      console.log(
+        `reconcile skipped:  ${summary.totals.reconcileSkipped} auction(s) — retention guard refused, see log above`,
+      );
+    }
     console.log(`failed counties:    ${summary.totals.failed}`);
     console.log(`blocked by policy:  ${summary.totals.blocked}`);
     if (dryRun) console.log("(dry run — nothing written)");

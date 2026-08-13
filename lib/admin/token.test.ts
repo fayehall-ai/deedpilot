@@ -9,7 +9,7 @@
  * source, every error string and every blocked package to anyone who guesses
  * the URL. The rest of these cases pin the comparison itself.
  */
-import { adminConfigured, tokenMatches } from "./token";
+import { actorFor, adminConfigured, tokenMatches } from "./token";
 
 let passed = 0;
 function assert(cond: unknown, msg: string) {
@@ -59,3 +59,30 @@ assert(!adminConfigured(), "whitespace-only config is not configured");
 assert(!tokenMatches("   "), "FAILS CLOSED: whitespace-only config matches nothing");
 
 console.log(`token.test.ts — ${passed} assertions passed`);
+
+// --- named tokens ------------------------------------------------------------
+
+/*
+ * Multiple people share one console. Until these existed every audit row said
+ * `actor: "admin"`, which was fine while the console only read and stopped
+ * being fine once it could withdraw parcels and correct sale dates.
+ */
+process.env.DEEDPILOT_ADMIN_TOKEN = "faye:alpha-secret,ops-bot:beta-secret";
+
+assert(actorFor("alpha-secret") === "faye", "a named token resolves to its person");
+assert(actorFor("beta-secret") === "ops-bot", "a second named token resolves separately");
+assert(actorFor("wrong") === null, "an unknown secret has no actor");
+assert(tokenMatches("beta-secret"), "tokenMatches still answers for named tokens");
+assert(!tokenMatches("faye"), "the name is not the secret");
+
+/* A bare secret keeps working, so nothing deployed today breaks. */
+process.env.DEEDPILOT_ADMIN_TOKEN = "plain-secret";
+assert(actorFor("plain-secret") === "admin", "an unnamed token is the anonymous admin");
+assert(tokenMatches("plain-secret"), "unnamed tokens still match");
+
+/* Fail closed stays failing closed. */
+process.env.DEEDPILOT_ADMIN_TOKEN = "";
+assert(actorFor("anything") === null, "no configured token means no actor");
+assert(!tokenMatches("anything"), "no configured token denies everyone");
+
+console.log("token.test.ts — named-token assertions passed");

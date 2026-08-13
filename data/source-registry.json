@@ -1,8 +1,8 @@
 {
   "builtAt": "2026-08-11T18:04:10.979Z",
-  "nCounties": 1312,
-  "nVerified": 921,
-  "nGaps": 602,
+  "nCounties": 1346,
+  "nVerified": 962,
+  "nGaps": 599,
   "counties": {
     "10001": {
       "state": "DE",
@@ -21871,6 +21871,22 @@
           ],
           "verifiedOn": "2026-07-31",
           "httpStatus": 200
+        },
+        {
+          "fips": "05013",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
         }
       ],
       "isGap": false
@@ -22191,8 +22207,25 @@
     "05005": {
       "state": "AR",
       "county": "Baxter",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "05005",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "06005": {
       "state": "CA",
@@ -22282,8 +22315,25 @@
     "05009": {
       "state": "AR",
       "county": "Boone",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "05009",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "06009": {
       "state": "CA",
@@ -23311,6 +23361,22 @@
           ],
           "verifiedOn": "2026-08-09",
           "httpStatus": 200
+        },
+        {
+          "fips": "05031",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
         }
       ],
       "isGap": false
@@ -23358,6 +23424,22 @@
             "parcel id"
           ],
           "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        },
+        {
+          "fips": "05045",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
           "httpStatus": 200
         }
       ],
@@ -23425,6 +23507,22 @@
           ],
           "verifiedOn": "2026-08-09",
           "httpStatus": 200
+        },
+        {
+          "fips": "05125",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
         }
       ],
       "isGap": false
@@ -23438,8 +23536,25 @@
     "05145": {
       "state": "AR",
       "county": "White",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "05145",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "06019": {
       "state": "CA",
@@ -24215,6 +24330,788 @@
             "certificate of purchase"
           ],
           "verifiedOn": "2026-08-09",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05093": {
+      "state": "AR",
+      "county": "Mississippi",
+      "sources": [
+        {
+          "fips": "05093",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05111": {
+      "state": "AR",
+      "county": "Poinsett",
+      "sources": [
+        {
+          "fips": "05111",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05035": {
+      "state": "AR",
+      "county": "Crittenden",
+      "sources": [
+        {
+          "fips": "05035",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05037": {
+      "state": "AR",
+      "county": "Cross",
+      "sources": [
+        {
+          "fips": "05037",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05123": {
+      "state": "AR",
+      "county": "St. Francis",
+      "sources": [
+        {
+          "fips": "05123",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05089": {
+      "state": "AR",
+      "county": "Marion",
+      "sources": [
+        {
+          "fips": "05089",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05101": {
+      "state": "AR",
+      "county": "Newton",
+      "sources": [
+        {
+          "fips": "05101",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05129": {
+      "state": "AR",
+      "county": "Searcy",
+      "sources": [
+        {
+          "fips": "05129",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05137": {
+      "state": "AR",
+      "county": "Stone",
+      "sources": [
+        {
+          "fips": "05137",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05053": {
+      "state": "AR",
+      "county": "Grant",
+      "sources": [
+        {
+          "fips": "05053",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05059": {
+      "state": "AR",
+      "county": "Hot Spring",
+      "sources": [
+        {
+          "fips": "05059",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05105": {
+      "state": "AR",
+      "county": "Perry",
+      "sources": [
+        {
+          "fips": "05105",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05063": {
+      "state": "AR",
+      "county": "Independence",
+      "sources": [
+        {
+          "fips": "05063",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05067": {
+      "state": "AR",
+      "county": "Jackson",
+      "sources": [
+        {
+          "fips": "05067",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05147": {
+      "state": "AR",
+      "county": "Woodruff",
+      "sources": [
+        {
+          "fips": "05147",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05023": {
+      "state": "AR",
+      "county": "Cleburne",
+      "sources": [
+        {
+          "fips": "05023",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05141": {
+      "state": "AR",
+      "county": "Van Buren",
+      "sources": [
+        {
+          "fips": "05141",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05077": {
+      "state": "AR",
+      "county": "Lee",
+      "sources": [
+        {
+          "fips": "05077",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05095": {
+      "state": "AR",
+      "county": "Monroe",
+      "sources": [
+        {
+          "fips": "05095",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05107": {
+      "state": "AR",
+      "county": "Phillips",
+      "sources": [
+        {
+          "fips": "05107",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05021": {
+      "state": "AR",
+      "county": "Clay",
+      "sources": [
+        {
+          "fips": "05021",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05055": {
+      "state": "AR",
+      "county": "Greene",
+      "sources": [
+        {
+          "fips": "05055",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05075": {
+      "state": "AR",
+      "county": "Lawrence",
+      "sources": [
+        {
+          "fips": "05075",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05121": {
+      "state": "AR",
+      "county": "Randolph",
+      "sources": [
+        {
+          "fips": "05121",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05135": {
+      "state": "AR",
+      "county": "Sharp",
+      "sources": [
+        {
+          "fips": "05135",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05049": {
+      "state": "AR",
+      "county": "Fulton",
+      "sources": [
+        {
+          "fips": "05049",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05065": {
+      "state": "AR",
+      "county": "Izard",
+      "sources": [
+        {
+          "fips": "05065",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05027": {
+      "state": "AR",
+      "county": "Columbia",
+      "sources": [
+        {
+          "fips": "05027",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05139": {
+      "state": "AR",
+      "county": "Union",
+      "sources": [
+        {
+          "fips": "05139",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05061": {
+      "state": "AR",
+      "county": "Howard",
+      "sources": [
+        {
+          "fips": "05061",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05097": {
+      "state": "AR",
+      "county": "Montgomery",
+      "sources": [
+        {
+          "fips": "05097",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05109": {
+      "state": "AR",
+      "county": "Pike",
+      "sources": [
+        {
+          "fips": "05109",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05113": {
+      "state": "AR",
+      "county": "Polk",
+      "sources": [
+        {
+          "fips": "05113",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "05133": {
+      "state": "AR",
+      "county": "Sevier",
+      "sources": [
+        {
+          "fips": "05133",
+          "state": "AR",
+          "url": "https://cosl.org/Home/Contents",
+          "host": "cosl.org",
+          "origin": "atlas",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.75,
+          "signals": [
+            "auction scout",
+            "tax deed"
+          ],
+          "verifiedOn": "2026-08-13",
           "httpStatus": 200
         }
       ],
