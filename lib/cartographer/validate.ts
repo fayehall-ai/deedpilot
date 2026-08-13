@@ -49,6 +49,15 @@ export interface StatuteProposal {
     required: boolean;
   };
   closingCosts: number;
+  /**
+   * Months from auction to marketable title, when the searched pass found it.
+   *
+   * Optional because a statutory-only draft (`--no-market`) has no way to know
+   * it, and a wrong hold period is worse than an absent one — absent falls back
+   * to the lawsuit plus two months, which is right for states with no waiting
+   * period.
+   */
+  auctionToMarketableMonths?: number;
   assessmentRatio: number;
   assessmentBasis: string;
   statute: string;
@@ -271,7 +280,11 @@ ${cite("quietTitle")}
       required: ${p.quietTitle.required},
     },
 ${cite("closingCosts")}
-    closingCosts: ${p.closingCosts},
+    closingCosts: ${p.closingCosts},${
+    p.auctionToMarketableMonths !== undefined
+      ? `\n    // Auction to marketable title, including any window waited out before filing.\n    auctionToMarketableMonths: ${p.auctionToMarketableMonths},`
+      : ""
+  }
 ${cite("assessmentRatio")}
     assessmentRatio: ${p.assessmentRatio},
     assessmentBasis: ${q(p.assessmentBasis)},

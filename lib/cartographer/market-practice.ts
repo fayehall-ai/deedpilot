@@ -63,8 +63,26 @@ const SourcedRange = z.object({
 
 const MarketPracticeSchema = z.object({
   quietTitle: SourcedRange.extend({
-    months: z.number().describe("Typical calendar months from filing to marketable title"),
-    monthsSources: z.array(z.string()).describe("URLs supporting the duration"),
+    months: z
+      .number()
+      .describe("Months from FILING to decree — the length of the lawsuit only"),
+    /**
+     * The economic figure, and a different question from the one above.
+     *
+     * Arkansas forced the split: attorneys there wait out the one-year
+     * challenge period before filing, so a five-month action sits inside an
+     * eighteen-month hold. Asking only for the lawsuit understated the capital
+     * tie-up by more than a year, and `compute_maxbid` charges carry against
+     * this, not against the lawsuit.
+     */
+    auctionToMarketableMonths: z
+      .number()
+      .describe(
+        "Months from winning the auction to holding marketable title, INCLUDING any " +
+          "statutory challenge or redemption window a purchaser waits out before filing. " +
+          "Equal to `months` only where there is no such window.",
+      ),
+    monthsSources: z.array(z.string()).describe("URLs supporting both durations"),
   }),
   closingCosts: SourcedRange.describe(
     "Deed issuance, recording and transfer taxes only — a flat per-parcel fee. " +
@@ -112,10 +130,17 @@ sale in ${name} (${state}), and the cost of closing such a purchase.
 FIND, WITH A URL FOR EACH:
 
 1. QUIET TITLE / CONFIRMATION ACTION — what a ${name} attorney charges to bring
-   the action a tax-deed purchaser needs for marketable title, and how many
-   months it takes end to end. Look at ${name} real-estate and title attorneys'
-   published fee pages, bar association fee surveys, legal-aid cost guides, and
-   court self-help pages. ${name}-specific figures only.
+   the action a tax-deed purchaser needs for marketable title. Look at ${name}
+   real-estate and title attorneys' published fee pages, bar association fee
+   surveys, legal-aid cost guides, and court self-help pages. ${name}-specific
+   figures only.
+
+   Report TWO separate durations, because they are different questions:
+   - months: from filing the action to a decree. The lawsuit.
+   - auctionToMarketableMonths: from winning the auction to marketable title,
+     including any statutory challenge or redemption window practitioners wait
+     out BEFORE filing. Capital is tied up for this whole period, and it is what
+     a bid is charged carry against. Say so if it equals the lawsuit length.
 
 2. CLOSING COSTS — deed issuance fee charged by the selling authority, county
    recorder fees, and any documentary or transfer tax, for one parcel. County
@@ -173,6 +198,13 @@ export function validateMarketPractice(m: MarketPractice): string[] {
   if (m.closingCosts.low > m.closingCosts.high) errors.push("closingCosts low exceeds high");
   if (m.quietTitle.months < 0 || m.quietTitle.months > 60) {
     errors.push(`quietTitle months of ${m.quietTitle.months} is outside 0-60`);
+  }
+  if (m.quietTitle.auctionToMarketableMonths < m.quietTitle.months) {
+    // The hold contains the lawsuit; it cannot be shorter than it.
+    errors.push(
+      `auctionToMarketableMonths (${m.quietTitle.auctionToMarketableMonths}) is shorter than the ` +
+        `lawsuit itself (${m.quietTitle.months}) — the hold contains the action`,
+    );
   }
   /*
    * A surviving-lien answer folded into closing costs is the error worth

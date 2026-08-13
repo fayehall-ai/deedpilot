@@ -82,6 +82,36 @@ export interface StatuteParams {
   /** Recording, documentary stamps, and deed issuance, as a rough fixed cost. */
   closingCosts: number;
   /**
+   * Judgment pad on top of `closingCosts`, kept separate on purpose.
+   *
+   * `closingCosts` is arithmetic on published fee schedules and carries a
+   * source. This is the operator's safety margin for publication, service and
+   * filing incidentals — a different kind of number, and mixing the two would
+   * make a judgement look sourced.
+   *
+   * It is NOT a lien allowance. Surviving assessments are parcel-specific and
+   * can run to thousands on blighted land; a flat pad does not cover them and
+   * implying otherwise hides the risk. Those belong in `caveats`.
+   */
+  extraClosingBuffer?: number;
+  /**
+   * Months from winning the auction to holding marketable title.
+   *
+   * Distinct from `quietTitle.typicalMonths`, which is filing-to-decree — the
+   * length of the lawsuit. This is the economic figure: how long capital is
+   * actually tied up, including any statutory window a purchaser waits out
+   * before filing at all.
+   *
+   * Arkansas is the case that forced the split. Attorneys there generally wait
+   * out the one-year challenge period (A.C.A. § 18-12-609) before filing, so a
+   * five-month action sits inside an eighteen-month hold. Modelling carry on
+   * the lawsuit alone understated it by more than a year.
+   *
+   * Absent, `compute_maxbid` falls back to `typicalMonths + 2`, which is the
+   * right assumption for states with no such waiting period.
+   */
+  auctionToMarketableMonths?: number;
+  /**
    * Assessed value as a fraction of fair market value — the most dangerous
    * number in this file.
    *
@@ -124,6 +154,72 @@ export interface StatuteParams {
 }
 
 export const STATUTE_PARAMS: Record<string, StatuteParams> = {
+  AR: {
+    state: "AR",
+    saleType: "Tax Deed",
+    /*
+     * No post-sale redemption. The owner's right closes at 4:00 p.m. CST on the
+     * last business day before the sale (A.C.A. § 26-37-202) and a limited
+     * warranty deed issues to the purchaser.
+     *
+     * § 26-37-203's ninety days is a bar on ACTIONS CONTESTING the conveyance,
+     * not a redemption right, and the two are opposite in sign: a redemption
+     * right is a penalty the investor earns, a contest window is a title defect
+     * the investor carries. Modelling it as a tier would invent a return that
+     * does not exist. It extends to two years after removal of disability for
+     * minors, the incapacitated, and wartime service members.
+     */
+    redemption: null,
+    quietTitle: {
+      // Reviewed and set by the operator. Uncontested Arkansas quotes at the
+      // low end; specialist tax-deed work and contingencies at the high end.
+      typicalLow: 2500,
+      typicalHigh: 5000,
+      // Filing to decree — the length of the lawsuit, not the hold. See
+      // auctionToMarketableMonths for the economic figure.
+      typicalMonths: 5,
+      required: true,
+    },
+    /*
+     * From published schedules, not judgement: COSL's $25 collection fee and
+     * circuit-clerk recording at $15 first page plus $5 each additional.
+     * Arkansas transfer tax does NOT apply here — tax-sale deeds are
+     * statutorily exempt — though it does hit a later resale at $3.30/$1,000.
+     */
+    closingCosts: 38,
+    extraClosingBuffer: 500,
+    /*
+     * Eighteen months, not five. Arkansas attorneys generally wait out the
+     * one-year challenge period (A.C.A. § 18-12-609) before filing, so the
+     * five-month action sits inside a much longer hold. Modelling carry on the
+     * lawsuit alone understated the tie-up by more than a year.
+     */
+    auctionToMarketableMonths: 18,
+    assessmentRatio: 0.2,
+    assessmentBasis:
+      "Arkansas assesses real property at 20% of true, actual or market value " +
+      "(A.C.A. § 26-26-303(c)); § 26-26-304 fails a county whose ratio study falls " +
+      "outside 18–22% of full fair market value. Measured across 1,669 Arkansas " +
+      "parcels carrying both figures, assessed/market was exactly 0.2000 on every one.",
+    statute:
+      "A.C.A. §§ 26-37-202, 26-37-203 (sale and conveyance); § 26-26-303 (assessment); " +
+      "§ 18-12-609 (challenge period)",
+    asOf: "2026-08",
+    sources: [
+      "https://law.justia.com/codes/arkansas/title-26/subtitle-3/chapter-26/subchapter-3/section-26-26-303/",
+      "https://codes.findlaw.com/ar/title-26-taxation/ar-code-sect-26-37-202/",
+      "https://codes.findlaw.com/ar/title-26-taxation/ar-code-sect-26-37-203/",
+      "https://cosl.org/Home/Buyers",
+      "https://www.law.cornell.edu/regulations/arkansas/135-00-21-Ark-Code-R-001",
+    ],
+    caveats: [
+      "COSL conveys by limited warranty deed and warrants nothing about title. A quiet title or confirmation action is needed for marketability, and title insurance being unavailable is expressly not grounds to cancel the sale.",
+      "The 90-day window to contest the conveyance (§ 26-37-203) is a title risk, not a redemption right, and extends to two years after removal of disability for minors, the incapacitated, and wartime service members.",
+      "Quiet-title cost is market practice, not statute — no Arkansas bar fee survey publishes one. The range is an operator estimate; a contested action or curative work costs materially more.",
+      "SURVIVING LIENS ARE NOT PRICED HERE. Municipal code-enforcement and clean-up liens (§ 14-54-903) and special improvement district assessments can survive and are parcel-specific — 'HARDING DRAIN IMP DISTRICT' appears on Jefferson County parcels in our own data. IRS liens turn on notice and keep a 120-day redemption right if notice was defective. Mortgages, state tax liens and judgment liens are generally extinguished where COSL gave proper statutory notice. Check each parcel; the closing contingency does not cover these.",
+      "The published opening bid is taxes, penalties, interest and costs — the statutory minimum bid under § 26-37-202, never an assessed or market value.",
+    ],
+  },
   TX: {
     state: "TX",
     saleType: "Redeemable Deed",

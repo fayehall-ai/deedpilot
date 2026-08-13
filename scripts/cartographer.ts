@@ -115,8 +115,14 @@ async function main() {
      * AR, LA and NM carry thousands of crawled lots and no entry here, so the
      * engine returns insufficient-data on every one of them.
      */
+    /*
+     * Arkansas was promoted on 13 August, so the pressure moved again. Listing
+     * the states by *live crawled inventory* rather than alphabetically is the
+     * point of this line — a state with thousands of parcels and no entry costs
+     * more than one with none.
+     */
     console.log(
-      "\nAR, LA and NM hold live crawled inventory and cannot be priced — " +
+      "\nLA and NM hold live crawled inventory and cannot be priced — " +
         "see proposals/ for drafts awaiting review.\n",
     );
     return;

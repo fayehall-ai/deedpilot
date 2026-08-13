@@ -256,6 +256,7 @@ Use it as a cross-check; contradict it only with a citation.
           proposal.closingCosts = Math.round(
             (market.data.closingCosts.low + market.data.closingCosts.high) / 2,
           );
+          proposal.auctionToMarketableMonths = market.data.quietTitle.auctionToMarketableMonths;
           // Provenance per field, so the reviewer can tell a searched estimate
           // from a statutory citation at a glance.
           const first = (u: string[]) => u[0] ?? "no source";

@@ -187,12 +187,31 @@ assert(uncitedRender.includes("UNCITED"), "an uncited field is marked in the ren
 
 const covered = coveredStates();
 const uncovered = uncoveredStates();
-assert(covered.length === 7, `expected 7 covered states, got ${covered.length}`);
+
+/*
+ * Asserted as an invariant rather than a count. Pinning `covered.length === 7`
+ * meant every promotion broke this test for the right reason and the wrong
+ * one — Arkansas landing on 13 August failed it while proving it worked. The
+ * property that actually matters is that the two lists partition the atlas
+ * exactly, with no state in both and none in neither.
+ */
+assert(covered.length > 0, "some states must be priceable");
+assert(
+  covered.length + uncovered.length === 51,
+  `covered (${covered.length}) and uncovered (${uncovered.length}) must partition 50 states + DC`,
+);
+assert(
+  covered.every((s) => !uncovered.includes(s)),
+  "no state may appear as both covered and a gap",
+);
 // IL and CA were the first two drafted and have since been reviewed and
 // promoted, so they must no longer appear as gaps.
 assert(covered.includes("IL") && covered.includes("CA"), "IL and CA are now priceable");
 assert(!uncovered.includes("IL") && !uncovered.includes("CA"), "and are no longer gaps");
-assert(uncovered.length === 44, `expected 44 remaining gaps, got ${uncovered.length}`);
+// Arkansas was promoted on 13 August with a searched market-practice pass and
+// an assessment ratio measured against 1,669 parcels.
+assert(covered.includes("AR"), "AR is priceable");
+assert(!uncovered.includes("AR"), "and is no longer a gap");
 assert(
   !covered.some((s) => uncovered.includes(s)),
   "covered and uncovered must be disjoint",
