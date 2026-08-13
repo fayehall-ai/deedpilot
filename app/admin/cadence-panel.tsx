@@ -5,9 +5,8 @@ import { deskWeekday, deskZoneLabel, deskDateTime, dispatchTimeAtDesk } from "@/
 import { spendReport, DEFAULT_RATES, type SpendRow } from "@/lib/ai/usage";
 import { drainQueueNow, runCrawlPlanNow, runResearchNow, savePipelineSettings } from "./run-actions";
 import { getQueue } from "@/lib/admin/queue";
+import { SubmitButton } from "@/components/submit-button";
 
-const button =
-  "rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90";
 const input = "rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-sm";
 const ghost =
   "rounded-lg border border-border px-2.5 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-foreground";
@@ -177,9 +176,7 @@ export async function CadencePanel({
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <form action={runCrawlPlanNow}>
-            <button type="submit" className={button}>
-              Run Crawl Scout now
-            </button>
+            <SubmitButton pendingLabel="Building today's plan…">Run Crawl Scout now</SubmitButton>
           </form>
           <span className="text-xs text-muted">
             queues up to {config.crawlMaxTasks} counties, highest priority first · free · skips any
@@ -188,9 +185,7 @@ export async function CadencePanel({
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <form action={drainQueueNow}>
-            <button type="submit" className={button}>
-              Work the queue now
-            </button>
+            <SubmitButton pendingLabel="Crawling counties…">Work the queue now</SubmitButton>
           </form>
           <span className="text-xs text-muted">
             crawls up to 5 queued counties in this request · free · the rest waits for{" "}
@@ -199,9 +194,9 @@ export async function CadencePanel({
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <form action={runResearchNow}>
-            <button type="submit" className={ghost}>
+            <SubmitButton variant="ghost" pendingLabel="Queueing research…">
               Run Research Scout now
-            </button>
+            </SubmitButton>
           </form>
           <span className="text-xs text-warn">
             queues {config.researchStates} paid searched call
@@ -301,9 +296,7 @@ export async function CadencePanel({
           </div>
 
           <div className="flex gap-2">
-            <button type="submit" className={button}>
-              Save schedules
-            </button>
+            <SubmitButton pendingLabel="Saving…">Save schedules</SubmitButton>
             <button type="submit" name="intent" value="reset" className={ghost}>
               Reset to defaults
             </button>

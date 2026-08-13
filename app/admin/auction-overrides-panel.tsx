@@ -2,9 +2,8 @@ import { Card } from "@/components/ui";
 import { listOverriddenAuctions } from "@/lib/admin/auction-overrides";
 import { OVERRIDABLE } from "@/lib/admin/auction-override-fields";
 import { clearAuctionOverrides, saveAuctionOverride } from "./run-actions";
+import { SubmitButton } from "@/components/submit-button";
 
-const button =
-  "rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90";
 const input = "rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-sm";
 const ghost =
   "rounded-lg border border-border px-2.5 py-1.5 text-sm text-muted transition-colors hover:border-danger hover:text-danger";
@@ -59,9 +58,7 @@ export async function AuctionOverridesPanel() {
             <span className="text-xs text-muted">Value (empty clears)</span>
             <input name="value" placeholder="2026-09-01" className={`${input} w-48`} />
           </label>
-          <button type="submit" className={button}>
-            Save correction
-          </button>
+          <SubmitButton pendingLabel="Saving…">Save correction</SubmitButton>
         </form>
         <p className="mt-2 text-xs text-muted">
           Values are checked against the column&rsquo;s own domain before they are stored — an
