@@ -40,6 +40,10 @@ import { tokenMatches } from "@/lib/admin/token";
 import { loadPolicyOverrides } from "@/lib/admin/policy-load";
 import { enqueueWeeklyResearch, isScoutJob, scoutState } from "@/lib/admin/scout-jobs";
 import { enqueuePlan, planGaps } from "@/lib/admin/plan-jobs";
+import { getPipelineConfig } from "@/lib/admin/pipeline-settings";
+
+/** Thrown to skip planning without logging it as a fault. */
+class SkipPlanning extends Error {}
 import { getScoutPrompt } from "@/lib/admin/scout-prompt";
 import { scoutState as researchState } from "@/lib/ai/scout-report";
 
@@ -120,7 +124,12 @@ export async function GET(req: NextRequest) {
      *
      * Raise this the moment the dispatcher ticks hourly.
      */
-    const planned = await enqueuePlan({ maxTasks: 50 });
+    const config = await getPipelineConfig();
+    if (!config.crawlEnabled) {
+      log.push("calendar crawling is switched off in pipeline settings");
+      throw new SkipPlanning();
+    }
+    const planned = await enqueuePlan({ maxTasks: config.crawlMaxTasks });
     if (planned.enqueued > 0) {
       log.push(
         `planned ${planned.enqueued} county crawl(s) from the calendar` +
@@ -141,7 +150,11 @@ export async function GET(req: NextRequest) {
     const weekly = await enqueueWeeklyResearch();
     if (weekly.ran) log.push(`weekly research queued: ${weekly.states.join(", ")}`);
   } catch (e) {
-    log.push(`plan failed (queue still draining): ${e instanceof Error ? e.message : String(e)}`);
+    // A deliberate skip is not a failure; anything else is, and either way the
+    // queue keeps draining because that is worth more than planning.
+    if (!(e instanceof SkipPlanning)) {
+      log.push(`plan failed (queue still draining): ${e instanceof Error ? e.message : String(e)}`);
+    }
   }
 
   while (Date.now() - started < BUDGET_MS - RESERVE_MS) {

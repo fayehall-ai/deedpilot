@@ -3,7 +3,8 @@ import { and, desc, gte, inArray, like, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { runJobs, type RunJob } from "@/lib/db/schema";
 import { enqueue } from "./queue";
-import { cooldownSince, deskWeekday, isResearchDay, RESEARCH_COOLDOWN_DAYS } from "./research-day";
+import { cooldownSince, deskWeekday, isResearchDay } from "./research-day";
+import { getPipelineConfig } from "./pipeline-settings";
 import {
   SCAN_STATES,
   dedupe,
@@ -247,10 +248,19 @@ export async function enqueueWeeklyResearch(now = new Date()): Promise<{
   reason: string;
   states: string[];
 }> {
+  const config = await getPipelineConfig();
+  if (!config.researchEnabled) {
+    return { ran: false, reason: "research is switched off in pipeline settings", states: [] };
+  }
+
   // Predicate lives in `./research-day`, which is pure and tested — the
   // UTC-versus-desk day distinction is a whole day wide at 02:00 UTC.
-  if (!isResearchDay(now)) {
-    return { ran: false, reason: `not Sunday at the desk (${deskWeekday(now)})`, states: [] };
+  if (!isResearchDay(now, config.researchWeekday)) {
+    return {
+      ran: false,
+      reason: `not ${config.researchWeekday} at the desk (${deskWeekday(now)})`,
+      states: [],
+    };
   }
 
   const [recent] = await db
@@ -259,13 +269,13 @@ export async function enqueueWeeklyResearch(now = new Date()): Promise<{
     .where(
       and(
         like(runJobs.adapter, `${SCOUT_PREFIX}%`),
-        gte(runJobs.createdAt, cooldownSince(now)),
+        gte(runJobs.createdAt, cooldownSince(now, config.researchCooldownDays)),
       ),
     );
   if ((recent?.n ?? 0) > 0) {
     return {
       ran: false,
-      reason: `research already queued within the last ${RESEARCH_COOLDOWN_DAYS} days`,
+      reason: `research already queued within the last ${config.researchCooldownDays} days`,
       states: [],
     };
   }
@@ -276,7 +286,7 @@ export async function enqueueWeeklyResearch(now = new Date()): Promise<{
     return { ran: false, reason: "no state has an upcoming sale without a source", states: [] };
   }
 
-  const states = ranked.slice(0, WEEKLY_RESEARCH_STATES).map((s) => s.state);
+  const states = ranked.slice(0, config.researchStates).map((s) => s.state);
   await enqueueScoutReport(states, "weekly");
   return { ran: true, reason: `queued ${states.length} state(s) by backlog urgency`, states };
 }

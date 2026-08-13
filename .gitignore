@@ -71,3 +71,6 @@ data/sri-capture/
 # disk, and a Vercel filesystem is read-only.
 data/results-candidates.jsonl
 data/results-crawl-report.json
+
+# Unrelated projects that end up in the repo root — not DeedPilot source.
+lca-lc-foundations/

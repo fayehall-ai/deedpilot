@@ -18,6 +18,9 @@ export const DESK_TIMEZONE = "America/New_York";
 /** How many days must pass before a new weekly pass may queue. */
 export const RESEARCH_COOLDOWN_DAYS = 6;
 
+/** Day the pass runs unless an operator has changed it in pipeline settings. */
+export const DEFAULT_RESEARCH_WEEKDAY = "Sun";
+
 /** Day of the week at the desk, e.g. "Sun". */
 export function deskWeekday(now: Date): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -33,11 +36,11 @@ export function deskWeekday(now: Date): string {
  * the desk. Daylight saving is handled by `Intl` rather than a fixed offset,
  * which is why this is not `getUTCDay() === 0` with four subtracted.
  */
-export function isResearchDay(now: Date): boolean {
-  return deskWeekday(now) === "Sun";
+export function isResearchDay(now: Date, weekday: string = DEFAULT_RESEARCH_WEEKDAY): boolean {
+  return deskWeekday(now) === weekday;
 }
 
 /** The earliest creation time that still counts as "already researched". */
-export function cooldownSince(now: Date): Date {
-  return new Date(now.getTime() - RESEARCH_COOLDOWN_DAYS * 86_400_000);
+export function cooldownSince(now: Date, days: number = RESEARCH_COOLDOWN_DAYS): Date {
+  return new Date(now.getTime() - days * 86_400_000);
 }

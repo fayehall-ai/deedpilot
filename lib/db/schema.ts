@@ -828,3 +828,85 @@ export const lotObservations = pgTable(
 );
 
 export type LotObservation = typeof lotObservations.$inferSelect;
+
+/**
+ * Operator-tunable pipeline cadence.
+ *
+ * These numbers were hardcoded in three places — the plan cap in the dispatcher
+ * route, the weekly day and state count in `scout-jobs`, the cooldown in
+ * `research-day` — which meant changing how hard the pipeline runs was a deploy.
+ * That is the wrong shape for the one setting most likely to need changing at
+ * short notice: the crawl cap exists to stop the queue outgrowing what a tick
+ * can drain, and the right value moves the moment the dispatcher cadence does.
+ *
+ * One row, id `default`, same pattern as `scout_prompts`. Absent means the
+ * built-in defaults apply, so a fresh deployment is not a broken one.
+ */
+export const pipelineSettings = pgTable("pipeline_settings", {
+  id: text("id").primaryKey(),
+  /** Master switch for calendar-driven crawling. */
+  crawlEnabled: boolean("crawl_enabled").notNull().default(true),
+  /**
+   * Counties queued per dispatcher tick.
+   *
+   * Sized to what one tick drains — measured 3.0s median, p90 8.1s, against a
+   * 195-second claiming budget. Raising it past that grows the queue rather
+   * than the throughput, because `enqueue` does not dedupe across days.
+   */
+  crawlMaxTasks: integer("crawl_max_tasks").notNull().default(50),
+  /** Master switch for the standing research pass. */
+  researchEnabled: boolean("research_enabled").notNull().default(true),
+  /** Three-letter weekday at the desk, e.g. `Sun`. */
+  researchWeekday: text("research_weekday").notNull().default("Sun"),
+  /** States queued per weekly pass. Each is a paid searched call of 1-2 minutes. */
+  researchStates: integer("research_states").notNull().default(4),
+  /** Days that must pass before another pass may queue. Guards double-firing. */
+  researchCooldownDays: integer("research_cooldown_days").notNull().default(6),
+  updatedBy: text("updated_by").notNull().default("admin"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type PipelineSettings = typeof pipelineSettings.$inferSelect;
+
+/**
+ * Every call that costs money, in the units the vendor bills.
+ *
+ * Nothing recorded spend before this, and unrecorded usage cannot be recovered
+ * — a searched call that ran last Tuesday is gone. So this stores what was
+ * *consumed* (exact, from the provider's own response) rather than a dollar
+ * figure, and the money is computed at read time against rates the operator
+ * sets. Vendor pricing changes and contracts differ; a price baked into a row
+ * is wrong the moment either does, and silently.
+ *
+ * `operation` is what the call was for, not which function made it — "why did
+ * this week cost more" is answered by purpose (research, PDF extraction,
+ * property enrichment), never by call site.
+ */
+export const apiUsage = pgTable(
+  "api_usage",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+    /** `xai`, `anthropic`, `attom`, `rentcast`, `batchdata`. */
+    provider: text("provider").notNull(),
+    /** Model id where one applies, e.g. `grok-4.5`. Null for REST lookups. */
+    model: text("model"),
+    /** `scout-research`, `pdf-extract`, `cartographer`, `brief`, `enrich`. */
+    operation: text("operation").notNull(),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+    /** Billed web searches — the dominant cost of a research pass. */
+    searchCalls: integer("search_calls"),
+    /** REST lookups, for the per-request property APIs. */
+    requests: integer("requests"),
+    /** What it was about, so spend can be attributed to a state or county. */
+    countyFips: text("county_fips"),
+    note: text("note"),
+  },
+  (t) => [
+    index("api_usage_at_idx").on(t.at),
+    index("api_usage_op_idx").on(t.operation, t.at),
+  ],
+);
+
+export type ApiUsage = typeof apiUsage.$inferSelect;

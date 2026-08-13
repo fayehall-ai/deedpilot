@@ -7,6 +7,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
+import { recordUsage, type Operation } from "./usage";
 
 /**
  * LLM provider chain for DeedPilot.
@@ -39,6 +40,16 @@ export interface ImageInput {
 }
 
 export interface StructuredRequest<T extends z.ZodType> {
+  /**
+   * What this call is for, recorded against its cost.
+   *
+   * "Why did last week cost more" is answered by purpose, never by call site,
+   * so this is passed rather than inferred from a stack. Defaults per entry
+   * point when a caller does not say.
+   */
+  operation?: Operation;
+  /** County this call is about, when it is about one. */
+  countyFips?: string;
   system: string;
   prompt: string;
   schema: T;
@@ -122,6 +133,15 @@ const grokProvider: Provider = {
     if (!parsed) {
       throw new Error("grok returned no parsed output matching the schema");
     }
+    await recordUsage({
+      provider: "xai",
+      model: GROK_MODEL,
+      operation: req.operation ?? "pdf-extract",
+      inputTokens: completion.usage?.prompt_tokens ?? null,
+      outputTokens: completion.usage?.completion_tokens ?? null,
+      countyFips: req.countyFips ?? null,
+      note: req.schemaName,
+    });
     return parsed as z.infer<T>;
   },
 };
@@ -189,6 +209,16 @@ const claudeProvider: Provider = {
     if (!parsed) {
       throw new Error("claude returned no parsed output matching the schema");
     }
+    const usage = (response as { usage?: { input_tokens?: number; output_tokens?: number } }).usage;
+    await recordUsage({
+      provider: "anthropic",
+      model: CLAUDE_MODEL,
+      operation: req.operation ?? "pdf-extract",
+      inputTokens: usage?.input_tokens ?? null,
+      outputTokens: usage?.output_tokens ?? null,
+      countyFips: req.countyFips ?? null,
+      note: req.schemaName,
+    });
     return parsed;
   },
 };
@@ -407,12 +437,24 @@ export async function runSearched<T extends z.ZodType>(
     }
   }
 
+  const searchCount = body.usage?.server_side_tool_usage_details?.web_search_calls ?? 0;
+  await recordUsage({
+    provider: "xai",
+    model: GROK_SEARCH_MODEL,
+    operation: req.operation ?? "scout-research",
+    inputTokens: body.usage?.input_tokens ?? null,
+    outputTokens: body.usage?.output_tokens ?? null,
+    searchCalls: searchCount,
+    countyFips: req.countyFips ?? null,
+    note: req.schemaName,
+  });
+
   return {
     data,
     model: GROK_SEARCH_MODEL,
     usedFallback: false,
     citations,
-    searchCount: body.usage?.server_side_tool_usage_details?.web_search_calls ?? 0,
+    searchCount,
   };
 }
 
@@ -427,5 +469,9 @@ interface ResponsesBody {
       annotations?: { type?: string; url?: string; title?: string | null }[];
     }[];
   }[];
-  usage?: { server_side_tool_usage_details?: { web_search_calls?: number } };
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    server_side_tool_usage_details?: { web_search_calls?: number };
+  };
 }

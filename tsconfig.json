@@ -30,5 +30,12 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    // Unrelated projects dropped into the repo root. `include` is `**/*.ts`
+    // with only node_modules excluded, so anything landing here is compiled
+    // and typechecked as if it were DeedPilot — one such directory produced
+    // 184 errors against zero of our own.
+    "lca-lc-foundations"
+  ]
 }

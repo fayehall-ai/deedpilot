@@ -17,6 +17,9 @@ import { currentActor, isAdmin } from "@/lib/admin/auth";
 import { audit, cancelJob, enqueue, inFlightFor } from "@/lib/admin/queue";
 import { getAdapter } from "@/lib/ingest/adapters";
 import { clearOverrides, isOverridable, setOverrides } from "@/lib/admin/auction-overrides";
+import { backlogStates, buildPlan, enqueuePlan } from "@/lib/admin/plan-jobs";
+import { getPipelineConfig, resetPipelineConfig, savePipelineConfig } from "@/lib/admin/pipeline-settings";
+import { enqueueScoutReport, scoutAdapter } from "@/lib/admin/scout-jobs";
 
 class NotAuthorised extends Error {
   constructor() {
@@ -300,5 +303,80 @@ export async function clearAuctionOverrides(formData: FormData): Promise<void> {
   const auctionId = str(formData, "auctionId");
   await clearOverrides(auctionId);
   await auditAs("auction.override.clear", auctionId, {});
+  revalidatePath("/admin");
+}
+
+// ---------------------------------------------------------------------------
+// Pipeline cadence
+// ---------------------------------------------------------------------------
+
+/**
+ * Queue today's calendar plan immediately.
+ *
+ * Enqueues rather than crawls: a full plan is hundreds of county fetches and a
+ * Server Function cannot hold the request open for that. The dispatcher drains
+ * what this queues, so pressing it before 02:00 UTC brings the day's work
+ * forward rather than duplicating it — `enqueuePlan` skips any county already
+ * queued or leased.
+ */
+export async function runCrawlPlanNow(): Promise<void> {
+  await requireAdmin();
+  const config = await getPipelineConfig();
+  const result = await enqueuePlan({ maxTasks: config.crawlMaxTasks });
+  await auditAs("plan.run_now", null, {
+    planned: result.planned,
+    enqueued: result.enqueued,
+    alreadyQueued: result.alreadyQueued,
+  });
+  revalidatePath("/admin");
+}
+
+/**
+ * Queue the weekly research pass now, ignoring the day check.
+ *
+ * The cooldown still applies. That is the guard worth keeping under a manual
+ * press: the day check exists to pick a slot, but the cooldown exists to stop
+ * the same four states being researched twice in a week at full price.
+ */
+export async function runResearchNow(): Promise<void> {
+  await requireAdmin();
+  const config = await getPipelineConfig();
+  const ranked = backlogStates(await buildPlan());
+  const states = ranked.slice(0, config.researchStates).map((s) => s.state);
+
+  const fresh: string[] = [];
+  for (const state of states) {
+    if ((await inFlightFor(scoutAdapter(state))) === 0) fresh.push(state);
+  }
+  if (fresh.length > 0) await enqueueScoutReport(fresh, await currentActor());
+
+  await auditAs("research.run_now", null, { queued: fresh, skipped: states.length - fresh.length });
+  revalidatePath("/admin");
+}
+
+/** Change how hard the pipeline runs. */
+export async function savePipelineSettings(formData: FormData): Promise<void> {
+  await requireAdmin();
+
+  if (str(formData, "intent") === "reset") {
+    await resetPipelineConfig();
+    await auditAs("pipeline.settings.reset", null, {});
+    revalidatePath("/admin");
+    return;
+  }
+
+  const patch = {
+    // Checkboxes are absent from the payload when unticked, which is what makes
+    // a bare `formData.get` the wrong read for a boolean.
+    crawlEnabled: str(formData, "crawlEnabled") === "on",
+    crawlMaxTasks: Number(str(formData, "crawlMaxTasks")),
+    researchEnabled: str(formData, "researchEnabled") === "on",
+    researchWeekday: str(formData, "researchWeekday"),
+    researchStates: Number(str(formData, "researchStates")),
+    researchCooldownDays: Number(str(formData, "researchCooldownDays")),
+  };
+
+  const next = await savePipelineConfig(patch, await currentActor());
+  await auditAs("pipeline.settings.save", null, next as unknown as Record<string, unknown>);
   revalidatePath("/admin");
 }

@@ -15,6 +15,7 @@ import { AuctionOverridesPanel } from "./auction-overrides-panel";
 import { PlanPanel } from "./plan-panel";
 import { LabelQueuePanel } from "./label-queue-panel";
 import { PipelinePanel } from "./pipeline-panel";
+import { CadencePanel } from "./cadence-panel";
 
 export const metadata: Metadata = {
   title: "Operations",
@@ -206,6 +207,10 @@ async function Body() {
       */}
       <Suspense fallback={<TableSkeleton />}>
         <PlanPanel />
+      </Suspense>
+
+      <Suspense fallback={<TableSkeleton />}>
+        <CadencePanel />
       </Suspense>
 
       <Suspense fallback={<TableSkeleton />}>
