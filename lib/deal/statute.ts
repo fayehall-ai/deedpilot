@@ -158,16 +158,25 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     state: "AR",
     saleType: "Tax Deed",
     /*
-     * No post-sale redemption. The owner's right closes at 4:00 p.m. CST on the
-     * last business day before the sale (A.C.A. § 26-37-202) and a limited
-     * warranty deed issues to the purchaser.
+     * No post-sale redemption — verified against the statute text itself, not a
+     * summary of it.
      *
-     * § 26-37-203's ninety days is a bar on ACTIONS CONTESTING the conveyance,
-     * not a redemption right, and the two are opposite in sign: a redemption
-     * right is a penalty the investor earns, a contest window is a title defect
-     * the investor carries. Modelling it as a tier would invent a return that
-     * does not exist. It extends to two years after removal of disability for
-     * minors, the incapacitated, and wartime service members.
+     * § 26-37-202(e): the owner has "the right to redeem the parcel before 4:00
+     * p.m. central standard time (CST) on the last business day before the date
+     * of the sale by paying all taxes, penalties, interest, and costs due", and
+     * a parcel not redeemed by that deadline is offered for sale, with a
+     * limited warranty deed issuing if it sells. Act 241 of 2023 removed any
+     * post-sale redemption; COSL's own FAQ and catalogue language match.
+     *
+     * § 26-37-203 governs only the deed and the contest window: (a) the limited
+     * warranty deed issues on sale, (b) an action contesting the validity of
+     * the conveyance is barred unless brought within 90 days, with narrow
+     * disability exceptions.
+     *
+     * The two are opposite in sign, which is why conflating them would be
+     * expensive: a redemption right is a penalty the investor EARNS, a contest
+     * window is a title defect the investor CARRIES. Modelling the 90 days as a
+     * tier would invent a return that does not exist.
      */
     redemption: null,
     quietTitle: {
@@ -202,8 +211,9 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "outside 18–22% of full fair market value. Measured across 1,669 Arkansas " +
       "parcels carrying both figures, assessed/market was exactly 0.2000 on every one.",
     statute:
-      "A.C.A. §§ 26-37-202, 26-37-203 (sale and conveyance); § 26-26-303 (assessment); " +
-      "§ 18-12-609 (challenge period)",
+      "A.C.A. § 26-37-202(e) (redemption ends 4:00 p.m. CST the last business day before sale); " +
+      "§ 26-37-203 (limited warranty deed; 90-day contest bar); Act 241 of 2023 (removed " +
+      "post-sale redemption); § 26-26-303(c) (20% assessment ratio); § 18-12-609 (challenge period)",
     asOf: "2026-08",
     sources: [
       "https://law.justia.com/codes/arkansas/title-26/subtitle-3/chapter-26/subchapter-3/section-26-26-303/",
@@ -215,6 +225,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     caveats: [
       "COSL conveys by limited warranty deed and warrants nothing about title. A quiet title or confirmation action is needed for marketability, and title insurance being unavailable is expressly not grounds to cancel the sale.",
       "The 90-day window to contest the conveyance (§ 26-37-203) is a title risk, not a redemption right, and extends to two years after removal of disability for minors, the incapacitated, and wartime service members.",
+      "HISTORICAL OUTCOMES BEFORE MID-2023 ARE A DIFFERENT REGIME. Act 241 of 2023 removed post-sale redemption; Arkansas results recorded under the prior rules describe a redeemable position and must not be pooled with post-Act sales when fitting a redemption rate. Current inventory is entirely post-Act.",
       "Quiet-title cost is market practice, not statute — no Arkansas bar fee survey publishes one. The range is an operator estimate; a contested action or curative work costs materially more.",
       "SURVIVING LIENS ARE NOT PRICED HERE. Municipal code-enforcement and clean-up liens (§ 14-54-903) and special improvement district assessments can survive and are parcel-specific — 'HARDING DRAIN IMP DISTRICT' appears on Jefferson County parcels in our own data. IRS liens turn on notice and keep a 120-day redemption right if notice was defective. Mortgages, state tax liens and judgment liens are generally extinguished where COSL gave proper statutory notice. Check each parcel; the closing contingency does not cover these.",
       "The published opening bid is taxes, penalties, interest and costs — the statutory minimum bid under § 26-37-202, never an assessed or market value.",
