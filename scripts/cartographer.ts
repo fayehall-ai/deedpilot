@@ -2,6 +2,8 @@
  * Statute Cartographer CLI.
  *
  *   npm run cartographer -- --gaps                 # which states cannot be priced
+ *   npm run cartographer -- --market AR            # only the searched pass
+ *   npm run cartographer -- --state AR --no-market # statutory draft only
  *   npm run cartographer -- --state IL --state CA  # draft proposals
  *   npm run cartographer -- --state IL --pr        # draft and open a PR
  *
@@ -57,6 +59,47 @@ function openPr(branch: string, path: string, states: string[]) {
 }
 
 async function main() {
+  /*
+   * The market-practice pass, kept behind its own flag.
+   *
+   * Separate from --state on purpose: the statutory draft costs one structured
+   * call and can be re-run freely, while this one runs a paid searched call per
+   * state. Different price, different cadence, different gate — these figures
+   * are estimates by nature and are labelled as such rather than waiting on a
+   * citation nobody can produce.
+   */
+  const marketStates = args("market");
+  if (marketStates.length > 0) {
+    for (const raw of marketStates) {
+      const state = raw.toUpperCase();
+      console.log(`\nResearching market practice for ${STATE_NAMES[state] ?? state}…`);
+      const { researchMarketPractice, validateMarketPractice } = await import(
+        "../lib/cartographer/market-practice"
+      );
+      const result = await researchMarketPractice(state);
+      const problems = validateMarketPractice(result.data);
+
+      const { quietTitle: qt, closingCosts: cc } = result.data;
+      console.log(`\n  quiet title   $${qt.low.toLocaleString()}–$${qt.high.toLocaleString()}, ~${qt.months} months  [${qt.confidence}]`);
+      console.log(`    basis       ${qt.basis}`);
+      for (const u of qt.sources.slice(0, 4)) console.log(`    source      ${u}`);
+      console.log(`\n  closing      $${cc.low.toLocaleString()}–$${cc.high.toLocaleString()}  [${cc.confidence}]`);
+      console.log(`    basis       ${cc.basis}`);
+      for (const u of cc.sources.slice(0, 4)) console.log(`    source      ${u}`);
+      console.log(`\n  survives the sale (NOT a closing cost):\n    ${result.data.survivingLiens}`);
+      if (result.data.caveats.length) {
+        console.log("\n  caveats:");
+        for (const c of result.data.caveats) console.log(`    - ${c}`);
+      }
+      console.log(`\n  ${result.searchCount} searches, ${result.citations.length} sources read, model ${result.model}`);
+      if (problems.length) {
+        console.log("\n  REFUSED — these figures must not reach a proposal:");
+        for (const e of problems) console.log(`    - ${e}`);
+      }
+    }
+    return;
+  }
+
   if (flag("gaps")) {
     const covered = coveredStates();
     const uncovered = uncoveredStates();
@@ -85,16 +128,53 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`Drafting proposals for ${states.join(", ")} …`);
+  /*
+   * The searched market pass is on by default, because a draft without
+   * quiet-title and closing figures is not reviewable — it was the reason the
+   * Arkansas proposal sat unmergeable for a week. `--no-market` skips it for
+   * iterating on the statutory half, which is one cheap structured call against
+   * the searched pass's paid one.
+   */
+  const skipMarket = flag("no-market");
+  console.log(
+    `Drafting proposals for ${states.join(", ")} …` +
+      (skipMarket
+        ? " (statutory only — --no-market)"
+        : ` (with searched market-practice pass, ~1-2 min and one paid call per state)`),
+  );
+
   const drafts = [];
   for (const s of states) {
-    const d = await draftState(s);
+    const d = await draftState(s, { skipMarket });
     const status = d.error
       ? `failed: ${d.error}`
       : d.validation?.ok
         ? "validation passed"
         : `validation FAILED (${d.validation?.issues.filter((i) => i.severity === "error").length} errors)`;
     console.log(`  ${s}: ${status}`);
+
+    if (d.marketError) {
+      console.log(`    market pass FAILED (${d.marketError}) — quiet-title and closing figures are recalled, not searched`);
+    } else if (d.marketProblems?.length) {
+      console.log(`    market pass REFUSED, figures left as drafted:`);
+      for (const e of d.marketProblems) console.log(`      - ${e}`);
+    } else if (d.market) {
+      const { quietTitle: qt, closingCosts: cc } = d.market.data;
+      console.log(
+        `    quiet title  $${qt.low.toLocaleString()}–$${qt.high.toLocaleString()}, ~${qt.months}mo [${qt.confidence}] · ` +
+          `closing $${cc.low}–$${cc.high} [${cc.confidence}] · ` +
+          `${d.market.searchCount} searches, ${d.market.citations.length} sources`,
+      );
+      /*
+       * Printed at the top level rather than buried in the file: a confidence
+       * of `inferred` means no authoritative fee schedule exists for the state,
+       * and that is the thing a reviewer most needs to decide whether to trust
+       * a number the engine subtracts straight off a bid.
+       */
+      if (qt.confidence !== "sourced") {
+        console.log(`    NOTE quiet-title confidence is '${qt.confidence}' — one call to a ${s} title attorney settles it`);
+      }
+    }
     drafts.push(d);
   }
 

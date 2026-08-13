@@ -32,6 +32,11 @@ import { getStateRule, STATE_NAMES } from "../atlas";
 import { STATUTE_PARAMS } from "../deal/statute";
 import { runStructured } from "../ai/providers";
 import {
+  researchMarketPractice,
+  validateMarketPractice,
+  type MarketPracticeResult,
+} from "./market-practice";
+import {
   renderProposal,
   validateProposal,
   type StatuteProposal,
@@ -138,6 +143,26 @@ export interface DraftResult {
   confidenceNote?: string;
   model?: string;
   error?: string;
+  /**
+   * The searched pass over the fields no statute answers.
+   *
+   * Present unless it was skipped or failed. Kept alongside the proposal rather
+   * than folded invisibly into it, because these figures are estimates and a
+   * reviewer needs to see their confidence and sources without digging.
+   */
+  market?: MarketPracticeResult;
+  marketProblems?: string[];
+  marketError?: string;
+}
+
+export interface DraftOptions {
+  /**
+   * Skip the searched market-practice pass.
+   *
+   * Costs a paid searched call per state, so iterating on the statutory half —
+   * which is one cheap structured call — should not pay for search each time.
+   */
+  skipMarket?: boolean;
 }
 
 /**
@@ -146,7 +171,7 @@ export interface DraftResult {
  * Returns the validation result alongside, so a caller cannot use the proposal
  * without also having been handed the reasons not to.
  */
-export async function draftState(state: string): Promise<DraftResult> {
+export async function draftState(state: string, opts: DraftOptions = {}): Promise<DraftResult> {
   const stateRule = getStateRule(state);
   const name = STATE_NAMES[state] ?? state;
 
@@ -201,12 +226,70 @@ Use it as a cross-check; contradict it only with a citation.
       notes: data.notes ?? undefined,
     };
 
+    /*
+     * The searched pass runs after the statutory draft and overwrites its
+     * quietTitle and closingCosts, because those two come out of the structured
+     * call as recall — and recall on a market-practice number returns the value
+     * seen most often, not this state's. Asked from memory for Arkansas it gave
+     * the Texas/Georgia range; asked to search, it found published county fee
+     * schedules and a closing cost an order of magnitude lower.
+     *
+     * A failure here degrades to the recalled figures rather than losing the
+     * whole draft, and says so — the statutory half is the expensive part to
+     * reproduce and is sound on its own.
+     */
+    let market: MarketPracticeResult | undefined;
+    let marketProblems: string[] | undefined;
+    let marketError: string | undefined;
+
+    if (!opts.skipMarket) {
+      try {
+        market = await researchMarketPractice(state);
+        marketProblems = validateMarketPractice(market.data);
+        if (marketProblems.length === 0) {
+          proposal.quietTitle = {
+            typicalLow: market.data.quietTitle.low,
+            typicalHigh: market.data.quietTitle.high,
+            typicalMonths: market.data.quietTitle.months,
+            required: proposal.quietTitle.required,
+          };
+          proposal.closingCosts = Math.round(
+            (market.data.closingCosts.low + market.data.closingCosts.high) / 2,
+          );
+          // Provenance per field, so the reviewer can tell a searched estimate
+          // from a statutory citation at a glance.
+          const first = (u: string[]) => u[0] ?? "no source";
+          const asOf = market.generatedAt.slice(0, 7);
+          proposal.provenance.quietTitle = {
+            source: first(market.data.quietTitle.sources),
+            asOf,
+            quote: `${market.data.quietTitle.confidence} estimate — ${market.data.quietTitle.basis}`,
+          };
+          proposal.provenance.closingCosts = {
+            source: first(market.data.closingCosts.sources),
+            asOf,
+            quote: `${market.data.closingCosts.confidence} estimate — ${market.data.closingCosts.basis}`,
+          };
+          proposal.caveats = [
+            ...proposal.caveats,
+            `Quiet title and closing costs are searched market estimates (${market.data.quietTitle.confidence}), not statute. ${market.data.caveats.join(" ")}`,
+            `Surviving liens — NOT priced into closingCosts: ${market.data.survivingLiens}`,
+          ];
+        }
+      } catch (e) {
+        marketError = e instanceof Error ? e.message : String(e);
+      }
+    }
+
     return {
       state,
       proposal,
       validation: validateProposal(proposal),
       confidenceNote: data.confidenceNote,
       model,
+      market,
+      marketProblems,
+      marketError,
     };
   } catch (e) {
     return {
