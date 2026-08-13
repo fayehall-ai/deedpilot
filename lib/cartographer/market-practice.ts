@@ -209,11 +209,21 @@ export function validateMarketPractice(m: MarketPractice): string[] {
   /*
    * A surviving-lien answer folded into closing costs is the error worth
    * catching by name: it makes an unresolved risk look like a priced fee.
+   *
+   * Matched on SURVIVAL language, not on instrument names. The first version
+   * tested for a bare "mortgage" and refused a correct Louisiana answer whose
+   * basis read "a 1-5 page conveyance or mortgage document" — the parish clerks'
+   * own fee category. Refusing a right answer trains an operator to ignore the
+   * validator, which is worse than the error it was guarding against.
    */
-  if (/improvement district|municipal lien|mortgage/i.test(m.closingCosts.basis)) {
+  if (
+    /(surviv\w*|inherit\w*|assumed by the (purchaser|buyer)|remains? (a lien|encumber))/i.test(
+      m.closingCosts.basis,
+    )
+  ) {
     errors.push(
-      "closingCosts basis mentions liens — surviving liens belong in survivingLiens, " +
-        "not in a flat per-parcel fee",
+      "closingCosts basis describes liens that survive the sale — those belong in " +
+        "survivingLiens, not in a flat per-parcel fee",
     );
   }
   return errors;
