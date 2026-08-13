@@ -12,6 +12,7 @@ import { ALL_COUNTIES } from "@/lib/atlas";
 import { loadRegistry } from "@/lib/ingest/adapters/generic";
 import { planScoutRun, type CountyHealth, type ScoutPlan } from "@/lib/scout";
 import { enqueue } from "./queue";
+import { asDeskDay, deskDate } from "../desk-time";
 
 /**
  * Turn the crawl calendar into queued work.
@@ -70,19 +71,27 @@ export async function countyHealth(): Promise<Record<string, CountyHealth>> {
   for (const r of rows) {
     out[r.county_fips] = {
       consecutiveFailures: r.consecutive_failures ?? 0,
-      lastAttempt: r.last_attempt ? new Date(r.last_attempt).toISOString().slice(0, 10) : null,
+      // Desk day, because `planScout` compares this to `plan.date`.
+      lastAttempt: r.last_attempt ? deskDate(new Date(r.last_attempt)) : null,
     };
   }
   return out;
 }
 
-/** Build today's plan without writing anything. */
+/**
+ * Build today's plan without writing anything.
+ *
+ * "Today" is the desk's calendar day, not the server's. `crawlsDueOn` derives
+ * its day from `toISOString()`, so an unshifted `new Date()` run by hand at 6pm
+ * Pacific would plan against *tomorrow* — comparing a US sale date to a UTC day
+ * that has already rolled over, and skipping a county whose window closes today.
+ */
 export async function buildPlan(opts: { maxTasks?: number; on?: Date } = {}): Promise<ScoutPlan> {
   return planScoutRun({
     fipsList: ALL_COUNTIES.map((c) => c.fips),
     registry: loadRegistry() ?? undefined,
     healthByCounty: await countyHealth(),
-    on: opts.on,
+    on: asDeskDay(opts.on),
     maxTasks: opts.maxTasks,
   });
 }

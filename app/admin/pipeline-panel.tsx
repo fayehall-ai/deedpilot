@@ -3,7 +3,8 @@ import { Card, Callout, Stat } from "@/components/ui";
 import { AdminTable, type AdminColumn } from "@/components/admin-table";
 import { db } from "@/lib/db";
 import { attritionCurve, type AttritionBucket } from "@/lib/ingest/observe";
-import { isResearchDay, deskWeekday, DESK_TIMEZONE } from "@/lib/admin/research-day";
+import { isResearchDay } from "@/lib/admin/research-day";
+import { deskWeekday, deskZoneLabel, dispatchTimeAtDesk } from "@/lib/desk-time";
 
 /**
  * What the pipeline observed, nationally.
@@ -98,13 +99,13 @@ export async function PipelinePanel() {
         <h3 className="mb-1 font-medium">Standing schedule</h3>
         <ul className="space-y-1.5 text-sm text-muted">
           <li>
-            <strong className="text-foreground">Crawl</strong> — nightly at 02:00 UTC. The dispatcher
-            builds the calendar plan and queues county crawls by priority, capped at what one tick can
-            drain.
+            <strong className="text-foreground">Crawl</strong> — nightly at{" "}
+            {dispatchTimeAtDesk(now)}. The dispatcher builds the calendar plan and queues county
+            crawls by priority, capped at what one tick can drain.
           </li>
           <li>
             <strong className="text-foreground">Research</strong> — weekly, on the tick falling on a
-            Sunday at the desk ({DESK_TIMEZONE}). Queues the four states with the most urgent
+            Sunday here ({deskZoneLabel(now)}). Queues the four states with the most urgent
             no-source gap, at a priority below every crawl. Today is {deskWeekday(now)}
             {isResearchDay(now) ? " — research is due on tonight's tick." : "."}
           </li>

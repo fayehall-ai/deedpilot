@@ -216,13 +216,15 @@ export async function getScoutReport(): Promise<ScoutReportView> {
 /**
  * The standing weekly research pass.
  *
- * ## Why Sunday is checked in US Eastern, not UTC
+ * ## Why the day is checked at the desk, not in UTC
  *
- * The dispatcher fires at 02:00 UTC every day. Sunday 02:00 UTC is *Saturday*
- * 21:00 Eastern — so a naive UTC day-of-week check would queue the week's
- * research on Saturday night for a desk that works US hours. The tick that
- * actually falls on a US Sunday is Monday 02:00 UTC (Sunday 22:00 ET), which is
- * what this matches. Research then queues Sunday night and drains into Monday.
+ * The dispatcher tick is scheduled in UTC and the desk is Pacific. The cron now
+ * fires at 09:00 UTC — 01:00-02:00 Pacific on the *same* calendar day — so the
+ * two agree and Sunday means Sunday. That was not free: at the previous 02:00
+ * UTC hour the tick landed at 18:00-19:00 Pacific the day before, and a UTC
+ * day-of-week check would have queued the week's research every Saturday
+ * evening. The check reads the desk zone regardless, so moving the cron hour
+ * again cannot silently reintroduce it.
  *
  * ## Why four states and not sixteen
  *
@@ -253,8 +255,8 @@ export async function enqueueWeeklyResearch(now = new Date()): Promise<{
     return { ran: false, reason: "research is switched off in pipeline settings", states: [] };
   }
 
-  // Predicate lives in `./research-day`, which is pure and tested — the
-  // UTC-versus-desk day distinction is a whole day wide at 02:00 UTC.
+  // Predicate lives in `./research-day`, which is pure and tested. The
+  // UTC-versus-desk distinction is a whole day wide at the wrong cron hour.
   if (!isResearchDay(now, config.researchWeekday)) {
     return {
       ran: false,

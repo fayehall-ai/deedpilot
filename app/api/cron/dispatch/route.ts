@@ -4,7 +4,7 @@
  * Replaces the shell-out in `/api/cron/ingest`, which cannot work here: that
  * route runs `npm run ingest` through `exec`, and a Vercel function has no
  * `tsx`, no devDependencies and a read-only filesystem. The evidence is in the
- * data — `vercel.json` has declared a 02:00 UTC daily ingest for weeks and
+ * data — `vercel.json` had declared a daily ingest for weeks and
  * `ingest_runs` contains **zero** rows at that hour. Every run on record came
  * from someone's terminal.
  *

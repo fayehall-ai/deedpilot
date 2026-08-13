@@ -53,7 +53,8 @@ export default function AdminPage(props: PageProps<"/admin">) {
 }
 
 async function Gate({ searchParams }: { searchParams: PageProps<"/admin">["searchParams"] }) {
-  const { e } = await searchParams;
+  const params = await searchParams;
+  const { e } = params;
 
   if (!adminConfigured()) {
     return (
@@ -104,7 +105,7 @@ async function Gate({ searchParams }: { searchParams: PageProps<"/admin">["searc
           </button>
         </form>
       </div>
-      <Body />
+      <Body outcome={params} />
     </>
   );
 }
@@ -136,7 +137,12 @@ const ago = (iso: string | null): string => {
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 
-async function Body() {
+async function Body({
+  outcome,
+}: {
+  /** Search params, carrying the result of the last run-now press. */
+  outcome: Record<string, string | string[] | undefined>;
+}) {
   /*
    * Reads the clock (relative "ago" stamps) and the live pipeline state, so
    * the request must be dynamic. Without this the build refuses the clock
@@ -210,7 +216,7 @@ async function Body() {
       </Suspense>
 
       <Suspense fallback={<TableSkeleton />}>
-        <CadencePanel />
+        <CadencePanel outcome={outcome} />
       </Suspense>
 
       <Suspense fallback={<TableSkeleton />}>

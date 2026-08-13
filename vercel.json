@@ -1,12 +1,20 @@
 {
+  "$comment": [
+    "Cron times are UTC — Vercel offers no zone. 09:00 UTC is 02:00 PDT in summer",
+    "and 01:00 PST in winter, so the tick lands overnight Pacific on the SAME",
+    "calendar day. The previous 02:00 UTC was 18:00-19:00 Pacific the PREVIOUS",
+    "day: the 'nightly' crawl read each county's page as it stood at dinner time",
+    "the day before, and any day-of-week check disagreed with the desk by a full",
+    "day. Keep in step with DISPATCH_UTC_HOUR in lib/desk-time.ts."
+  ],
   "crons": [
     {
       "path": "/api/cron/dispatch",
-      "schedule": "0 2 * * *"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/coverage",
-      "schedule": "30 3 * * *"
+      "schedule": "30 10 * * *"
     }
   ]
 }

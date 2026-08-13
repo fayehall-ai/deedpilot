@@ -10,11 +10,13 @@
  * person who made it.
  */
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { runSchedules, sourceOverrides, policyOverrides } from "@/lib/db/schema";
 import { currentActor, isAdmin } from "@/lib/admin/auth";
-import { audit, cancelJob, enqueue, inFlightFor } from "@/lib/admin/queue";
+import { audit, cancelJob, claimNext, completeJob, enqueue, failJob, inFlightFor } from "@/lib/admin/queue";
+import { runAdapter } from "@/lib/ingest/runner";
 import { getAdapter } from "@/lib/ingest/adapters";
 import { clearOverrides, isOverridable, setOverrides } from "@/lib/admin/auction-overrides";
 import { backlogStates, buildPlan, enqueuePlan } from "@/lib/admin/plan-jobs";
@@ -311,13 +313,16 @@ export async function clearAuctionOverrides(formData: FormData): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * Queue today's calendar plan immediately.
+ * Queue today's calendar plan, and say what happened.
  *
  * Enqueues rather than crawls: a full plan is hundreds of county fetches and a
- * Server Function cannot hold the request open for that. The dispatcher drains
- * what this queues, so pressing it before 02:00 UTC brings the day's work
- * forward rather than duplicating it — `enqueuePlan` skips any county already
- * queued or leased.
+ * Server Function cannot hold the request open for that.
+ *
+ * The outcome is carried back in the URL because the interesting case is the
+ * quiet one. `enqueuePlan` skips any county already queued or leased, so a
+ * second press correctly enqueues nothing — and with no message that is
+ * indistinguishable from a broken button. It was reported as exactly that: four
+ * presses, four audited successes, zero visible change.
  */
 export async function runCrawlPlanNow(): Promise<void> {
   await requireAdmin();
@@ -329,6 +334,58 @@ export async function runCrawlPlanNow(): Promise<void> {
     alreadyQueued: result.alreadyQueued,
   });
   revalidatePath("/admin");
+  redirect(`/admin?ran=plan&enqueued=${result.enqueued}&skipped=${result.alreadyQueued}`);
+}
+
+/**
+ * Work the queue here and now, within one request.
+ *
+ * Why this exists: "Run Crawl Scout now" only ever queued, and against a daily
+ * dispatcher "now" meant "some time in the next twenty-four hours". The queue
+ * sat at 50 jobs for an hour while the button was pressed four times, each press
+ * doing exactly what it promised and nothing a person could see.
+ *
+ * Bounded hard. A Server Function is not the dispatcher and must not pretend to
+ * be one: it claims a few jobs, runs them, and stops well inside the request
+ * budget, leaving the rest to the overnight tick. A county is ~3s at the median
+ * and 8s at p90, so the cap is small and the deadline is re-checked between jobs
+ * rather than assumed.
+ */
+const DRAIN_BUDGET_MS = 25_000;
+const DRAIN_MAX_JOBS = 5;
+
+export async function drainQueueNow(): Promise<void> {
+  await requireAdmin();
+  const started = Date.now();
+  let ran = 0;
+  let failed = 0;
+
+  while (ran + failed < DRAIN_MAX_JOBS && Date.now() - started < DRAIN_BUDGET_MS) {
+    const job = await claimNext();
+    if (!job) break;
+    try {
+      const adapter = getAdapter(job.adapter);
+      if (!adapter) {
+        await failJob(job.id, `unknown adapter ${job.adapter}`);
+        failed++;
+        continue;
+      }
+      const summary = await runAdapter(adapter, {
+        countyFips: job.countyFips ?? undefined,
+        limit: job.limit ?? undefined,
+        dryRun: job.dryRun,
+      });
+      await completeJob(job.id, summary as unknown as Record<string, unknown>);
+      ran++;
+    } catch (e) {
+      await failJob(job.id, e instanceof Error ? e.message : String(e));
+      failed++;
+    }
+  }
+
+  await auditAs("queue.drain_now", null, { ran, failed, ms: Date.now() - started });
+  revalidatePath("/admin");
+  redirect(`/admin?ran=drain&done=${ran}&failed=${failed}`);
 }
 
 /**
@@ -352,6 +409,9 @@ export async function runResearchNow(): Promise<void> {
 
   await auditAs("research.run_now", null, { queued: fresh, skipped: states.length - fresh.length });
   revalidatePath("/admin");
+  redirect(
+    `/admin?ran=research&enqueued=${fresh.length}&skipped=${states.length - fresh.length}#cadence`,
+  );
 }
 
 /** Change how hard the pipeline runs. */

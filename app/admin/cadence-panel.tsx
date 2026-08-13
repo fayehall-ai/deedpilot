@@ -1,9 +1,10 @@
 import { Card, Callout, Stat } from "@/components/ui";
 import { AdminTable, type AdminColumn } from "@/components/admin-table";
 import { getPipelineConfig, LIMITS, WEEKDAYS } from "@/lib/admin/pipeline-settings";
-import { deskWeekday, DESK_TIMEZONE } from "@/lib/admin/research-day";
+import { deskWeekday, deskZoneLabel, deskDateTime, dispatchTimeAtDesk } from "@/lib/desk-time";
 import { spendReport, DEFAULT_RATES, type SpendRow } from "@/lib/ai/usage";
-import { runCrawlPlanNow, runResearchNow, savePipelineSettings } from "./run-actions";
+import { drainQueueNow, runCrawlPlanNow, runResearchNow, savePipelineSettings } from "./run-actions";
+import { getQueue } from "@/lib/admin/queue";
 
 const button =
   "rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90";
@@ -22,9 +23,23 @@ const usd = (cents: number) =>
  * more, so the number and its consequence belong on one screen rather than in
  * two places that have to be read against each other.
  */
-export async function CadencePanel() {
-  const [config, spend] = await Promise.all([getPipelineConfig(), spendReport(30)]);
+export async function CadencePanel({
+  outcome,
+}: {
+  /** Result of the last button press, carried in the URL by the server action. */
+  outcome?: Record<string, string | string[] | undefined>;
+}) {
+  const [config, spend, queue] = await Promise.all([
+    getPipelineConfig(),
+    spendReport(30),
+    getQueue(1),
+  ]);
   const now = new Date();
+  const ran = typeof outcome?.ran === "string" ? outcome.ran : null;
+  const num = (k: string) => {
+    const v = outcome?.[k];
+    return typeof v === "string" ? Number(v) : 0;
+  };
 
   const columns: AdminColumn<SpendRow>[] = [
     { key: "op", header: "What for", cell: (r) => r.operation },
@@ -109,12 +124,56 @@ export async function CadencePanel() {
       )}
 
       {/* ---- run now ---- */}
+      {ran === "plan" && (
+        <Callout
+          tone={num("enqueued") > 0 ? "info" : "warn"}
+          title={
+            num("enqueued") > 0
+              ? `Queued ${num("enqueued")} county crawl${num("enqueued") === 1 ? "" : "s"}`
+              : "Nothing new to queue"
+          }
+        >
+          {num("skipped") > 0 && (
+            <>
+              {num("skipped")} counties from today&rsquo;s plan are already queued or running, so they
+              were skipped rather than duplicated.{" "}
+            </>
+          )}
+          {num("enqueued") === 0 &&
+            "The plan is already in the queue. Use Work the queue now to actually crawl some of it."}
+        </Callout>
+      )}
+      {ran === "research" && (
+        <Callout tone={num("enqueued") > 0 ? "info" : "warn"} title={`Queued ${num("enqueued")} research pass(es)`}>
+          {num("skipped") > 0
+            ? `${num("skipped")} state(s) already had a pass in flight and were not charged again.`
+            : "Each is a paid searched call and will drain across dispatcher ticks."}
+        </Callout>
+      )}
+      {ran === "drain" && (
+        <Callout tone={num("failed") > 0 ? "warn" : "info"} title={`Crawled ${num("done")} county/counties`}>
+          {num("failed") > 0 ? `${num("failed")} failed — see Recent runs below.` : "Queue worked down by that many."}
+          {num("done") === 0 && num("failed") === 0 && " The queue was empty."}
+        </Callout>
+      )}
+
       <Card>
         <h3 className="mb-1 font-medium">Run now</h3>
         <p className="mb-3 text-xs text-muted">
-          Both queue rather than crawl — a full pass is hundreds of fetches and a form submission
-          cannot hold that open. The dispatcher drains what they queue, so pressing before 02:00 UTC
-          brings the day&rsquo;s work forward rather than duplicating it.
+          The two Scout buttons <strong>queue</strong> work; they do not crawl. A full pass is
+          hundreds of fetches and a form submission cannot hold that open. On a once-daily dispatcher
+          that means &ldquo;now&rdquo; is really &ldquo;by tomorrow morning&rdquo; — so{" "}
+          <strong>Work the queue now</strong> exists to actually run a few immediately.
+        </p>
+        <p className="mb-3 text-xs text-muted">
+          Queue right now: <strong className="tabular-nums">{queue.queued}</strong> waiting,{" "}
+          <strong className="tabular-nums">{queue.leased}</strong> running
+          {queue.failed > 0 && (
+            <>
+              , <strong className="tabular-nums text-danger">{queue.failed}</strong> failed
+            </>
+          )}
+          .
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <form action={runCrawlPlanNow}>
@@ -123,7 +182,19 @@ export async function CadencePanel() {
             </button>
           </form>
           <span className="text-xs text-muted">
-            queues up to {config.crawlMaxTasks} counties, highest priority first · free
+            queues up to {config.crawlMaxTasks} counties, highest priority first · free · skips any
+            already queued
+          </span>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <form action={drainQueueNow}>
+            <button type="submit" className={button}>
+              Work the queue now
+            </button>
+          </form>
+          <span className="text-xs text-muted">
+            crawls up to 5 queued counties in this request · free · the rest waits for{" "}
+            {dispatchTimeAtDesk(now)}
           </span>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -150,7 +221,7 @@ export async function CadencePanel() {
             <>
               {" "}
               Last changed by <strong>{config.updatedBy}</strong> on{" "}
-              {config.updatedAt.toISOString().slice(0, 10)}.
+              {deskDateTime(config.updatedAt)}.
             </>
           ) : (
             " Currently on the built-in defaults."
@@ -176,8 +247,8 @@ export async function CadencePanel() {
                 />
               </label>
               <span className="pb-2 text-xs text-muted">
-                runs nightly at 02:00 UTC · ~3.0s a county against a 195s claiming budget, so past
-                ~60 the queue grows rather than the throughput
+                runs nightly at {dispatchTimeAtDesk(now)} · ~3.0s a county against a 195s claiming
+                budget, so past ~60 the queue grows rather than the throughput
               </span>
             </div>
           </div>
@@ -223,9 +294,9 @@ export async function CadencePanel() {
               </label>
             </div>
             <p className="text-xs text-muted">
-              The day is read in {DESK_TIMEZONE}, not UTC — the 02:00 UTC tick on a UTC Sunday is
-              Saturday 22:00 at the desk, so a UTC check would run this a day early every week. Today
-              is <strong>{deskWeekday(now)}</strong> at the desk.
+              Days are counted at the desk, so a Sunday pass runs on Sunday here rather than on
+              whatever day the server thinks it is. Today is <strong>{deskWeekday(now)}</strong>,{" "}
+              {deskZoneLabel(now)}.
             </p>
           </div>
 
