@@ -248,17 +248,28 @@ number resolves it on the assessor site.`;
  * the raw searched answer so the page can show `basis` and `sources` — a number
  * on its own would be exactly the unsourced figure this project refuses
  * everywhere else.
+ *
+ * ## Two phases, because they finish at different times
+ *
+ * Retrieval takes about five seconds and extraction about fifteen more. Exposed
+ * as one call, a reader waits twenty seconds looking at a skeleton. Exposed as
+ * two, the page can show what the search engine said at five seconds and replace
+ * it with the checked answer when that lands.
+ *
+ * `lookupAddress` still does both, for the provider path and for anything that
+ * only wants the finished result.
  */
-export async function lookupAddress(address: string): Promise<{
-  data: SearchedProperty;
-  citations: { url: string; title: string | null }[];
-}> {
+
+export function validateQuery(address: string): string {
   const query = address.trim();
   if (query.length < 5) {
     throw new Error("Enter a street address, including the city or ZIP.");
   }
+  return query;
+}
 
-  const prompt = `Find this US property and report what public sources say about it.
+function promptFor(query: string): string {
+  return `Find this US property and report what public sources say about it.
 
 ADDRESS: ${query}
 
@@ -267,7 +278,57 @@ of record. Then a listing site for a current market estimate.
 
 If the address is ambiguous or you cannot find this exact property, set
 found=false and explain in basis. Do not report a nearby or similar property.`;
+}
 
-  const result = await retrieve(prompt, PropertySchema, "property-lookup", query);
+/** Phase one: the pages, and the search engine's own summary of them. */
+export async function retrievePhase(address: string) {
+  const query = validateQuery(address);
+  const { retrieveForAddress } = await import("../tavily");
+  return retrieveForAddress(query);
+}
+
+/**
+ * Phase two: read the retrieved pages and fill the schema.
+ *
+ * Takes the retrieval rather than fetching again, so a page that showed the
+ * provisional line is extracting from exactly the sources it showed.
+ */
+export async function extractPhase(
+  address: string,
+  retrieval: Awaited<ReturnType<typeof retrievePhase>>,
+): Promise<{ data: SearchedProperty; citations: { url: string; title: string | null }[] }> {
+  const query = validateQuery(address);
+  const { asContext } = await import("../tavily");
+  const { runStructured } = await import("../../ai/providers");
+
+  if (retrieval.sources.length === 0) {
+    // Nothing retrieved — fall back to the browsing model rather than reporting
+    // "not found", which would be a claim about the property rather than about
+    // the search.
+    const result = await retrieve(promptFor(query), PropertySchema, "property-lookup");
+    return { data: result.data, citations: result.citations };
+  }
+
+  const { data } = await runStructured({
+    system: SYSTEM,
+    prompt: `${promptFor(query)}\n\nRead ONLY the sources below. Cite the URLs you actually used.\n\n${asContext(retrieval)}`,
+    schema: PropertySchema,
+    schemaName: "property_lookup",
+    operation: "property-lookup",
+    maxTokens: 8000,
+  });
+
+  return {
+    data,
+    citations: retrieval.sources.map((s) => ({ url: s.url, title: s.title })),
+  };
+}
+
+export async function lookupAddress(address: string): Promise<{
+  data: SearchedProperty;
+  citations: { url: string; title: string | null }[];
+}> {
+  const query = validateQuery(address);
+  const result = await retrieve(promptFor(query), PropertySchema, "property-lookup", query);
   return { data: result.data, citations: result.citations };
 }

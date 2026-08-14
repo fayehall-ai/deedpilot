@@ -56,12 +56,58 @@ function Field({ label, value }: { label: string; value: string | number | null 
 const money = (n: number | null | undefined) =>
   n === null || n === undefined ? null : `$${Math.round(n).toLocaleString()}`;
 
-async function Result({ q }: { q: string }) {
-  const { lookupAddress } = await import("@/lib/property/providers/websearch");
+/**
+ * What the search engine said, shown while the checked answer is still being
+ * written.
+ *
+ * Retrieval finishes in about five seconds and extraction takes fifteen more,
+ * so this fills the gap with something true rather than a spinner. It is
+ * labelled provisional and unverified in the markup, not only in a tooltip,
+ * because it is exactly the kind of figure this project refuses to treat as
+ * usable: a summary line with no URL behind the number.
+ *
+ * It is replaced in place the moment the extracted answer resolves.
+ */
+function Provisional({ answer, sources }: { answer: string | null; sources: number }) {
+  return (
+    <div className="rounded-xl border border-border bg-surface p-5">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className="text-sm font-semibold">First look</h2>
+        <span className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[0.65rem] uppercase tracking-wide text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          unverified
+        </span>
+        <span className="ml-auto inline-flex items-center gap-2 text-xs text-muted">
+          <span
+            className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none"
+            aria-hidden
+          />
+          checking {sources} source{sources === 1 ? "" : "s"}…
+        </span>
+      </div>
+      {answer && <p className="mt-3 text-sm leading-relaxed">{answer}</p>}
+      <p className="mt-3 text-xs text-muted">
+        A search engine&apos;s summary, with no source attached to the figure. It is shown because
+        it arrives first, not because it is checked — the confirmed answer replaces it below.
+      </p>
+    </div>
+  );
+}
 
-  let data: Awaited<ReturnType<typeof lookupAddress>>;
+/** The finished answer: cached if fresh, otherwise retrieved and extracted. */
+async function Result({ q }: { q: string }) {
+  const [{ retrievePhase, extractPhase }, cacheMod] = await Promise.all([
+    import("@/lib/property/providers/websearch"),
+    import("@/lib/property/lookup-cache"),
+  ]);
+
+  const cached = await cacheMod.getCached<import("@/lib/property/providers/websearch").SearchedProperty>(q);
+  if (cached) {
+    return <Answer p={cached.result} citations={cached.citations} ageHours={cached.ageHours} />;
+  }
+
+  let retrieval: Awaited<ReturnType<typeof retrievePhase>>;
   try {
-    data = await lookupAddress(q);
+    retrieval = await retrievePhase(q);
   } catch (e) {
     return (
       <div className="rounded-xl border border-red-300 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/40">
@@ -71,7 +117,53 @@ async function Result({ q }: { q: string }) {
     );
   }
 
-  const { data: p, citations } = data;
+  /*
+   * The provisional line is the *fallback* for the checked answer, so React
+   * swaps one for the other with no extra plumbing: whatever is inside the
+   * boundary replaces whatever was in the fallback, in place.
+   */
+  return (
+    <Suspense fallback={<Provisional answer={retrieval.answer} sources={retrieval.sources.length} />}>
+      <Extracted q={q} retrieval={retrieval} />
+    </Suspense>
+  );
+}
+
+async function Extracted({
+  q,
+  retrieval,
+}: {
+  q: string;
+  retrieval: Awaited<ReturnType<typeof import("@/lib/property/providers/websearch").retrievePhase>>;
+}) {
+  const { extractPhase } = await import("@/lib/property/providers/websearch");
+  const { putCached } = await import("@/lib/property/lookup-cache");
+
+  let data: Awaited<ReturnType<typeof extractPhase>>;
+  try {
+    data = await extractPhase(q, retrieval);
+  } catch (e) {
+    return (
+      <div className="rounded-xl border border-red-300 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/40">
+        <p className="font-medium">That search could not run.</p>
+        <p className="mt-1 text-sm text-muted">{e instanceof Error ? e.message : String(e)}</p>
+      </div>
+    );
+  }
+
+  await putCached(q, data.data, data.citations);
+  return <Answer p={data.data} citations={data.citations} ageHours={0} />;
+}
+
+function Answer({
+  p,
+  citations,
+  ageHours,
+}: {
+  p: import("@/lib/property/providers/websearch").SearchedProperty;
+  citations: { url: string; title: string | null }[];
+  ageHours: number;
+}) {
 
   if (!p.found || p.confidence === "none") {
     return (
@@ -91,7 +183,7 @@ async function Result({ q }: { q: string }) {
       <div className="rounded-xl border border-border bg-surface p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="text-lg font-semibold tracking-tight">
-            {p.addressLine ?? q}
+            {p.addressLine ?? "This property"}
             {p.city ? `, ${p.city}` : ""} {p.zip ?? ""}
           </h2>
           <span
@@ -111,6 +203,22 @@ async function Result({ q }: { q: string }) {
         <p className="mt-1 text-sm text-muted">
           Estimated market value. This is <strong>not</strong> an assessed value and is not used to
           price a bid.
+          {ageHours > 0 && (
+            /*
+             * A cached answer says how old it is. Serving a fortnight-old
+             * valuation without saying so would make the page look live when it
+             * is not, and "when was this read" is the first thing a reader needs
+             * in order to decide whether to trust it.
+             */
+            <>
+              {" "}
+              Read{" "}
+              {ageHours < 24
+                ? `${ageHours} hour${ageHours === 1 ? "" : "s"} ago`
+                : `${Math.floor(ageHours / 24)} day${Math.floor(ageHours / 24) === 1 ? "" : "s"} ago`}
+              .
+            </>
+          )}
         </p>
 
         <dl className="mt-5 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
