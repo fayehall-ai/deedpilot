@@ -52,6 +52,19 @@ function Submit() {
 /**
  * The wait is long enough that a spinner alone reads as a hang, so it says what
  * is happening and roughly how long it takes.
+ *
+ * ## Say what it does, not what it aspires to
+ *
+ * This read "Reading county assessor and listing sources", which was not true.
+ * Retrieval is a general web search; the extraction prompt *asks* for the
+ * assessor record first, but what comes back is whatever the index holds — in
+ * measured runs PropertyShark, Redfin, Zillow, Xome, sometimes an assessor page
+ * and often not.
+ *
+ * Naming a specific authoritative source the search may never touch is the same
+ * failure as an unsourced figure: it borrows credibility the answer has not
+ * earned. The result panel already lists the URLs actually read, and this line
+ * should not promise more than that list will show.
  */
 function Pending() {
   const { pending } = useFormStatus();
@@ -68,7 +81,7 @@ function Pending() {
         aria-hidden
       />
       <p className="text-sm text-muted">
-        Reading county assessor and listing sources — usually about twenty seconds.
+        Searching public records and property listings — usually twenty to thirty seconds.
       </p>
     </div>
   );
