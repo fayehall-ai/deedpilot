@@ -170,6 +170,50 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
       "without re-deciding the question.",
   },
 
+  // --- Assessment-roll hosts, added 2026-08-14 -----------------------------
+  //
+  // Checked while establishing whether the counties with no parcel layer —
+  // Franklin MO, and Sandoval / Rio Arriba / San Juan / Catron NM — publish
+  // their assessment roll online for free. Short answer: no. Recorded so the
+  // next person does not repeat the search.
+  {
+    host: "www.franklinmo.org",
+    decision: "allow",
+    minDelayMs: 5000,
+    reason:
+      "Franklin County MO's official site — robots.txt is `Allow: /` with only a lightbox query " +
+      "parameter disallowed, verified 2026-08-14. Note the domain: an earlier probe used " +
+      "franklinmo.net, which does not resolve, and the county was written off as unreachable on " +
+      "that basis. Crawling is permitted but there is nothing here worth crawling for values: " +
+      "the assessor maintains a roll of roughly 73,000 parcels and publishes no bulk file, " +
+      "directing the public to per-parcel lookups instead. GIS data requires a written request, " +
+      "a signed agreement, County Commission approval and payment.",
+  },
+  {
+    host: "www.sjcounty.net",
+    decision: "requires_agreement",
+    minDelayMs: 10_000,
+    reason:
+      "San Juan County NM. Its assessor's document library was the one free bulk tax roll found " +
+      "for either state — a 2026 tax roll published as CSV — and the host returns HTTP 403 to an " +
+      "ordinary request, including for /robots.txt, verified 2026-08-14. The crawl posture cannot " +
+      "be read without defeating the control, so the same stance as bid4assets and DataScout " +
+      "applies. The file is a public record: ask the assessor for it, or fetch it from a browser " +
+      "session, rather than working around the block.",
+  },
+  {
+    host: "data-sjcounty.opendata.arcgis.com",
+    decision: "allow",
+    minDelayMs: 60_000,
+    reason:
+      "San Juan County NM's ArcGIS Hub open-data portal. robots.txt permits `*` and declares " +
+      "`Crawl-delay: 60`, which is where the delay here comes from; only /sites/, /admin/ and " +
+      "session routes are disallowed — verified 2026-08-14. Its parcels dataset carries " +
+      "identifiers and geometry but no assessed or market values, so it does not answer the " +
+      "question on its own; the entry exists because the portal is the county's sanctioned bulk " +
+      "route and may publish a valued dataset later.",
+  },
+
   {
     host: "datascoutpro.com",
     decision: "requires_agreement",
