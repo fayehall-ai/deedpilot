@@ -28,7 +28,15 @@ export type Operation =
   | "pdf-extract"
   | "cartographer"
   | "brief"
-  | "enrich";
+  | "enrich"
+  /*
+   * A reader typing an address on the home page. Kept separate from `enrich`
+   * on purpose: batch enrichment is a background cost the desk chooses, and
+   * this one is spent per visitor and scales with traffic rather than with
+   * inventory. Folding them together would hide the only line on the bill that
+   * a stranger can increase.
+   */
+  | "property-lookup";
 
 export interface UsageRecord {
   provider: string;
