@@ -26,7 +26,13 @@
     "enrich:lots": "tsx scripts/enrich-lots.ts",
     "crawl:directory": "tsx scripts/crawl-directory.ts",
     "seed:schedules": "tsx scripts/seed-schedules.ts",
-    "promote:sources": "tsx scripts/promote-scout-sources.ts"
+    "promote:sources": "tsx scripts/promote-scout-sources.ts",
+    "enrich:status": "tsx scripts/enrichment-status.ts",
+    "enrich:cadastre": "tsx scripts/bulk-cadastre.ts",
+    "enrich:rentcast": "tsx scripts/bulk-rentcast.ts",
+    "enrich:geocode": "tsx scripts/geocode-lots.ts",
+    "enrich:discover": "tsx scripts/discover-parcel-layers.ts",
+    "enrich:verify": "tsx scripts/verify-parcel-layer.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
