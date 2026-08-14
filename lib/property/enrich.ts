@@ -11,6 +11,7 @@ import { rentcastProvider } from "./providers/rentcast";
 import { attomProvider } from "./providers/attom";
 import { batchdataProvider } from "./providers/batchdata";
 import { websearchProvider } from "./providers/websearch";
+import { cadastreProvider } from "./providers/cadastre";
 
 /**
  * ATTOM first for APN → assessed (max-bid).
@@ -24,6 +25,10 @@ import { websearchProvider } from "./providers/websearch";
  * never feed the ratio path that turns an assessment into an ARV.
  */
 const PROVIDERS: PropertyProvider[] = [
+  // The state's own assessor layer, where one is published. Ordered ahead of
+  // the paid providers because it is the source they aggregate, not a fallback
+  // for when they fail — and it is free, keyless and sub-second.
+  cadastreProvider,
   attomProvider,
   batchdataProvider,
   rentcastProvider,
