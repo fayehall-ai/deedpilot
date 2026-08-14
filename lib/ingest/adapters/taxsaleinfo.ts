@@ -114,6 +114,65 @@ const SEV_NOTE =
   "the delinquent tax year that was foreclosed upon. It is typically several years old and " +
   "may not reflect current market value.";
 
+/**
+ * Street and city out of a catalog card's description.
+ *
+ * ## The bug this replaces
+ *
+ * The old rule captured everything after "On" up to a comma. Descriptions
+ * frequently have no comma after the street, so the capture ran on into whatever
+ * followed. Of 2,128 Michigan lots carrying an address, 852 contained a
+ * truncation ellipsis and 494 contained "Sold for $":
+ *
+ *     'Wells Ave In Benton Harbor Sold for $5'   x77
+ *     '~4.25 ... Sold for $280'                  x58
+ *     '13.5 Acres On... Sold for $605'           x15
+ *
+ * That is not cosmetic. `address_line` is an input to property enrichment, which
+ * looks a property up *by address* — so a listing title in that field asks a
+ * provider to value a string containing a sale price, and any answer it returns
+ * belongs to a different property. A wrong address is worse than none: a null is
+ * skipped, a wrong one is trusted.
+ *
+ * ## The rule
+ *
+ * Take what follows "On", stop at the first thing that means the street has
+ * ended — a comma, a slash, " In " before a place, a semicolon, terminal
+ * punctuation, or the source's own truncation marker — then refuse the result
+ * unless it still looks like a street.
+ *
+ * Refusing is cheap. Every one of these lots carries a parcel number, and the
+ * detail page supplies a real `Address:` field when one exists; this only fills
+ * the gap before that runs. A miss costs nothing, a false positive costs a
+ * valuation.
+ */
+export function parseCatalogDescription(desc: string): { street?: string; city?: string } {
+  const truncated = /\.\.\.|\u2026/.test(desc);
+  const usable = desc.split(/\.\.\.|\u2026/)[0];
+  const body = usable.replace(/\bSold for\b.*$/i, "").trim();
+
+  const afterOn = body.match(/\bOn\s+(.+)$/i)?.[1];
+  if (!afterOn) return {};
+
+  const rawStreet = afterOn.split(/,|\/|;|\bIn\s+[A-Z]|!/)[0]?.trim();
+  const street = plausibleStreet(rawStreet) ? rawStreet : undefined;
+
+  const rawCity = truncated
+    ? undefined
+    : body.match(/,\s*([A-Z][A-Za-z .'-]{2,40})\s*$/)?.[1]?.trim();
+
+  return { street, city: rawCity || undefined };
+}
+
+/** Whether a captured fragment can be an address rather than prose. */
+function plausibleStreet(s: string | undefined): s is string {
+  if (!s || s.length < 3 || s.length > 60) return false;
+  if (/^~?[\d.]+\s*(acres?)?\b/i.test(s)) return false;
+  if (!/[A-Za-z]{3}/.test(s)) return false;
+  if (/sold for|minimum bid|\$|\.\.\.|\u2026/i.test(s)) return false;
+  return true;
+}
+
 export const taxSaleInfoAdapter: SourceAdapter = {
   name: "mi-taxsaleinfo",
   platform: "taxsaleinfo",
@@ -212,8 +271,7 @@ export const taxSaleInfoAdapter: SourceAdapter = {
         .trim();
 
       const acreage = Number(desc.match(/~?([\d.]+)\s*Acre/i)?.[1]);
-      const street = desc.match(/\bOn\s+([^,]{3,60})/i)?.[1]?.trim();
-      const city = desc.match(/,\s*([A-Z][A-Za-z .'-]{2,40})\s*$/)?.[1]?.trim();
+      const { street, city } = parseCatalogDescription(desc);
 
       lots.push({
         externalId: lotId,
