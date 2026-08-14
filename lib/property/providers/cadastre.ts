@@ -59,7 +59,13 @@ interface CadastreSource {
   parcelField: string;
   /** Field holding the 5-digit county FIPS, when the layer is statewide. */
   countyField?: string;
-  /** Assessor's assessed value — the ratio input. */
+  /**
+   * Assessor's assessed value — the ratio input.
+   *
+   * Empty where a state assesses in classes and no single ratio applies, in
+   * which case the market figure carries the parcel on its own. Better to price
+   * from a market value than to divide by a ratio that is wrong for the class.
+   */
   assessedField: string;
   /** Appraised market value, where published. */
   marketField?: string;
@@ -96,6 +102,34 @@ export const CADASTRE_SOURCES: Record<string, CadastreSource> = {
     ownerField: "OWNER_NAM1",
     addressField: "SITUS_ADDR",
     note: "Cobb County GA — public parcel layer, FMV and assessed value",
+  },
+
+  /*
+   * Greenville County, South Carolina — 3,461 lots, and the county I twice
+   * reported as having no queryable layer.
+   *
+   * The first hunt only probed the county's own domain. The second found
+   * "Greenville_Parcels" on ArcGIS Online and I announced the earlier call
+   * wrong; that layer turned out to be the town of Greenville, *Florida* — 197
+   * rows of Florida DOR fields at 30.3°N. This one is the real thing: 215,484
+   * rows, extent at 34.5°N / -82.75°W, and PIN values that match the sale list
+   * verbatim.
+   *
+   * `FAIRMKTVAL` only, and deliberately no assessed value. South Carolina
+   * assesses in classes — 4% owner-occupied, 6% other, 10.5% manufacturing —
+   * so there is no single ratio to divide by and `compute_maxbid` would apply
+   * the wrong one. A fair market value prices the parcel directly and skips the
+   * question, which is what the SC statute proposal recommended before any of
+   * this existed. `TAXMKTVAL` is left alone because it is not established here
+   * whether it is net of exemptions.
+   */
+  "45045": {
+    url: "https://services.arcgis.com/zTM0LZtJeE1HzO09/arcgis/rest/services/kx_greenville_county_sc_tax_parcel_SHP/FeatureServer/0/query",
+    parcelField: "PIN",
+    assessedField: "",
+    marketField: "FAIRMKTVAL",
+    landField: "LANDVAL",
+    note: "Greenville County SC — tax parcels, fair market value (classified ratios: no single assessed ratio)",
   },
 
   AR: {
@@ -157,7 +191,7 @@ export const cadastreProvider: PropertyProvider = {
         where: clauses.join(" AND "),
         outFields: [
           src.parcelField,
-          src.assessedField,
+          src.assessedField || undefined,
           src.marketField,
           src.landField,
           src.ownerField,
@@ -185,7 +219,7 @@ export const cadastreProvider: PropertyProvider = {
       if (rows.length !== 1) continue;
 
       const a = rows[0].attributes;
-      const assessed = num(a[src.assessedField]);
+      const assessed = src.assessedField ? num(a[src.assessedField]) : undefined;
       const market = src.marketField ? num(a[src.marketField]) : undefined;
       if (assessed === undefined && market === undefined) continue;
 
