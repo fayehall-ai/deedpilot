@@ -132,6 +132,44 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
   // parcels that are not for sale, which is the failure `listing_kind` exists
   // to catch. The entries are here because policy is decided per host, before
   // anyone writes the code that fetches.
+  // --- Assessor portal platforms, added 2026-08-14 -------------------------
+  //
+  // Reached while looking for a free route to the counties the parcel-layer
+  // pipeline cannot answer: Franklin MO, Sandoval and Rio Arriba NM, and the
+  // Greenville SC and Jefferson LA remainders. These platforms host the
+  // assessor's own record for hundreds of counties, which is the data every
+  // aggregator resells — so the question of whether we may read them is worth
+  // settling once, here, rather than per county.
+  {
+    host: "qpublic.schneidercorp.com",
+    decision: "requires_agreement",
+    minDelayMs: 5000,
+    reason:
+      "Schneider Geospatial's qPublic/Beacon — the assessor portal for hundreds of counties " +
+      "across GA, AL, SC, FL, MS and TN, and the single largest free source of parcel values " +
+      "that is not a GIS layer. Two independent reasons not to crawl it, verified 2026-08-14. " +
+      "Its robots.txt allows `*` but names ClaudeBot and a dozen other automated agents with " +
+      "`Disallow: /`, and carries `Content-Signal: search=yes, ai-train=no, use=reference` — a " +
+      "posture that permits indexing and refuses automated collection. Separately, an ordinary " +
+      "request to an Application.aspx page returns HTTP 403, so there is an active edge control " +
+      "as well as a stated one. Either alone would settle it; together they leave no reading " +
+      "where a crawler is welcome. The data is a public record at source, so the route is the " +
+      "county assessor directly, or Schneider's own terms.",
+  },
+  {
+    host: "www.greenvillecounty.org",
+    decision: "allow",
+    minDelayMs: 5000,
+    reason:
+      "Greenville County SC's own site, hosting the Real Property Search behind its tax " +
+      "collector pages. robots.txt permits `*` and disallows only /COM/, /newlook/, /pdf/ and a " +
+      "set of /SCJD/ court-system paths; the property routes are not among them — verified " +
+      "2026-08-14. This is the government source of record and the policy's preferred route. " +
+      "Not currently needed: the county's parcel layer already answers 93% of its lots at 110ms " +
+      "with no scraping at all, and this entry exists so the remaining 253 can be pursued " +
+      "without re-deciding the question.",
+  },
+
   {
     host: "datascoutpro.com",
     decision: "requires_agreement",
