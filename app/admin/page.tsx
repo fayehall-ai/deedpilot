@@ -62,6 +62,28 @@ export default function AdminPage(props: PageProps<"/admin">) {
 }
 
 async function Gate({ searchParams }: { searchParams: PageProps<"/admin">["searchParams"] }) {
+  /*
+   * Request time, explicitly, before anything reads the cookie.
+   *
+   * Without this the gate resolved during prerendering. At build time there is
+   * no cookie, so `isAdmin()` returned false and the *sign-in form* was baked
+   * into the static shell — then Vercel served that shell from its CDN with
+   * `x-vercel-cache: HIT` and an age of ten minutes. An operator holding a
+   * valid `dp_admin` cookie got the anonymous prerender and the console never
+   * appeared, because their request never reached a function.
+   *
+   * `vary` on this route lists rsc and the router headers and does NOT list
+   * Cookie, so one cached copy is served to everybody. That is the whole bug,
+   * and it also means the reverse would be far worse: if an authenticated
+   * render were ever cached, every anonymous visitor would receive the
+   * operations console. Pinning the gate to request time prevents both.
+   *
+   * The module header already said this page must never be cached. It said so
+   * about `unstable_instant` and did not account for `cacheComponents` making
+   * prerendering the default for everything else.
+   */
+  await connection();
+
   const params = await searchParams;
   const { e } = params;
 
