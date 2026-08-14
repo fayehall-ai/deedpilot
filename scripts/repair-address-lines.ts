@@ -24,6 +24,20 @@
  * afterwards. Nulling on absence would erase a good address every time the
  * catalog refreshed — trading a wrong value for a lost one.
  *
+ * ## Parcel numbers too
+ *
+ * The same failure reached a different column. Seven of St Charles County
+ * Missouri's eight lots carry prose in `parcel_number`, one of them 879
+ * characters of the statute's own specimen deed — "Therefore, this indenture,
+ * made this ______ day of ______, 20______, between the state of Missouri, by
+ * C. D., collector of said ______ County…". An extractor read the statutory form
+ * printed beside the sale list as if it were parcel data.
+ *
+ * A parcel number is short and mostly digits. Prose in that column cannot match
+ * any assessor layer, and every lookup it is handed is a wasted request — so it
+ * is cleared on the same reasoning as the addresses: a null is skipped, a wrong
+ * value is tried.
+ *
  * ## Why these patterns are safe to clear
  *
  * Each is impossible in a real address: a dollar sign, the literal "sold for",
@@ -52,12 +66,35 @@ const CORRUPT_CITY = sql`(
   OR city ILIKE '%sold for%'
 )`;
 
+/**
+ * Parcel identifiers are short and mostly digits; prose is not one.
+ *
+ * Two different faults land here and they need different remedies.
+ *
+ * Recoverable: a real identifier with commentary appended — Bell County TX
+ * publishes `105238; Judgment Through Tax Year: 2024`, where `105238` is the
+ * parcel and the rest is a note. Trimming at the separator keeps 31 usable ids
+ * that clearing would have thrown away.
+ *
+ * Not recoverable: a value that was never an identifier — Michigan's "Multiple -
+ * See Below", and St Charles County MO's 879 characters of the statute's own
+ * specimen deed. Those are nulled.
+ */
+const RECOVERABLE_PARCEL = sql`(parcel_number ~ '^[0-9][0-9.\-]{2,}[;,] ')`;
+
+const CORRUPT_PARCEL = sql`(
+  (length(parcel_number) > 40 OR parcel_number ~ '[a-z]{5}')
+  AND NOT ${sql`(parcel_number ~ '^[0-9][0-9.\-]{2,}[;,] ')`}
+)`;
+
 async function main() {
   const before = await db.execute(sql`
     SELECT count(*) FILTER (WHERE ${CORRUPT})::int bad_address,
-           count(*) FILTER (WHERE ${CORRUPT_CITY})::int bad_city
+           count(*) FILTER (WHERE ${CORRUPT_CITY})::int bad_city,
+           count(*) FILTER (WHERE ${CORRUPT_PARCEL})::int bad_parcel,
+           count(*) FILTER (WHERE ${RECOVERABLE_PARCEL})::int trimmable_parcel
     FROM lots`);
-  console.log("\nRows holding a value that cannot be an address:");
+  console.log("\nRows holding a value that cannot be what its column says:");
   console.table(before as unknown as object[]);
 
   const sample = await db.execute(sql`
@@ -72,11 +109,18 @@ async function main() {
 
   await db.execute(sql`UPDATE lots SET address_line = NULL WHERE ${CORRUPT}`);
   await db.execute(sql`UPDATE lots SET city = NULL WHERE ${CORRUPT_CITY}`);
+  // Trim before nulling, so a recoverable id is not caught by the broader rule.
+  await db.execute(sql`
+    UPDATE lots SET parcel_number = split_part(parcel_number, ';', 1)
+    WHERE ${RECOVERABLE_PARCEL}`);
+  await db.execute(sql`UPDATE lots SET parcel_number = NULL WHERE ${CORRUPT_PARCEL}`);
 
   const after = await db.execute(sql`
     SELECT count(*) FILTER (WHERE ${CORRUPT})::int bad_address,
            count(*) FILTER (WHERE ${CORRUPT_CITY})::int bad_city,
-           count(address_line)::int addresses_remaining
+           count(*) FILTER (WHERE ${CORRUPT_PARCEL})::int bad_parcel,
+           count(address_line)::int addresses_remaining,
+           count(parcel_number)::int parcels_remaining
     FROM lots`);
   console.log("after:");
   console.table(after as unknown as object[]);
