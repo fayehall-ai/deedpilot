@@ -9,6 +9,8 @@ import { CalendarView } from "@/components/calendar-view";
 import { AtlasStates } from "@/components/atlas-states";
 import { AtlasExplorer } from "@/components/atlas-explorer";
 import { STATE_PATHS } from "@/lib/atlas/geo";
+import { connection } from "next/server";
+import { getUpcomingAuctions } from "@/lib/queries";
 import { CoverageReport } from "@/components/coverage-report";
 import { PricingPlans } from "@/components/pricing-plans";
 
@@ -50,6 +52,40 @@ import { PricingPlans } from "@/components/pricing-plans";
  * The action stops itself at 55s, well inside this.
  */
 export const maxDuration = 120;
+
+/**
+ * The map, once the sale calendar has loaded.
+ *
+ * Separated so the map paints from the static shell and the auction list fills
+ * in behind it. The fallback is the same map without sales rather than a
+ * skeleton — the geography is already known, and flashing a grey box in place of
+ * something we can render is a worse trade than a list arriving a moment late.
+ */
+async function ExplorerWithAuctions() {
+  /*
+   * Request time, before the query. `getUpcomingAuctions` filters on today, so
+   * without this the build refuses it as uncached data — and rightly: a "today"
+   * resolved at build time would freeze into the prefetched shell and start
+   * listing sales that have already happened. `AuctionsList` marks the same
+   * boundary for the same reason.
+   */
+  await connection();
+  const rows = await getUpcomingAuctions({});
+  return (
+    <AtlasExplorer
+      states={STATE_PATHS}
+      auctions={rows.map((r) => ({
+        id: r.id,
+        saleDate: r.saleDate,
+        state: r.state,
+        countyFips: r.countyFips,
+        countyName: r.countyName,
+        lotCount: r.lotCount ?? 0,
+        saleType: r.saleType ?? null,
+      }))}
+    />
+  );
+}
 
 export default function HomePage(props: PageProps<"/">) {
   return (
@@ -104,11 +140,8 @@ export default function HomePage(props: PageProps<"/">) {
       {/* --- Calendar ------------------------------------------------------ */}
       <section id="calendar" className="scroll-mt-16 border-b border-border bg-surface-2/20">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+          <div className="mb-6">
             <h2 className="text-2xl font-semibold tracking-tight">What is selling, and when</h2>
-            <Link href="/calendar" className="text-sm text-muted underline hover:text-foreground">
-              Open the full calendar
-            </Link>
           </div>
           <Suspense fallback={<CalendarSkeleton />}>
             <CalendarView searchParams={props.searchParams} basePath="/" />
@@ -122,11 +155,8 @@ export default function HomePage(props: PageProps<"/">) {
           on this page is not something a search engine can index. */}
       <section id="atlas" className="scroll-mt-16 border-b border-border bg-surface-2/20">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+          <div className="mb-6">
             <h2 className="text-2xl font-semibold tracking-tight">Rules for every county</h2>
-            <Link href="/atlas" className="text-sm text-muted underline hover:text-foreground">
-              Open the atlas
-            </Link>
           </div>
           {/*
             Map first, list second. The map answers "what kind of state is
@@ -134,7 +164,14 @@ export default function HomePage(props: PageProps<"/">) {
             is scannable, searchable by the browser's own find, and reachable
             without a pointing device.
           */}
-          <AtlasExplorer states={STATE_PATHS} />
+          {/*
+            The map is fed the sale calendar so a county click can answer "and
+            when does it sell" without leaving. Behind its own boundary because
+            the map itself is static and should not wait on a query.
+          */}
+          <Suspense fallback={<AtlasExplorer states={STATE_PATHS} />}>
+            <ExplorerWithAuctions />
+          </Suspense>
           <details className="group/states mt-8">
             <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
               <span aria-hidden className="transition-transform group-open/states:rotate-90">
@@ -152,13 +189,10 @@ export default function HomePage(props: PageProps<"/">) {
       {/* --- Coverage ------------------------------------------------------ */}
       <section id="coverage" className="scroll-mt-16 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+          <div className="mb-6">
             <h2 className="text-2xl font-semibold tracking-tight">
               What we cover, and what we do not
             </h2>
-            <Link href="/coverage" className="text-sm text-muted underline hover:text-foreground">
-              Full coverage report
-            </Link>
           </div>
           {/* compact: the per-county ingest log is 200 rows of ops detail. */}
           <CoverageReport compact />

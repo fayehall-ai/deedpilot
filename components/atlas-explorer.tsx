@@ -21,6 +21,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { CountyDetail, StatePath, StatePayload } from "@/lib/atlas/geo";
 import { NATIONAL_VIEWBOX } from "@/lib/atlas/geo";
 import { num } from "@/lib/format";
+import { CountyAuctions, type AuctionRow } from "./county-auctions";
 
 /** A modified click means the reader wants a new tab — never intercept it. */
 function opensElsewhere(e: React.MouseEvent) {
@@ -66,8 +67,18 @@ const TYPE_COLOR: Record<string, string> = {
 export function AtlasExplorer({
   states,
   initialState = null,
+  auctions = [],
 }: {
   states: StatePath[];
+  /**
+   * Every upcoming sale, filtered in the browser as the selection changes.
+   *
+   * Passed whole rather than fetched per click: it is about a hundred and forty
+   * rows, and a request on every county would make the map feel slower than the
+   * question deserves. "Which counties sell what" and "when do they sell" are
+   * one question, and this is the half that used to live behind a nav item.
+   */
+  auctions?: AuctionRow[];
   /**
    * Open on a state from the first paint. `/atlas/<state>` passes its own
    * payload so the page arrives already drilled in — the county map is in the
@@ -136,7 +147,8 @@ export function AtlasExplorer({
   }, [county, openState]);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <div>
         {/*
           Controls above the map, driving the same state the map clicks do.
@@ -456,7 +468,26 @@ export function AtlasExplorer({
       </div>
 
       <DetailPanel state={openState} county={county} />
-    </div>
+      </div>
+
+      {/*
+        Sales sit under the map, not behind a nav item.
+        
+        Choosing a county and asking "does it have a sale coming up" used to mean
+        leaving for /auctions and coming back — which made comparing two counties
+        a round trip each. The answer now appears where the question was asked.
+        
+        Unfiltered it stays collapsed: a wall of dates answers a question nobody
+        has asked yet. Once a county is chosen it opens, because at that point it
+        is the answer rather than an aside.
+      */}
+      <CountyAuctions
+        auctions={auctions}
+        countyFips={county?.fips ?? null}
+        countyLabel={county?.label ?? null}
+        stateAbbr={openState?.abbr ?? null}
+      />
+    </>
   );
 }
 
