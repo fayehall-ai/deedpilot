@@ -20,6 +20,36 @@ export interface LookupState {
   error?: string;
 }
 
+/**
+ * Longer than a search takes and shorter than the function may run.
+ *
+ * A cold lookup is around 27 seconds and has been seen past 45. When the
+ * platform kills the function instead, the browser gets a dead response and
+ * renders "This page couldn't load" — a full-page error, with nothing in the
+ * runtime log to explain it, for what is really just a slow search.
+ *
+ * Failing on our own terms turns that into a sentence the reader can act on.
+ */
+const BUDGET_MS = 55_000;
+
+function timeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<never>((_, reject) =>
+      setTimeout(
+        () =>
+          reject(
+            new Error(
+              "That search took longer than a minute and was stopped. Sources were slow to " +
+                "respond — try again, or add the city and ZIP to narrow it.",
+            ),
+          ),
+        ms,
+      ),
+    ),
+  ]);
+}
+
 export async function lookupProperty(
   _prev: LookupState | null,
   formData: FormData,
@@ -45,8 +75,12 @@ export async function lookupProperty(
       };
     }
 
-    const retrieval = await retrievePhase(query);
-    const { data, citations } = await extractPhase(query, retrieval);
+    const started = Date.now();
+    const retrieval = await timeout(retrievePhase(query), BUDGET_MS);
+    const { data, citations } = await timeout(
+      extractPhase(query, retrieval),
+      Math.max(5_000, BUDGET_MS - (Date.now() - started)),
+    );
     await cache.putCached(query, data, citations);
     return { query, data, citations, ageHours: 0 };
   } catch (e) {
