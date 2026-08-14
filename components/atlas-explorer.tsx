@@ -481,10 +481,20 @@ function Swatch({
 /**
  * The panel beside the map.
  *
- * Deliberately a summary, not the county page. Everything here is already on
- * `/atlas/<state>/<county>` with its sources and check dates, and that page is
- * what a person should read before bidding — the panel exists to let someone
- * compare several counties quickly without losing the map.
+ * This used to describe itself as "deliberately a summary, not the county page",
+ * and it is no longer true. The panel grew until it carried surviving liens,
+ * quiet title, auction format, platform, frequency, deposit rules, offices,
+ * notes, check dates and sources — everything on `/atlas/<state>/<county>`
+ * except state-level deal maths, which belongs with the state anyway.
+ *
+ * The "Full county page →" link outlived that. It was pitched as "more detail"
+ * while leading to a near-copy, and it cost the reader their place in the map to
+ * get there. Removed, along with the equivalent state link, whose page adds only
+ * a grid of county cards — and the map is a better county grid.
+ *
+ * Both pages still exist and are still worth having as shareable, indexable URLs
+ * for someone arriving from search. The map simply should not be a funnel out of
+ * itself.
  */
 function DetailPanel({
   state,
@@ -518,12 +528,18 @@ function DetailPanel({
         {state.stateNotes ? (
           <p className="mt-3 text-sm leading-relaxed text-muted">{state.stateNotes}</p>
         ) : null}
-        <a
-          href={`/atlas/${state.slug}`}
-          className="mt-4 inline-block text-sm underline hover:text-foreground"
-        >
-          Full {state.name} page →
-        </a>
+        {/*
+          No "full state page" link.
+          
+          That page's only addition over this panel is a grid of county cards,
+          and the map beside this is a better county grid — spatial, filterable,
+          and already open. Sending someone there traded a good interface for a
+          worse copy of it and cost them their place in the map.
+          
+          The page still exists and is still worth having as a shareable,
+          indexable URL for someone arriving from search. The map simply should
+          not be a funnel out of itself.
+        */}
       </aside>
     );
   }
@@ -660,12 +676,19 @@ function DetailPanel({
         </p>
       )}
 
-      <a
-        href={`/atlas/${state.slug}/${county.slug}`}
-        className="mt-4 inline-block text-sm underline hover:text-foreground"
-      >
-        Full county page →
-      </a>
+      {/*
+        No "full county page" link.
+
+        That page's remaining addition over this panel is state-level deal maths,
+        which belongs with the state rather than repeated under every county in
+        it. Everything else it holds — surviving liens, quiet title, format,
+        platform, frequency, deposit, offices, notes, and the sources above — is
+        already here.
+
+        I removed this link believing the citations lived only on that page and
+        would be stranded. They were already in this panel, a few lines up. The
+        link was duplicating a panel that had quietly become complete.
+      */}
     </aside>
   );
 }
