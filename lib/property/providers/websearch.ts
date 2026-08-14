@@ -280,11 +280,29 @@ If the address is ambiguous or you cannot find this exact property, set
 found=false and explain in basis. Do not report a nearby or similar property.`;
 }
 
-/** Phase one: the pages, and the search engine's own summary of them. */
+/**
+ * Phase one: the pages, and the search engine's own summary of them.
+ *
+ * Returns an empty retrieval rather than throwing when the fast path is
+ * unavailable, so `extractPhase` falls through to the browsing model.
+ *
+ * This shipped throwing, and production showed a reader "That search could not
+ * run. TAVILY_API_KEY is not set" — the key is in `.env.local`, which is
+ * gitignored and never reached the deployment. An optional accelerator that
+ * takes the whole feature down when it is absent is worse than not having it:
+ * the browsing path still works, is slower, and was right there.
+ */
 export async function retrievePhase(address: string) {
   const query = validateQuery(address);
-  const { retrieveForAddress } = await import("../tavily");
-  return retrieveForAddress(query);
+  const { retrieveForAddress, tavilyConfigured } = await import("../tavily");
+  const empty = { answer: null, sources: [] as never[], ms: 0 };
+  if (!tavilyConfigured()) return empty;
+  try {
+    return await retrieveForAddress(query);
+  } catch {
+    // Down, rate limited or misconfigured — all the same answer here.
+    return empty;
+  }
 }
 
 /**
