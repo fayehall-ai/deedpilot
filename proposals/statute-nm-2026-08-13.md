@@ -108,9 +108,30 @@ Three details worth carrying into the entry:
 - The section was last amended in 1982, so unlike Louisiana there is no recent
   act to check behind it.
 
-Caveat on provenance: the cited justia URL was unfetchable and the text was read
-via a search fallback (casemine, legalfix, findlaw). The section and quote are
-checkable, but this is a second-hand read of a primary source, not a direct one.
+Two further points from the same section: the deed is executed by the division
+upon receipt of payment (subsection A), and the sale itself is governed by
+§ 7-38-67. The section was enacted by Laws 1973 ch. 258 § 110 and no redemption
+period appears anywhere in it.
+
+### Provenance — checked twice, independently
+
+The cited justia URL was unfetchable, so both passes fell back to search. That
+would normally be a reason to discount the result. Here it is the opposite,
+because the fallback ran **twice against disjoint sources**:
+
+| | sources actually read |
+|---|---|
+| pass 1 | nmlegis.gov SB0306, NM Court of Appeals opinion PDF, justia 2011 archive, sourcenm land-banking report |
+| pass 2 | casemine, legalfix, findlaw |
+
+No overlap — and both returned the **identical quote, word for word**, the same
+subsection, the same two-year bar in (C), and the same four grounds in (D).
+
+That is what the verbatim requirement exists for. A paraphrase agreeing twice
+would prove only that a model is consistent; two disjoint reads producing the
+same sentence character-for-character is evidence about the *text*. `redemption:
+null` for New Mexico rests on stronger ground than a single direct fetch would
+have given it.
 
 ## Why it cannot be measured yet
 
