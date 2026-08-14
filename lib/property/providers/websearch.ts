@@ -31,14 +31,21 @@
  * handling for a number that came from a listing site. The rule is enforced by
  * `stripAssessed` below rather than left to prompt discipline, and tested.
  *
- * ## Why no Tavily leg
+ * ## Retrieval, and why there are two paths
  *
- * `TAVILY_API_KEY` is configured and available. It is not used here because
- * `runSearched` already performs live web search provider-side, with citations,
- * usage accounting and the retry behaviour this project has already tuned. A
- * second retrieval path would be a second thing to maintain for no measured
- * gain. If a comparison ever shows Tavily finding parcels this misses, the seam
- * to add it is `retrieve()` — deliberately factored out for that.
+ * This originally handed the whole job to `runSearched`, letting the model
+ * browse. Measured on one address that was **114.6 seconds, 15 searches and 49
+ * citations** — nothing told it when to stop looking.
+ *
+ * One Tavily call for the same address took **4.8 seconds** and both paths
+ * arrived at the same figure, so the browsing pass bought nothing but its own
+ * thoroughness. `retrieve()` now searches once and extracts with
+ * `runStructured`, which does not browse and therefore only has to read.
+ *
+ * The browsing path remains as the fallback, because Tavily returns snippets
+ * from pages it has already indexed: a question needing a county portal walked
+ * or a form filled still wants the model that can do it. Fast path for the
+ * common case, general path when the fast one comes back empty.
  */
 
 import { z } from "zod";
@@ -103,7 +110,48 @@ async function retrieve<T extends z.ZodType>(
   prompt: string,
   schema: T,
   operation: "enrich" | "property-lookup",
+  /** Free-text identity for the search engine. Omitted for the browsing path. */
+  searchFor?: string,
 ) {
+  const { tavilyConfigured } = await import("../tavily");
+
+  /*
+   * Fast path: retrieve once, then extract.
+   *
+   * Measured on 350 5th Ave — the browsing model took 114.6s across 15 searches
+   * and 49 citations; Tavily returned the pages in 4.8s and both arrived at the
+   * same figure. `runStructured` does not browse, so the extraction step only
+   * has to read what came back.
+   */
+  if (searchFor && tavilyConfigured()) {
+    try {
+      const { retrieveForAddress, asContext } = await import("../tavily");
+      const { runStructured } = await import("../../ai/providers");
+      const r = await retrieveForAddress(searchFor);
+      if (r.sources.length > 0) {
+        const result = await runStructured({
+          system: SYSTEM,
+          prompt: `${prompt}\n\nRead ONLY the sources below. Cite the URLs you actually used.\n\n${asContext(r)}`,
+          schema,
+          schemaName: "property_lookup",
+          operation,
+          maxTokens: 8000,
+        });
+        return {
+          ...result,
+          citations: r.sources.map((s) => ({ url: s.url, title: s.title })),
+          searchCount: 1,
+        };
+      }
+    } catch {
+      /*
+       * Retrieval failing is not the question failing. Tavily being down, rate
+       * limited or empty falls through to the browsing model, which is slower
+       * and more thorough — the right trade when the fast path has nothing.
+       */
+    }
+  }
+
   const { runSearched } = await import("../../ai/providers");
   return runSearched({
     system: SYSTEM,
@@ -186,7 +234,7 @@ address above is a description rather than a street address (some tax notices
 publish "ON MAPLE ST NW" with no number), say found=false unless the parcel
 number resolves it on the assessor site.`;
 
-    const { data } = await retrieve(prompt, PropertySchema, "enrich");
+    const { data } = await retrieve(prompt, PropertySchema, "enrich", identity || (input.parcelNumber ?? undefined));
     return toRecord(data, "websearch");
   },
 };
@@ -220,6 +268,6 @@ of record. Then a listing site for a current market estimate.
 If the address is ambiguous or you cannot find this exact property, set
 found=false and explain in basis. Do not report a nearby or similar property.`;
 
-  const result = await retrieve(prompt, PropertySchema, "property-lookup");
+  const result = await retrieve(prompt, PropertySchema, "property-lookup", query);
   return { data: result.data, citations: result.citations };
 }
