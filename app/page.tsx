@@ -43,6 +43,14 @@ import { PricingPlans } from "@/components/pricing-plans";
  * correctly. Anything added here should keep that shape: cached and prerendered
  * unless it truly cannot be, and never nested inside another boundary.
  */
+/*
+ * The property lookup is a server action invoked from this route, so its ceiling
+ * is this route's. A cold search is ~27s and has run past 45; the default is not
+ * something to find out about from a reader seeing "This page couldn't load".
+ * The action stops itself at 55s, well inside this.
+ */
+export const maxDuration = 120;
+
 export default function HomePage(props: PageProps<"/">) {
   return (
     <div>
