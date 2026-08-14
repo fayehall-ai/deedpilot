@@ -15,7 +15,7 @@ import { AuctionOverridesPanel } from "./auction-overrides-panel";
 import { PlanPanel } from "./plan-panel";
 import { Stage, Collapsed } from "@/components/stage";
 import { whatNeedsAttention } from "@/lib/admin/attention";
-import { buildCoverageFunnel } from "@/lib/coverage/funnel";
+import { DiscoverSummary, FunnelBars, PriceSummary, SummaryPending } from "./coverage-summary";
 import { SourcesPanel } from "./sources-panel";
 import { CapePanel } from "./cape-panel";
 import { PolicyPanel } from "./policy-panel";
@@ -171,7 +171,7 @@ async function Body({
    */
   await connection();
 
-  const [adapters, runs, inventory, cape, queue, schedules, sourceOv, policyOv, attention, funnel] =
+  const [adapters, runs, inventory, cape, queue, schedules, sourceOv, policyOv, attention] =
     await Promise.all([
       getAdapterHealth(),
       getRecentRuns(40),
@@ -182,7 +182,6 @@ async function Body({
       getSourceOverrides(),
       getPolicyOverrides(),
       whatNeedsAttention(),
-      buildCoverageFunnel(),
     ]);
   const policies = getPolicies();
 
@@ -242,8 +241,11 @@ async function Body({
           n={1}
           title="Discover"
           question="Where does each county publish its sale list?"
-          state={funnel.stages[1].counties < funnel.totalCounties / 2 ? "attention" : "ok"}
-          summary={`${funnel.stages[1].counties.toLocaleString()} counties sourced`}
+          summary={
+            <Suspense fallback={<SummaryPending />}>
+              <DiscoverSummary />
+            </Suspense>
+          }
         >
           <Suspense fallback={<TableSkeleton />}>
             <ScoutPanel />
@@ -307,29 +309,16 @@ async function Body({
           title="Price"
           question="How much of what we hold can a subscriber actually act on?"
           state={blocked.length > 0 ? "blocked" : "ok"}
-          summary={`${funnel.headline.toLocaleString()} of ${funnel.totalCounties.toLocaleString()} counties priceable`}
+          summary={
+            <Suspense fallback={<SummaryPending />}>
+              <PriceSummary />
+            </Suspense>
+          }
           defaultOpen={blocked.length > 0}
         >
-          <Card>
-            <div className="space-y-1.5">
-              {funnel.stages.map((st) => (
-                <div key={st.key} className="flex items-center gap-3 text-sm">
-                  <span className="w-16 shrink-0 text-right tabular-nums font-medium">
-                    {st.counties.toLocaleString()}
-                  </span>
-                  <span
-                    className="h-2 shrink-0 rounded-sm bg-accent"
-                    style={{ width: `${Math.max(2, st.share * 160)}px` }}
-                    aria-hidden
-                  />
-                  <span className="min-w-0">
-                    {st.label}
-                    {st.needs !== "—" && <span className="ml-2 text-xs text-muted">needs {st.needs}</span>}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Card>
+          <Suspense fallback={<TableSkeleton />}>
+            <FunnelBars />
+          </Suspense>
           <Collapsed label="Inventory by state" count={inventory.states.length}>
             <InventoryPanel inventory={inventory} />
           </Collapsed>
