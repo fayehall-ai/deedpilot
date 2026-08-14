@@ -73,6 +73,15 @@ interface CadastreSource {
   ownerField?: string;
   /** Situs address, where the layer carries one. */
   addressField?: string;
+  /**
+   * Fields to add together for a market value, where the assessor splits it.
+   *
+   * Lincoln County NM publishes `GTVALL` for land and `GTVALI` for improvements
+   * and no total anywhere — a parcel with a house on it reads as land-only
+   * unless the two are added. Summing is the layer's own arithmetic, not an
+   * estimate, so it is safe in a way that inferring a total never would be.
+   */
+  marketSumFields?: string[];
   note: string;
 }
 
@@ -130,6 +139,27 @@ export const CADASTRE_SOURCES: Record<string, CadastreSource> = {
     marketField: "FAIRMKTVAL",
     landField: "LANDVAL",
     note: "Greenville County SC — tax parcels, fair market value (classified ratios: no single assessed ratio)",
+  },
+
+  /*
+   * Lincoln County, New Mexico. Surfaced by verified discovery and left unwired
+   * for a day because the verifier reported `VALIDATIONSTATUS` as its value
+   * field — the field regex matched "val" inside "VALIDATION". The real figures
+   * are GTVALL and GTVALI, populated on 38,807 of 39,223 rows.
+   *
+   * No assessed value is written. New Mexico's own ratio is unsettled — the
+   * Cartographer found the statute defines a market value and a separate 33 1/3%
+   * tax ratio, with a 3% annual cap distorting the base — so a market figure
+   * priced directly is the honest input and skips the question.
+   */
+  "35027": {
+    url: "https://services.arcgis.com/4YineAQdtmx0tv46/arcgis/rest/services/Parcel_LincolnNM/FeatureServer/0/query",
+    parcelField: "PIN",
+    assessedField: "",
+    marketField: "",
+    marketSumFields: ["GTVALL", "GTVALI"],
+    landField: "GTVALL",
+    note: "Lincoln County NM — parcels; land + improvement values summed",
   },
 
   AR: {
@@ -192,7 +222,8 @@ export const cadastreProvider: PropertyProvider = {
         outFields: [
           src.parcelField,
           src.assessedField || undefined,
-          src.marketField,
+          src.marketField || undefined,
+          ...(src.marketSumFields ?? []),
           src.landField,
           src.ownerField,
           src.addressField,
@@ -220,7 +251,18 @@ export const cadastreProvider: PropertyProvider = {
 
       const a = rows[0].attributes;
       const assessed = src.assessedField ? num(a[src.assessedField]) : undefined;
-      const market = src.marketField ? num(a[src.marketField]) : undefined;
+      /*
+       * A summed market value counts as present when ANY part is, because a
+       * vacant lot legitimately has improvements of zero — requiring both would
+       * discard every unimproved parcel, which is most of a tax sale.
+       */
+      const summed = src.marketSumFields?.length
+        ? src.marketSumFields.reduce<number | undefined>((total, f) => {
+            const v = num(a[f]);
+            return v === undefined ? total : (total ?? 0) + v;
+          }, undefined)
+        : undefined;
+      const market = (src.marketField ? num(a[src.marketField]) : undefined) ?? summed;
       if (assessed === undefined && market === undefined) continue;
 
       return {
