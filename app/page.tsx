@@ -49,6 +49,12 @@ export default function HomePage(props: PageProps<"/">) {
       {/* --- Hero --------------------------------------------------------- */}
       <section className="border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+          {/*
+            The lookup sits top-right rather than under the copy: it is the one
+            thing on this page a visitor might arrive already wanting to do, and
+            it now answers in place instead of navigating away.
+          */}
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-widest text-accent">
               Tax deed &amp; foreclosure auctions
@@ -76,8 +82,11 @@ export default function HomePage(props: PageProps<"/">) {
                 Explore the atlas — free
               </Link>
             </div>
+          </div>
 
+          <div className="w-full lg:w-[26rem] lg:shrink-0">
             <PropertySearch />
+          </div>
           </div>
 
           <HeroStats />
