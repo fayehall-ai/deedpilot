@@ -10,16 +10,24 @@ import { ProviderUnavailableError } from "./types";
 import { rentcastProvider } from "./providers/rentcast";
 import { attomProvider } from "./providers/attom";
 import { batchdataProvider } from "./providers/batchdata";
+import { websearchProvider } from "./providers/websearch";
 
 /**
  * ATTOM first for APN → assessed (max-bid).
  * BatchData next for address/owner when ATTOM misses or for address fills.
- * RentCast last (address + AVM; needs street).
+ * RentCast next (address + AVM; needs street).
+ * Web search LAST, and only because the three above can all be unavailable at
+ * once — which is the state they are in today: ATTOM 401, BatchData out of
+ * credits, RentCast healthy but unable to use a notice that publishes no street
+ * number. A searched answer is weaker evidence than any parcel API and is
+ * ordered to say so; it also cannot write `assessedValue` at all, so it can
+ * never feed the ratio path that turns an assessment into an ARV.
  */
 const PROVIDERS: PropertyProvider[] = [
   attomProvider,
   batchdataProvider,
   rentcastProvider,
+  websearchProvider,
 ];
 
 export function configuredEnrichmentProviders(): string[] {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PropertySearch } from "@/components/property-search";
 import { Suspense } from "react";
 import { getPlatformStats } from "@/lib/queries";
 import { num } from "@/lib/format";
@@ -75,6 +76,8 @@ export default function HomePage(props: PageProps<"/">) {
                 Explore the atlas — free
               </Link>
             </div>
+
+            <PropertySearch />
           </div>
 
           <HeroStats />
