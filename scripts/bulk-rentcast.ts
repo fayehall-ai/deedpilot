@@ -23,7 +23,7 @@
 import "../lib/env";
 import { and, eq, isNull, isNotNull, sql } from "drizzle-orm";
 import { db } from "../lib/db";
-import { lots, auctions, counties } from "../lib/db/schema";
+import { lots, auctions, counties, lotValuations } from "../lib/db/schema";
 import { rentcastProvider } from "../lib/property/providers/rentcast";
 import { applyRecordToLot } from "../lib/property/enrich";
 
@@ -45,6 +45,16 @@ async function main() {
     process.exit(1);
   }
 
+  /*
+   * "Already valued" must mean either kind of value, not just an assessed one.
+   *
+   * The first version tested `assessedValue IS NULL`, and RentCast writes a
+   * *market* value — so every lot it had successfully valued still looked
+   * unvalued on the next run and was queried again. A Louisiana pass that needed
+   * 74 calls made 1,188, and would have made 1,188 more every time it ran.
+   *
+   * On a metered API that is not a wasted minute, it is a wasted bill.
+   */
   const rows = await db
     .select({
       id: lots.id,
@@ -58,11 +68,13 @@ async function main() {
     .from(lots)
     .innerJoin(auctions, eq(auctions.id, lots.auctionId))
     .innerJoin(counties, eq(counties.fips, auctions.countyFips))
+    .leftJoin(lotValuations, eq(lotValuations.lotId, lots.id))
     .where(
       and(
         eq(lots.status, "pending"),
         eq(counties.state, state),
         isNull(lots.assessedValue),
+        isNull(lotValuations.marketValue),
         // A city is the field that was missing; without it this provider cannot
         // answer and the call is wasted spend.
         isNotNull(lots.city),
