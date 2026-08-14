@@ -84,23 +84,61 @@ const PropertySchema = z.object({
         "'derived' when reasoning from comparables on the same street; " +
         "'none' when nothing usable was found",
     ),
+  /**
+   * What was actually found, when the exact unit or parcel was not.
+   *
+   * The strict `found=false` path is right for enrichment, where a valuation for
+   * the wrong parcel becomes a wrong bid. It is wrong for a person typing an
+   * address into a search box: told only "no record found", they learn nothing,
+   * while the search plainly did find the building, the complex and comparable
+   * units — it just could not pin unit #211.
+   */
+  closestMatch: z
+    .string()
+    .nullable()
+    .describe(
+      "When the exact address was not found, the nearest thing that WAS — the building, " +
+        "the complex, the same street. Name it precisely and say how it differs. Null if " +
+        "the exact property was found.",
+    ),
+  features: z
+    .array(z.string())
+    .describe("Notable characteristics from listings or records — pool, fireplace, views, parking"),
+  neighborhood: z
+    .string()
+    .nullable()
+    .describe("Area, landmarks and what is nearby. Useful context, not a valuation."),
+  status: z
+    .string()
+    .nullable()
+    .describe("For sale, off-market, recently sold — as a source describes it"),
+  estimateLow: z.number().nullable().describe("Low end of any published estimate range"),
+  estimateHigh: z.number().nullable().describe("High end of any published estimate range"),
+  comparables: z
+    .string()
+    .nullable()
+    .describe("What similar units or nearby properties have sold for, when stated"),
   basis: z.string().describe("What was read and where — one or two sentences"),
   sources: z.array(z.string()).describe("URLs actually read. A figure with no URL is not a figure."),
 });
 
 export type SearchedProperty = z.infer<typeof PropertySchema>;
 
-const SYSTEM = `You look up one specific US property and report only what a page you
-read actually says about it.
+const SYSTEM = `You look up one specific US property and report what pages you read
+actually say about it.
 
-You are being read by a desk that bids real money at tax auctions. An invented
-figure causes a loss; "not found" costs nothing. Prefer "not found".
+Never present another property's figure as this one's. A neighbour, a different
+unit in the same building, a county median — none of those are this property's
+value, and reporting one as if it were causes a real loss.
 
-A value for a *different* property — a neighbour, a county median, a similar
-listing nearby — is not this property's value. Report found=false rather than
-substituting one.
+But "I found the building and not the unit" is useful and should be said, not
+withheld. When you cannot pin the exact address, set found=false and marketValue
+null, then fill closestMatch with what you DID find — the complex, the building,
+the same street — and still report the type, size, year, features, neighbourhood
+and what comparable units sold for. Be explicit about which property each fact
+describes.
 
-Attach a URL to every figure. If you cannot, set confidence 'none'.`;
+Attach a URL to every figure. A figure with no source is confidence 'none'.`;
 
 /**
  * The retrieval step, factored out so a second search backend can be compared
