@@ -65,6 +65,8 @@ interface CadastreSource {
   marketField?: string;
   landField?: string;
   ownerField?: string;
+  /** Situs address, where the layer carries one. */
+  addressField?: string;
   note: string;
 }
 
@@ -76,6 +78,26 @@ interface CadastreSource {
  * in the state, so each entry is something a person checked once.
  */
 export const CADASTRE_SOURCES: Record<string, CadastreSource> = {
+  /*
+   * Keyed by 5-digit county FIPS where a county publishes its own layer, and by
+   * state where the state does. County entries win, because a county service is
+   * the assessor's own and a statewide one is a roll-up of the same records.
+   *
+   * Cobb County alone holds 8,475 of Georgia's 8,730 stranded lots — 97% — so
+   * one county entry unlocks the state in practice. Georgia publishes no
+   * statewide parcel service; the concentration is what makes that survivable.
+   */
+  "13067": {
+    url: "https://gis.cobbcounty.gov/gisserver/rest/services/cobbpublic/Parcels/MapServer/3/query",
+    parcelField: "PIN",
+    assessedField: "ASV_TOTAL",
+    marketField: "FMV_TOTAL",
+    landField: "FMV_LAND",
+    ownerField: "OWNER_NAM1",
+    addressField: "SITUS_ADDR",
+    note: "Cobb County GA — public parcel layer, FMV and assessed value",
+  },
+
   AR: {
     url: "https://gis.arkansas.gov/arcgis/rest/services/FEATURESERVICES/Planning_Cadastre/FeatureServer/0/query",
     parcelField: "parcelid",
@@ -116,7 +138,11 @@ export const cadastreProvider: PropertyProvider = {
   },
 
   async lookup(input: EnrichInput): Promise<PropertyRecord | null> {
-    const src = CADASTRE_SOURCES[input.state?.toUpperCase() ?? ""];
+    // County first, then state — a county publishes the assessor's own layer and
+    // a statewide service is a roll-up of the same records.
+    const src =
+      (input.fips ? CADASTRE_SOURCES[input.fips] : undefined) ??
+      CADASTRE_SOURCES[input.state?.toUpperCase() ?? ""];
     if (!src || !input.parcelNumber) return null;
 
     for (const candidate of candidates(input.parcelNumber)) {
@@ -129,7 +155,14 @@ export const cadastreProvider: PropertyProvider = {
 
       const params = new URLSearchParams({
         where: clauses.join(" AND "),
-        outFields: [src.parcelField, src.assessedField, src.marketField, src.landField, src.ownerField]
+        outFields: [
+          src.parcelField,
+          src.assessedField,
+          src.marketField,
+          src.landField,
+          src.ownerField,
+          src.addressField,
+        ]
           .filter(Boolean)
           .join(","),
         returnGeometry: "false",
@@ -163,6 +196,12 @@ export const cadastreProvider: PropertyProvider = {
         marketValue: market,
         landValue: src.landField ? num(a[src.landField]) : undefined,
         ownerName: src.ownerField ? (a[src.ownerField] as string) || undefined : undefined,
+        // Situs addresses arrive column-aligned from the assessor's mainframe —
+        // "195   FOWLER  CIR  NE". Collapsed, or every downstream match fails on
+        // whitespace.
+        addressLine: src.addressField
+          ? ((a[src.addressField] as string) || "").replace(/\s+/g, " ").trim() || undefined
+          : undefined,
       };
     }
 
