@@ -16,6 +16,7 @@ import { PlanPanel } from "./plan-panel";
 import { Stage, Collapsed } from "@/components/stage";
 import { whatNeedsAttention } from "@/lib/admin/attention";
 import { DiscoverSummary, FunnelBars, PriceSummary, SummaryPending } from "./coverage-summary";
+import { EnrichmentPanel } from "./enrichment-panel";
 import { SourcesPanel } from "./sources-panel";
 import { CapePanel } from "./cape-panel";
 import { PolicyPanel } from "./policy-panel";
@@ -318,6 +319,15 @@ async function Body({
         >
           <Suspense fallback={<TableSkeleton />}>
             <FunnelBars />
+          </Suspense>
+          {/*
+            Valuations sit under Price because that is the question they answer:
+            a parcel without one cannot be priced, whatever else is known about
+            it. This was the largest gap on the board and had no presence here at
+            all until now.
+          */}
+          <Suspense fallback={<TableSkeleton />}>
+            <EnrichmentPanel />
           </Suspense>
           <Collapsed label="Inventory by state" count={inventory.states.length}>
             <InventoryPanel inventory={inventory} />
