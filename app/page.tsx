@@ -91,8 +91,25 @@ export default function HomePage(props: PageProps<"/">) {
   return (
     <div>
       {/* --- Hero --------------------------------------------------------- */}
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+      {/*
+        The ink band.
+        
+        The page was light from top to bottom, which reads as a brochure. This is
+        an instrument someone runs during a live auction while deciding whether
+        to commit tens of thousands — one deep band at the top says that before a
+        word is read, and gives the light working surface below something to be
+        the working surface *of*.
+        
+        The faint radial is the only ornament on the page: enough to stop a large
+        flat field looking like a filled rectangle, not enough to notice.
+      */}
+      <section className="relative overflow-hidden bg-ink text-ink-fg">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.5]
+                     [background:radial-gradient(60rem_32rem_at_18%_-10%,rgba(78,157,127,0.16),transparent_65%)]"
+        />
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
           {/*
             The lookup sits top-right rather than under the copy: it is the one
             thing on this page a visitor might arrive already wanting to do, and
@@ -105,17 +122,27 @@ export default function HomePage(props: PageProps<"/">) {
               Wide-tracked caps in the accent colour shout before the headline
               gets a chance to speak, and the headline is the better sentence.
             */}
-            <p className="text-sm font-medium text-accent">Tax deed &amp; foreclosure auctions</p>
+            {/* A live signal rather than a label: the dot is the only thing on
+                the band that moves, and it says the data behind this is current. */}
+            <p className="inline-flex items-center gap-2.5 text-sm font-medium text-ink-muted">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#4e9d7f] opacity-70 motion-reduce:animate-none" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#4e9d7f]" />
+              </span>
+              Tax deed &amp; foreclosure auctions
+            </p>
             {/*
               Bigger, and tighter as it grows. A 3xl headline beside a 3xl
               section heading gave the page no top — this now clearly leads, and
               negative tracking at display sizes is what stops large type reading
               as merely enlarged.
             */}
-            <h1 className="mt-4 text-4xl font-semibold leading-[1.08] tracking-[-0.028em] sm:text-5xl">
-              Know your walk-away price before you raise the paddle.
+            <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.05] tracking-[-0.032em] sm:text-6xl">
+              Know your walk-away price
+              <br className="hidden sm:block" />{" "}
+              <span className="text-ink-muted">before you raise the paddle.</span>
             </h1>
-            <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-muted">
+            <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-ink-muted">
               Every county&apos;s tax sale rules, live auction inventory, and a co-pilot that
               computes your maximum bid — accounting for the liens that survive, the quiet title
               you&apos;ll have to file, and the redemption window that may hand the property back.
@@ -129,15 +156,15 @@ export default function HomePage(props: PageProps<"/">) {
             <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
               <Link
                 href="/#calendar"
-                className="rounded-full bg-accent px-6 py-3 font-medium text-accent-fg
-                           shadow-[var(--shadow-sm)] transition-opacity hover:opacity-90"
+                className="rounded-full bg-ink-fg px-6 py-3 font-medium text-ink
+                           transition-transform hover:scale-[1.02] active:scale-[0.99]"
               >
                 Browse upcoming auctions
               </Link>
               <Link
                 href="/#atlas"
-                className="text-sm font-medium text-muted underline-offset-4 transition-colors
-                           hover:text-foreground hover:underline"
+                className="text-sm font-medium text-ink-muted underline-offset-4 transition-colors
+                           hover:text-ink-fg hover:underline"
               >
                 Explore the atlas — free
               </Link>
@@ -240,7 +267,7 @@ async function HeroStats() {
 
   return (
     <>
-      <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-border pt-6 sm:grid-cols-3 lg:grid-cols-5">
+      <dl className="mt-14 grid grid-cols-2 gap-x-5 gap-y-8 border-t border-ink-line pt-8 sm:grid-cols-3 lg:grid-cols-5">
         <HeroStat label="Counties mapped" value={num(ALL_COUNTIES.length)} />
         <HeroStat label="Researched in depth" value={num(Object.keys(COUNTY_DATA).length)} />
         <HeroStat label="States with inventory" value={num(stats.byState.length)} />
@@ -254,10 +281,13 @@ async function HeroStats() {
         before any sale — so it never joins the number above.
       */}
       {stats.leadLots > 0 ? (
-        <p className="mt-4 text-sm text-muted">
+        <p className="mt-6 max-w-[62ch] text-sm leading-relaxed text-ink-muted">
           Plus {num(stats.leadLots)} parcels on delinquent rolls and lands-available inventory —
           research leads, not scheduled lots.{" "}
-          <Link href="/#coverage" className="underline hover:text-fg">
+          <Link
+            href="/#coverage"
+            className="underline underline-offset-4 transition-colors hover:text-ink-fg"
+          >
             How we count
           </Link>
         </p>
@@ -276,11 +306,19 @@ async function HeroStats() {
  * inventory" across one row and the matching numbers across the next. A <div>
  * inside <dl> is valid HTML5 and exists for exactly this.
  */
+/**
+ * One figure in the readout.
+ *
+ * Number first and large, label beneath and quiet — the opposite of the original
+ * order. A row of small-caps labels above their values reads as a marketing
+ * grid; values leading, hairline-separated, reads as an instrument telling you
+ * what it currently holds.
+ */
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
-      <dd className="tnum mt-0.5 text-2xl font-semibold">{value}</dd>
+    <div className="border-l border-ink-line pl-4 first:border-l-0 first:pl-0">
+      <dd className="tnum text-3xl font-semibold leading-none tracking-[-0.02em]">{value}</dd>
+      <dt className="mt-2 text-xs leading-snug text-ink-muted">{label}</dt>
     </div>
   );
 }

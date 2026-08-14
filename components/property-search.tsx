@@ -34,8 +34,9 @@ function Submit() {
       type="submit"
       disabled={pending}
       aria-busy={pending}
-      className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium
-                 text-accent-fg transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
+      className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink-fg px-5 py-2.5 text-sm
+                 font-medium text-ink transition-transform hover:scale-[1.02]
+                 disabled:cursor-wait disabled:opacity-60"
     >
       {pending && (
         <span
@@ -93,7 +94,12 @@ export function PropertySearch() {
   return (
     <div className="w-full sm:max-w-md">
       <form action={action}>
-        <label htmlFor="q" className="block text-sm font-medium">
+        {/*
+          Styled for the ink band it now sits on. A surface-coloured field on a
+          dark ground is nearly invisible, and this is the one control a visitor
+          may have arrived specifically to use.
+        */}
+        <label htmlFor="q" className="block text-sm font-medium text-ink-fg">
           Look up any US property
         </label>
         <div className="mt-2 flex gap-2">
@@ -108,13 +114,13 @@ export function PropertySearch() {
             defaultValue={state?.query ?? ""}
             placeholder="1600 Pennsylvania Ave NW, Washington, DC"
             autoComplete="street-address"
-            className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm
-                       placeholder:text-faint focus:border-accent focus:outline-none
-                       focus:ring-2 focus:ring-accent/30"
+            className="min-w-0 flex-1 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-sm
+                       text-ink-fg placeholder:text-ink-muted/70 focus:border-white/40
+                       focus:bg-white/10 focus:outline-none"
           />
           <Submit />
         </div>
-        <p className="mt-2 text-xs text-muted">
+        <p className="mt-2.5 text-xs text-ink-muted">
           Include the city or ZIP — an address alone is usually ambiguous.
         </p>
 
