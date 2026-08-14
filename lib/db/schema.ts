@@ -910,3 +910,44 @@ export const apiUsage = pgTable(
 );
 
 export type ApiUsage = typeof apiUsage.$inferSelect;
+
+/**
+ * Property lookups already answered, keyed by a normalised address.
+ *
+ * A searched lookup costs a Tavily call plus an extraction and takes about
+ * twenty seconds. The same address asked twice should cost once — and on a
+ * public search box the same address WILL be asked twice, because the parcels
+ * people look up are the ones on a listing everybody is reading.
+ *
+ * Keyed on `address_key` rather than the raw string so that trailing
+ * punctuation, casing and doubled spaces do not each buy their own row. The
+ * normaliser is deliberately conservative — see `normaliseAddress` — because
+ * over-normalising two different properties into one key is a wrong answer,
+ * while under-normalising is only a wasted call.
+ */
+export const propertyLookups = pgTable(
+  "property_lookups",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Normalised key. Unique — one row per property, refreshed in place. */
+    addressKey: text("address_key").notNull().unique(),
+    /** Exactly what the reader typed, for display and for debugging the key. */
+    queryText: text("query_text").notNull(),
+    /** The validated `SearchedProperty`, as returned. */
+    result: jsonb("result").notNull(),
+    /** URLs actually read, so a cached answer still shows its sources. */
+    citations: jsonb("citations").notNull(),
+    /**
+     * Whether the lookup found the property. Stored as a column rather than
+     * read out of `result` because misses expire far sooner than hits, and the
+     * expiry query should not have to open the document to find out which it is.
+     */
+    found: boolean("found").notNull(),
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+    /** How many times this row was served instead of a fresh search. */
+    hits: integer("hits").notNull().default(0),
+  },
+  (t) => [index("property_lookups_fetched_idx").on(t.fetchedAt)],
+);
+
+export type PropertyLookup = typeof propertyLookups.$inferSelect;
