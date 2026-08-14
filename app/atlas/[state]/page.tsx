@@ -13,7 +13,10 @@ import {
   toSaleType,
 } from "@/lib/atlas";
 import { num } from "@/lib/format";
+import { Suspense } from "react";
+import { connection } from "next/server";
 import { AtlasExplorer } from "@/components/atlas-explorer";
+import { getUpcomingAuctions } from "@/lib/queries";
 import { STATE_PATHS, statePayload } from "@/lib/atlas/geo";
 import { Breadcrumbs, Card, SaleTypeBadge } from "@/components/ui";
 
@@ -33,6 +36,28 @@ export async function generateMetadata(
     title: `${name} tax sales — ${rule.type}`,
     description: `${name} sells tax-defaulted property by ${rule.type.toLowerCase()}. Redemption: ${rule.redemption}. Return: ${rule.returns}.`,
   };
+}
+
+/** The map for this state, once the sale calendar has loaded. */
+async function ExplorerWithAuctions({ abbr }: { abbr: string }) {
+  // Request time before a query that filters on today; see app/page.tsx.
+  await connection();
+  const rows = await getUpcomingAuctions({});
+  return (
+    <AtlasExplorer
+      states={STATE_PATHS}
+      initialState={statePayload(abbr)}
+      auctions={rows.map((r) => ({
+        id: r.id,
+        saleDate: r.saleDate,
+        state: r.state,
+        countyFips: r.countyFips,
+        countyName: r.countyName,
+        lotCount: r.lotCount ?? 0,
+        saleType: r.saleType ?? null,
+      }))}
+    />
+  );
 }
 
 export default async function StatePage(props: PageProps<"/atlas/[state]">) {
@@ -81,7 +106,17 @@ export default async function StatePage(props: PageProps<"/atlas/[state]">) {
         HTML on first paint.
       */}
       <section className="mb-8">
-        <AtlasExplorer states={STATE_PATHS} initialState={statePayload(abbr)} />
+        {/*
+          Same map, same sale list. This page is where a state click from the
+          home map lands, so leaving the auctions off here would put the answer
+          one step behind the question again — which is the thing the section
+          exists to prevent.
+        */}
+        <Suspense
+          fallback={<AtlasExplorer states={STATE_PATHS} initialState={statePayload(abbr)} />}
+        >
+          <ExplorerWithAuctions abbr={abbr} />
+        </Suspense>
       </section>
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2">

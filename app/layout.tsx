@@ -29,11 +29,15 @@ export const metadata: Metadata = {
  * anchors are for moving around the page, routes are for deep links, sharing,
  * and the search engines that index the 1,010 county pages.
  *
- * Auctions is the exception, and points at its route. The home page used to
- * carry the same sales twice, as a calendar and as a list below it; the list
- * came out once the calendar could show lots and opening bids on its own. The
- * route stays because a flat list is still the better view for scanning a whole
- * season at once, and there is no longer a section for the anchor to reach.
+ * Auctions was here and is not any more. A visitor asking "what is for sale"
+ * almost always means "where", and answering it on a separate page meant
+ * choosing a county on the map, leaving to see whether it had a sale, and coming
+ * back to try another — a round trip per county.
+ *
+ * The sale list now sits under the map: collapsed while nothing is selected,
+ * filtered to the county the moment one is. `/auctions` remains a real route for
+ * deep links and for scanning a whole season flat, it simply is not the way in
+ * any more.
  *
  * CAPE is deliberately not here. It is a production board for research and
  * operations rather than something a visitor is looking for, and it is reached
@@ -41,7 +45,6 @@ export const metadata: Metadata = {
  */
 const NAV = [
   { href: "/#calendar", label: "Calendar" },
-  { href: "/auctions", label: "Auctions" },
   { href: "/#atlas", label: "Atlas" },
   { href: "/#coverage", label: "Coverage" },
   { href: "/#pricing", label: "Pricing" },
