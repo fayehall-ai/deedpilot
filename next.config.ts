@@ -38,6 +38,45 @@ const nextConfig: NextConfig = {
    * sales.
    */
   serverExternalPackages: ["pdf-parse"],
+
+  /**
+   * `/admin` must never be stored by a shared cache.
+   *
+   * `await connection()` in the gate is the real fix — it stops the route being
+   * prerendered with the anonymous branch baked in. This is the second lock,
+   * because the failure mode is bad in both directions and only one of them was
+   * observed.
+   *
+   * Observed: an operator with a valid cookie received a ten-minute-old cached
+   * copy of the *sign-in form* and the console never loaded, because the route
+   * advertised `vary: rsc, next-router-state-tree, …` with no `Cookie`, so one
+   * copy was served to everyone.
+   *
+   * Not observed, and worse: the same missing `Vary` means an *authenticated*
+   * render could be cached and handed to anonymous visitors — every source, run,
+   * access decision and CAPE stage on a page whose own header says "not public".
+   * `private` bars shared caches from storing it at all; `no-store` bars the
+   * browser too, which is right for a console whose whole value is being current.
+   */
+  async headers() {
+    return [
+      {
+        source: "/admin/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" },
+          { key: "Vary", value: "Cookie" },
+        ],
+      },
+      {
+        source: "/admin",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" },
+          { key: "Vary", value: "Cookie" },
+        ],
+      },
+    ];
+  },
+
   experimental: {
     /** Next DevTools → "Instant Navs" — freezes a page at its static shell. */
     instantNavigationDevToolsToggle: true,
