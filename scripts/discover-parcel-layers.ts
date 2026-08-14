@@ -45,7 +45,12 @@ async function get(url: string): Promise<Record<string, unknown>> {
   return (await r.json()) as Record<string, unknown>;
 }
 
-const VALUE_RE = /val|assess|appr|^jv$|^av_|fmv|mkt|land|improv|total/i;
+/*
+ * Anchored, because a loose /val/ matched VALIDATIONSTATUS on the Lincoln NM
+ * layer and reported a status column as the parcel's value — which passed
+ * verification and would have written nulls for a whole county.
+ */
+const VALUE_RE = /(^|_)(val|value|assess\w*|appr\w*|jv|av|fmv|mkt|market|land|improv\w*|total)(_|$)|value$|val[lic]$/i;
 const ID_RE = /parcel|^pin$|apn|tms|prop_?id|pid/i;
 
 interface Candidate { title: string; url: string; owner: string }
