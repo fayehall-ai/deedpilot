@@ -65,11 +65,23 @@ export async function lookupProperty(
   /** Injectable for tests, so the rule below is exercised rather than restated. */
   providers: PropertyProvider[] = PROVIDERS,
 ): Promise<PropertyRecord | null> {
+  /*
+   * Parcel-only lookups prefer a provider that keys on a parcel number.
+   *
+   * This used to hoist ATTOM alone, which quietly undid the array order above:
+   * most auction lots carry no address, so the branch fired almost every time
+   * and put a paid aggregator ahead of the assessor's own layer — and, while
+   * ATTOM was returning 401, ahead of everything.
+   *
+   * The cadastre keys on a parcel number too, and is the source ATTOM
+   * aggregates. It goes first when it goes at all.
+   */
+  const parcelFirst = ["cadastre", "attom"];
   const order = [...providers].sort((a, b) => {
-    // Prefer ATTOM when we only have parcel
-    if (!input.addressLine && a.name === "attom") return -1;
-    if (!input.addressLine && b.name === "attom") return 1;
-    return 0;
+    if (input.addressLine) return 0;
+    const ai = parcelFirst.indexOf(a.name);
+    const bi = parcelFirst.indexOf(b.name);
+    return (ai === -1 ? parcelFirst.length : ai) - (bi === -1 ? parcelFirst.length : bi);
   });
 
   const configured = order.filter((p) => p.configured());
