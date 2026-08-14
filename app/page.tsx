@@ -100,28 +100,44 @@ export default function HomePage(props: PageProps<"/">) {
           */}
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-widest text-accent">
-              Tax deed &amp; foreclosure auctions
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            {/*
+              The eyebrow steps down from uppercase-widest to a quieter label.
+              Wide-tracked caps in the accent colour shout before the headline
+              gets a chance to speak, and the headline is the better sentence.
+            */}
+            <p className="text-sm font-medium text-accent">Tax deed &amp; foreclosure auctions</p>
+            {/*
+              Bigger, and tighter as it grows. A 3xl headline beside a 3xl
+              section heading gave the page no top — this now clearly leads, and
+              negative tracking at display sizes is what stops large type reading
+              as merely enlarged.
+            */}
+            <h1 className="mt-4 text-4xl font-semibold leading-[1.08] tracking-[-0.028em] sm:text-5xl">
               Know your walk-away price before you raise the paddle.
             </h1>
-            <p className="mt-3 max-w-2xl leading-relaxed text-muted">
+            <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-muted">
               Every county&apos;s tax sale rules, live auction inventory, and a co-pilot that
               computes your maximum bid — accounting for the liens that survive, the quiet title
               you&apos;ll have to file, and the redemption window that may hand the property back.
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            {/*
+              One primary action, one quiet one. Two buttons of equal weight ask
+              the reader to choose between them; a filled button beside a plain
+              link tells them which one is the answer.
+            */}
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
               <Link
                 href="/#calendar"
-                className="rounded-lg bg-accent px-5 py-2.5 font-medium text-accent-fg hover:opacity-90"
+                className="rounded-full bg-accent px-6 py-3 font-medium text-accent-fg
+                           shadow-[var(--shadow-sm)] transition-opacity hover:opacity-90"
               >
                 Browse upcoming auctions
               </Link>
               <Link
                 href="/#atlas"
-                className="rounded-lg border border-border px-5 py-2.5 font-medium hover:border-accent"
+                className="text-sm font-medium text-muted underline-offset-4 transition-colors
+                           hover:text-foreground hover:underline"
               >
                 Explore the atlas — free
               </Link>
@@ -141,7 +157,6 @@ export default function HomePage(props: PageProps<"/">) {
       <section id="calendar" className="scroll-mt-16 border-b border-border bg-surface-2/20">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold tracking-tight">What is selling, and when</h2>
           </div>
           <Suspense fallback={<CalendarSkeleton />}>
             <CalendarView searchParams={props.searchParams} basePath="/" />
@@ -156,7 +171,6 @@ export default function HomePage(props: PageProps<"/">) {
       <section id="atlas" className="scroll-mt-16 border-b border-border bg-surface-2/20">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold tracking-tight">Rules for every county</h2>
           </div>
           {/*
             Map first, list second. The map answers "what kind of state is
@@ -190,9 +204,6 @@ export default function HomePage(props: PageProps<"/">) {
       <section id="coverage" className="scroll-mt-16 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold tracking-tight">
-              What we cover, and what we do not
-            </h2>
           </div>
           {/* compact: the per-county ingest log is 200 rows of ops detail. */}
           <CoverageReport compact />

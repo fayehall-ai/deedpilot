@@ -95,34 +95,34 @@ export function CountyAuctions({
       .filter((a) => a.countyFips === countyFips)
       .sort((a, b) => a.saleDate.localeCompare(b.saleDate));
 
+    /*
+     * Nothing scheduled means nothing here.
+     *
+     * This used to explain the emptiness — that a county publishing no calendar
+     * yet is not the same as a county with nothing coming. True, and still
+     * wrong to show: most counties have no sale on any given day, so the note
+     * appeared far more often than a sale did, and a panel that is usually an
+     * apology trains people to stop reading it.
+     *
+     * The reader already knows they clicked. Silence says "no" faster than a
+     * paragraph does.
+     */
+    if (mine.length === 0) return null;
+
     return (
-      <section className="mt-4">
-        <h3 className="mb-2 text-sm font-semibold">
+      <section className="mt-6">
+        <h3 className="mb-3 text-sm font-medium">
           Upcoming sales in {countyLabel}
-          {mine.length > 0 && (
-            <span className="ml-2 font-normal text-muted">
-              {mine.length} scheduled · {mine.reduce((n, a) => n + a.lotCount, 0).toLocaleString()}{" "}
-              parcels
-            </span>
-          )}
+          <span className="ml-2 font-normal text-muted">
+            {mine.length} scheduled · {mine.reduce((n, a) => n + a.lotCount, 0).toLocaleString()}{" "}
+            parcels
+          </span>
         </h3>
-        {mine.length === 0 ? (
-          /*
-           * Said plainly, because an empty list here is ambiguous in a way that
-           * matters: it can mean the county sells rarely, or that we have not
-           * ingested it. Silence would let a reader assume the first.
-           */
-          <p className="rounded-lg border border-border/60 bg-surface px-3 py-2.5 text-sm text-muted">
-            No sale currently scheduled for {countyLabel}. Counties publish their calendars at
-            different times, so this can mean nothing is listed yet rather than nothing is coming.
-          </p>
-        ) : (
-          <div className="space-y-1.5">
-            {mine.map((a) => (
-              <Row key={a.id} a={a} />
-            ))}
-          </div>
-        )}
+        <div className="space-y-2">
+          {mine.map((a) => (
+            <Row key={a.id} a={a} />
+          ))}
+        </div>
       </section>
     );
   }

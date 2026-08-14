@@ -16,7 +16,24 @@
   --surface-2: #f4f2ee;
   --foreground: #1b1917;
   --muted: #6d675f;
-  --border: #e3dfd8;
+  --border: #e6e2db;
+  /*
+   * Third text weight, below `muted`.
+   *
+   * `text-faint` was used in fourteen places and never defined, so every label
+   * meant to recede rendered at full inherited colour. A hierarchy with two
+   * usable steps reads as flat, which is most of why this looked unfinished.
+   */
+  --faint: #9a938a;
+  /*
+   * Elevation instead of outlines.
+   *
+   * Every surface carried the same 1px border, so a card, a panel and a row all
+   * weighed the same and nothing led. These are deliberately faint — a shadow
+   * you notice is a shadow doing too much.
+   */
+  --shadow-sm: 0 1px 2px rgb(28 25 23 / 0.04), 0 1px 1px rgb(28 25 23 / 0.03);
+  --shadow-md: 0 2px 4px rgb(28 25 23 / 0.04), 0 4px 12px rgb(28 25 23 / 0.05);
 
   --accent: #1f4d3d;
   --accent-fg: #ffffff;
@@ -40,7 +57,11 @@
     --surface-2: #24211c;
     --foreground: #f0ece5;
     --muted: #a29b90;
-    --border: #34302a;
+    --border: #322e28;
+    --faint: #7d766c;
+    /* Heavier in dark, where a soft shadow on a dark ground reads as nothing. */
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 2px 6px rgb(0 0 0 / 0.28), 0 8px 24px rgb(0 0 0 / 0.22);
 
     --accent: #4e9d7f;
     --accent-fg: #0d1512;
@@ -62,6 +83,7 @@
   --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-faint: var(--faint);
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
@@ -75,6 +97,26 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  /* Apple's own stack renders these greys as intended on macOS and iOS, which
+     is where most of this audience reads it. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+ * Display type is set tighter than body type.
+ *
+ * At 30px and above, default tracking reads loose and unconsidered; pulling it
+ * in is most of what separates a heading that looks typeset from one that looks
+ * defaulted.
+ */
+h1,
+h2 {
+  letter-spacing: -0.021em;
+}
+
+h1 {
+  text-wrap: balance;
 }
 
 /* Money and parcel numbers line up in columns — tabular figures are not

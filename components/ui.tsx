@@ -8,8 +8,24 @@ export function Card({
   children: React.ReactNode;
   className?: string;
 }) {
+  /*
+   * Elevation carries the card, not an outline.
+   *
+   * Every surface used to wear the same 1px border at full strength — a card, a
+   * panel and a table row were visually the same object, so the page read as a
+   * grid of boxes rather than as anything with a foreground. The border is now
+   * half-strength and does the job of a seam, while a very soft shadow does the
+   * job of separation.
+   *
+   * Corners go to 2xl and padding to 6: at 5 and xl the proportions read as a
+   * component library default. Larger radii need more inset to look intentional.
+   */
   return (
-    <div className={`rounded-xl border border-border bg-surface p-5 ${className}`}>{children}</div>
+    <div
+      className={`rounded-2xl border border-border/60 bg-surface p-6 shadow-[var(--shadow-sm)] ${className}`}
+    >
+      {children}
+    </div>
   );
 }
 
