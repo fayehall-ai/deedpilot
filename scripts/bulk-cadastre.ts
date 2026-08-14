@@ -52,9 +52,22 @@ async function main(){
 
 async function runCounty(FIPS: string, limit: number): Promise<{hit:number;miss:number}> {
   const county = ALL_COUNTIES.find(c=>c.fips===FIPS);
+  /*
+   * "Unvalued" means neither kind of value, not just a missing assessed one.
+   *
+   * Testing `assessed_value IS NULL` alone re-selected every lot the cadastre had
+   * already answered with a market figure — which is most of them, since several
+   * registry entries deliberately write no assessed value at all. A pass over
+   * Arkansas reported "33 enriched" while the outstanding count did not move,
+   * because the 33 were lots that already had a value and the genuinely missing
+   * ones were missed.
+   */
   const lots = await db.execute(sql`
-    SELECT l.id, l.parcel_number FROM lots l JOIN auctions a ON a.id=l.auction_id
-    WHERE a.county_fips=${FIPS} AND l.status='pending' AND l.assessed_value IS NULL
+    SELECT l.id, l.parcel_number FROM lots l
+    JOIN auctions a ON a.id=l.auction_id
+    LEFT JOIN lot_valuations v ON v.lot_id=l.id
+    WHERE a.county_fips=${FIPS} AND l.status='pending'
+      AND l.assessed_value IS NULL AND v.market_value IS NULL
       AND l.parcel_number IS NOT NULL LIMIT ${limit}`) as unknown as {id:string;parcel_number:string}[];
   console.log(`${county?.name ?? FIPS}: ${lots.length} lots to try`);
   /*

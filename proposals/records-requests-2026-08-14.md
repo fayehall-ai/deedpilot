@@ -24,7 +24,7 @@ What remains is asking. These are public records in both states.
 
 Three things to fill in, and one to decide.
 
-- Replace `[YOUR NAME]`, `[YOUR EMAIL]`, `[YOUR PHONE]` throughout.
+- Signed as Faye Hall, Founder, DeedPilot · deedpilot.ai@gmail.com · (831) 818-9086.
 - **Set a fee ceiling you are willing to pay.** Each letter says $25; Otero
   County NM was found charging $100 for a comparable extract, so a refusal to pay
   is a refusal to receive. Raise it if these parcels are worth it to you.
@@ -73,7 +73,7 @@ copy the Assessor who holds the record.
 >
 > I understand the response period is three business days under § 610.023.3.
 >
-> [YOUR NAME] · [YOUR EMAIL] · [YOUR PHONE]
+> Faye Hall, Founder, DeedPilot · deedpilot.ai@gmail.com · (831) 818-9086
 
 ---
 
@@ -116,7 +116,7 @@ record — use it, and copy the Assessor.
 > I understand the response period is three business days under § 14-2-8(D), or
 > fifteen days with written notice if the request is excessively burdensome.
 >
-> [YOUR NAME] · [YOUR EMAIL] · [YOUR PHONE]
+> Faye Hall, Founder, DeedPilot · deedpilot.ai@gmail.com · (831) 818-9086
 
 ---
 
@@ -154,7 +154,7 @@ No portal published; email the Assessor directly.
 > I understand fees are limited to the actual cost of the medium under
 > § 14-2-9(C).
 >
-> [YOUR NAME] · [YOUR EMAIL] · [YOUR PHONE]
+> Faye Hall, Founder, DeedPilot · deedpilot.ai@gmail.com · (831) 818-9086
 
 ---
 
@@ -189,7 +189,7 @@ below stands alone if you cannot.
 > If your office prefers the county's IPRA request form, please tell me and I will
 > submit it that way.
 >
-> [YOUR NAME] · [YOUR EMAIL] · [YOUR PHONE]
+> Faye Hall, Founder, DeedPilot · deedpilot.ai@gmail.com · (831) 818-9086
 
 ---
 
@@ -221,7 +221,7 @@ own route.
 > If fees will exceed **$25**, please tell me before proceeding. I understand fees
 > are limited to the actual cost of the medium under § 14-2-9(C).
 >
-> [YOUR NAME] · [YOUR EMAIL] · [YOUR PHONE]
+> Faye Hall, Founder, DeedPilot · deedpilot.ai@gmail.com · (831) 818-9086
 
 ---
 
