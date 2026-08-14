@@ -35,6 +35,23 @@
   --shadow-sm: 0 1px 2px rgb(28 25 23 / 0.04), 0 1px 1px rgb(28 25 23 / 0.03);
   --shadow-md: 0 2px 4px rgb(28 25 23 / 0.04), 0 4px 12px rgb(28 25 23 / 0.05);
 
+  /*
+   * The ink band.
+   *
+   * Deliberately the same in both themes. A page that is light all the way down
+   * reads as a brochure, and this is an instrument people run during a live
+   * auction while deciding whether to commit tens of thousands of pounds. One
+   * deep band at the top does more for that than any amount of card polish.
+   *
+   * Tinted with the accent's own green rather than neutral black, so the band
+   * and the accent look like one decision instead of two.
+   */
+  --ink: #10201b;
+  --ink-2: #16302711;
+  --ink-fg: #eef2f0;
+  --ink-muted: #8fa79d;
+  --ink-line: #ffffff1f;
+
   --accent: #1f4d3d;
   --accent-fg: #ffffff;
 
@@ -84,6 +101,10 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
+  --color-ink: var(--ink);
+  --color-ink-fg: var(--ink-fg);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-line: var(--ink-line);
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);

@@ -57,7 +57,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur">
+        {/*
+          The bar belongs to the ink band, not above it.
+          
+          A white header sitting on a dark hero looked like two pages stacked. Ink
+          site-wide also solves the scroll problem a transparent header would have
+          created — no colour has to change as the light content passes under it.
+        */}
+        <header className="sticky top-0 z-40 border-b border-ink-line bg-ink/90 text-ink-fg backdrop-blur">
           {/*
             The logo plus five nav items need 551px of intrinsic width, and
             this row was `flex-wrap: nowrap` with visible overflow — so on a
@@ -88,7 +95,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <Link
                   key={n.href}
                   href={n.href}
-                  className="shrink-0 rounded-md px-3 py-1.5 text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
+                  className="shrink-0 rounded-md px-3 py-1.5 text-ink-muted transition-colors hover:bg-white/10 hover:text-ink-fg"
                 >
                   {n.label}
                 </Link>
