@@ -40,6 +40,47 @@ value rather than "whatever the assessor prints".
 **It cannot be resolved from the statute** — only by measuring what our data
 holds, the way Arkansas was settled at 0.2000 across 1,669 of 1,669 parcels.
 
+### The definitional chain, and a Prop-13 problem underneath it
+
+A second verification pass against the same section confirmed the reading above
+and supplied the chain connecting the two numbers:
+
+- **§ 7-35-2(N), (P)** define *taxable value* as the result of applying the *tax
+  ratio* to "the value of the property determined for property taxation
+  purposes", and define the tax ratio as that percentage.
+- **NMAC 3.6.6.10** implements it literally: divide the value for property
+  taxation purposes by three.
+
+So the full path is:
+
+```
+market value → [statutory caps] → value for property taxation purposes → ÷3 → taxable value
+```
+
+That middle step is the problem, and it is new information:
+
+> *"Separate statutory limitations (e.g., the 3 percent annual cap on increases in
+> the value of certain residential property) mean that the 'value for property
+> taxation purposes' is not always current market value."*
+
+New Mexico has its own Proposition 13. A long-held residential parcel's
+"value for property taxation purposes" can sit well below what it would fetch,
+because annual increases were capped at 3% — so the base figure is already
+depressed **before** the ratio is applied.
+
+This means settling `assessmentRatio` is necessary but not sufficient. Whichever
+of 1.0 or 0.3333 turns out to be right, an ARV derived from it inherits the cap
+drift and needs the same caveat the CA entry carries — and in the same direction,
+understating value on exactly the long-held parcels most likely to reach a tax
+sale. Any NM entry should ship with that warning attached, not discover it later.
+
+Two further limits on the market-value rule, worth recording:
+
+- Special valuation methods for agricultural land, livestock and mineral property
+  (§§ 7-36-20 through 7-36-33) take those parcels outside § 7-36-15(B) entirely.
+- Laws 2008 ch. 77 added § 7-36-15(B)(2), requiring assessors to consider
+  affordable-housing restrictions when valuing residential housing.
+
 ## `redemption: null` — verified
 
 The August draft carried this on "high confidence" reasoning. It is now checked
@@ -198,5 +239,7 @@ Order of operations:
       duplicate rows (dry run prints the target and refuses published notices)
 - [ ] Confirm whether NM assessors publish full value or taxable value — settle
       by measurement after enrichment, not by reading
+- [ ] Carry a cap-drift caveat on any derived NM ARV, as CA does for Prop 13:
+      the 3% annual cap depresses the base value before the ratio applies
 - [ ] Source one NM quiet-title / confirmation cost
 - [ ] Decide whether to wait out the two-year § 7-38-70(B) window before filing
