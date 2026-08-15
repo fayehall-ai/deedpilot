@@ -35,7 +35,7 @@ function Submit() {
       disabled={pending}
       aria-busy={pending}
       className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink-fg px-5 py-2.5 text-sm
-                 font-medium text-ink shadow-[0_8px_24px_-10px_rgba(12,107,255,0.7)]
+                 font-medium text-ink shadow-[0_8px_24px_-12px_rgba(255,255,255,0.5)]
                  transition-transform hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60"
     >
       {pending && (

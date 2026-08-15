@@ -172,9 +172,21 @@ export default function HomePage(props: PageProps<"/">) {
             <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
               <Link
                 href="/#calendar"
-                className="rounded-full bg-ink-fg px-6 py-3 font-medium text-ink
-                           shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_10px_30px_-8px_rgba(12,107,255,0.65)]
-                           transition-transform hover:scale-[1.02] active:scale-[0.99]"
+                /*
+                 * Gold, and it earns the exception.
+                 *
+                 * The rule elsewhere is blue for action, gold for distinction —
+                 * but this is both: the single most important thing anyone can
+                 * do on the page, on a navy ground where gold is simply the
+                 * loudest colour available. A white pill was the safe choice and
+                 * read as a system button rather than an invitation.
+                 *
+                 * One per screen. The Search control beside it stays neutral so
+                 * this is unambiguously the primary.
+                 */
+                className="rounded-full bg-gold px-6 py-3 font-semibold text-ink
+                           shadow-[0_10px_34px_-10px_color-mix(in_srgb,var(--gold)_85%,transparent)]
+                           transition-all hover:brightness-105 hover:scale-[1.02] active:scale-[0.99]"
               >
                 Browse upcoming auctions
               </Link>

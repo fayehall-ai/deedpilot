@@ -193,7 +193,9 @@ export async function CalendarView(props: {
                   <span
                     className={
                       cell.isToday
-                        ? "grid h-6 w-6 place-items-center rounded-full bg-accent text-[11px] font-semibold text-accent-fg shadow-[0_0_0_3px_color-mix(in_srgb,var(--accent)_22%,transparent)]"
+                        // Today is a fact, not a control — gold marks it, so it
+                        // cannot be mistaken for the blue of an active filter.
+                        ? "grid h-6 w-6 place-items-center rounded-full bg-gold text-[11px] font-semibold text-ink shadow-[0_0_0_3px_color-mix(in_srgb,var(--gold)_28%,transparent)]"
                         : `text-[11px] ${cell.inMonth ? "text-muted" : "text-muted/50"}`
                     }
                   >
