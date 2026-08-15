@@ -173,7 +173,7 @@ function FilterChip({ href, label, active }: { href: string; label: string; acti
       href={href}
       className={`rounded-full border px-3 py-1 text-sm transition-colors ${
         active
-          ? "border-accent bg-accent text-accent-fg"
+          ? "border-gold bg-gold font-medium text-ink"
           : "border-border text-muted hover:border-accent hover:text-foreground"
       }`}
     >

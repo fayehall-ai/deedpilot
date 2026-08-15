@@ -306,7 +306,7 @@ export function DealCalculator({
               step={5}
               value={margin}
               onChange={(e) => setMargin(Number(e.target.value))}
-              className="mt-3 w-full accent-[var(--accent)]"
+              className="mt-3 w-full accent-[var(--gold)]"
             />
             <div className="mt-1 text-xs text-muted">
               Required profit as a share of ARV. 30% is a common floor for tax-sale flips.

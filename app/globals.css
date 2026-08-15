@@ -54,13 +54,32 @@
   /*
    * Gold, and the rule for using it.
    *
-   * Navy with gold is the pairing this category reaches for, and the reason it
-   * usually looks dated is volume: gold on every button, gold rules, gold
-   * headings. It only reads as expensive when it is rare. Reserved here for the
-   * live signal and nothing else — if a second gold element appears on a screen,
-   * one of them is wrong.
+   * This began as "reserve it for the live signal; a second gold element on a
+   * screen means one of them is wrong." That was rationing, and it was wrong —
+   * it kept the strongest colour on the palette confined to a 6px dot while
+   * blue did two contradictory jobs at once.
+   *
+   * The rule now runs on meaning rather than volume:
+   *
+   *   gold  this one — the current filter, today, the recommended plan,
+   *         the primary action, the mark itself
+   *   blue  everything else you can click: links, secondary buttons,
+   *         admin tooling
+   *
+   * Volume still matters, but it is governed by the rule rather than by a
+   * quota: only one thing per screen is genuinely "this one", so gold stays
+   * rare on its own.
    */
   --gold: #f2b544;
+  /*
+   * Gold as *text*, which the fill above cannot do.
+   *
+   * #f2b544 on white is 1.83:1 — it fails even the 3:1 large-text floor, so
+   * anything gold-coloured on a light surface has to be this darker sibling.
+   * Same hue, 5.14:1 on --surface. Fills use --gold with ink text (9.82:1);
+   * text uses --gold-ink. They are not interchangeable.
+   */
+  --gold-ink: #8f661c;
   /* Brighter sibling for use on the ink band, where the light-theme accent is
      too dark to register against the navy. */
   --accent-on-ink: #5aa2ff;
@@ -101,6 +120,9 @@
     --border: #232c3f;
     --faint: #6b7790;
     --gold: #f5c163;
+    /* On a dark surface the fill colour is already legible as text (10.72:1),
+       so the two converge and no darker sibling is needed. */
+    --gold-ink: #f5c163;
     /* Heavier in dark, where a soft shadow on a dark ground reads as nothing. */
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
     --shadow-md: 0 2px 6px rgb(0 0 0 / 0.28), 0 8px 24px rgb(0 0 0 / 0.22);
@@ -131,6 +153,7 @@
   --color-ink-muted: var(--ink-muted);
   --color-ink-line: var(--ink-line);
   --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
   --color-accent-on-ink: var(--accent-on-ink);
   --color-accent-2: var(--accent-2);
   --color-border: var(--border);
