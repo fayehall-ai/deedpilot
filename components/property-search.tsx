@@ -140,7 +140,12 @@ export function PropertySearch() {
 
       {state?.data && state.citations && (
         <div className="mt-4">
-          <PropertyResult data={state.data} citations={state.citations} ageHours={state.ageHours} />
+          <PropertyResult
+            data={state.data}
+            citations={state.citations}
+            ageHours={state.ageHours}
+            location={state.location}
+          />
         </div>
       )}
     </div>

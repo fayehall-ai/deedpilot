@@ -17,6 +17,15 @@ export interface LookupState {
   data?: SearchedProperty;
   citations?: { url: string; title: string | null }[];
   ageHours?: number;
+  /**
+   * Where the address is, when the geocoder could place it.
+   *
+   * Carried separately from `data` because it is not something a source said —
+   * it is a coordinate we resolved — and because the cached result predates it.
+   * Absent whenever the query was a parcel number, a street with no house
+   * number, or anything else the address file cannot place.
+   */
+  location?: { lat: number; lon: number; matched: string };
   error?: string;
 }
 
@@ -59,6 +68,25 @@ export async function lookupProperty(
     return { query, error: "Enter a street address, including the city or ZIP." };
   }
 
+  /*
+   * Started first and awaited last, so it overlaps everything below.
+   *
+   * The geocoder answers in about 200ms and the search takes twenty seconds or
+   * more, so run in parallel this is free. Run in sequence it would be 200ms
+   * added to every lookup including cache hits, which are otherwise instant.
+   *
+   * Deliberately not part of the `timeout` race: a slow geocoder should cost
+   * the reader an aerial photo, never the valuation they actually asked for.
+   */
+  const locating = import("@/lib/property/geocode")
+    .then((m) => m.geocodeAddress(query))
+    .catch(() => null);
+
+  const located = async () => {
+    const hit = await locating;
+    return hit ? { lat: hit.lat, lon: hit.lon, matched: hit.matched } : undefined;
+  };
+
   try {
     const [{ retrievePhase, extractPhase }, cache] = await Promise.all([
       import("@/lib/property/providers/websearch"),
@@ -72,6 +100,7 @@ export async function lookupProperty(
         data: cached.result,
         citations: cached.citations,
         ageHours: cached.ageHours,
+        location: await located(),
       };
     }
 
@@ -82,7 +111,7 @@ export async function lookupProperty(
       Math.max(5_000, BUDGET_MS - (Date.now() - started)),
     );
     await cache.putCached(query, data, citations);
-    return { query, data, citations, ageHours: 0 };
+    return { query, data, citations, ageHours: 0, location: await located() };
   } catch (e) {
     return { query, error: e instanceof Error ? e.message : String(e) };
   }

@@ -42,21 +42,14 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "../lib/db";
 import { lots, auctions } from "../lib/db/schema";
 import { ALL_COUNTIES } from "../lib/atlas";
+// One geocoder, shared with the lookup box. See lib/property/geocode.ts.
+import { geocodeAddress, type Located } from "../lib/property/geocode";
 
 const arg = (n: string) => {
   const i = process.argv.indexOf(`--${n}`);
   return i >= 0 ? process.argv[i + 1] : undefined;
 };
 
-const URL = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress";
-
-interface Located {
-  lat: number;
-  lon: number;
-  city?: string;
-  zip?: string;
-  matched: string;
-}
 
 /**
  * Forms of an address worth trying, in order of fidelity.
@@ -91,38 +84,6 @@ export function addressVariants(raw: string): string[] {
   push(noParens.replace(/^(\d+)\s*[-–]\s*\d+\b/, "$1"));
 
   return out;
-}
-
-async function geocode(address: string, state: string): Promise<Located | null> {
-  const params = new URLSearchParams({
-    address: `${address}, ${state}`,
-    benchmark: "Public_AR_Current",
-    format: "json",
-  });
-  try {
-    const res = await fetch(`${URL}?${params}`, { signal: AbortSignal.timeout(25_000) });
-    if (!res.ok) return null;
-    const data = (await res.json()) as {
-      result?: {
-        addressMatches?: {
-          matchedAddress: string;
-          coordinates: { x: number; y: number };
-          addressComponents?: { city?: string; zip?: string };
-        }[];
-      };
-    };
-    const m = data.result?.addressMatches?.[0];
-    if (!m) return null;
-    return {
-      lat: m.coordinates.y,
-      lon: m.coordinates.x,
-      city: m.addressComponents?.city,
-      zip: m.addressComponents?.zip,
-      matched: m.matchedAddress,
-    };
-  } catch {
-    return null;
-  }
 }
 
 async function main() {
@@ -167,7 +128,7 @@ async function main() {
       const st = ALL_COUNTIES.find((c) => c.fips === row.fips)?.state ?? state ?? "";
       let hit: Located | null = null;
       for (const variant of addressVariants(String(row.address))) {
-        hit = await geocode(variant, st);
+        hit = await geocodeAddress(variant, st, 25_000);
         if (hit) break;
       }
       if (hit) {
