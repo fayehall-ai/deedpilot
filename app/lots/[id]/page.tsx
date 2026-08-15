@@ -13,6 +13,7 @@ import { ParcelBrief } from "@/components/parcel-brief";
 import { HistoricalComps } from "@/components/historical-comps";
 import { PropertyEnrichButton } from "@/components/property-enrich-button";
 import { PropertyDetail } from "@/components/property-detail";
+import { ParcelImagery } from "@/components/parcel-imagery";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
 import { getComparables } from "@/lib/history/comparables";
 import { assessorLinks } from "@/lib/property/assessor-links";
@@ -334,6 +335,24 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
               </p>
             ) : null}
           </Card>
+
+          {/*
+            What it looks like, after what it costs.
+
+            The figures come first because they decide whether the parcel is
+            worth a second thought at all. But "27 acres, $4,100 opening bid"
+            describes a fortune and a mistake equally well, and the overhead
+            frame is the fastest way to tell which — whether anything is built,
+            whether a road reaches it, what it sits next to.
+
+            Renders nothing when the lot has no coordinates, which is most of
+            them until the geocoder has run over the county.
+          */}
+          <ParcelImagery
+            latitude={lot.latitude ? Number(lot.latitude) : null}
+            longitude={lot.longitude ? Number(lot.longitude) : null}
+            caption={lot.addressLine ?? `parcel ${lot.parcelNumber ?? ""}`.trim()}
+          />
 
           <PropertyDetail raw={attomRaw} />
 

@@ -1,4 +1,5 @@
 import type { SearchedProperty } from "@/lib/property/providers/websearch";
+import { ParcelImagery } from "./parcel-imagery";
 
 /**
  * One property lookup, rendered.
@@ -13,6 +14,8 @@ export interface ResultProps {
   citations: { url: string; title: string | null }[];
   /** Hours since this answer was read, when it came from the cache. */
   ageHours?: number;
+  /** Resolved by the geocoder, not stated by a source. Absent when unplaceable. */
+  location?: { lat: number; lon: number; matched: string };
 }
 
 const money = (n: number | null | undefined) =>
@@ -102,7 +105,7 @@ function Detail({ p }: { p: SearchedProperty }) {
   );
 }
 
-export function PropertyResult({ data: p, citations, ageHours = 0 }: ResultProps) {
+export function PropertyResult({ data: p, citations, ageHours = 0, location }: ResultProps) {
   const exact = p.found && p.confidence !== "none";
 
   /*
@@ -139,6 +142,17 @@ export function PropertyResult({ data: p, citations, ageHours = 0 }: ResultProps
           {p.closestMatch && <p className="mt-3 leading-relaxed">{p.closestMatch}</p>}
           <Detail p={p} />
         </div>
+
+        {/*
+          Shown even here, because the coordinates came from the geocoder
+          placing the address that was typed — not from the closest match. The
+          picture is of the right place even when the valuation is not.
+        */}
+        <ParcelImagery
+          latitude={location?.lat}
+          longitude={location?.lon}
+          caption={location?.matched}
+        />
 
         <div className="rounded-xl border border-border bg-surface p-5">
           <h4 className="text-sm font-semibold">Why this is not the exact property</h4>
@@ -193,6 +207,20 @@ export function PropertyResult({ data: p, citations, ageHours = 0 }: ResultProps
 
         <Detail p={p} />
       </div>
+
+      {/*
+        Placed after the figures rather than above them.
+
+        The number is what was asked for; the picture is what makes it mean
+        something. Leading with the image would also imply the search returned
+        a photograph, when what it returned is a valuation and the photograph
+        comes from a separate, federal source.
+      */}
+      <ParcelImagery
+        latitude={location?.lat}
+        longitude={location?.lon}
+        caption={location?.matched ?? p.addressLine}
+      />
 
       <div className="rounded-xl border border-border bg-surface p-5">
         <h4 className="text-sm font-semibold">What was read</h4>
