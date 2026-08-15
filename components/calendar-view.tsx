@@ -677,7 +677,7 @@ function CalendarControls({
           </span>
           Type, platform &amp; leads
           {secondaryActive ? (
-            <span className="rounded-full bg-accent px-1.5 text-[10px] text-accent-fg">on</span>
+            <span className="rounded-full bg-gold px-1.5 text-[10px] font-medium text-ink">on</span>
           ) : null}
         </summary>
 
@@ -767,13 +767,16 @@ function Chip({
       /*
        * Filters are the most-used control on this page and were 20px tall with
        * a hairline border — smaller than the text beside them and easy to miss.
-       * Taller, with the active state carrying a bloom in the accent so the
-       * current filter is obvious from across the page rather than on inspection.
+       * Taller, with the active state carrying a bloom so the current filter is
+       * obvious from across the page rather than on inspection.
+       *
+       * Gold, because "which filter am I on" is the single fact this row exists
+       * to report, and gold is now what the page uses to say "this one".
        */
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs
                   font-medium transition-all active:scale-[0.97] ${
         active
-          ? "border-accent bg-accent text-accent-fg shadow-[0_4px_14px_-4px_color-mix(in_srgb,var(--accent)_60%,transparent)]"
+          ? "border-gold bg-gold text-ink shadow-[0_4px_14px_-4px_color-mix(in_srgb,var(--gold)_70%,transparent)]"
           : "border-border/70 bg-surface text-muted hover:border-accent/50 hover:bg-surface-2/60 hover:text-foreground"
       }`}
     >

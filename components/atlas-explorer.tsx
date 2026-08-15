@@ -224,7 +224,7 @@ export function AtlasExplorer({
               onChange={(e) => setPopIndex(Number(e.target.value))}
               aria-label="Minimum county population"
               aria-valuetext={POPULATION_STOPS[popIndex].label}
-              className="mt-2 w-full accent-[var(--accent)]"
+              className="mt-2 w-full accent-[var(--gold)]"
             />
             {/* Says what the filter is doing to the map, so a suddenly sparse
                 state reads as a filter rather than as missing data. */}

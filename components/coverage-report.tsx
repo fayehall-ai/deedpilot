@@ -73,7 +73,8 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
           <div className="mb-4 grid gap-4 sm:grid-cols-4">
             <Card>
               <div className="text-xs uppercase tracking-wide text-muted">Gold score</div>
-              <div className="tnum mt-1 text-3xl font-semibold" style={{ color: "var(--accent)" }}>
+              {/* The score is called gold; it should not have been rendered in blue. */}
+              <div className="tnum mt-1 text-3xl font-semibold" style={{ color: "var(--gold-ink)" }}>
                 {(board.gold.score * 100).toFixed(1)}%
               </div>
               <p className="mt-1 text-xs text-muted">

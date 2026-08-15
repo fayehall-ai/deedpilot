@@ -86,7 +86,7 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
                 className={`mt-6 rounded-full px-4 py-2.5 text-center text-sm font-medium
                             transition-all active:scale-[0.98] ${
                   featured
-                    ? "bg-accent text-accent-fg shadow-[0_10px_28px_-10px_color-mix(in_srgb,var(--accent)_75%,transparent)] hover:brightness-110"
+                    ? "bg-gold text-ink font-semibold shadow-[0_10px_28px_-10px_color-mix(in_srgb,var(--gold)_85%,transparent)] hover:brightness-105"
                     : "border border-border/70 hover:border-accent/50 hover:bg-surface-2/60"
                 }`}
               >
