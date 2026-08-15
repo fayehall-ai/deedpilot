@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { FRAMES, aerialUrl, hasUsableCoordinates } from "./imagery";
+import { FRAMES, aerialUrl, hasUsableCoordinates, requestWidthFor } from "./imagery";
 
 /**
  * The rules worth locking down are the ones that fail silently.
@@ -78,4 +78,33 @@ test("asks the imagery service for a real image", () => {
   assert.equal(q.get("bboxSR"), "4326", "bbox is sent in degrees, so it must say so");
   assert.equal(q.get("size"), "640,420");
   assert.ok(url.startsWith("https://basemap.nationalmap.gov/"), "must stay on the federal source");
+});
+
+test("never asks for more pixels than the source carries", () => {
+  /*
+   * NAIP is about a metre per pixel, so a 260m frame holds ~260 real pixels.
+   * Asking for 1040 (a 520px slot at 2x) returns the same picture interpolated
+   * — measured against the live service, not assumed — and costs three times
+   * the bytes for it.
+   */
+  const close = requestWidthFor(260, 520);
+  assert.ok(close <= 260 * 1.5 + 1, `close frame asked for ${close}px of a ~260px source`);
+
+  // The wide frame genuinely has the information, so it may use the display.
+  const wide = requestWidthFor(900, 520);
+  assert.equal(wide, 1040, "a 900m frame can fill a 520px slot at 2x");
+
+  // Never so small that it is visibly blocky.
+  assert.ok(requestWidthFor(40, 520) >= 320);
+});
+
+test("the close frame is not tighter than the source can support", () => {
+  /*
+   * It opened at 160m, which rendered as mush on any screen wider than a
+   * phone. This is the regression guard for that, expressed as the rule rather
+   * than the number: the frame must carry enough real pixels to be worth
+   * showing at the size it is shown.
+   */
+  assert.ok(FRAMES[0].span >= 240, `close frame ${FRAMES[0].span}m is below the legible floor`);
+  assert.ok(FRAMES[1].span > FRAMES[0].span * 2, "the two frames should be meaningfully different");
 });
