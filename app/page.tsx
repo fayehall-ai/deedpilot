@@ -107,7 +107,7 @@ export default function HomePage(props: PageProps<"/">) {
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.5]
-                     [background:radial-gradient(60rem_32rem_at_18%_-10%,rgba(78,157,127,0.16),transparent_65%)]"
+                     [background:radial-gradient(64rem_34rem_at_16%_-12%,rgba(45,109,255,0.22),transparent_66%)]"
         />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
           {/*
@@ -126,8 +126,8 @@ export default function HomePage(props: PageProps<"/">) {
                 the band that moves, and it says the data behind this is current. */}
             <p className="inline-flex items-center gap-2.5 text-sm font-medium text-ink-muted">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#4e9d7f] opacity-70 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#4e9d7f]" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-70 motion-reduce:animate-none" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold" />
               </span>
               Tax deed &amp; foreclosure auctions
             </p>

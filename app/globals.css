@@ -11,12 +11,12 @@
  */
 
 :root {
-  --background: #fbfaf8;
+  --background: #f7f8fb;
   --surface: #ffffff;
-  --surface-2: #f4f2ee;
-  --foreground: #1b1917;
-  --muted: #6d675f;
-  --border: #e6e2db;
+  --surface-2: #eef1f6;
+  --foreground: #0e1626;
+  --muted: #5b6b85;
+  --border: #dfe4ed;
   /*
    * Third text weight, below `muted`.
    *
@@ -24,7 +24,7 @@
    * meant to recede rendered at full inherited colour. A hierarchy with two
    * usable steps reads as flat, which is most of why this looked unfinished.
    */
-  --faint: #9a938a;
+  --faint: #93a0b5;
   /*
    * Elevation instead of outlines.
    *
@@ -32,8 +32,8 @@
    * weighed the same and nothing led. These are deliberately faint — a shadow
    * you notice is a shadow doing too much.
    */
-  --shadow-sm: 0 1px 2px rgb(28 25 23 / 0.04), 0 1px 1px rgb(28 25 23 / 0.03);
-  --shadow-md: 0 2px 4px rgb(28 25 23 / 0.04), 0 4px 12px rgb(28 25 23 / 0.05);
+  --shadow-sm: 0 1px 2px rgb(9 20 44 / 0.05), 0 1px 1px rgb(9 20 44 / 0.03);
+  --shadow-md: 0 2px 4px rgb(9 20 44 / 0.05), 0 8px 24px rgb(9 20 44 / 0.07);
 
   /*
    * The ink band.
@@ -46,13 +46,23 @@
    * Tinted with the accent's own green rather than neutral black, so the band
    * and the accent look like one decision instead of two.
    */
-  --ink: #10201b;
-  --ink-2: #16302711;
-  --ink-fg: #eef2f0;
-  --ink-muted: #8fa79d;
-  --ink-line: #ffffff1f;
+  --ink: #0a1533;
+  --ink-fg: #eef2fa;
+  --ink-muted: #93a3c4;
+  --ink-line: #ffffff1c;
 
-  --accent: #1f4d3d;
+  /*
+   * Gold, and the rule for using it.
+   *
+   * Navy with gold is the pairing this category reaches for, and the reason it
+   * usually looks dated is volume: gold on every button, gold rules, gold
+   * headings. It only reads as expensive when it is rare. Reserved here for the
+   * live signal and nothing else — if a second gold element appears on a screen,
+   * one of them is wrong.
+   */
+  --gold: #f2b544;
+
+  --accent: #1d5cf0;
   --accent-fg: #ffffff;
 
   /* Bid guidance. Load-bearing during a live auction. */
@@ -61,27 +71,28 @@
   --danger: #a3342a;
 
   /* Sale types — carried over from the Tax Sale Atlas legend. */
-  --type-lien: #2f6f4f;
-  --type-deed: #8a3b2f;
-  --type-redeemable: #b8842f;
-  --type-hybrid: #3f5c8a;
+  --type-lien: #12866a;
+  --type-deed: #c2553f;
+  --type-redeemable: #d4922c;
+  --type-hybrid: #4d76c9;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #14130f;
-    --surface: #1c1a16;
-    --surface-2: #24211c;
-    --foreground: #f0ece5;
-    --muted: #a29b90;
-    --border: #322e28;
-    --faint: #7d766c;
+    --background: #0b0f1a;
+    --surface: #121826;
+    --surface-2: #182031;
+    --foreground: #e9eef8;
+    --muted: #97a3ba;
+    --border: #232c3f;
+    --faint: #6b7790;
+    --gold: #f5c163;
     /* Heavier in dark, where a soft shadow on a dark ground reads as nothing. */
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
     --shadow-md: 0 2px 6px rgb(0 0 0 / 0.28), 0 8px 24px rgb(0 0 0 / 0.22);
 
-    --accent: #4e9d7f;
-    --accent-fg: #0d1512;
+    --accent: #5b8dff;
+    --accent-fg: #06102b;
 
     --ok: #5cb98d;
     --warn: #e0b45f;
@@ -105,6 +116,7 @@
   --color-ink-fg: var(--ink-fg);
   --color-ink-muted: var(--ink-muted);
   --color-ink-line: var(--ink-line);
+  --color-gold: var(--gold);
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
