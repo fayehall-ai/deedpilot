@@ -154,11 +154,19 @@ export async function CalendarView(props: {
         agenda below carries everything narrower.
       */}
       <div className="hidden lg:block">
-        <div className="grid grid-cols-7 overflow-hidden rounded-xl border border-border bg-surface">
+        {/*
+          A card, not a table.
+          
+          Hard borders at full strength on every cell made this read as a
+          spreadsheet — which is accurate about the data and wrong about the
+          product. Grid lines drop to a third strength so they separate without
+          drawing, and the whole thing sits on elevation like the other surfaces.
+        */}
+        <div className="grid grid-cols-7 overflow-hidden rounded-2xl border border-border/70 bg-surface shadow-[var(--shadow-md)]">
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
-              className="border-b border-border bg-surface-2/60 px-2 py-1.5 text-center text-[11px] font-medium uppercase tracking-wide text-muted"
+              className="border-b border-border/70 bg-surface-2/50 px-2 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-faint"
             >
               {label}
             </div>
@@ -170,7 +178,10 @@ export async function CalendarView(props: {
               <div
                 key={cell.iso}
                 className={[
-                  "min-h-28 border-border p-1.5",
+                  "min-h-28 border-border/40 p-2 transition-colors",
+                  // A day is clickable in effect — its sales are — so it should
+                  // acknowledge the cursor. Nothing here did before.
+                  cell.inMonth ? "hover:bg-surface-2/40" : "",
                   // No right border on the last column, no bottom on the last row.
                   (i + 1) % 7 === 0 ? "" : "border-r",
                   i < weeks.flat().length - 7 ? "border-b" : "",
@@ -182,7 +193,7 @@ export async function CalendarView(props: {
                   <span
                     className={
                       cell.isToday
-                        ? "grid h-5 w-5 place-items-center rounded-full bg-accent text-[11px] font-semibold text-accent-fg"
+                        ? "grid h-6 w-6 place-items-center rounded-full bg-accent text-[11px] font-semibold text-accent-fg shadow-[0_0_0_3px_color-mix(in_srgb,var(--accent)_22%,transparent)]"
                         : `text-[11px] ${cell.inMonth ? "text-muted" : "text-muted/50"}`
                     }
                   >
@@ -193,7 +204,7 @@ export async function CalendarView(props: {
                       counties selling three parcels each. */}
                   {sales.length > 0 ? (
                     <span
-                      className="tnum text-[10px] text-muted"
+                      className="tnum text-[10px] font-medium text-faint"
                       title={`${num(sales.reduce((n, a) => n + a.lotCount, 0))} parcels across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
                         sumBids(sales),
                       )}`}
@@ -751,10 +762,17 @@ function Chip({
       title={title}
       // Links, not toggle buttons — `aria-current` is the right state here.
       aria-current={active ? "true" : undefined}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs transition-colors ${
+      /*
+       * Filters are the most-used control on this page and were 20px tall with
+       * a hairline border — smaller than the text beside them and easy to miss.
+       * Taller, with the active state carrying a bloom in the accent so the
+       * current filter is obvious from across the page rather than on inspection.
+       */
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs
+                  font-medium transition-all active:scale-[0.97] ${
         active
-          ? "border-accent bg-accent text-accent-fg"
-          : "border-border bg-surface text-muted hover:border-accent hover:text-foreground"
+          ? "border-accent bg-accent text-accent-fg shadow-[0_4px_14px_-4px_color-mix(in_srgb,var(--accent)_60%,transparent)]"
+          : "border-border/70 bg-surface text-muted hover:border-accent/50 hover:bg-surface-2/60 hover:text-foreground"
       }`}
     >
       {dot ? (
