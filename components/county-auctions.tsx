@@ -50,14 +50,20 @@ function Row({ a }: { a: AuctionRow }) {
   return (
     <Link
       href={`/auctions/${a.id}`}
-      className="flex items-center gap-3 rounded-lg border border-border/60 bg-surface px-3 py-2.5
-                 transition-colors hover:border-accent"
+      /*
+       * A sale is a date and a size, and both should be readable at a glance
+       * without entering the row. The urgent ones lift on the left in the accent
+       * — a week out is when travel and funds have to be arranged.
+       */
+      className="group flex items-center gap-4 rounded-xl border border-border/60 bg-surface px-4 py-3
+                 shadow-[var(--shadow-sm)] transition-all hover:border-accent/50
+                 hover:shadow-[var(--shadow-md)]"
     >
       <div className="w-24 shrink-0">
         <div className="text-sm font-medium tabular-nums">{fmtDate(a.saleDate)}</div>
         <div
           className={`text-xs tabular-nums ${
-            away <= 7 ? "font-medium text-accent" : "text-faint"
+            away <= 7 ? "font-semibold text-accent" : "text-faint"
           }`}
         >
           {away <= 0 ? "today" : away === 1 ? "tomorrow" : `in ${away} days`}
@@ -133,8 +139,8 @@ export function CountyAuctions({
   if (sorted.length === 0) return null;
 
   return (
-    <details className="mt-4 rounded-xl border border-border bg-surface">
-      <summary className="flex cursor-pointer list-none items-baseline gap-3 px-4 py-3">
+    <details className="mt-6 rounded-2xl border border-border/70 bg-surface shadow-[var(--shadow-sm)]">
+      <summary className="flex cursor-pointer list-none items-baseline gap-3 rounded-2xl px-5 py-4 transition-colors hover:bg-surface-2/50">
         <span className="text-sm font-medium">Browse upcoming auctions as a list</span>
         <span className="text-sm text-muted">
           {sorted.length} sales

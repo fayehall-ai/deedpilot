@@ -536,7 +536,7 @@ function DetailPanel({
 }) {
   if (!state) {
     return (
-      <aside className="rounded-xl border border-border bg-surface p-4">
+      <aside className="rounded-2xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-sm)]">
         <p className="text-xs uppercase tracking-wide text-muted">Select a state</p>
         <h3 className="mt-1 text-lg font-semibold tracking-tight">Tax sale system</h3>
         <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -550,7 +550,7 @@ function DetailPanel({
   if (!county) {
     const researched = state.counties.filter((c) => c.researched).length;
     return (
-      <aside className="rounded-xl border border-border bg-surface p-4">
+      <aside className="rounded-2xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-sm)]">
         <p className="text-xs uppercase tracking-wide text-muted">{state.saleType}</p>
         <h3 className="mt-1 text-lg font-semibold tracking-tight">{state.name}</h3>
         <p className="mt-2 text-sm text-muted">
@@ -592,7 +592,7 @@ function DetailPanel({
      * run past the map beside it, and a panel taller than the thing it
      * describes pushes the map off screen mid-read.
      */
-    <aside className="max-h-[38rem] overflow-y-auto rounded-xl border border-border bg-surface p-4">
+    <aside className="max-h-[38rem] overflow-y-auto rounded-2xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-md)]">
       <p className="text-xs uppercase tracking-wide text-muted">{state.name}</p>
       <h3 className="mt-1 text-lg font-semibold tracking-tight">{county.label}</h3>
       {/* The county's own label when it runs a finer-grained system than the
