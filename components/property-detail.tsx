@@ -262,17 +262,22 @@ export function PropertyDetail({ raw }: { raw: Record<string, unknown> | null })
   if (sections.length === 0) return null;
 
   const legal = fmtValue(at(raw, "summary.legal1"));
-  const vintage = fmtValue(at(raw, "vintage.pubDate"), "date");
-  const total = sections.reduce((n, s) => n + s.values.length, 0);
 
+  /*
+   * No field count and no vendor line.
+   *
+   * "57 fields from ATTOM · published 2025-12-12" answered a question nobody
+   * reading a parcel page has. The count measures the payload rather than the
+   * property, the vendor is an implementation detail, and the publish date was
+   * routinely mistaken for the sale or assessment date sitting inches above it.
+   *
+   * Provenance still appears where it belongs — on the valuation card, against
+   * the figure it actually qualifies.
+   */
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
-      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+      <div className="mb-4">
         <h3 className="text-sm font-semibold">Full property record</h3>
-        <span className="text-xs text-muted">
-          {num(total)} fields from ATTOM
-          {vintage ? ` · published ${vintage}` : ""}
-        </span>
       </div>
 
       <div className="space-y-4">

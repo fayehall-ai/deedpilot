@@ -11,14 +11,12 @@ import { DetailSkeleton } from "@/components/skeleton";
 import { DealCalculator } from "@/components/deal-calculator";
 import { ParcelBrief } from "@/components/parcel-brief";
 import { HistoricalComps } from "@/components/historical-comps";
-import { PropertyEnrichButton } from "@/components/property-enrich-button";
 import { PropertyDetail } from "@/components/property-detail";
 import { ParcelImagery } from "@/components/parcel-imagery";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
 import { getComparables } from "@/lib/history/comparables";
 import { assessorLinks } from "@/lib/property/assessor-links";
 import { mergeValuations, provenanceLabel } from "@/lib/property/merge";
-import { configuredEnrichmentProviders } from "@/lib/property/enrich";
 import type { SaleType } from "@/lib/atlas/types";
 
 
@@ -157,7 +155,6 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
   });
 
   const thinListing = !assessedValue && !lot.addressLine;
-  const providers = configuredEnrichmentProviders();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -474,16 +471,18 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             initialModel={cached?.model ?? null}
           />
 
-          <Card>
-            <h3 className="mb-2 text-sm font-semibold">Property details</h3>
-            <p className="mb-3 text-xs leading-relaxed text-muted">
-              Pull address, assessed value, and property facts from a commercial property API.{" "}
-              {providers.length
-                ? `Configured: ${providers.join(", ")}.`
-                : "No API key set yet — the county record links still work."}
-            </p>
-            <PropertyEnrichButton lotId={lot.id} />
-          </Card>
+          {/*
+            The "Fetch property details" card lived here and has been removed.
+
+            It offered to do, one parcel at a time and on someone else's click,
+            what the bulk pipeline already does for a whole county — and it was
+            usually disabled anyway, since the page only renders once a lot has
+            an address and a value. What it showed most readers was a dead
+            button and a sentence about API providers they cannot configure.
+
+            It also fronted an unauthenticated endpoint that spends money. That
+            endpoint is now admin-only; see app/api/lots/[id]/enrich/route.ts.
+          */}
         </aside>
       </div>
     </div>
