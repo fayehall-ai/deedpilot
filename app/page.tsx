@@ -107,7 +107,7 @@ export default function HomePage(props: PageProps<"/">) {
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.5]
-                     [background:radial-gradient(64rem_34rem_at_16%_-12%,rgba(45,109,255,0.22),transparent_66%)]"
+                     [background:radial-gradient(64rem_34rem_at_16%_-12%,rgba(139,109,255,0.26),transparent_66%)]"
         />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
           {/*

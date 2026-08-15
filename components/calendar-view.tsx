@@ -583,22 +583,33 @@ function CalendarControls({
     <div className="mb-4 space-y-2.5">
       {/* Month, and what is in it. */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
+          {/*
+            Was 28px square holding a text chevron at body size — under the 44px
+            a finger expects, and visually so light it read as decoration beside
+            the month name rather than the control that changes it. Now 40px,
+            with a drawn chevron at a real stroke weight, on a surface that looks
+            pressable.
+          */}
           <Link
             href={calendarHref(filters, { month: prev })}
             {...STAY_PUT}
             aria-label={`Previous month, ${monthLabel(prev)}`}
-            className="grid h-7 w-7 place-items-center rounded-md border border-border text-muted transition-colors hover:border-accent hover:text-foreground"
+            className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-surface
+                       text-foreground shadow-[var(--shadow-sm)] transition-all
+                       hover:border-accent hover:text-accent active:scale-95"
           >
-            ‹
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden><path d="m15 18-6-6 6-6" /></svg>
           </Link>
           <Link
             href={calendarHref(filters, { month: next })}
             {...STAY_PUT}
             aria-label={`Next month, ${monthLabel(next)}`}
-            className="grid h-7 w-7 place-items-center rounded-md border border-border text-muted transition-colors hover:border-accent hover:text-foreground"
+            className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-surface
+                       text-foreground shadow-[var(--shadow-sm)] transition-all
+                       hover:border-accent hover:text-accent active:scale-95"
           >
-            ›
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden><path d="m9 18 6-6-6-6" /></svg>
           </Link>
         </div>
         <h3 className="text-lg font-semibold tracking-tight">{monthLabel(filters.month)}</h3>
