@@ -61,8 +61,20 @@
    * one of them is wrong.
    */
   --gold: #f2b544;
+  /* Brighter sibling for use on the ink band, where the light-theme accent is
+     too dark to register against the navy. */
+  --accent-on-ink: #a78bff;
 
-  --accent: #1d5cf0;
+  /*
+   * Electric violet, not blue.
+   *
+   * Blue on navy is the safest possible choice and reads as exactly that —
+   * corporate, and the same note played twice. Violet is far enough from the
+   * ground to actually separate from it, and it is the one hue that stays
+   * legible on white while still popping on navy, which the accent has to do
+   * because it carries links and buttons on both.
+   */
+  --accent: #6a3ff2;
   --accent-fg: #ffffff;
 
   /* Bid guidance. Load-bearing during a live auction. */
@@ -91,8 +103,8 @@
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
     --shadow-md: 0 2px 6px rgb(0 0 0 / 0.28), 0 8px 24px rgb(0 0 0 / 0.22);
 
-    --accent: #5b8dff;
-    --accent-fg: #06102b;
+    --accent: #9b83ff;
+    --accent-fg: #120a2e;
 
     --ok: #5cb98d;
     --warn: #e0b45f;
@@ -117,6 +129,7 @@
   --color-ink-muted: var(--ink-muted);
   --color-ink-line: var(--ink-line);
   --color-gold: var(--gold);
+  --color-accent-on-ink: var(--accent-on-ink);
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
