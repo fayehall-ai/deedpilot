@@ -104,10 +104,26 @@ export default function HomePage(props: PageProps<"/">) {
         flat field looking like a filled rectangle, not enough to notice.
       */}
       <section className="relative overflow-hidden bg-ink text-ink-fg">
+        {/*
+          Light, not paint.
+          
+          Two blooms and a hairline. Their site fills rectangles with blue, which
+          is what dates it; the same hue behaving like a light source behind the
+          content reads as current. The cyan is a second temperature so the field
+          shifts across its width instead of being one flat wash.
+          
+          The top hairline is a gradient that fades at both ends — a full-width
+          line at constant opacity looks like a table border.
+        */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.5]
-                     [background:radial-gradient(64rem_34rem_at_16%_-12%,rgba(139,109,255,0.26),transparent_66%)]"
+          className="pointer-events-none absolute inset-0
+                     [background:radial-gradient(58rem_30rem_at_12%_-14%,rgba(12,107,255,0.34),transparent_62%),radial-gradient(44rem_26rem_at_84%_6%,rgba(34,211,238,0.14),transparent_60%)]"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px
+                     [background:linear-gradient(90deg,transparent,rgba(90,162,255,0.55),transparent)]"
         />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
           {/*
@@ -140,7 +156,7 @@ export default function HomePage(props: PageProps<"/">) {
             <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.05] tracking-[-0.032em] sm:text-6xl">
               Know your walk-away price
               <br className="hidden sm:block" />{" "}
-              <span className="text-ink-muted">before you raise the paddle.</span>
+              <span className="text-fade">before you raise the paddle.</span>
             </h1>
             <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-ink-muted">
               Every county&apos;s tax sale rules, live auction inventory, and a co-pilot that
@@ -157,6 +173,7 @@ export default function HomePage(props: PageProps<"/">) {
               <Link
                 href="/#calendar"
                 className="rounded-full bg-ink-fg px-6 py-3 font-medium text-ink
+                           shadow-[0_0_0_1px_rgba(255,255,255,0.14),0_10px_30px_-8px_rgba(12,107,255,0.65)]
                            transition-transform hover:scale-[1.02] active:scale-[0.99]"
               >
                 Browse upcoming auctions
@@ -267,7 +284,7 @@ async function HeroStats() {
 
   return (
     <>
-      <dl className="mt-14 grid grid-cols-2 gap-x-5 gap-y-8 border-t border-ink-line pt-8 sm:grid-cols-3 lg:grid-cols-5">
+      <dl className="glass mt-14 grid grid-cols-2 gap-x-5 gap-y-8 rounded-2xl p-6 sm:grid-cols-3 sm:p-7 lg:grid-cols-5">
         <HeroStat label="Counties mapped" value={num(ALL_COUNTIES.length)} />
         <HeroStat label="Researched in depth" value={num(Object.keys(COUNTY_DATA).length)} />
         <HeroStat label="States with inventory" value={num(stats.byState.length)} />
