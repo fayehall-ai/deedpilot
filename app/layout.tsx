@@ -79,9 +79,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           */}
           <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:gap-6 sm:px-6">
             <HomeLink className="flex shrink-0 items-center gap-2 font-semibold tracking-tight">
+              {/*
+                Gold, like the primary CTA it shares the navy bar with.
+
+                The mark is identity rather than interaction, so blue — which
+                now means "you can act on this" — was the one thing it could not
+                be without lying about itself. Ink on gold is 9.82:1.
+              */}
               <span
                 aria-hidden
-                className="grid h-7 w-7 place-items-center rounded-md bg-accent text-sm font-bold text-accent-fg"
+                className="grid h-7 w-7 place-items-center rounded-md bg-gold text-sm font-bold text-ink"
               >
                 §
               </span>
