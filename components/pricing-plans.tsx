@@ -25,21 +25,27 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
             <div
               key={id}
               /*
-               * The featured plan was distinguished by a 1px accent border, which
-               * is the least a design can do — beside three identical cards it
-               * read as a rendering artefact rather than a recommendation. It now
-               * lifts: an accent ring, a bloom beneath, and a step up the page.
+               * The recommendation is gold, not blue.
+               *
+               * Blue was doing two jobs — "you can act on this" and "this is the
+               * notable one" — so a featured card and an active filter competed
+               * for the same meaning. Splitting them: blue stays interaction
+               * (links, buttons, current filter), gold marks the one thing on a
+               * surface worth noticing. Gold is also simply what a recommendation
+               * has looked like for a very long time.
+               *
+               * The button below stays blue, because pressing it is an action.
                */
               className={`relative flex flex-col rounded-2xl border p-6 transition-transform ${
                 featured
-                  ? "border-accent/40 bg-surface shadow-[0_0_0_1px_color-mix(in_srgb,var(--accent)_35%,transparent),0_18px_44px_-16px_color-mix(in_srgb,var(--accent)_55%,transparent)] lg:-mt-3 lg:pb-9"
+                  ? "border-gold/50 bg-surface shadow-[0_0_0_1px_color-mix(in_srgb,var(--gold)_55%,transparent),0_18px_44px_-16px_color-mix(in_srgb,var(--gold)_60%,transparent)] lg:-mt-3 lg:pb-9"
                   : "border-border/70 bg-surface shadow-[var(--shadow-sm)] hover:border-border"
               }`}
             >
               {featured ? (
-                <div className="mb-3 -mt-1 self-start rounded-full bg-accent px-3 py-1 text-[10px]
-                                font-semibold uppercase tracking-[0.08em] text-accent-fg
-                                shadow-[0_4px_14px_-4px_color-mix(in_srgb,var(--accent)_70%,transparent)]">
+                <div className="mb-3 -mt-1 self-start rounded-full bg-gold px-3 py-1 text-[10px]
+                                font-semibold uppercase tracking-[0.08em] text-ink
+                                shadow-[0_4px_14px_-4px_color-mix(in_srgb,var(--gold)_80%,transparent)]">
                   Most popular
                 </div>
               ) : null}
