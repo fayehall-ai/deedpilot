@@ -95,18 +95,25 @@ export function PropertySearch() {
     <div className="w-full sm:max-w-md">
       <form action={action}>
         {/*
-          Styled for the ink band it now sits on. A surface-coloured field on a
-          dark ground is nearly invisible, and this is the one control a visitor
-          may have arrived specifically to use.
+          Styled for the ink band it sits on. A surface-coloured field on a dark
+          ground is nearly invisible, and this is the one control a visitor may
+          have arrived specifically to use.
+
+          No visible label, and no hint underneath. Both said what the
+          placeholder already demonstrates — that it is an address field, and
+          that the example carries a city and a state. Three lines of chrome
+          around one input made the control look more demanding than typing an
+          address actually is.
+
+          The label became `aria-label` rather than disappearing: a search box
+          still needs a name for anyone not looking at the placeholder.
         */}
-        <label htmlFor="q" className="block text-sm font-medium text-ink-fg">
-          Look up any US property
-        </label>
-        <div className="mt-2 flex gap-2">
+        <div className="flex gap-2">
           <input
             id="q"
             name="q"
             type="search"
+            aria-label="Look up any US property by address"
             required
             minLength={5}
             // Restores what was typed once the action returns; see the header.
@@ -121,10 +128,6 @@ export function PropertySearch() {
           />
           <Submit />
         </div>
-        <p className="mt-2.5 text-xs text-ink-muted">
-          Include the city or ZIP — an address alone is usually ambiguous.
-        </p>
-
         <Pending />
       </form>
 
