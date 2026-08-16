@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The site-intel worker, as a launchd agent.
+
+  Copy to ~/Library/LaunchAgents/ and edit the three absolute paths below —
+  launchd runs with no shell profile, so nothing here can be relative and
+  `npx` cannot be found on a bare PATH.
+
+    cp docs/com.deedpilot.intel.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.deedpilot.intel.plist
+
+  KeepAlive restarts it if it exits for any reason. The worker itself idles
+  politely when there is nothing due — it does not spin — so a permanently
+  running agent costs nothing when the queue is drained.
+
+  It stops on a parcel boundary, so `launchctl unload` never leaves a parcel
+  with half its sources written and no ledger row to say so.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.deedpilot.intel</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <!-- Absolute path to node — this machine's, from `which node`. -->
+        <string>/Users/fayehall/.local/bin/node</string>
+        <string>/Users/fayehall/deedpilot/node_modules/.bin/tsx</string>
+        <string>/Users/fayehall/deedpilot/scripts/intel-worker.ts</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/fayehall/deedpilot</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <!--
+      Throttled so a worker that fails immediately — a bad DATABASE_URL, a
+      missing dependency — cannot restart in a tight loop and fill the log with
+      the same stack trace a thousand times a minute.
+    -->
+    <key>ThrottleInterval</key>
+    <integer>60</integer>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/deedpilot-intel.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/deedpilot-intel.err.log</string>
+
+    <!--
+      `lib/env` loads .env.local from the working directory, so the database
+      URL does not need to be duplicated here. Keeping credentials out of a
+      plist matters: this file is world-readable and gets copied around.
+    -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>NODE_ENV</key>
+        <string>production</string>
+    </dict>
+
+    <!-- Nice'd: this is background work and must never compete with the desk. -->
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>LowPriorityIO</key>
+    <true/>
+</dict>
+</plist>

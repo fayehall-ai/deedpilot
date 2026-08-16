@@ -13,10 +13,12 @@ import { ParcelBrief } from "@/components/parcel-brief";
 import { HistoricalComps } from "@/components/historical-comps";
 import { PropertyDetail } from "@/components/property-detail";
 import { ParcelImagery } from "@/components/parcel-imagery";
+import { SiteIntel } from "@/components/site-intel";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
 import { getComparables } from "@/lib/history/comparables";
 import { assessorLinks } from "@/lib/property/assessor-links";
 import { mergeValuations, provenanceLabel } from "@/lib/property/merge";
+import { intelSourcesChecked, signalsForLot } from "@/lib/property/signals/store";
 import type { SaleType } from "@/lib/atlas/types";
 
 
@@ -52,6 +54,15 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
 
   const { lot, auction, county } = row;
   const valuations = await getLotValuations(lot.id);
+  /*
+   * Site intel is read, never fetched, on the request path. Overpass takes
+   * tens of seconds per parcel and is regularly rate-limited; the background
+   * worker owns that latency so the page never does. A parcel the loop has not
+   * reached yet renders no section at all rather than a spinner over an
+   * upstream nobody controls.
+   */
+  const siteSignals = await signalsForLot(lot.id);
+  const checkedIntelSources = await intelSourcesChecked(lot.id);
   /*
    * Merged across providers, not `valuations[0]`. Providers differ in coverage
    * more than in value — RentCast returns a market estimate and little else,
@@ -350,6 +361,17 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             longitude={lot.longitude ? Number(lot.longitude) : null}
             caption={lot.addressLine ?? `parcel ${lot.parcelNumber ?? ""}`.trim()}
           />
+
+          {/*
+            What surrounds it, after what it looks like.
+
+            The aerial frame shows a reader that something is next door; this
+            names it, measures it and says why it matters. On the Houston test
+            parcel that is a Union Pacific mainline at 344 ft, the Wallisville
+            substation at 397 ft, and ten industrial parcels — none of which is
+            visible in an assessment, a tax notice or a listing feed.
+          */}
+          <SiteIntel signals={siteSignals} checkedSources={checkedIntelSources} />
 
           <PropertyDetail raw={attomRaw} />
 

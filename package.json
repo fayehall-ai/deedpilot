@@ -32,7 +32,10 @@
     "enrich:rentcast": "tsx scripts/bulk-rentcast.ts",
     "enrich:geocode": "tsx scripts/geocode-lots.ts",
     "enrich:discover": "tsx scripts/discover-parcel-layers.ts",
-    "enrich:verify": "tsx scripts/verify-parcel-layer.ts"
+    "enrich:verify": "tsx scripts/verify-parcel-layer.ts",
+    "intel:worker": "tsx scripts/intel-worker.ts",
+    "intel:status": "tsx scripts/intel-worker.ts --status",
+    "intel:locate": "tsx scripts/backfill-parcel-geometry.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

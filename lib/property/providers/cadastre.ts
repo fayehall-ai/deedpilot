@@ -193,6 +193,91 @@ const num = (v: unknown): number | undefined => {
   return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : undefined;
 };
 
+/** An Esri geometry, in the two shapes these layers actually return. */
+type EsriGeometry =
+  | { x: number; y: number }
+  | { rings: [number, number][][] }
+  | Record<string, unknown>;
+
+/**
+ * Where the parcel is, from the geometry the layer was already sending.
+ *
+ * ## Why this exists
+ *
+ * Every cadastre lookup used to pass `returnGeometry: "false"`, and 16,001
+ * parcels were matched under that setting. The assessed values were kept and
+ * the coordinates — in the same response, at no extra cost, from a service
+ * that charges nothing and meters nothing — were discarded on the way past.
+ *
+ * That was not a small omission. Only 4,002 of 25,702 lots carry a location,
+ * and a location is the precondition for every question about what surrounds a
+ * parcel: the flood zone it sits in, the rail line behind it, the substation
+ * next door. Turning the flag on recovers all of it retroactively, because the
+ * layer will answer the same query again for free.
+ *
+ * ## Both shapes, because both are published
+ *
+ * Arkansas's statewide service returns `{x, y}` — the assessor's parcel
+ * *centroid*, which is all it holds. Cobb County GA returns `rings`, a real
+ * boundary polygon, 77 points for a suburban lot. Polygons are worth more than
+ * their centroid: a distance measured from a boundary is the distance a person
+ * standing on the parcel would experience, and on a forty-acre tract the
+ * centroid can be a quarter-mile from the thing that matters.
+ *
+ * So the ring is kept as well as reduced. `boundary` records that the polygon
+ * is available for a real edge distance later; `centroid` admits the number is
+ * the best the source published.
+ */
+export function parcelLocation(geometry: EsriGeometry | undefined | null):
+  | { latitude: number; longitude: number; basis: "centroid" | "boundary"; ring?: [number, number][] }
+  | undefined {
+  if (!geometry) return undefined;
+
+  const g = geometry as { x?: unknown; y?: unknown; rings?: unknown };
+
+  // A point layer: the assessor's own centroid, used verbatim.
+  if (typeof g.x === "number" && typeof g.y === "number") {
+    if (!Number.isFinite(g.x) || !Number.isFinite(g.y)) return undefined;
+    /*
+     * Guarded because a layer that ignores `outSR` returns Web Mercator metres
+     * (±20,000,000) rather than degrees, and writing those into a lat/lon
+     * column puts the parcel in the Gulf of Guinea — a silent, plausible,
+     * completely wrong answer of exactly the kind the parcel-id matcher
+     * refuses to make.
+     */
+    if (Math.abs(g.y) > 90 || Math.abs(g.x) > 180) return undefined;
+    return { latitude: g.y, longitude: g.x, basis: "centroid" };
+  }
+
+  if (Array.isArray(g.rings) && g.rings.length > 0) {
+    const ring = g.rings[0] as [number, number][];
+    const pts = ring.filter(
+      (p) =>
+        Array.isArray(p) &&
+        typeof p[0] === "number" &&
+        typeof p[1] === "number" &&
+        Math.abs(p[1]) <= 90 &&
+        Math.abs(p[0]) <= 180,
+    );
+    if (pts.length < 3) return undefined;
+    /*
+     * The mean of the vertices, not the centre of the bounding box.
+     *
+     * Both are approximations of a polygon centroid and neither is exact, but
+     * the mean degrades gracefully on the shape that dominates rural
+     * inventory: a long thin strip along a road, where the bounding-box centre
+     * routinely falls outside the parcel entirely — on a neighbour's land, or
+     * in the middle of the road. A point that is not on the parcel would
+     * measure every distance from the wrong place.
+     */
+    const lon = pts.reduce((s, p) => s + p[0], 0) / pts.length;
+    const lat = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+    return { latitude: lat, longitude: lon, basis: "boundary", ring: pts };
+  }
+
+  return undefined;
+}
+
 export const cadastreProvider: PropertyProvider = {
   name: "cadastre",
 
@@ -230,11 +315,23 @@ export const cadastreProvider: PropertyProvider = {
         ]
           .filter(Boolean)
           .join(","),
-        returnGeometry: "false",
+        /*
+         * On, and free. See `parcelLocation` — this flag was `false` for the
+         * first 16,001 matches and the coordinates in every one of those
+         * responses were dropped on the floor.
+         */
+        returnGeometry: "true",
+        // Degrees, explicitly. A layer left to its own default returns Web
+        // Mercator metres, which `parcelLocation` rejects rather than misplace
+        // the parcel by several thousand miles.
+        outSR: "4326",
         f: "json",
       });
 
-      let data: { features?: { attributes: Record<string, unknown> }[]; error?: unknown };
+      let data: {
+        features?: { attributes: Record<string, unknown>; geometry?: unknown }[];
+        error?: unknown;
+      };
       try {
         const res = await fetch(`${src.url}?${params}`, { signal: AbortSignal.timeout(25_000) });
         if (!res.ok) continue;
@@ -265,6 +362,8 @@ export const cadastreProvider: PropertyProvider = {
       const market = (src.marketField ? num(a[src.marketField]) : undefined) ?? summed;
       if (assessed === undefined && market === undefined) continue;
 
+      const located = parcelLocation(rows[0].geometry as never);
+
       return {
         source: "cadastre",
         parcelNumber: String(a[src.parcelField] ?? input.parcelNumber),
@@ -272,6 +371,15 @@ export const cadastreProvider: PropertyProvider = {
         marketValue: market,
         landValue: src.landField ? num(a[src.landField]) : undefined,
         ownerName: src.ownerField ? (a[src.ownerField] as string) || undefined : undefined,
+        /*
+         * The parcel's own coordinates, which every downstream site-intel
+         * question depends on. Flowing through `PropertyRecord` rather than a
+         * side channel because `applyRecordToLot` already writes these two
+         * fields — the plumbing was there the whole time and had nothing to
+         * carry.
+         */
+        latitude: located?.latitude,
+        longitude: located?.longitude,
         // Situs addresses arrive column-aligned from the assessor's mainframe —
         // "195   FOWLER  CIR  NE". Collapsed, or every downstream match fails on
         // whitespace.

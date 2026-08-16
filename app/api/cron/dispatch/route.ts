@@ -40,6 +40,8 @@ import { tokenMatches } from "@/lib/admin/token";
 import { loadPolicyOverrides } from "@/lib/admin/policy-load";
 import { enqueueWeeklyResearch, isScoutJob, scoutState } from "@/lib/admin/scout-jobs";
 import { enqueuePlan, planGaps } from "@/lib/admin/plan-jobs";
+import { enqueueIntel, intelLotId, intelSource, isIntelJob } from "@/lib/admin/intel-jobs";
+import { configuredSignalSources, enrichLotIntel } from "@/lib/property/signals";
 import { getPipelineConfig } from "@/lib/admin/pipeline-settings";
 
 /** Thrown to skip planning without logging it as a fault. */
@@ -149,6 +151,15 @@ export async function GET(req: NextRequest) {
      */
     const weekly = await enqueueWeeklyResearch();
     if (weekly.ran) log.push(`weekly research queued: ${weekly.states.join(", ")}`);
+
+    /*
+     * Site intel last and at the lowest priority in the queue, so it can only
+     * ever consume budget the day's crawls and research did not want. A daily
+     * tick enriches a handful of parcels against thousands; the long-running
+     * worker in `scripts/intel-worker.ts` is what actually drains the backlog.
+     */
+    const intel = await enqueueIntel();
+    if (intel.enqueued > 0) log.push(`queued ${intel.enqueued} site-intel fetch(es)`);
   } catch (e) {
     // A deliberate skip is not a failure; anything else is, and either way the
     // queue keeps draining because that is worth more than planning.
@@ -185,6 +196,33 @@ export async function GET(req: NextRequest) {
             `across ${result.report.countiesChecked} counties`,
         );
         done.push({ job: job.id, adapter: job.adapter, rows: result.report.rows.length });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        await failJob(job.id, msg);
+        log.push(`${job.adapter}: ${msg}`);
+        done.push({ job: job.id, adapter: job.adapter, error: msg });
+      }
+      continue;
+    }
+
+    /*
+     * Site-intel fetches, which are not adapters and have no county to crawl.
+     * Handled before the adapter lookup for the same reason scout jobs are:
+     * `getAdapter` would reject a perfectly well-formed job as unknown.
+     */
+    if (isIntelJob(job.adapter)) {
+      const lotId = intelLotId(job.requestedBy);
+      const source = intelSource(job.adapter);
+      if (!lotId) {
+        await failJob(job.id, `intel job carries no lot id: ${job.requestedBy}`);
+        continue;
+      }
+      try {
+        const sources = configuredSignalSources().filter((s) => s.name === source);
+        const result = await enrichLotIntel(lotId, { sources });
+        await completeJob(job.id, result as unknown as Record<string, unknown>);
+        log.push(`${job.adapter}: ${result.totalSignals} signal(s) for ${lotId.slice(0, 8)}`);
+        done.push({ job: job.id, adapter: job.adapter, signals: result.totalSignals });
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         await failJob(job.id, msg);
