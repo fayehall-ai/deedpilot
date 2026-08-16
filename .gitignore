@@ -77,3 +77,9 @@ lca-lc-foundations/
 
 # Adapter fixtures captured during a crawl — large, regenerable, not reviewed.
 data/samples/
+
+# CAPE Component Seven output — large media, reproducible from the database
+artifacts/
+
+# Ad-hoc sampler used while tuning the intel loop
+scripts/.intel-sample.mts

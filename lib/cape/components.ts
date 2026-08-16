@@ -22,6 +22,7 @@
  * whether they have been produced; it does not write them, and it does not
  * claim they exist when they do not.
  */
+import { createHash } from "node:crypto";
 import type { CountyRule } from "@/lib/atlas/types";
 import type { StatuteParams } from "@/lib/deal/statute";
 import { classifySource, type SourceClassification } from "./sources";
@@ -76,6 +77,30 @@ export interface PackageInput {
     withGeo: number;
   };
   today: string;
+  /**
+   * What Component Seven has actually produced for this package, if anything.
+   *
+   * Passed in rather than looked up, so `buildPackage` stays a pure function of
+   * its inputs — the property `cape.test.ts` depends on and the reason the
+   * checklist can be reasoned about at all.
+   *
+   * `inputsHash` is what makes a stale artifact detectable: it is the identity
+   * of the computed package the script was written from. A narration produced
+   * before the sale date was confirmed describes a different sale, and must not
+   * report itself as done.
+   */
+  production?: CapeProductionState | null;
+}
+
+/** The subset of a `cape_productions` row the checklist reads. */
+export interface CapeProductionState {
+  inputsHash: string;
+  hasScript: boolean;
+  slidePlanCount: number | null;
+  hasAudio: boolean;
+  hasVideo: boolean;
+  /** Figures the narration spoke that were not in the facts. Empty is the pass. */
+  unsupportedFigures: string[];
 }
 
 export interface CapePackage {
@@ -88,6 +113,50 @@ export interface CapePackage {
   /** Component Nine's gate. */
   releasable: boolean;
   blockedBy: string[];
+}
+
+/**
+ * Identity of the facts a narration is written from.
+ *
+ * ## What it must include
+ *
+ * Everything a script could legitimately speak: the county, the sale, the
+ * statute, the rules, the parcel counts. If any of those move, the narration
+ * describes a sale that no longer exists and every artifact built from it is
+ * stale.
+ *
+ * ## What it must exclude, and why that matters more
+ *
+ * `today` is in `PackageInput` because Component Eight computes a deadline from
+ * it. Folding it into this hash would change the hash every midnight, mark all
+ * 152 packages stale every day, and — since staleness is what triggers
+ * regeneration — re-synthesise every narration daily against a metered speech
+ * API. A cache key that includes the clock is not a cache key.
+ *
+ * `production` is excluded because it is the thing being judged.
+ */
+export function capeInputsHash(i: PackageInput): string {
+  const shape = {
+    auctionId: i.auctionId,
+    county: i.countyName,
+    state: i.state,
+    saleDate: i.saleDate,
+    saleDateConfirmed: i.saleDateConfirmed,
+    saleType: i.saleType,
+    platform: i.platform,
+    sourceUrl: i.sourceUrl,
+    startTime: i.startTime,
+    registrationDeadline: text(i.registrationDeadline),
+    depositDeadline: text(i.depositDeadline),
+    lotCount: i.lotCount,
+    listingKind: i.listingKind,
+    population: i.population,
+    parcels: i.parcels,
+    offices: i.offices,
+    rule: i.rule ?? null,
+    statute: i.statute ?? null,
+  };
+  return createHash("sha256").update(JSON.stringify(shape)).digest("hex").slice(0, 16);
 }
 
 const have = (label: string, detail: string): ComponentItem => ({ label, state: "have", detail });
@@ -299,11 +368,55 @@ export function buildPackage(i: PackageInput): CapePackage {
   ]);
 
   // --- Seven: education and video production -------------------------------
+  /*
+   * Staleness is decided here, once, and every item below reads the result.
+   *
+   * An artifact produced from different inputs is not a produced artifact. A
+   * narration written before the sale date was confirmed, or before the state's
+   * statute entry landed, describes a sale that has since changed — and
+   * reporting it as done would let a package pass Component Nine on the
+   * strength of a video that contradicts the rest of the briefing.
+   */
+  const prod = i.production ?? null;
+  const currentHash = capeInputsHash(i);
+  const stale = prod !== null && prod.inputsHash !== currentHash;
+  const staleNote = "Produced from earlier facts — regenerate";
+
   const seven = component(7, "Education and video", [
-    verify("Narration script", "Not produced"),
-    verify("Narration audio", "Not produced"),
-    verify("Slide plan", "Not produced"),
-    verify("Final video", "Not produced"),
+    prod?.hasScript
+      ? stale
+        ? verify("Narration script", staleNote)
+        : /*
+           * A script that spoke a number nobody computed is not a script. It is
+           * held at `verify` however complete it looks, because the whole point
+           * of the check is that audio carries no visible source — see
+           * `verifyNarration`.
+           */
+          prod.unsupportedFigures.length > 0
+          ? verify(
+              "Narration script",
+              `Unsupported figure(s): ${prod.unsupportedFigures.join(", ")}`,
+            )
+          : have("Narration script", "Written and verified against the computed facts")
+      : verify("Narration script", "Not produced"),
+
+    prod?.hasAudio
+      ? stale
+        ? verify("Narration audio", staleNote)
+        : have("Narration audio", "Synthesised")
+      : verify("Narration audio", "Not produced"),
+
+    prod?.slidePlanCount
+      ? stale
+        ? verify("Slide plan", staleNote)
+        : have("Slide plan", `${prod.slidePlanCount} slide(s)`)
+      : verify("Slide plan", "Not produced"),
+
+    prod?.hasVideo
+      ? stale
+        ? verify("Final video", staleNote)
+        : have("Final video", "Encoded")
+      : verify("Final video", "Not produced"),
   ]);
 
   // --- Eight: production calendar ------------------------------------------
@@ -345,8 +458,29 @@ export function buildPackage(i: PackageInput): CapePackage {
     i.listingKind === "sale_list"
       ? have("Parcel-list source", "Published sale list")
       : verify("Parcel-list source", `A ${i.listingKind} listing`),
-    verify("Narration accuracy", "No narration produced"),
-    verify("Video formatting and audio", "No video produced"),
+    /*
+     * These two are Component Seven's quality gate, and they stay honest about
+     * what the machine can and cannot certify.
+     *
+     * `verifyNarration` proves a negative — that no spoken figure is absent
+     * from the computed facts — and that is worth recording as satisfied,
+     * because it is the failure mode with real consequences: a fabricated
+     * redemption period repeated to everyone who takes the course. It does not
+     * prove the narration is *good*, and this item does not claim it does.
+     *
+     * Whether the video is watchable is a human judgement, so it stays at
+     * `verify` even when an MP4 exists. An automated "looks fine" on a file
+     * nobody has opened is precisely the false assurance Component Nine is
+     * supposed to prevent.
+     */
+    prod?.hasScript && !stale
+      ? prod.unsupportedFigures.length === 0
+        ? have("Narration accuracy", "Every spoken figure traced to a computed fact")
+        : verify("Narration accuracy", `Unsupported: ${prod.unsupportedFigures.join(", ")}`)
+      : verify("Narration accuracy", stale ? staleNote : "No narration produced"),
+    prod?.hasVideo && !stale
+      ? verify("Video formatting and audio", "Encoded — needs a human review pass")
+      : verify("Video formatting and audio", stale ? staleNote : "No video produced"),
   ]);
 
   // --- Ten: PropStream export and downstream automations -------------------

@@ -36,7 +36,17 @@ export type Operation =
    * inventory. Folding them together would hide the only line on the bill that
    * a stranger can increase.
    */
-  | "property-lookup";
+  | "property-lookup"
+  /*
+   * CAPE Component Seven — the county narration script and slide plan.
+   *
+   * Its own line because it is the first operation that leads directly to
+   * *metered media*: a script becomes ElevenLabs characters and then an
+   * encode. When the video bill is questioned, the question is really about
+   * how many scripts were generated and regenerated, and that is answerable
+   * only if the script call is not folded into `brief`.
+   */
+  | "cape-script";
 
 export interface UsageRecord {
   provider: string;

@@ -19,6 +19,7 @@ import { Breadcrumbs, Card } from "@/components/ui";
 import { DetailSkeleton } from "@/components/skeleton";
 import { getCapeAuctions, getCapeParcelCoverage } from "@/lib/queries";
 import { buildPackage, type ItemState } from "@/lib/cape/components";
+import { productionStates } from "@/lib/cape/inputs";
 import { TIER_LABEL, TIER_RANK, type SourceTier } from "@/lib/cape/sources";
 import { getCounty, resolveCountyRule } from "@/lib/atlas";
 import { statuteFor } from "@/lib/deal/statute";
@@ -63,7 +64,11 @@ async function Board() {
    * every overdue badge at build time.
    */
   await connection();
-  const [rows, coverage] = await Promise.all([getCapeAuctions(), getCapeParcelCoverage()]);
+  const [rows, coverage, productions] = await Promise.all([
+    getCapeAuctions(),
+    getCapeParcelCoverage(),
+    productionStates(),
+  ]);
   const today = new Date().toISOString().slice(0, 10);
   const empty = { total: 0, withParcelNumber: 0, withAssessed: 0, withAddress: 0, withZoning: 0, withGeo: 0 };
 
@@ -109,6 +114,7 @@ async function Board() {
       population: getCounty(r.countyFips)?.population ?? null,
       parcels: coverage[r.id] ?? empty,
       today,
+      production: productions[r.id] ?? null,
     }),
   }));
 

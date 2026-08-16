@@ -1107,3 +1107,86 @@ export const lotIntelRuns = pgTable(
 );
 
 export type LotIntelRun = typeof lotIntelRuns.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// CAPE Component Seven — produced education and video artifacts
+// ---------------------------------------------------------------------------
+
+/**
+ * What has actually been produced for a county package, and from which inputs.
+ *
+ * ## Why the artifacts are recorded rather than detected
+ *
+ * `lib/cape/components.ts` reports Component Seven's four items — script,
+ * audio, slide plan, video — and it must not answer by looking for files. A
+ * file on a laptop is not evidence a package was produced, and a file that
+ * exists for a *previous* version of the facts is worse than none: it would
+ * report a narration as done while it described a sale date that has since been
+ * confirmed, or a statute that has since been entered.
+ *
+ * So production is a row, and the row carries `inputsHash` — the identity of
+ * the computed package the script was written from. When the package changes,
+ * the hash changes, and the artifacts are stale by construction rather than by
+ * anyone remembering to check.
+ *
+ * ## Why the script is stored and the media are paths
+ *
+ * The script is the reviewable artifact and the thing a person edits, so it
+ * lives in the database where it can be read, diffed and corrected. Audio and
+ * video are large binaries; the row records where they are and how big, and the
+ * bytes live on disk. There is no blob storage configured in this project, and
+ * inventing one here would be a deployment decision smuggled into a feature.
+ */
+export const capeProductions = pgTable(
+  "cape_productions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    auctionId: uuid("auction_id")
+      .notNull()
+      .references(() => auctions.id, { onDelete: "cascade" }),
+
+    /**
+     * Identity of the computed CAPE package this was written from.
+     *
+     * The staleness test, and the reason regenerating 152 packages does not
+     * re-bill for speech: unchanged inputs mean the existing audio is still
+     * correct. See `scriptInputsHash`.
+     */
+    inputsHash: text("inputs_hash").notNull(),
+
+    /** The narration script and slide plan, as validated by `CapeScriptSchema`. */
+    script: jsonb("script").$type<Record<string, unknown>>(),
+    scriptModel: text("script_model"),
+    /**
+     * Figures the narration spoke that were not in the facts.
+     *
+     * Empty is the pass. Stored rather than merely logged because it is a
+     * quality signal Component Nine reads: a script that invented a number is
+     * not releasable, and the reviewer needs to know which number.
+     */
+    unsupportedFigures: jsonb("unsupported_figures").$type<string[]>(),
+
+    slidePlanCount: integer("slide_plan_count"),
+    audioPath: text("audio_path"),
+    audioDurationSec: numeric("audio_duration_sec", { precision: 10, scale: 2 }),
+    /** Billed unit for speech synthesis, kept so spend is attributable. */
+    audioCharacters: integer("audio_characters"),
+    videoPath: text("video_path"),
+    videoDurationSec: numeric("video_duration_sec", { precision: 10, scale: 2 }),
+    videoBytes: bigint("video_bytes", { mode: "number" }),
+
+    /** `pending` · `script` · `audio` · `video` · `failed` — how far it got. */
+    stage: text("stage").notNull().default("pending"),
+    error: text("error"),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    // One production per auction, replaced in place as it advances.
+    uniqueIndex("cape_productions_auction_key").on(t.auctionId),
+    index("cape_productions_stage_idx").on(t.stage, t.updatedAt),
+  ],
+);
+
+export type CapeProduction = typeof capeProductions.$inferSelect;

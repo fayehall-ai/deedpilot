@@ -35,7 +35,9 @@
     "enrich:verify": "tsx scripts/verify-parcel-layer.ts",
     "intel:worker": "tsx scripts/intel-worker.ts",
     "intel:status": "tsx scripts/intel-worker.ts --status",
-    "intel:locate": "tsx scripts/backfill-parcel-geometry.ts"
+    "intel:locate": "tsx scripts/backfill-parcel-geometry.ts",
+    "cape:plan": "tsx scripts/cape-produce.ts --plan",
+    "cape:produce": "tsx scripts/cape-produce.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

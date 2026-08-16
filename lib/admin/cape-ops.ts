@@ -12,6 +12,7 @@
  */
 import "server-only";
 import { getCapeAuctions, getCapeParcelCoverage } from "../queries";
+import { productionStates } from "../cape/inputs";
 import { buildPackage, type ItemState, type CapePackage } from "../cape/components";
 import { getCounty, resolveCountyRule } from "../atlas";
 import { statuteFor } from "../deal/statute";
@@ -46,7 +47,11 @@ export interface CapeOps {
 }
 
 export async function getCapeOps(): Promise<CapeOps> {
-  const [rows, coverage] = await Promise.all([getCapeAuctions(), getCapeParcelCoverage()]);
+  const [rows, coverage, productions] = await Promise.all([
+    getCapeAuctions(),
+    getCapeParcelCoverage(),
+    productionStates(),
+  ]);
   const today = new Date().toISOString().slice(0, 10);
   const empty = {
     total: 0, withParcelNumber: 0, withAssessed: 0,
@@ -88,6 +93,7 @@ export async function getCapeOps(): Promise<CapeOps> {
       population: getCounty(r.countyFips)?.population ?? null,
       parcels: coverage[r.id] ?? empty,
       today,
+      production: productions[r.id] ?? null,
     }),
   }));
 
