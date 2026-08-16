@@ -84,6 +84,18 @@ export function buildConcatList(slides: RenderedSlide[]): string {
   return parts.join("\n") + "\n";
 }
 
+/** Exact duration of a media file, from ffprobe. */
+async function probeDuration(file: string): Promise<number> {
+  const { stdout } = await run("ffprobe", [
+    "-v", "error",
+    "-show_entries", "format=duration",
+    "-of", "default=noprint_wrappers=1:nokey=1",
+    file,
+  ]);
+  const n = Number(stdout.trim());
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
 /** Concatenate the per-section narration into one continuous track. */
 async function concatAudio(mp3Paths: string[], outPath: string): Promise<void> {
   const listPath = `${outPath}.txt`;
@@ -166,9 +178,30 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
 
   if (audioPath) {
     args.push("-c:a", "aac", "-b:a", "192k");
-    // The slides are timed to the narration, so the two should end together;
-    // `-shortest` stops a rounding difference leaving a frozen tail frame.
-    args.push("-shortest");
+    /*
+     * An explicit duration, not `-shortest`.
+     *
+     * `-shortest` is the documented way to end an output with its shortest
+     * input and it does not constrain a concat-demuxer image stream, whose
+     * length is not known until it ends. Measured: a narration of 193.6s
+     * produced a 223.5s file — thirty seconds of a frozen final slide over
+     * silence, on every narrated video.
+     *
+     * The extra time is the last-frame repeat above, which the demuxer plays
+     * for an unspecified stretch. Both problems disappear if the output is cut
+     * at a length we actually know, and after concatenation the narration's own
+     * duration is exactly that.
+     */
+    const narrationSec = await probeDuration(audioPath);
+    if (narrationSec > 0) args.push("-t", narrationSec.toFixed(3));
+    else args.push("-shortest");
+  } else {
+    /*
+     * Silent decks have no audio to cut against, so they are bounded by the
+     * slide plan — otherwise the repeated final frame runs on past the end.
+     */
+    const planned = opts.slides.reduce((n, s) => n + Math.max(0.5, s.durationSec), 0);
+    if (planned > 0) args.push("-t", planned.toFixed(3));
   }
 
   args.push(mp4Path);
