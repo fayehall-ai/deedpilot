@@ -170,11 +170,22 @@ export const neighborhoodSource: SignalSource = {
         direction: rate >= 0.6 ? "positive" : rate <= 0.35 ? "negative" : "neutral",
         severity: "low",
         label: `${pct(rate)} owner-occupied`,
+        /*
+         * Three bands, because two produced a sentence that contradicted the
+         * number beside it. Anything above 35% fell through to "owner-occupied
+         * majority", so a tract measured at 42% — a renter-leaning tract with
+         * no majority either way — rendered as "42% owner-occupied /
+         * Owner-occupied majority" on the same line. The note has to survive
+         * being read next to the figure it describes.
+         */
         note:
           rate <= 0.35
             ? `Predominantly renter-occupied tract — the resale pool leans investor, which caps price ` +
               `at what the rent supports.`
-            : `Owner-occupied majority, which usually means a retail resale is possible.`,
+            : rate < 0.5
+              ? `Renters are the majority here. A retail resale is possible but the investor bid is ` +
+                `what sets the floor.`
+              : `Owner-occupied majority, which usually means a retail resale is possible.`,
         value: Math.round(rate * 10000) / 100,
         valueText: pct(rate),
         raw: { ownerOccupied, occupied },
