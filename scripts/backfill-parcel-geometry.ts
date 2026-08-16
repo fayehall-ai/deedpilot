@@ -29,9 +29,9 @@
  */
 
 import "../lib/env";
-import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { db } from "../lib/db";
-import { counties, lots } from "../lib/db/schema";
+import { auctions, counties, lots } from "../lib/db/schema";
 import { CADASTRE_SOURCES, parcelLocation } from "../lib/property/providers/cadastre";
 
 function arg(name: string): string | undefined {
@@ -160,28 +160,69 @@ async function main() {
     })
     .from(lots)
     .innerJoin(counties, eq(counties.fips, lots.countyFips))
+    .innerJoin(auctions, eq(auctions.id, lots.auctionId))
     .where(and(...conditions))
-    /*
-     * Parcels that already have a valuation first. Those are the ones the
-     * cadastre demonstrably matched, so their geometry is the highest-yield
-     * ask in the table — this run is recovering data we know exists.
-     */
-    .orderBy(sql`${lots.assessedValue} is null`, sql`${lots.openingBid} desc nulls last`)
+    .orderBy(
+      /*
+       * Confirmed sale-list inventory first, and this ordering is the whole
+       * point of the run.
+       *
+       * Without it the sweep spent its first thousand lookups on Cobb County's
+       * delinquent roll — 8,475 lot rows that are only 3,080 distinct parcels,
+       * for a sale most of them will never reach — while 4,524 Arkansas lots
+       * that are genuinely for sale, in a state whose layer answers every time,
+       * waited behind them. Coordinates on a parcel nobody can bid on buy
+       * nothing; coordinates on next week's inventory are the input to every
+       * other question.
+       */
+      sql`case when ${auctions.listingKind} = 'sale_list'
+                and ${auctions.saleDateConfirmed}
+                and ${auctions.saleDate} >= current_date then 0 else 1 end`,
+      // Then the perishable ones, then the valuable ones.
+      sql`${auctions.saleDate} asc nulls last`,
+      sql`${lots.openingBid} desc nulls last`,
+    )
     .limit(limit);
 
   const workable = targets.filter(
     (t) => CADASTRE_SOURCES[t.fips] ?? CADASTRE_SOURCES[t.state.toUpperCase()],
   );
 
+  /*
+   * One lookup per parcel, not per lot row.
+   *
+   * A parcel that appears in three auctions is three `lots` rows with three
+   * ids and one location. Cobb County publishes its roll repeatedly, so its
+   * 8,730 rows are 3,080 distinct parcels — asking the layer for each row
+   * separately triples the requests and returns the same point every time.
+   *
+   * The answer is applied to every row sharing the identity, so all three rows
+   * are located by the single lookup that was going to happen anyway.
+   */
+  const byParcel = new Map<string, typeof workable>();
+  for (const t of workable) {
+    const key = `${t.fips}|${t.parcelNumber}`;
+    const group = byParcel.get(key) ?? [];
+    group.push(t);
+    byParcel.set(key, group);
+  }
+
+  const duplicates = workable.length - byParcel.size;
   console.log(
-    `${targets.length} parcel(s) without coordinates; ${workable.length} in a county or state ` +
-      `with a registered layer.`,
+    `${targets.length} lot row(s) without coordinates; ${workable.length} in a county or state ` +
+      `with a registered layer; ${byParcel.size} distinct parcel(s) to look up` +
+      (duplicates > 0 ? ` (${duplicates} duplicate row(s) will ride along free)` : "") +
+      `.`,
   );
 
   let located = 0;
   let missed = 0;
+  let rowsUpdated = 0;
+  let i = 0;
 
-  for (const [i, t] of workable.entries()) {
+  for (const group of byParcel.values()) {
+    i++;
+    const t = group[0];
     const point = await locate(t.fips, t.state, t.parcelNumber!);
     if (point) {
       await db
@@ -190,22 +231,27 @@ async function main() {
           latitude: String(point.latitude),
           longitude: String(point.longitude),
         })
-        .where(eq(lots.id, t.id));
+        .where(inArray(lots.id, group.map((g) => g.id)));
       located++;
+      rowsUpdated += group.length;
       console.log(
-        `[${i + 1}/${workable.length}] ${t.parcelNumber} (${t.county}, ${t.state}) → ` +
-          `${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)} (${point.basis})`,
+        `[${i}/${byParcel.size}] ${t.parcelNumber} (${t.county}, ${t.state}) → ` +
+          `${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)} (${point.basis})` +
+          (group.length > 1 ? ` ×${group.length} rows` : ""),
       );
     } else {
       missed++;
-      if (missed % 25 === 0) console.log(`[${i + 1}/${workable.length}] ${missed} unmatched so far`);
+      if (missed % 25 === 0) console.log(`[${i}/${byParcel.size}] ${missed} unmatched so far`);
     }
     // The state services are free and unmetered; that is a reason to be polite
     // with them, not a reason to hammer them.
     await sleep(250);
   }
 
-  console.log(`\nLocated ${located}, unmatched ${missed}, of ${workable.length} attempted.`);
+  console.log(
+    `\nLocated ${located} parcel(s) covering ${rowsUpdated} lot row(s); ` +
+      `unmatched ${missed}, of ${byParcel.size} attempted.`,
+  );
 }
 
 /*
