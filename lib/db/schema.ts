@@ -951,3 +951,159 @@ export const propertyLookups = pgTable(
 );
 
 export type PropertyLookup = typeof propertyLookups.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// Site intel — what surrounds a parcel, and what that does to its value
+// ---------------------------------------------------------------------------
+
+/**
+ * Which way a signal cuts.
+ *
+ * Deliberately three values and not a number. A railroad 111m away is bad and
+ * a park 200m away is good, but "how bad" in dollars is a question the data
+ * cannot answer and the model is not allowed to — see `lib/deal/maxbid.ts` and
+ * the division it protects. Direction plus distance is what we actually know,
+ * and it is enough for the only job this serves: telling a bidder what is out
+ * there before they drive four hours to look at it.
+ */
+export const signalDirectionEnum = pgEnum("signal_direction", [
+  "negative",
+  "positive",
+  "neutral",
+]);
+
+/**
+ * How much attention a signal deserves, not how many dollars it costs.
+ *
+ * `high` means a reasonable buyer would want to know before bidding — an active
+ * rail mainline at the property line, an electrical substation next door, a
+ * parcel inside a special flood hazard area, no public road touching the
+ * boundary. `low` is context that colours a picture without changing a decision.
+ */
+export const signalSeverityEnum = pgEnum("signal_severity", ["high", "medium", "low"]);
+
+/**
+ * One observed fact about a parcel's surroundings.
+ *
+ * ## Why this is a table and not more columns on `lot_valuations`
+ *
+ * A valuation is one row per provider holding one opinion of a parcel's worth.
+ * Surroundings are not like that: a single lot in an industrial corridor
+ * produced eleven rail features, three power features, four industrial
+ * land-use polygons and three streams inside 600 metres, and the count is
+ * unbounded — a parcel next to a rail yard has dozens. Columns cannot hold a
+ * list, and the list is the point.
+ *
+ * ## Why distance is stored per feature
+ *
+ * "Near a railroad" is not a fact; "111 metres from the UP Houston East Belt
+ * Subdivision" is. The first is a judgement someone else has to re-derive and
+ * cannot check. The second is what the reader wants and what makes the claim
+ * falsifiable — they can open a map and see whether we are right.
+ *
+ * Distances are metres from the parcel's location as we know it, which is a
+ * centroid for most parcels and a polygon edge where the cadastre published
+ * one. `distanceBasis` records which, because a 111m centroid distance on a
+ * forty-acre parcel may be zero metres from the boundary, and a reader
+ * comparing two lots deserves to know the measurement changed meaning.
+ */
+export const lotSignals = pgTable(
+  "lot_signals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    lotId: uuid("lot_id")
+      .notNull()
+      .references(() => lots.id, { onDelete: "cascade" }),
+    /**
+     * Dotted taxonomy — `rail.mainline`, `power.substation`, `flood.zone`,
+     * `landuse.industrial`, `access.road`, `terrain.elevation`,
+     * `neighborhood.income`. Dotted rather than an enum because the vocabulary
+     * grows every time a new layer is added, and a `pgEnum` would make each
+     * addition a migration.
+     */
+    kind: text("kind").notNull(),
+    /** Which fetcher produced it: `osm`, `fema`, `usgs`, `census`, `cadastre`. */
+    source: text("source").notNull(),
+    /**
+     * A stable identity for this feature within its source, so a re-run updates
+     * the row rather than inserting a duplicate. OSM's `way/12345`, FEMA's zone
+     * for the point, `elevation` for a scalar. Without it, a nightly refresh
+     * would multiply every parcel's signal count by the number of nights.
+     */
+    featureKey: text("feature_key").notNull(),
+
+    direction: signalDirectionEnum("direction").notNull(),
+    severity: signalSeverityEnum("severity").notNull(),
+    /** What to call it on screen — "UP Houston East Belt Subdivision". */
+    label: text("label").notNull(),
+    /** Why it matters, in a sentence, written by code and never by a model. */
+    note: text("note"),
+
+    distanceM: integer("distance_m"),
+    /** `centroid` or `boundary` — see the note above on what a distance means. */
+    distanceBasis: text("distance_basis"),
+    /** Scalar payload where the signal is a measurement: elevation, income, BFE. */
+    value: numeric("value", { precision: 14, scale: 2 }),
+    /** Categorical payload: a FEMA zone code, a zoning string. */
+    valueText: text("value_text"),
+
+    /** The source's own record, kept so a mapping bug is repairable for free. */
+    raw: jsonb("raw").$type<Record<string, unknown>>(),
+    observedAt: timestamp("observed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("lot_signals_identity_key").on(t.lotId, t.source, t.featureKey),
+    /* The lot page's query: everything about this parcel, worst first. */
+    index("lot_signals_lot_idx").on(t.lotId, t.severity),
+    /* "Which lots sit near a rail line" — the screen this whole table exists for. */
+    index("lot_signals_kind_idx").on(t.kind, t.distanceM),
+  ],
+);
+
+export type LotSignal = typeof lotSignals.$inferSelect;
+
+/**
+ * What has been fetched for a parcel, from where, and when it went stale.
+ *
+ * The scheduler's whole job is choosing the next parcel to enrich, and it
+ * cannot do that from `lot_signals` alone: a parcel with no rows is
+ * indistinguishable from a parcel that was checked and genuinely has nothing
+ * near it. Rural inventory makes that distinction constantly — most of these
+ * parcels are meant to have no substation next door — and without this table
+ * the loop would re-fetch every empty parcel forever and never reach a new one.
+ *
+ * A miss is therefore recorded as loudly as a hit, which is the same lesson
+ * `ProviderUnavailableError` exists to enforce one layer up: not knowing and
+ * knowing there is nothing are different states, and only one of them is a
+ * fact about the property.
+ */
+export const lotIntelRuns = pgTable(
+  "lot_intel_runs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    lotId: uuid("lot_id")
+      .notNull()
+      .references(() => lots.id, { onDelete: "cascade" }),
+    /** Matches `lot_signals.source`. One row per lot per source. */
+    source: text("source").notNull(),
+    /**
+     * `ok` — answered, whether or not it found anything.
+     * `empty` — answered, nothing within radius. A real result.
+     * `failed` — could not be asked. Retried; never treated as an answer.
+     * `skipped` — preconditions absent, e.g. no coordinates to query with.
+     */
+    status: text("status").notNull(),
+    /** How many signals this fetch wrote. Zero is meaningful — see `empty`. */
+    signalCount: integer("signal_count").notNull().default(0),
+    error: text("error"),
+    durationMs: integer("duration_ms"),
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("lot_intel_runs_key").on(t.lotId, t.source),
+    /* The scheduler's query: oldest first, per source. */
+    index("lot_intel_runs_stale_idx").on(t.source, t.fetchedAt),
+  ],
+);
+
+export type LotIntelRun = typeof lotIntelRuns.$inferSelect;

@@ -64,6 +64,12 @@ lib/ingest/     policy → fetch → adapter → judge → runner.
 lib/ai/         Claude risk briefs. Given the computed numbers as facts and
                 told not to produce its own.
 
+lib/property/   Valuation enrichment, and `signals/` — what physically
+                surrounds a parcel. Rail lines, substations, industrial land,
+                flood zone, slope, road access, tract vacancy, from free
+                keyless public sources. Runs as a continuous background loop;
+                see docs/intel-loop.md.
+
 lib/db/         Drizzle schema. Only *observed* data lives here.
 
 copilot/        Python co-pilot: the oracles as callables, a clearing-price
@@ -81,6 +87,27 @@ explains those numbers and flags risk. The model never produces a walk-away
 price — a hallucinated one is the single output that could directly cost a
 subscriber money at auction. If the AI is unavailable, the deal analysis still
 renders in full.
+
+### Site intel: what the listing does not say
+
+A tax notice lists what is owed. An assessment lists what the county thinks it
+is worth. Neither says the parcel backs onto a Union Pacific mainline, sits
+inside a special flood hazard area, or has no road touching it at all — and the
+third of those is how people buy something they cannot resell.
+
+`lib/property/signals/` fetches that continuously in the background from free
+keyless sources (OpenStreetMap, FEMA, USGS, Census), one `(parcel, source)` at
+a time, perishability first. On 7610 Wallisville Rd in Harris County — assessed
+$973,680, opening bid $760,267 — it returns a UP mainline at 344 ft, the
+Wallisville substation at 397 ft, a CenterPoint transmission line at 210 ft and
+ten industrial parcels inside 1,200 m.
+
+Every distance is measured to the feature's real geometry and carries its
+source, so a reader can check it on a map in thirty seconds. **No signal ever
+produces a dollar figure** — same division as above: proximity is reported, and
+`lib/deal/maxbid.ts` remains the only thing that prices anything.
+
+See `docs/intel-loop.md`.
 
 ### Ingestion: LLM-extracts / code-judges
 
@@ -164,6 +191,12 @@ npm run flywheel:coverage -- --plan              # scoreboard + ranked work
 npm run flywheel:coverage -- --cycle --limit 300 # purge skeletons + MI enrich
 npm run enrich:mi -- --limit 500
 npm run purge:skeletons
+
+# Site intel — continuous background enrichment (see docs/intel-loop.md)
+npm run intel:locate -- --plan     # parcels a cadastre layer can locate, free
+npm run intel:locate -- --state AR # recover coordinates from the parcel layer
+npm run intel:status               # coverage per source
+npm run intel:worker               # the loop; runs until stopped
 ```
 
 Florida focus: `docs/fl-sprint.md` — clerk list PDFs only; RealAuction stays blocked.
