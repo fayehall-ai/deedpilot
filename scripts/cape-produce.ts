@@ -7,6 +7,7 @@
  *   npm run cape:produce -- --script-only    # no speech, no encode, no spend
  *   npm run cape:produce -- --silent         # slides and video, no narration
  *   npm run cape:produce -- --limit 20 --force
+ *   npm run cape:produce -- --limit 1 --publish   # upload and print the URL
  *
  * ## Order of work
  *
@@ -157,6 +158,7 @@ async function main() {
   let held = 0;
   let failed = 0;
   let spentChars = 0;
+  const urls: string[] = [];
 
   for (const [n, { input, pkg }] of work.entries()) {
     console.log(
@@ -169,10 +171,12 @@ async function main() {
       scriptOnly: flag("script-only"),
       silent: flag("silent"),
       force: flag("force"),
+      publish: flag("publish"),
       onProgress: (m) => console.log(m),
     });
 
     spentChars += result.characters ?? 0;
+    if (result.videoUrl) urls.push(result.videoUrl);
     if (result.stage === "video") produced++;
     else if (result.stage === "failed") failed++;
     else if (result.skipped) held++;
@@ -188,6 +192,12 @@ async function main() {
     );
   }
   console.log(`artifacts: ${OUT_ROOT}`);
+  if (urls.length > 0) {
+    console.log(`\npublished:`);
+    for (const u of urls) console.log(`  ${u}`);
+  } else if (!flag("publish") && produced > 0) {
+    console.log(`(local only — pass --publish to host on Vercel Blob and get a URL)`);
+  }
 }
 
 /*

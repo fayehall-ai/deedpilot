@@ -18,6 +18,7 @@ import {
   VoiceUnavailableError,
 } from "./voice";
 import { encodeVideo, EncoderMissingError } from "./video";
+import { blobConfigured, publishVideo } from "./publish";
 
 /**
  * Component Seven, end to end: script, slides, narration, video.
@@ -51,6 +52,8 @@ export interface ProduceOptions {
   silent?: boolean;
   /** Re-run even when the stored hash matches the current facts. */
   force?: boolean;
+  /** Upload the finished video to Vercel Blob and record its public URL. */
+  publish?: boolean;
   onProgress?: (msg: string) => void;
 }
 
@@ -68,6 +71,7 @@ export interface ProduceResult {
   cachedSections?: number;
   videoPath?: string;
   videoSeconds?: number;
+  videoUrl?: string;
   error?: string;
 }
 
@@ -244,11 +248,32 @@ export async function produceCapePackage(
         `${(video.bytes / 1_048_576).toFixed(1)} MB → ${video.mp4Path}`,
     );
 
+    // --- 5. Publish ---------------------------------------------------------
+    /*
+     * Opt-in, because producing and distributing are different commitments —
+     * see `publish.ts`. Encoding a batch for review must not put a batch of
+     * videos on a public URL as a side effect.
+     */
+    let videoUrl: string | undefined;
+    if (opts.publish) {
+      if (!blobConfigured()) {
+        log("  publish requested but BLOB_READ_WRITE_TOKEN is not set — kept local");
+      } else {
+        const published = await publishVideo(video.mp4Path, { slug: slug(input) });
+        videoUrl = published.url;
+        await upsert(input.auctionId, { inputsHash, videoUrl: published.url });
+        log(
+          `  published${published.alreadyPublished ? " (already up, not re-uploaded)" : ""}: ${published.url}`,
+        );
+      }
+    }
+
     return {
       ...base,
       stage: "video",
       videoPath: video.mp4Path,
       videoSeconds: video.durationSec,
+      videoUrl,
     };
   } catch (e) {
     // A missing encoder is an environment fault, not this package's — every

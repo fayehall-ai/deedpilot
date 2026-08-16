@@ -19,7 +19,7 @@ import { Breadcrumbs, Card } from "@/components/ui";
 import { DetailSkeleton } from "@/components/skeleton";
 import { getCapeAuctions, getCapeParcelCoverage } from "@/lib/queries";
 import { buildPackage, type ItemState } from "@/lib/cape/components";
-import { productionStates } from "@/lib/cape/inputs";
+import { productionStates, publishedVideoUrls } from "@/lib/cape/inputs";
 import { TIER_LABEL, TIER_RANK, type SourceTier } from "@/lib/cape/sources";
 import { getCounty, resolveCountyRule } from "@/lib/atlas";
 import { statuteFor } from "@/lib/deal/statute";
@@ -64,10 +64,11 @@ async function Board() {
    * every overdue badge at build time.
    */
   await connection();
-  const [rows, coverage, productions] = await Promise.all([
+  const [rows, coverage, productions, videoUrls] = await Promise.all([
     getCapeAuctions(),
     getCapeParcelCoverage(),
     productionStates(),
+    publishedVideoUrls(),
   ]);
   const today = new Date().toISOString().slice(0, 10);
   const empty = { total: 0, withParcelNumber: 0, withAssessed: 0, withAddress: 0, withZoning: 0, withGeo: 0 };
@@ -335,6 +336,25 @@ Passes Component Nine&apos;s quality gate
                               className="underline hover:text-foreground"
                             >
                               PropStream CSV
+                            </a>
+                          </>
+                        ) : null}
+                        {/*
+                          The produced briefing, where one has been published.
+                          Only a hosted URL is linked — a local artifact path is
+                          real but unreachable from this page, and a dead link
+                          on an operations board is worse than none.
+                        */}
+                        {videoUrls[row.id] ? (
+                          <>
+                            {" · "}
+                            <a
+                              href={videoUrls[row.id]}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline hover:text-foreground"
+                            >
+                              Briefing video ↗
                             </a>
                           </>
                         ) : null}

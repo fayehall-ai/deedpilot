@@ -122,6 +122,16 @@ async function parcelCoverage() {
   return out;
 }
 
+/** Hosted briefing URLs by auction id, for surfaces that link to them. */
+export async function publishedVideoUrls(): Promise<Record<string, string>> {
+  const rows = await db
+    .select({ auctionId: capeProductions.auctionId, videoUrl: capeProductions.videoUrl })
+    .from(capeProductions);
+  const out: Record<string, string> = {};
+  for (const r of rows) if (r.videoUrl) out[r.auctionId] = r.videoUrl;
+  return out;
+}
+
 /** Every production row, in the shape the checklist reads. */
 export async function productionStates(): Promise<Record<string, CapeProductionState>> {
   const rows = await db.select().from(capeProductions);

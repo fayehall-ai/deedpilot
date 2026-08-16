@@ -1172,6 +1172,17 @@ export const capeProductions = pgTable(
     /** Billed unit for speech synthesis, kept so spend is attributable. */
     audioCharacters: integer("audio_characters"),
     videoPath: text("video_path"),
+    /**
+     * The hosted URL, once published.
+     *
+     * Separate from `videoPath` rather than replacing it, because they answer
+     * different questions and both are worth keeping. The path says a video was
+     * produced and where to review it; the URL says it was *distributed* and is
+     * the thing that goes into the course. A package can legitimately have the
+     * first without the second — that is every package encoded for review and
+     * not yet published.
+     */
+    videoUrl: text("video_url"),
     videoDurationSec: numeric("video_duration_sec", { precision: 10, scale: 2 }),
     videoBytes: bigint("video_bytes", { mode: "number" }),
 
