@@ -45,6 +45,21 @@ const VARS = {
   B25003_001E: "occupied units",
   B25002_003E: "vacant units",
   B25002_001E: "total housing units",
+  /*
+   * Vacancy by reason, and specifically the seasonal share.
+   *
+   * Without this the vacancy signal is actively misleading in exactly the
+   * places tax deed inventory is cheapest. Keweenaw County, Michigan measures
+   * 51% vacant — flagged `high`, described as an exit-risk market — and 982 of
+   * those 1,146 empty units are seasonal cabins. Real distress vacancy there is
+   * 7%, below the national tract average, in a county whose whole economy is
+   * second homes.
+   *
+   * Mississippi County, Arkansas measures 25% vacant with *zero* seasonal
+   * units. Same headline band, opposite fact. The seasonal split is what tells
+   * them apart.
+   */
+  B25004_006E: "vacant for seasonal, recreational or occasional use",
   B01003_001E: "population",
 } as const;
 
@@ -134,30 +149,52 @@ export const neighborhoodSource: SignalSource = {
     const base = { source: "census", distanceBasis: input.location.basis } as const;
 
     if (vacant !== undefined && totalUnits && totalUnits > 0) {
-      const rate = vacant / totalUnits;
+      /*
+       * Seasonal units are removed before anything is judged.
+       *
+       * A cabin that is empty in February because its owner lives in Chicago is
+       * not a distressed unit, and counting it as one inverts the signal in
+       * every resort county — see the note on `B25004_006E` above.
+       */
+      const seasonal = at("B25004_006E") ?? 0;
+      const distressVacant = Math.max(0, vacant - seasonal);
+      const rate = distressVacant / totalUnits;
+      const seasonalShare = vacant > 0 ? seasonal / vacant : 0;
+
       /*
        * Thresholds, not a curve. The national tract vacancy rate runs around
        * 10%; a fifth of homes empty is a visibly distressed area and a third is
        * one where resale, not price, is the problem.
        */
       const severity = rate >= 0.3 ? "high" : rate >= 0.2 ? "medium" : "low";
+
+      // Worth saying out loud once it is a third of the empty stock, because
+      // the headline vacancy figure a reader finds elsewhere will disagree
+      // with this one and they deserve to know why.
+      const seasonalNote =
+        seasonalShare >= 0.33
+          ? ` A further ${seasonal.toLocaleString()} unit(s) are vacant seasonally — second homes ` +
+            `rather than distress — so a headline vacancy rate quoted elsewhere for this tract ` +
+            `will read ${pct(vacant / totalUnits)}.`
+          : "";
+
       signals.push({
         ...base,
         kind: "neighborhood.vacancy",
         featureKey: `vacancy:${tract.geoid}`,
         direction: rate >= 0.2 ? "negative" : "neutral",
         severity,
-        label: `${pct(rate)} of homes vacant in ${tract.name}`,
+        label: `${pct(rate)} of homes vacant year-round in ${tract.name}`,
         note:
-          rate >= 0.2
-            ? `${vacant.toLocaleString()} of ${totalUnits.toLocaleString()} units are empty. ` +
-              `High vacancy is an exit-risk signal rather than a price signal — the question is whether ` +
-              `there is a buyer at any price, not what the price is.`
-            : `${vacant.toLocaleString()} of ${totalUnits.toLocaleString()} units vacant, ` +
-              `around the national tract average.`,
+          (rate >= 0.2
+            ? `${distressVacant.toLocaleString()} of ${totalUnits.toLocaleString()} units sit empty ` +
+              `outside seasonal use. High vacancy is an exit-risk signal rather than a price signal — ` +
+              `the question is whether there is a buyer at any price, not what the price is.`
+            : `${distressVacant.toLocaleString()} of ${totalUnits.toLocaleString()} units vacant ` +
+              `year-round, around or below the national tract average.`) + seasonalNote,
         value: Math.round(rate * 10000) / 100,
         valueText: pct(rate),
-        raw: { vacant, totalUnits, geoid: tract.geoid },
+        raw: { vacant, seasonal, distressVacant, totalUnits, geoid: tract.geoid },
       });
     }
 
