@@ -364,17 +364,77 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let preferredMirror = 0;
 
 /**
+ * How long until this endpoint will actually serve us, per the endpoint itself.
+ *
+ * ## Why ask rather than guess
+ *
+ * Overpass allocates a small number of concurrent slots per IP and publishes
+ * the state of them at `/api/status`:
+ *
+ *     Rate limit: 2
+ *     Slot available after: 2026-08-16T20:41:34Z, in 15 seconds.
+ *     Slot available after: 2026-08-16T20:42:15Z, in 56 seconds.
+ *
+ * A run that opened two workers against it consumed both slots and then failed
+ * a third of its parcels — while backing off two, four and six seconds against
+ * a server that was saying, in plain text, "fifty-six". The retry was not too
+ * few attempts; it was the wrong duration, guessed when the right one was being
+ * published for free.
+ *
+ * So a rejection asks. Failing that ask is not fatal — a mirror that does not
+ * publish status simply falls through to the fixed backoff.
+ */
+async function slotWaitMs(endpoint: string): Promise<number | null> {
+  try {
+    const statusUrl = endpoint.replace(/\/interpreter$/, "/status");
+    const res = await fetch(statusUrl, {
+      headers: { "user-agent": UA },
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) return null;
+    const text = await res.text();
+
+    // Slots already free — the rejection was about something else.
+    if (/\d+ slots available now/i.test(text)) return 0;
+
+    const waits = [...text.matchAll(/in (\d+) seconds?\./g)].map((m) => Number(m[1]));
+    if (waits.length === 0) return null;
+    /*
+     * The soonest slot, plus a second of slack. Waiting for the *latest* one
+     * would idle through a slot that had already freed.
+     */
+    return (Math.min(...waits) + 1) * 1000;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * One Overpass call, with the transport quirks this service actually has.
  *
  * The body is sent raw. A `application/x-www-form-urlencoded` POST — the form
  * every example uses — was answered with 406 by the reference instance during
  * development, and a raw body with an explicit `Accept` was answered with 200.
  */
-async function overpass(query: string, attempts = 3): Promise<unknown[]> {
+async function overpass(query: string, attempts = 4): Promise<unknown[]> {
   let lastError = "";
+  /*
+   * The mirror only moves on a *hard* failure.
+   *
+   * Rotating on every attempt sent us to the slow mirrors for the one reason
+   * that is not their business to fix: overpass-api.de saying "your two slots
+   * are busy, come back in thirty seconds". That is not a broken server, it is
+   * a queue, and the correct response is to wait in it. Rotating instead
+   * abandoned the fastest endpoint — measured at 3.4s for the near tier — for
+   * two that time out, and it did so precisely when the good one was about to
+   * be free.
+   *
+   * So: a rate-limit answer waits and retries the same host; a network error or
+   * an unexpected status moves on.
+   */
+  let index = preferredMirror;
 
   for (let attempt = 0; attempt < attempts; attempt++) {
-    const index = (preferredMirror + attempt) % MIRRORS.length;
     const endpoint = MIRRORS[index];
     try {
       const res = await fetch(endpoint, {
@@ -416,14 +476,28 @@ async function overpass(query: string, attempts = 3): Promise<unknown[]> {
 
       /*
        * 429 and 504 are this service saying "not now" — the documented
-       * behaviour of a free shared endpoint under load, and the state it was in
-       * for most of an afternoon during development. Backed off and retried,
-       * never recorded as "nothing near this parcel".
+       * behaviour of a free shared endpoint whose per-IP slots are occupied.
+       * Backed off and retried, never recorded as "nothing near this parcel".
+       *
+       * How long to wait comes from the endpoint rather than from a guess; see
+       * `slotWaitMs`. Capped so a badly congested mirror cannot stall a parcel
+       * indefinitely — past that it is cheaper to try the next mirror and let
+       * the ledger retry this parcel on its six-hour clock.
        */
       lastError = `HTTP ${res.status} from ${endpoint}`;
-      await sleep(2_000 * (attempt + 1));
+      const announced = res.status === 429 || res.status === 504 ? await slotWaitMs(endpoint) : null;
+      if (announced === null) {
+        // Not a queue we can wait in — try somebody else.
+        index = (index + 1) % MIRRORS.length;
+        await sleep(2_000 * (attempt + 1));
+      } else {
+        // A published wait. Stay on this host; it is the fastest one we have.
+        await sleep(Math.min(announced, 90_000));
+      }
     } catch (e) {
+      // Timeout or connection failure: this host is not answering at all.
       lastError = `${endpoint}: ${e instanceof Error ? e.message : String(e)}`;
+      index = (index + 1) % MIRRORS.length;
       await sleep(2_000 * (attempt + 1));
     }
   }
