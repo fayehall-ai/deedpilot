@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-08-20T17:10:26.962Z",
+  "builtAt": "2026-08-20T17:15:56.127Z",
   "nCounties": 1355,
-  "nVerified": 962,
-  "nGaps": 608,
+  "nVerified": 964,
+  "nGaps": 607,
   "counties": {
     "10001": {
       "state": "DE",
@@ -4696,8 +4696,43 @@
     "21059": {
       "state": "KY",
       "county": "Daviess",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "21059",
+          "state": "KY",
+          "url": "https://www.daviessky.org/taxsale/",
+          "host": "www.daviessky.org",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "tax sale",
+            "third party purchaser (KY)"
+          ],
+          "scheduleHint": "Delinquent Property Tax Sale on August 20, 2026",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        },
+        {
+          "fips": "21059",
+          "state": "KY",
+          "url": "https://www.daviessky.org/taxsale/",
+          "host": "www.daviessky.org",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "tax sale",
+            "third party purchaser (KY)"
+          ],
+          "scheduleHint": "Delinquent Property Tax Sale on August 20, 2026",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "21067": {
       "state": "KY",

@@ -2,9 +2,13 @@
  * Drain the crawl queue, here rather than on a cron tick.
  *
  *   npm run queue:drain                 # until the queue is empty, then stop
+ *   npm run queue:drain -- --queue      # queue newly crawlable counties first
  *   npm run queue:drain -- --follow     # keep running, waiting for new work
  *   npm run queue:drain -- --max 20     # stop after N jobs
  *   npm run queue:status                # what is queued, running and done
+ *
+ * After a prospecting run the loop closes with `--queue`: counties that just
+ * acquired a source become crawlable, and this is what goes back for them.
  *
  * ## Why this exists alongside the dispatcher
  *
@@ -44,6 +48,8 @@ import {
   foldSupersededImports,
   parcelListCoverage,
 } from "../lib/import/reconcile";
+import { enqueueImportEnrichment } from "../lib/import/enrich";
+import { auctions } from "../lib/db/schema";
 
 const flag = (n: string) => process.argv.includes(`--${n}`);
 const arg = (n: string): string | undefined => {
@@ -124,6 +130,34 @@ async function main(): Promise<void> {
 
   const max = Number(arg("max") ?? Infinity);
   const follow = flag("follow");
+
+  /*
+   * `--queue` first, for the step after a prospecting run.
+   *
+   * A county with no located source has no adapter, so the import's enrichment
+   * could not queue anything for it and it sat in the "no source" bucket. Once
+   * the Prospector finds its sale page, the registry entry makes
+   * `genericAdapter` serve it and it becomes crawlable — but nothing goes back
+   * to look. This does, in a fresh process, which matters: both the registry
+   * and the adapter index are cached per-process, so newly located counties are
+   * only visible to a run that started after they were written.
+   */
+  if (flag("queue")) {
+    const counties = (
+      await db
+        .selectDistinct({ fips: auctions.countyFips })
+        .from(auctions)
+        .where(
+          sql`${auctions.announcedParcelCount} > 0 AND ${auctions.lotCount} = 0
+              AND ${auctions.saleDate} >= current_date AND ${auctions.delistedAt} IS NULL`,
+        )
+    ).map((r) => r.fips);
+    const e = await enqueueImportEnrichment(counties, "queue-flag");
+    console.log(
+      `queued ${e.queued} county crawl(s) (${e.alreadyBusy} already in flight, ` +
+        `${e.noSource.length} still have no located source)\n`,
+    );
+  }
   const reaped = await reapStuckRuns();
   if (reaped) console.log(`reaped ${reaped} stuck run(s)`);
 
