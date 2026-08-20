@@ -99,6 +99,46 @@ for (const phrasing of ["Sheriff Sales", "Sheriff's Sale", "Sheriffs Sale"]) {
 // Delaware sells by monition — a term that appears nowhere else.
 assert(scoreContent("<p>Monition sale of the property</p>").score >= 3, "monition sale");
 
+/*
+ * States that call it something else.
+ *
+ * The vocabulary was written in deed-and-lien language and silently failed
+ * wherever the legislature chose different words. Kentucky exposed it: McCracken
+ * County's own delinquent-tax page — "certificate of delinquency" three times,
+ * "third party purchaser", "delinquent tax" fourteen times — scored 2 against a
+ * threshold of 4 and was rejected as not being about tax sales. Every Kentucky
+ * county failed identically, and KY is the fourth largest state in the imported
+ * calendar. The text below is the shape of that real page.
+ */
+const kentucky = scoreContent(
+  `<h1>Delinquent Tax Collection</h1><p>The County Clerk sells each certificate of
+   delinquency. A third party purchaser may register to purchase certificates of
+   delinquency. Delinquent tax bills are payable at the office.</p>`,
+);
+assert(kentucky.score >= 4, `Kentucky's statutory wording must qualify, got ${kentucky.score}`);
+assert(
+  kentucky.signals.includes("certificate of delinquency (KY)"),
+  "and must report which term carried it",
+);
+
+for (const [label, html] of [
+  ["Louisiana", "<p>Sale of adjudicated property by the parish.</p>"],
+  ["Ohio", "<p>Forfeited land sale list for the county.</p>"],
+  ["New Jersey", "<p>Tax sale certificates are sold at public auction.</p>"],
+] as const) {
+  assert(scoreContent(html).score >= 3, `${label}'s wording must register, got ${scoreContent(html).score}`);
+}
+
+/*
+ * The control that makes the above a fix rather than a lowered bar. These terms
+ * are terms of art: a county homepage does not say them in passing, so adding
+ * them must not move a homepage's score at all.
+ */
+assert(
+  scoreContent(homepage).score === home.score,
+  "the new vocabulary must not raise a county homepage's score",
+);
+
 // Plurals must not change the verdict.
 assert(scoreContent("<p>Annual tax sales are held yearly</p>").score >= 2, "plural tax sales");
 

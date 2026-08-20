@@ -48,6 +48,30 @@ const VOCABULARY: { term: RegExp; weight: number; label: string }[] = [
   { term: /\bmonition\s+sale/i, weight: 3, label: "monition sale" },
   { term: /\bparcels?\s*(id|number|#)/i, weight: 1, label: "parcel id" },
   { term: /\bassessed\s+value/i, weight: 1, label: "assessed value" },
+
+  /*
+   * Statutory names for the same thing, state by state.
+   *
+   * The table above is written in the vocabulary of deed and lien states, and
+   * it silently fails everywhere the legislature chose different words.
+   * Kentucky is the case that exposed it: McCracken County's own delinquent-tax
+   * page says "certificate of delinquency" three times, "third party purchaser"
+   * once and "delinquent tax" fourteen times — and scored 2 against a threshold
+   * of 4, so a page that is unambiguously the sale was rejected as not being
+   * about tax sales at all. Every Kentucky county failed the same way, and KY
+   * is the fourth largest state in the imported calendar.
+   *
+   * Each of these is a term of art. No county homepage says "certificate of
+   * delinquency" or "adjudicated property" in passing, so they raise the score
+   * only where they should — which is why the fix is more vocabulary rather
+   * than a lower threshold.
+   */
+  { term: /\bcertificates?\s+of\s+delinquency/i, weight: 3, label: "certificate of delinquency (KY)" },
+  { term: /\bthird[-\s]part(y|ies)\s+purchasers?/i, weight: 2, label: "third party purchaser (KY)" },
+  { term: /\btax\s+sale\s+certificates?/i, weight: 3, label: "tax sale certificate" },
+  { term: /\badjudicated\s+propert(y|ies)/i, weight: 3, label: "adjudicated property (LA)" },
+  { term: /\bforfeited\s+land/i, weight: 3, label: "forfeited land (OH/WV)" },
+  { term: /\bcollector'?s\s+deed/i, weight: 2, label: "collector's deed (MO)" },
 ];
 
 /** Score at or above which a page counts as a tax-sale source. */
