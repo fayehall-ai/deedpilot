@@ -15,6 +15,7 @@
     "import:apply": "tsx scripts/import-apply.ts",
     "queue:drain": "tsx scripts/drain-queue.ts",
     "queue:status": "tsx scripts/drain-queue.ts --status",
+    "repair:delisting": "tsx scripts/repair-imported-delisting.ts",
     "export:atlas": "tsx scripts/export-atlas-for-copilot.ts",
     "scout": "tsx scripts/scout.ts",
     "prospect": "tsx scripts/prospect.ts",
