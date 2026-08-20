@@ -20,6 +20,7 @@
     "prospect": "tsx scripts/prospect.ts",
     "cartographer": "tsx scripts/cartographer.ts",
     "prospect:national": "tsx scripts/prospect-national.ts",
+    "prospect:announced": "tsx scripts/prospect-announced.ts",
     "crawl:results": "tsx scripts/crawl-results.ts",
     "flywheel:coverage": "tsx scripts/coverage-cycle.ts",
     "enrich:mi": "tsx scripts/coverage-cycle.ts --enrich-mi",
