@@ -80,6 +80,19 @@ const nextConfig: NextConfig = {
   experimental: {
     /** Next DevTools → "Instant Navs" — freezes a page at its static shell. */
     instantNavigationDevToolsToggle: true,
+
+    /**
+     * The sale-calendar import posts a whole CSV through a Server Action.
+     *
+     * Action bodies are capped at 1 MB by default, and eight weeks of national
+     * sale dates is already over half of that — a year would be rejected by the
+     * framework before `uploadAuctionCsv` ever ran, and the failure surfaces as
+     * a generic action error rather than anything naming the size. 8 MB matches
+     * the cap the action enforces itself; the two have to move together.
+     */
+    serverActions: {
+      bodySizeLimit: "8mb",
+    },
   },
 };
 

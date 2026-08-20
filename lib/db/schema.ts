@@ -211,6 +211,30 @@ export const auctions = pgTable(
     depositDeadline: timestamp("deposit_deadline", { withTimezone: true }),
     sourceUrl: text("source_url").notNull(),
     lotCount: integer("lot_count").notNull().default(0),
+    /**
+     * Parcels the county says it is offering, when a source states a count
+     * without publishing the parcels.
+     *
+     * Kept apart from `lot_count` on purpose, and the distinction is the whole
+     * reason the column exists. `lot_count` is written by `upsertLots` and means
+     * *parcel rows this database holds*; every coverage figure, the CAPE funnel
+     * and the "is this inventory" filter are computed from it. An imported sale
+     * calendar carries a headline count — "16,062 parcels" — with no parcel
+     * list behind it, and writing that number into `lot_count` would have
+     * claimed a quarter of a million parcels we do not have, inflating every one
+     * of those figures at once while the auction's own page showed an empty
+     * table.
+     *
+     * So the announced figure lands here and `lot_count` stays 0 until
+     * something actually crawls the county's list. The two disagreeing is the
+     * normal, honest state of an imported sale, and the gap between them is
+     * exactly the enrichment worklist: `announced_parcel_count > lot_count`
+     * means a sale whose parcels are still to be fetched.
+     *
+     * Null means no source has stated a count — a different fact from 0, which
+     * would be a county announcing a sale with nothing in it.
+     */
+    announcedParcelCount: integer("announced_parcel_count"),
     /** Untouched payload from the source, for re-parsing without re-fetching. */
     raw: jsonb("raw").$type<Record<string, unknown>>(),
     /**

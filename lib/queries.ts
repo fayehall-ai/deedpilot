@@ -1,6 +1,6 @@
 import "server-only";
 import { cacheLife } from "next/cache";
-import { and, asc, desc, eq, gte, inArray, lte, sql, count } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, or, sql, count } from "drizzle-orm";
 import { db } from "./db";
 import { auctions, counties, lots, ingestRuns, dealAnalyses, lotValuations } from "./db/schema";
 
@@ -10,15 +10,44 @@ function todayIso(): string {
 }
 
 /**
- * Inventory a bidder can act on: parcels from a county's published sale list.
+ * A sale whose county has stated a parcel count without publishing the parcels.
+ *
+ * Written by the CSV import. The count is the county's claim, not a number of
+ * rows this database holds — see `announced_parcel_count` in the schema.
+ */
+const hasAnnouncedCount = () => sql`coalesce(${auctions.announcedParcelCount}, 0) > 0`;
+
+/**
+ * Not an empty calendar shell.
+ *
+ * Was `lot_count > 0` alone. An announced sale has no lots yet and is still
+ * not a skeleton: a skeleton is a date with nothing known about it, whereas an
+ * announced sale carries a published parcel count and a venue. Hiding those
+ * would mean importing a calendar and then not seeing it.
+ */
+const hasParcels = () => or(sql`${auctions.lotCount} > 0`, hasAnnouncedCount());
+
+/**
+ * Inventory a bidder can act on: parcels from a county's published sale list,
+ * or a sale the county has announced with a count.
  *
  * A delinquent roll parses identically to a sale list and is 10-50x larger, so
  * without this filter the honest counts are swamped by parcels that are not for
  * sale. Applied to every headline number and every default listing view; ops
  * surfaces opt out explicitly.
+ *
+ * The `listing_kind` half is now a disjunction because an imported sale's
+ * `listing_kind` is `unknown` and must stay that way — nothing has read a
+ * document for it, so claiming `sale_list` would be a lie about provenance.
+ * What admits it instead is the announced count, which no delinquent roll has.
+ * A projected date is still excluded by `sale_date_confirmed`, which is the
+ * half that was actually keeping research leads off the calendar.
  */
 const isConfirmedInventory = () =>
-  and(eq(auctions.listingKind, "sale_list"), eq(auctions.saleDateConfirmed, true));
+  and(
+    or(eq(auctions.listingKind, "sale_list"), hasAnnouncedCount()),
+    eq(auctions.saleDateConfirmed, true),
+  );
 
 export interface AuctionListRow {
   id: string;
@@ -36,6 +65,12 @@ export interface AuctionListRow {
   listingKind: string;
   /** False when the date is projected from the state's typical schedule. */
   saleDateConfirmed: boolean;
+  /**
+   * Parcels the county says it is offering, when nothing has crawled the list.
+   * Null for a crawled sale; with `lotCount` 0 it marks an announced sale, which
+   * the UI must label rather than show as though the parcels were in hand.
+   */
+  announcedParcelCount: number | null;
   /** Sum of opening bids where known — an incomplete floor, labelled as such. */
   totalOpeningBids: string | null;
 }
@@ -61,11 +96,11 @@ export async function getUpcomingAuctions(
    */
   "use cache";
   cacheLife("minutes");
-  // Skeletons (lot_count = 0) are not inventory — they inflate "coverage" and
-  // look like real sales on the auctions page. Opt in only for ops views.
+  // Skeletons — no lots and no announced count — are not inventory: they
+  // inflate "coverage" and look like real sales. Opt in only for ops views.
   const where = [
     gte(auctions.saleDate, todayIso()),
-    ...(opts.includeSkeletons ? [] : [sql`${auctions.lotCount} > 0`]),
+    ...(opts.includeSkeletons ? [] : [hasParcels()]),
     ...(opts.includeUnconfirmed ? [] : [isConfirmedInventory()]),
   ];
   if (opts.state) where.push(eq(counties.state, opts.state));
@@ -85,6 +120,7 @@ export async function getUpcomingAuctions(
       state: counties.state,
       listingKind: auctions.listingKind,
       saleDateConfirmed: auctions.saleDateConfirmed,
+      announcedParcelCount: auctions.announcedParcelCount,
       totalOpeningBids: sql<string | null>`(
         SELECT sum(${lots.openingBid}) FROM ${lots} WHERE ${lots.auctionId} = ${auctions.id}
       )`,
@@ -112,6 +148,8 @@ export interface CalendarAuctionRow {
   state: string;
   listingKind: string;
   saleDateConfirmed: boolean;
+  /** See `AuctionListRow.announcedParcelCount`. */
+  announcedParcelCount: number | null;
   /**
    * The county's own name for this sale. Load-bearing when one county holds
    * several sales the same day — "HARRIS COUNTY tax sale — precinct 3" is the
@@ -142,7 +180,7 @@ export interface CalendarFilterOpts {
 /** The shared WHERE for every calendar query, so facets and cells agree. */
 function calendarWhere(opts: CalendarFilterOpts) {
   const where = [
-    sql`${auctions.lotCount} > 0`,
+    hasParcels(),
     ...(opts.includeUnconfirmed ? [] : [isConfirmedInventory()]),
   ];
   if (opts.states?.length) where.push(inArray(counties.state, opts.states));
@@ -179,6 +217,7 @@ export async function getCalendarAuctions(
       state: counties.state,
       listingKind: auctions.listingKind,
       saleDateConfirmed: auctions.saleDateConfirmed,
+      announcedParcelCount: auctions.announcedParcelCount,
       title: auctions.title,
       // Correlated rather than joined-and-grouped: `lots_auction_idx` turns each
       // one into an index scan, and grouping would have to survive the county

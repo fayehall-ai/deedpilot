@@ -17,6 +17,8 @@ import { DetailSkeleton } from "@/components/skeleton";
 import { resolveCountyRule, STATE_NAMES } from "@/lib/atlas";
 import type { LinkRef } from "@/lib/atlas/types";
 import { statuteFor } from "@/lib/deal/statute";
+import { isImported, readAnnouncedDetail } from "@/lib/import/announced-detail";
+import { parcelsShown, platformLabel } from "@/lib/format";
 
 
 export async function generateMetadata(
@@ -83,7 +85,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <SaleTypeBadge type={auction.saleType} />
             <StatusBadge status={auction.status} />
-            <span className="text-xs text-muted">via {auction.platform}</span>
+            <span className="text-xs text-muted">via {platformLabel(auction.platform)}</span>
           </div>
         </div>
 
@@ -100,14 +102,37 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
       </header>
 
       <div className="mb-6 grid gap-4 rounded-xl border border-border bg-surface p-5 sm:grid-cols-4">
-        <Stat label="Parcels" value={num(lots.length)} />
+        {/*
+          An announced sale has no parcel rows, and showing "0" here beside a
+          confirmed date reads as a sale with nothing in it rather than one
+          whose list has not been fetched. The county's own figure is shown
+          instead, with the hint saying whose claim it is.
+        */}
+        <Stat
+          label="Parcels"
+          value={num(lots.length > 0 ? lots.length : parcelsShown(auction).count)}
+          hint={
+            lots.length === 0 && parcelsShown(auction).count > 0
+              ? "announced by the county — list not yet fetched"
+              : undefined
+          }
+        />
+        {/*
+          With no parcels, `withBid.length === lots.length` is 0 === 0, which
+          rendered "$0 — all parcels priced" on every imported sale. That is the
+          precise claim this codebase refuses to let a missing bid sheet make:
+          it tells a bidder every parcel opens free. No list means no answer, and
+          `money(null)` is the em dash that says so.
+        */}
         <Stat
           label="Opening bids"
-          value={money(totalOpening)}
+          value={money(lots.length === 0 ? null : totalOpening)}
           hint={
-            withBid.length === lots.length
-              ? "all parcels priced"
-              : `${num(lots.length - withBid.length)} lot(s) have no published opening bid`
+            lots.length === 0
+              ? "no parcel list yet"
+              : withBid.length === lots.length
+                ? "all parcels priced"
+                : `${num(lots.length - withBid.length)} lot(s) have no published opening bid`
           }
         />
         <Stat
@@ -132,6 +157,14 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
           hint={statute?.quietTitle.required ? "typically required" : "often unnecessary"}
         />
       </div>
+
+      {/*
+        Everything the announcement carried, for a sale whose parcels are not in
+        yet. Placed above the statutory caveats because it is the concrete part
+        — where to turn up, how bidding runs, who to ring — and below the stats
+        because those answer "is this worth reading at all".
+      */}
+      <AnnouncedFacts auction={auction} hasLots={lots.length > 0} />
 
       {rule?.survivingLiens ? (
         <div className="mb-6">
@@ -297,8 +330,19 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
 
       {lots.length === 0 ? (
         <EmptyState title="No parcels published yet">
-          Counties often publish the parcel list only days before the sale. The auction date is
-          confirmed; check back closer to {saleDate(auction.saleDate)}.
+          {parcelsShown(auction).count > 0 ? (
+            <>
+              The county has announced {num(parcelsShown(auction).count)} parcels for this sale, but
+              the parcel list itself has not been fetched yet — so there is nothing to rank here.
+              Counties often publish it only days before the sale. Check back closer to{" "}
+              {saleDate(auction.saleDate)}.
+            </>
+          ) : (
+            <>
+              Counties often publish the parcel list only days before the sale. The auction date is
+              confirmed; check back closer to {saleDate(auction.saleDate)}.
+            </>
+          )}
         </EmptyState>
       ) : (
         <Card className="overflow-hidden p-0">
@@ -392,6 +436,103 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
  * is usually that nobody has looked — and the `inherited` line below the grid
  * is where that distinction is actually made.
  */
+/**
+ * The imported announcement, rendered only when there is one.
+ *
+ * Shown for imported sales whether or not parcels have since arrived: a crawl
+ * fills in the parcel list, but it does not supply the collector's phone number
+ * or the registration terms, so this stays useful after enrichment rather than
+ * being a placeholder that disappears.
+ */
+function AnnouncedFacts({
+  auction,
+  hasLots,
+}: {
+  auction: { externalId: string; raw: Record<string, unknown> | null };
+  hasLots: boolean;
+}) {
+  if (!isImported(auction.externalId)) return null;
+  const d = readAnnouncedDetail(auction.raw);
+  if (!d) return null;
+
+  return (
+    <Card className="mb-6">
+      <h2 className="mb-1 text-base font-semibold">As announced by the county</h2>
+      <p className="mb-4 text-xs text-muted">
+        Published sale details.{" "}
+        {hasLots
+          ? "The parcel list below was fetched separately."
+          : "The parcel list has not been fetched yet."}
+      </p>
+
+      {d.venue ? (
+        <div className="mb-4">
+          <div className="text-xs uppercase tracking-wide text-muted">Held at</div>
+          <div className="mt-0.5 leading-relaxed">{d.venue}</div>
+        </div>
+      ) : null}
+
+      {d.facts.length > 0 ? (
+        <dl className="grid gap-3 sm:grid-cols-3">
+          {d.facts.map((f) => (
+            <div key={f.label}>
+              <dt className="text-xs uppercase tracking-wide text-muted">{f.label}</dt>
+              <dd className="mt-0.5 break-words leading-relaxed">
+                {f.href ? (
+                  <a
+                    href={f.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline"
+                  >
+                    {f.value}
+                  </a>
+                ) : (
+                  f.value
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+
+      {d.contacts.length > 0 ? (
+        <dl className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-4">
+          {d.contacts.map((c) => (
+            <div key={c.label}>
+              <dt className="text-xs uppercase tracking-wide text-muted">{c.label}</dt>
+              <dd className="mt-0.5 break-words leading-relaxed">
+                {c.href ? (
+                  <a href={c.href} className="text-accent hover:underline">
+                    {c.value}
+                  </a>
+                ) : (
+                  c.value
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+
+      {d.notes ? (
+        <p className="mt-4 border-t border-border pt-4 text-sm leading-relaxed">{d.notes}</p>
+      ) : null}
+
+      {d.registration ? (
+        <details className="mt-4 border-t border-border pt-4">
+          <summary className="cursor-pointer text-sm font-medium hover:text-accent">
+            Registration and terms
+          </summary>
+          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">
+            {d.registration}
+          </p>
+        </details>
+      ) : null}
+    </Card>
+  );
+}
+
 function Row({ label, value }: { label: string; value?: string | null }) {
   const v = value?.trim();
   if (!v) return null;

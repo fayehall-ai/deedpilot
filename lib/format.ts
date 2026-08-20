@@ -100,3 +100,25 @@ const SALE_TYPE_VAR: Record<string, string> = {
 export function saleTypeColor(type: string): string {
   return SALE_TYPE_VAR[type] ?? "var(--muted)";
 }
+
+/**
+ * How many parcels to show for a sale, and whether that number is ours.
+ *
+ * Two different facts share one slot in the UI. `lotCount` is parcels this
+ * database holds — crawled, priceable, clickable. `announcedParcelCount` is
+ * what a county said it is offering in a sale nothing has crawled yet, which is
+ * a claim about the world rather than a count of rows.
+ *
+ * Collapsing them would be wrong in both directions: showing an imported sale
+ * as "0 parcels" hides a genuine 16,062-parcel auction, and showing it as a
+ * plain "16,062" promises a parcel list that does not exist behind the link.
+ * So the count comes back with the flag, and every caller is obliged to say
+ * which kind it is rather than being able to forget.
+ */
+export function parcelsShown(a: {
+  lotCount: number;
+  announcedParcelCount?: number | null;
+}): { count: number; announced: boolean } {
+  if (a.lotCount > 0) return { count: a.lotCount, announced: false };
+  return { count: a.announcedParcelCount ?? 0, announced: true };
+}

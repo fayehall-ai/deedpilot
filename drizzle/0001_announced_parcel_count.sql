@@ -1,0 +1,11 @@
+-- Auctions imported from a published sale calendar state how many parcels a
+-- county is offering without publishing the parcels themselves.
+--
+-- That count must not land in `lot_count`, which means "parcel rows this
+-- database holds" and is what every coverage figure and the CAPE funnel are
+-- computed from. Writing an announced 246,730 parcels into it would inflate all
+-- of them at once while the auctions' own pages showed empty tables.
+--
+-- Additive and nullable: existing rows keep NULL, which correctly reads as "no
+-- source has stated a count" rather than "a sale with nothing in it".
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS announced_parcel_count integer;

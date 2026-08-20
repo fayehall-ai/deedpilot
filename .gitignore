@@ -83,3 +83,9 @@ artifacts/
 
 # Ad-hoc sampler used while tuning the intel loop
 scripts/.intel-sample.mts
+
+# Sale-calendar exports fed to `npm run import:apply`. Input artefacts, not
+# source: a single national export is ~540KB of third-party listing data, it is
+# superseded by the next one, and everything it carries is in the database
+# once imported.
+data/leads/

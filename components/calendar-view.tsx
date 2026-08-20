@@ -21,7 +21,7 @@ import {
   type CalendarAuctionRow,
   type CalendarFacet,
 } from "@/lib/queries";
-import { money, num, platformLabel, relativeDays, saleDate, saleTypeColor } from "@/lib/format";
+import { money, num, platformLabel, relativeDays, saleDate, saleTypeColor, parcelsShown } from "@/lib/format";
 import { STATE_NAMES, countyLabel } from "@/lib/atlas";
 import {
   calendarHref,
@@ -114,7 +114,9 @@ export async function CalendarView(props: {
   // Headline counts describe the month, not the grid — the spillover squares
   // belong to a neighbouring month and would double-count if paged through.
   const inMonth = rows.filter((r) => r.saleDate >= first && r.saleDate <= last);
-  const lotTotal = inMonth.reduce((n, r) => n + r.lotCount, 0);
+  // Parcels on offer, not parcels held: an imported sale contributes its
+  // announced count, or the headline would read 0 for a month of real auctions.
+  const lotTotal = inMonth.reduce((n, r) => n + parcelsShown(r).count, 0);
   const countyTotal = new Set(inMonth.map((r) => r.countyFips)).size;
 
   // Sales cluster into a few months a year, so an empty grid is the normal
@@ -207,11 +209,11 @@ export async function CalendarView(props: {
                   {sales.length > 0 ? (
                     <span
                       className="tnum text-[10px] font-medium text-faint"
-                      title={`${num(sales.reduce((n, a) => n + a.lotCount, 0))} parcels across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
+                      title={`${num(dayParcels(sales).total)} parcels across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
                         sumBids(sales),
-                      )}`}
+                      )}${announcedPhrase(dayParcels(sales).announced)}`}
                     >
-                      {num(sales.reduce((n, a) => n + a.lotCount, 0))}
+                      {num(dayParcels(sales).total)}
                     </span>
                   ) : null}
                 </div>
@@ -364,12 +366,13 @@ function SaleEntry({
   const lead = group.sales[0];
   const stateName = STATE_NAMES[lead.state] ?? lead.state;
   const county = countyLabel(lead.state, lead.countyName);
-  const isLead = lead.listingKind !== "sale_list" || !lead.saleDateConfirmed;
+  const standing = saleStanding(lead);
+  const isLead = standing === "lead";
 
   return (
     <details className="group/entry">
       <summary
-        title={`${county}, ${stateName} — ${num(group.sales.length)} separate ${lead.saleType} sales, ${num(group.lotTotal)} parcels total${bidPhrase(group.bidTotal)}, ${platformLabel(lead.platform)}${
+        title={`${county}, ${stateName} — ${num(group.sales.length)} separate ${lead.saleType} sales, ${num(group.lotTotal)} parcels total${announcedPhrase(group.announcedTotal)}${bidPhrase(group.bidTotal)}, ${platformLabel(lead.platform)}${
           group.cancelledCount ? ` (${num(group.cancelledCount)} cancelled)` : ""
         }`}
         className={[
@@ -401,7 +404,7 @@ function SaleEntry({
               ›
             </span>
           </span>
-          {isLead ? <LeadTag auction={lead} /> : null}
+          {standing !== "inventory" ? <LeadTag auction={lead} standing={standing} /> : null}
           {/* A cancellation must be visible without opening the group — the one
               thing collapsing rows could otherwise bury. */}
           {group.cancelledCount > 0 && !group.allCancelled ? (
@@ -420,7 +423,9 @@ function SaleEntry({
             <li key={a.id}>
               <Link
                 href={`/auctions/${a.id}`}
-                title={`${a.title ?? county} — ${num(a.lotCount)} parcels${bidPhrase(sumBids([a]))}${cancelled ? `, ${a.status}` : ""}`}
+                title={`${a.title ?? county} — ${num(parcelsShown(a).count)} parcels${
+                  parcelsShown(a).announced ? " announced, list not yet fetched" : ""
+                }${bidPhrase(sumBids([a]))}${cancelled ? `, ${a.status}` : ""}`}
                 className={`flex items-baseline gap-2 rounded px-1 py-0.5 transition-colors hover:bg-surface-2 ${
                   verbose ? "text-sm" : "text-[11px]"
                 }`}
@@ -432,7 +437,7 @@ function SaleEntry({
                       distinguishing title — never an unlabelled row. */}
                   {group.labels[i] ?? `Sale ${i + 1}`}
                 </span>
-                <span className="tnum shrink-0 text-muted">{num(a.lotCount)}</span>
+                <AnnouncedCount sale={a} />
               </Link>
             </li>
           );
@@ -451,13 +456,14 @@ function SaleEntry({
 function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; verbose?: boolean }) {
   const stateName = STATE_NAMES[auction.state] ?? auction.state;
   const county = countyLabel(auction.state, auction.countyName);
-  const isLead = auction.listingKind !== "sale_list" || !auction.saleDateConfirmed;
+  const standing = saleStanding(auction);
+  const isLead = standing === "lead";
   const cancelled = auction.status === "cancelled" || auction.status === "postponed";
 
   return (
     <Link
       href={`/auctions/${auction.id}`}
-      title={`${county}, ${stateName} — ${auction.saleType}, ${num(auction.lotCount)} parcels${bidPhrase(
+      title={`${county}, ${stateName} — ${auction.saleType}, ${num(parcelsShown(auction).count)} parcels${bidPhrase(
         sumBids([auction]),
       )}, ${platformLabel(auction.platform)}`}
       className={[
@@ -487,9 +493,11 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
           <span className="text-muted"> · </span>
           {auction.countyName}
         </span>
-        {isLead ? <LeadTag auction={auction} /> : null}
+        {standing !== "inventory" ? <LeadTag auction={auction} standing={standing} /> : null}
       </span>
-      {verbose ? <Totals lots={auction.lotCount} bids={sumBids([auction])} /> : null}
+      {verbose ? (
+        <Totals lots={parcelsShown(auction).count} bids={sumBids([auction])} />
+      ) : null}
     </Link>
   );
 }
@@ -527,6 +535,33 @@ function Totals({ lots, bids }: { lots: number; bids: number | null }) {
  * reason it does: `Number(null)` is 0, and a missing bid sheet must not be
  * able to claim every parcel opens free.
  */
+/**
+ * How much to trust a row, in the two ways it can fall short.
+ *
+ * A *lead* is something that may not be a sale at all: a projected date, or a
+ * delinquent roll parsed as though it were inventory. It gets the dashed border
+ * because it might evaporate.
+ *
+ * An *announced* sale is not that. Its date is county-published and its
+ * existence is not in doubt; what is missing is the parcel list. Imported rows
+ * carry `listing_kind = 'unknown'` — honestly, since no document has been read
+ * for them — and the old test keyed on that alone, so every imported sale would
+ * have rendered as "unverified" behind a dashed border. That is a stronger
+ * claim against them than the data supports, and it would have made a freshly
+ * imported calendar look broken.
+ */
+function saleStanding(a: {
+  listingKind: string;
+  saleDateConfirmed: boolean;
+  lotCount: number;
+  announcedParcelCount?: number | null;
+}): "inventory" | "announced" | "lead" {
+  if (!a.saleDateConfirmed) return "lead";
+  if (a.listingKind === "sale_list" && a.lotCount > 0) return "inventory";
+  if (parcelsShown(a).announced && parcelsShown(a).count > 0) return "announced";
+  return a.listingKind === "sale_list" ? "inventory" : "lead";
+}
+
 function sumBids(sales: CalendarAuctionRow[]): number | null {
   const present = sales
     .map((s) => s.totalOpeningBids)
@@ -542,19 +577,76 @@ function bidPhrase(total: number | null): string {
 }
 
 /**
+ * Parcels on a day, and how many of them are only announced.
+ *
+ * The calendar's density is its value — a day cell is about 100px wide — so an
+ * announced sale cannot carry a badge there. It carries the number, and the
+ * distinction moves into the tooltip and into the dotted underline below.
+ */
+function dayParcels(sales: CalendarAuctionRow[]): { total: number; announced: number } {
+  let total = 0;
+  let announced = 0;
+  for (const a of sales) {
+    const p = parcelsShown(a);
+    total += p.count;
+    if (p.announced) announced += p.count;
+  }
+  return { total, announced };
+}
+
+/** Tooltip clause naming the announced share, or nothing when there is none. */
+function announcedPhrase(announced: number): string {
+  return announced > 0 ? ` \u00b7 ${num(announced)} announced, list not yet fetched` : "";
+}
+
+/**
+ * A sale's parcel count, marked when it is the county's claim rather than ours.
+ *
+ * A dotted underline rather than a badge or a colour: this renders inside a
+ * calendar cell at 11px, where a badge would wrap the row and a colour would
+ * collide with the sale-type legend. The underline is the conventional "there
+ * is more to know here" affordance and it survives being small.
+ */
+function AnnouncedCount({
+  sale,
+}: {
+  sale: { lotCount: number; announcedParcelCount?: number | null };
+}) {
+  const p = parcelsShown(sale);
+  if (!p.announced) return <span className="tnum shrink-0 text-muted">{num(p.count)}</span>;
+  return (
+    <span
+      className="tnum shrink-0 text-muted underline decoration-dotted underline-offset-2"
+      title={`${num(p.count)} parcels announced by the county — the parcel list has not been fetched yet`}
+    >
+      {num(p.count)}
+    </span>
+  );
+}
+
+/**
  * Names *why* an entry is not bidding inventory, in the space of one word.
  *
  * The date claim outranks the document kind: on a calendar, the square a thing
  * sits in is itself an assertion that the sale happens that day.
  */
-function LeadTag({ auction }: { auction: CalendarAuctionRow }) {
-  const label = !auction.saleDateConfirmed
-    ? "projected"
-    : auction.listingKind === "delinquent_list"
-      ? "roll"
-      : auction.listingKind === "lands_available"
-        ? "lands"
-        : "unverified";
+function LeadTag({
+  auction,
+  standing,
+}: {
+  auction: CalendarAuctionRow;
+  standing: "announced" | "lead";
+}) {
+  const label =
+    standing === "announced"
+      ? "announced"
+      : !auction.saleDateConfirmed
+        ? "projected"
+        : auction.listingKind === "delinquent_list"
+          ? "roll"
+          : auction.listingKind === "lands_available"
+            ? "lands"
+            : "unverified";
   return (
     <span className="whitespace-nowrap rounded bg-surface-2 px-1 text-[9px] uppercase tracking-wide text-muted">
       {label}

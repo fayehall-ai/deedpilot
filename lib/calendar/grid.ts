@@ -153,12 +153,22 @@ export const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] 
  * to a single row would lose seven real sale lists — but eight identical lines
  * read as an ingest bug and crowd out the other counties selling that day.
  */
+/*
+ * `parcelsShown` is imported rather than reimplemented so the calendar and the
+ * auction pages cannot drift on what a sale's parcel count means. It is pure
+ * formatting logic with no DB or React dependency, which keeps this module's
+ * own guarantee intact.
+ */
+import { parcelsShown } from "../format";
+
 export interface GroupableSale {
   countyFips: string;
   saleType: string;
   listingKind: string;
   saleDateConfirmed: boolean;
   lotCount: number;
+  /** Published count for a sale nothing has crawled. See `parcelsShown`. */
+  announcedParcelCount?: number | null;
   status: string;
   title: string | null;
   /** Summed across the group when present. Absent is fine — see `bidTotal`. */
@@ -170,7 +180,16 @@ export interface SaleGroup<T> {
   sales: T[];
   /** Per-sale labels distinguishing members, e.g. "precinct 1". Null if none. */
   labels: (string | null)[];
+  /**
+   * Parcels across the group: those held, plus those a county has announced.
+   *
+   * Sums `parcelsShown` rather than `lotCount` so an imported sale of 16,062
+   * parcels does not sort and display as a zero. `announcedTotal` says how much
+   * of this figure is still only a claim.
+   */
   lotTotal: number;
+  /** The part of `lotTotal` that comes from announced, uncrawled sales. */
+  announcedTotal: number;
   /**
    * Summed opening bids, or null when not one member published any.
    *
@@ -225,7 +244,11 @@ export function groupSalesByCounty<T extends GroupableSale>(sales: T[]): SaleGro
         key,
         sales: members,
         labels: distinguishingLabels(members.map((m) => m.title)),
-        lotTotal: members.reduce((n, m) => n + m.lotCount, 0),
+        lotTotal: members.reduce((n, m) => n + parcelsShown(m).count, 0),
+        announcedTotal: members.reduce(
+          (n, m) => n + (parcelsShown(m).announced ? parcelsShown(m).count : 0),
+          0,
+        ),
         bidTotal: bids.length ? bids.reduce((a, b) => a + b, 0) : null,
         cancelledCount,
         allCancelled: cancelledCount === members.length,

@@ -17,6 +17,7 @@ import { Stage, Collapsed } from "@/components/stage";
 import { whatNeedsAttention } from "@/lib/admin/attention";
 import { DiscoverSummary, FunnelBars, PriceSummary, SummaryPending } from "./coverage-summary";
 import { EnrichmentPanel } from "./enrichment-panel";
+import { ImportPanel } from "./import-panel";
 import { SourcesPanel } from "./sources-panel";
 import { CapePanel } from "./cape-panel";
 import { PolicyPanel } from "./policy-panel";
@@ -248,6 +249,21 @@ async function Body({
             </Suspense>
           }
         >
+          {/*
+            First in the stage because it is the only control here that adds
+            sales the crawler does not yet know exist. The Scout answers "where
+            does this county publish", which is the same question one step
+            later; an uploaded calendar answers "which sales are there at all".
+          */}
+          <Card>
+            <h2 className="mb-1 text-base font-semibold">Import a sale calendar</h2>
+            <p className="mb-3 text-sm text-muted">
+              Loads announced sales from a CSV export. Rows arrive with a published parcel count
+              and no parcels — they show on the calendar labelled as announced until a crawl
+              fills them in.
+            </p>
+            <ImportPanel />
+          </Card>
           <Suspense fallback={<TableSkeleton />}>
             <ScoutPanel />
           </Suspense>

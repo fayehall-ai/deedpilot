@@ -14,7 +14,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { getUpcomingAuctions } from "@/lib/queries";
-import { money, num, relativeDays, saleDate } from "@/lib/format";
+import { money, num, relativeDays, saleDate, parcelsShown } from "@/lib/format";
 import { EmptyState, SaleTypeBadge, StatusBadge } from "@/components/ui";
 import { STATE_NAMES } from "@/lib/atlas";
 
@@ -133,8 +133,26 @@ export async function AuctionsList(props: {
 
                     <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <dt className="text-xs text-muted">Parcels</dt>
-                        <dd className="tnum font-medium">{num(a.lotCount)}</dd>
+                        {/*
+                          Labelled "announced" when the number is the county's
+                          claim rather than parcels we hold. The card links to a
+                          detail page whose parcel table is empty in that case,
+                          and a bare number here would make that read as a bug.
+                        */}
+                        <dt className="text-xs text-muted">
+                          {parcelsShown(a).announced ? "Parcels announced" : "Parcels"}
+                        </dt>
+                        <dd className="tnum font-medium">
+                          {num(parcelsShown(a).count)}
+                          {parcelsShown(a).announced ? (
+                            <span
+                              className="ml-1 align-middle text-[10px] uppercase tracking-wide text-muted"
+                              title="The county published this count; the parcel list has not been fetched yet"
+                            >
+                              announced
+                            </span>
+                          ) : null}
+                        </dd>
                       </div>
                       <div>
                         <dt className="text-xs text-muted">Opening bids</dt>
