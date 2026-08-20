@@ -76,6 +76,23 @@ function flush(base: SourceRegistry | null, results: ProspectResult[]): SourceRe
 async function main(): Promise<void> {
   const limit = arg("limit") ? Number(arg("limit")) : undefined;
   const dryRun = flag("dry-run");
+  /*
+   * Domain patterns on by default here, unlike everywhere else.
+   *
+   * `candidatesFor` draws on two things: links someone researched into the
+   * atlas, and generated county-domain patterns that are off by default because
+   * most do not resolve. This script's target set is *defined* by having no
+   * researched link — that is why these counties have no source — so with
+   * patterns off `candidatesFor` returns nothing and every county is an instant
+   * gap. The first run did exactly that: 306 counties queued, five checked, five
+   * "no source found", no fetch and no LLM call behind any of them.
+   *
+   * Patterns are the mechanism built for this case. They resolve a homepage
+   * rather than a sale page, which `verify.ts` then crawls for the sale — a
+   * homepage alone scores below the relevance threshold and is rejected, so a
+   * wrong guess costs a fetch and is not mistaken for a source.
+   */
+  const includePatterns = !flag("no-patterns");
 
   const base = readRegistry();
   /* A county already carrying a verified source is not a gap and does not need
@@ -121,13 +138,22 @@ async function main(): Promise<void> {
   );
 
   if (dryRun) {
-    for (const t of targets.slice(0, 40)) {
+    /*
+     * Routed through `prospectCounty` rather than just listing the targets, so
+     * the output is the candidate plan — the thing worth checking before a paid
+     * run. A dry run makes no network requests.
+     */
+    let withCandidates = 0;
+    for (const t of targets.slice(0, 25)) {
+      const r = await prospectCounty(t.county_fips, { dryRun: true, includePatterns });
+      if (!r.isGap) withCandidates++;
       console.log(
-        `  ${t.state} ${t.county} (${t.county_fips}) — ${t.sales} sale(s), ` +
-          `${t.parcels.toLocaleString()} parcels, soonest ${t.soonest}`,
+        `  ${t.state} ${t.county} (${t.county_fips}, ${t.parcels.toLocaleString()} parcels) — ${r.note.slice(0, 150)}`,
       );
     }
-    if (targets.length > 40) console.log(`  … and ${targets.length - 40} more`);
+    console.log(
+      `\n${withCandidates}/${Math.min(25, targets.length)} sampled counties have candidates to verify.`,
+    );
     process.exit(0);
   }
 
@@ -141,7 +167,7 @@ async function main(): Promise<void> {
   for (const [i, t] of targets.entries()) {
     if (stopping) break;
     try {
-      const r = await prospectCounty(t.county_fips, { useLlm: true });
+      const r = await prospectCounty(t.county_fips, { useLlm: true, includePatterns });
       found.push(r);
       pending.push(r);
       if (r.isGap) gaps++;

@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-08-11T18:04:10.979Z",
-  "nCounties": 1346,
+  "builtAt": "2026-08-20T17:07:24.775Z",
+  "nCounties": 1355,
   "nVerified": 962,
-  "nGaps": 599,
+  "nGaps": 608,
   "counties": {
     "10001": {
       "state": "DE",
@@ -4817,6 +4817,12 @@
       ],
       "isGap": false
     },
+    "21097": {
+      "state": "KY",
+      "county": "Harrison",
+      "sources": [],
+      "isGap": true
+    },
     "21111": {
       "state": "KY",
       "county": "Jefferson",
@@ -5023,6 +5029,12 @@
         }
       ],
       "isGap": false
+    },
+    "21207": {
+      "state": "KY",
+      "county": "Russell",
+      "sources": [],
+      "isGap": true
     },
     "21209": {
       "state": "KY",
@@ -6372,6 +6384,18 @@
       ],
       "isGap": false
     },
+    "26029": {
+      "state": "MI",
+      "county": "Charlevoix",
+      "sources": [],
+      "isGap": true
+    },
+    "26031": {
+      "state": "MI",
+      "county": "Cheboygan",
+      "sources": [],
+      "isGap": true
+    },
     "26037": {
       "state": "MI",
       "county": "Clinton",
@@ -6925,6 +6949,12 @@
       ],
       "isGap": false
     },
+    "26141": {
+      "state": "MI",
+      "county": "Presque Isle",
+      "sources": [],
+      "isGap": true
+    },
     "26145": {
       "state": "MI",
       "county": "Saginaw",
@@ -7289,6 +7319,12 @@
         }
       ],
       "isGap": false
+    },
+    "27071": {
+      "state": "MN",
+      "county": "Koochiching",
+      "sources": [],
+      "isGap": true
     },
     "27109": {
       "state": "MN",
@@ -13488,6 +13524,12 @@
       "sources": [],
       "isGap": true
     },
+    "39131": {
+      "state": "OH",
+      "county": "Pike",
+      "sources": [],
+      "isGap": true
+    },
     "39133": {
       "state": "OH",
       "county": "Portage",
@@ -17223,6 +17265,12 @@
         }
       ],
       "isGap": false
+    },
+    "47131": {
+      "state": "TN",
+      "county": "Obion",
+      "sources": [],
+      "isGap": true
     },
     "47141": {
       "state": "TN",
@@ -21465,6 +21513,12 @@
         }
       ],
       "isGap": false
+    },
+    "56033": {
+      "state": "WY",
+      "county": "Sheridan",
+      "sources": [],
+      "isGap": true
     },
     "04001": {
       "state": "AZ",
