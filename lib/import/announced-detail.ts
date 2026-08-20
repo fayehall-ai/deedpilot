@@ -42,9 +42,7 @@ export interface AnnouncedDetail {
 }
 
 /** True when this auction came from a calendar import rather than a crawl. */
-export function isImported(externalId: string): boolean {
-  return externalId.startsWith("ustla:");
-}
+export { isImportedExternalId as isImported } from "./provenance";
 
 /**
  * Publishers write "None" and "N/A" where they mean an empty cell.

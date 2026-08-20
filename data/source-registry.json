@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-08-20T17:15:56.127Z",
-  "nCounties": 1355,
-  "nVerified": 964,
-  "nGaps": 607,
+  "builtAt": "2026-08-20T18:02:43.276Z",
+  "nCounties": 1583,
+  "nVerified": 991,
+  "nGaps": 808,
   "counties": {
     "10001": {
       "state": "DE",
@@ -377,6 +377,12 @@
       ],
       "isGap": false
     },
+    "12027": {
+      "state": "FL",
+      "county": "DeSoto",
+      "sources": [],
+      "isGap": true
+    },
     "12031": {
       "state": "FL",
       "county": "Duval",
@@ -468,6 +474,18 @@
         }
       ],
       "isGap": false
+    },
+    "12039": {
+      "state": "FL",
+      "county": "Gadsden",
+      "sources": [],
+      "isGap": true
+    },
+    "12041": {
+      "state": "FL",
+      "county": "Gilchrist",
+      "sources": [],
+      "isGap": true
     },
     "12053": {
       "state": "FL",
@@ -597,6 +615,12 @@
         }
       ],
       "isGap": false
+    },
+    "12063": {
+      "state": "FL",
+      "county": "Jackson",
+      "sources": [],
+      "isGap": true
     },
     "12069": {
       "state": "FL",
@@ -1034,6 +1058,12 @@
       ],
       "isGap": false
     },
+    "12093": {
+      "state": "FL",
+      "county": "Okeechobee",
+      "sources": [],
+      "isGap": true
+    },
     "12095": {
       "state": "FL",
       "county": "Orange",
@@ -1465,6 +1495,12 @@
       ],
       "isGap": false
     },
+    "12121": {
+      "state": "FL",
+      "county": "Suwannee",
+      "sources": [],
+      "isGap": true
+    },
     "12127": {
       "state": "FL",
       "county": "Volusia",
@@ -1547,6 +1583,12 @@
         }
       ],
       "isGap": false
+    },
+    "12133": {
+      "state": "FL",
+      "county": "Washington",
+      "sources": [],
+      "isGap": true
     },
     "13001": {
       "state": "GA",
@@ -1975,6 +2017,12 @@
       "sources": [],
       "isGap": true
     },
+    "13105": {
+      "state": "GA",
+      "county": "Elbert",
+      "sources": [],
+      "isGap": true
+    },
     "13113": {
       "state": "GA",
       "county": "Fayette",
@@ -2164,6 +2212,12 @@
       "sources": [],
       "isGap": true
     },
+    "13169": {
+      "state": "GA",
+      "county": "Jones",
+      "sources": [],
+      "isGap": true
+    },
     "13175": {
       "state": "GA",
       "county": "Laurens",
@@ -2179,6 +2233,24 @@
     "13185": {
       "state": "GA",
       "county": "Lowndes",
+      "sources": [],
+      "isGap": true
+    },
+    "13187": {
+      "state": "GA",
+      "county": "Lumpkin",
+      "sources": [],
+      "isGap": true
+    },
+    "13199": {
+      "state": "GA",
+      "county": "Meriwether",
+      "sources": [],
+      "isGap": true
+    },
+    "13209": {
+      "state": "GA",
+      "county": "Montgomery",
       "sources": [],
       "isGap": true
     },
@@ -2245,6 +2317,12 @@
         }
       ],
       "isGap": false
+    },
+    "13219": {
+      "state": "GA",
+      "county": "Oconee",
+      "sources": [],
+      "isGap": true
     },
     "13223": {
       "state": "GA",
@@ -2337,6 +2415,18 @@
       "sources": [],
       "isGap": true
     },
+    "13279": {
+      "state": "GA",
+      "county": "Toombs",
+      "sources": [],
+      "isGap": true
+    },
+    "13281": {
+      "state": "GA",
+      "county": "Towns",
+      "sources": [],
+      "isGap": true
+    },
     "13285": {
       "state": "GA",
       "county": "Troup",
@@ -2405,9 +2495,27 @@
       ],
       "isGap": false
     },
+    "13301": {
+      "state": "GA",
+      "county": "Warren",
+      "sources": [],
+      "isGap": true
+    },
+    "13305": {
+      "state": "GA",
+      "county": "Wayne",
+      "sources": [],
+      "isGap": true
+    },
     "13313": {
       "state": "GA",
       "county": "Whitfield",
+      "sources": [],
+      "isGap": true
+    },
+    "13319": {
+      "state": "GA",
+      "county": "Wilkinson",
       "sources": [],
       "isGap": true
     },
@@ -3545,6 +3653,12 @@
       "sources": [],
       "isGap": true
     },
+    "18049": {
+      "state": "IN",
+      "county": "Fulton",
+      "sources": [],
+      "isGap": true
+    },
     "18053": {
       "state": "IN",
       "county": "Grant",
@@ -3666,6 +3780,18 @@
       ],
       "isGap": false
     },
+    "18075": {
+      "state": "IN",
+      "county": "Jay",
+      "sources": [],
+      "isGap": true
+    },
+    "18079": {
+      "state": "IN",
+      "county": "Jennings",
+      "sources": [],
+      "isGap": true
+    },
     "18081": {
       "state": "IN",
       "county": "Johnson",
@@ -3753,6 +3879,12 @@
       "sources": [],
       "isGap": true
     },
+    "18103": {
+      "state": "IN",
+      "county": "Miami",
+      "sources": [],
+      "isGap": true
+    },
     "18105": {
       "state": "IN",
       "county": "Monroe",
@@ -3782,15 +3914,57 @@
       "sources": [],
       "isGap": true
     },
+    "18121": {
+      "state": "IN",
+      "county": "Parke",
+      "sources": [],
+      "isGap": true
+    },
+    "18123": {
+      "state": "IN",
+      "county": "Perry",
+      "sources": [],
+      "isGap": true
+    },
     "18127": {
       "state": "IN",
       "county": "Porter",
       "sources": [],
       "isGap": true
     },
+    "18129": {
+      "state": "IN",
+      "county": "Posey",
+      "sources": [],
+      "isGap": true
+    },
     "18141": {
       "state": "IN",
       "county": "St. Joseph",
+      "sources": [
+        {
+          "fips": "18141",
+          "state": "IN",
+          "url": "https://www.zeusauction.com/publicauctions.php",
+          "host": "www.zeusauction.com",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.43,
+          "signals": [
+            "tax lien sale",
+            "tax sale"
+          ],
+          "scheduleHint": "9/4/2026 5:30 PM CDT – 9/8/2026 10:00 PM CDT",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "18143": {
+      "state": "IN",
+      "county": "Scott",
       "sources": [],
       "isGap": true
     },
@@ -3880,6 +4054,12 @@
       ],
       "isGap": false
     },
+    "18169": {
+      "state": "IN",
+      "county": "Wabash",
+      "sources": [],
+      "isGap": true
+    },
     "18173": {
       "state": "IN",
       "county": "Warrick",
@@ -3889,6 +4069,12 @@
     "18177": {
       "state": "IN",
       "county": "Wayne",
+      "sources": [],
+      "isGap": true
+    },
+    "18181": {
+      "state": "IN",
+      "county": "White",
       "sources": [],
       "isGap": true
     },
@@ -4592,6 +4778,12 @@
       "sources": [],
       "isGap": true
     },
+    "21021": {
+      "state": "KY",
+      "county": "Boyle",
+      "sources": [],
+      "isGap": true
+    },
     "21029": {
       "state": "KY",
       "county": "Bullitt",
@@ -4647,6 +4839,12 @@
       ],
       "isGap": false
     },
+    "21035": {
+      "state": "KY",
+      "county": "Calloway",
+      "sources": [],
+      "isGap": true
+    },
     "21037": {
       "state": "KY",
       "county": "Campbell",
@@ -4670,6 +4868,12 @@
       ],
       "isGap": false
     },
+    "21043": {
+      "state": "KY",
+      "county": "Carter",
+      "sources": [],
+      "isGap": true
+    },
     "21047": {
       "state": "KY",
       "county": "Christian",
@@ -4692,6 +4896,24 @@
         }
       ],
       "isGap": false
+    },
+    "21051": {
+      "state": "KY",
+      "county": "Clay",
+      "sources": [],
+      "isGap": true
+    },
+    "21053": {
+      "state": "KY",
+      "county": "Clinton",
+      "sources": [],
+      "isGap": true
+    },
+    "21057": {
+      "state": "KY",
+      "county": "Cumberland",
+      "sources": [],
+      "isGap": true
     },
     "21059": {
       "state": "KY",
@@ -4734,6 +4956,18 @@
       ],
       "isGap": false
     },
+    "21061": {
+      "state": "KY",
+      "county": "Edmonson",
+      "sources": [],
+      "isGap": true
+    },
+    "21065": {
+      "state": "KY",
+      "county": "Estill",
+      "sources": [],
+      "isGap": true
+    },
     "21067": {
       "state": "KY",
       "county": "Fayette",
@@ -4774,6 +5008,12 @@
       ],
       "isGap": false
     },
+    "21071": {
+      "state": "KY",
+      "county": "Floyd",
+      "sources": [],
+      "isGap": true
+    },
     "21073": {
       "state": "KY",
       "county": "Franklin",
@@ -4796,6 +5036,12 @@
         }
       ],
       "isGap": false
+    },
+    "21091": {
+      "state": "KY",
+      "county": "Hancock",
+      "sources": [],
+      "isGap": true
     },
     "21093": {
       "state": "KY",
@@ -4852,9 +5098,27 @@
       ],
       "isGap": false
     },
+    "21095": {
+      "state": "KY",
+      "county": "Harlan",
+      "sources": [],
+      "isGap": true
+    },
     "21097": {
       "state": "KY",
       "county": "Harrison",
+      "sources": [],
+      "isGap": true
+    },
+    "21101": {
+      "state": "KY",
+      "county": "Henderson",
+      "sources": [],
+      "isGap": true
+    },
+    "21107": {
+      "state": "KY",
+      "county": "Hopkins",
       "sources": [],
       "isGap": true
     },
@@ -4904,6 +5168,12 @@
       ],
       "isGap": false
     },
+    "21115": {
+      "state": "KY",
+      "county": "Johnson",
+      "sources": [],
+      "isGap": true
+    },
     "21117": {
       "state": "KY",
       "county": "Kenton",
@@ -4944,6 +5214,18 @@
       ],
       "isGap": false
     },
+    "21119": {
+      "state": "KY",
+      "county": "Knott",
+      "sources": [],
+      "isGap": true
+    },
+    "21121": {
+      "state": "KY",
+      "county": "Knox",
+      "sources": [],
+      "isGap": true
+    },
     "21125": {
       "state": "KY",
       "county": "Laurel",
@@ -4967,9 +5249,57 @@
       ],
       "isGap": false
     },
+    "21127": {
+      "state": "KY",
+      "county": "Lawrence",
+      "sources": [],
+      "isGap": true
+    },
+    "21131": {
+      "state": "KY",
+      "county": "Leslie",
+      "sources": [],
+      "isGap": true
+    },
+    "21137": {
+      "state": "KY",
+      "county": "Lincoln",
+      "sources": [],
+      "isGap": true
+    },
+    "21139": {
+      "state": "KY",
+      "county": "Livingston",
+      "sources": [],
+      "isGap": true
+    },
     "21145": {
       "state": "KY",
       "county": "McCracken",
+      "sources": [
+        {
+          "fips": "21145",
+          "state": "KY",
+          "url": "https://mccrackencountyclerk.ky.gov/delinquent-taxes/",
+          "host": "mccrackencountyclerk.ky.gov",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.88,
+          "signals": [
+            "delinquent tax",
+            "certificate of delinquency (KY)"
+          ],
+          "scheduleHint": "August 21, 2026 at 9AM CDT",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "21149": {
+      "state": "KY",
+      "county": "McLean",
       "sources": [],
       "isGap": true
     },
@@ -4996,6 +5326,71 @@
       ],
       "isGap": false
     },
+    "21153": {
+      "state": "KY",
+      "county": "Magoffin",
+      "sources": [],
+      "isGap": true
+    },
+    "21155": {
+      "state": "KY",
+      "county": "Marion",
+      "sources": [],
+      "isGap": true
+    },
+    "21159": {
+      "state": "KY",
+      "county": "Martin",
+      "sources": [],
+      "isGap": true
+    },
+    "21165": {
+      "state": "KY",
+      "county": "Menifee",
+      "sources": [],
+      "isGap": true
+    },
+    "21167": {
+      "state": "KY",
+      "county": "Mercer",
+      "sources": [],
+      "isGap": true
+    },
+    "21169": {
+      "state": "KY",
+      "county": "Metcalfe",
+      "sources": [],
+      "isGap": true
+    },
+    "21171": {
+      "state": "KY",
+      "county": "Monroe",
+      "sources": [
+        {
+          "fips": "21171",
+          "state": "KY",
+          "url": "https://monroecounty.gov/",
+          "host": "monroecounty.gov",
+          "origin": "platform_pattern",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax sale",
+            "tax sale certificate"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "21175": {
+      "state": "KY",
+      "county": "Morgan",
+      "sources": [],
+      "isGap": true
+    },
     "21185": {
       "state": "KY",
       "county": "Oldham",
@@ -5018,6 +5413,18 @@
         }
       ],
       "isGap": false
+    },
+    "21189": {
+      "state": "KY",
+      "county": "Owsley",
+      "sources": [],
+      "isGap": true
+    },
+    "21193": {
+      "state": "KY",
+      "county": "Perry",
+      "sources": [],
+      "isGap": true
     },
     "21195": {
       "state": "KY",
@@ -5042,6 +5449,12 @@
       ],
       "isGap": false
     },
+    "21197": {
+      "state": "KY",
+      "county": "Powell",
+      "sources": [],
+      "isGap": true
+    },
     "21199": {
       "state": "KY",
       "county": "Pulaski",
@@ -5064,6 +5477,18 @@
         }
       ],
       "isGap": false
+    },
+    "21201": {
+      "state": "KY",
+      "county": "Robertson",
+      "sources": [],
+      "isGap": true
+    },
+    "21205": {
+      "state": "KY",
+      "county": "Rowan",
+      "sources": [],
+      "isGap": true
     },
     "21207": {
       "state": "KY",
@@ -5117,6 +5542,18 @@
       ],
       "isGap": false
     },
+    "21217": {
+      "state": "KY",
+      "county": "Taylor",
+      "sources": [],
+      "isGap": true
+    },
+    "21225": {
+      "state": "KY",
+      "county": "Union",
+      "sources": [],
+      "isGap": true
+    },
     "21227": {
       "state": "KY",
       "county": "Warren",
@@ -5139,6 +5576,18 @@
         }
       ],
       "isGap": false
+    },
+    "21235": {
+      "state": "KY",
+      "county": "Whitley",
+      "sources": [],
+      "isGap": true
+    },
+    "21239": {
+      "state": "KY",
+      "county": "Woodford",
+      "sources": [],
+      "isGap": true
     },
     "22001": {
       "state": "LA",
@@ -7361,6 +7810,18 @@
       "sources": [],
       "isGap": true
     },
+    "27083": {
+      "state": "MN",
+      "county": "Lyon",
+      "sources": [],
+      "isGap": true
+    },
+    "27097": {
+      "state": "MN",
+      "county": "Morrison",
+      "sources": [],
+      "isGap": true
+    },
     "27109": {
       "state": "MN",
       "county": "Olmsted",
@@ -7474,6 +7935,32 @@
       "sources": [],
       "isGap": true
     },
+    "27143": {
+      "state": "MN",
+      "county": "Sibley",
+      "sources": [
+        {
+          "fips": "27143",
+          "state": "MN",
+          "url": "https://co.sibley.mn.us/606/Delinquent-Property-Taxes-Tax-Forfeiture",
+          "host": "co.sibley.mn.us",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "redemption period",
+            "parcel id",
+            "forfeited land (OH/WV)"
+          ],
+          "scheduleHint": "September Sale",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "27145": {
       "state": "MN",
       "county": "Stearns",
@@ -7529,8 +8016,25 @@
     "28001": {
       "state": "MS",
       "county": "Adams",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "28001",
+          "state": "MS",
+          "url": "https://adamscounty.org/treasurer",
+          "host": "adamscounty.org",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.43,
+          "signals": [
+            "tax sale",
+            "tax sale certificate"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "28003": {
       "state": "MS",
@@ -7605,6 +8109,42 @@
       "sources": [],
       "isGap": true
     },
+    "28021": {
+      "state": "MS",
+      "county": "Claiborne",
+      "sources": [],
+      "isGap": true
+    },
+    "28023": {
+      "state": "MS",
+      "county": "Clarke",
+      "sources": [],
+      "isGap": true
+    },
+    "28025": {
+      "state": "MS",
+      "county": "Clay",
+      "sources": [],
+      "isGap": true
+    },
+    "28027": {
+      "state": "MS",
+      "county": "Coahoma",
+      "sources": [],
+      "isGap": true
+    },
+    "28029": {
+      "state": "MS",
+      "county": "Copiah",
+      "sources": [],
+      "isGap": true
+    },
+    "28031": {
+      "state": "MS",
+      "county": "Covington",
+      "sources": [],
+      "isGap": true
+    },
     "28033": {
       "state": "MS",
       "county": "DeSoto",
@@ -7650,6 +8190,30 @@
         }
       ],
       "isGap": false
+    },
+    "28039": {
+      "state": "MS",
+      "county": "George",
+      "sources": [],
+      "isGap": true
+    },
+    "28041": {
+      "state": "MS",
+      "county": "Greene",
+      "sources": [],
+      "isGap": true
+    },
+    "28043": {
+      "state": "MS",
+      "county": "Grenada",
+      "sources": [],
+      "isGap": true
+    },
+    "28045": {
+      "state": "MS",
+      "county": "Hancock",
+      "sources": [],
+      "isGap": true
     },
     "28047": {
       "state": "MS",
@@ -7732,6 +8296,24 @@
       ],
       "isGap": false
     },
+    "28051": {
+      "state": "MS",
+      "county": "Holmes",
+      "sources": [],
+      "isGap": true
+    },
+    "28055": {
+      "state": "MS",
+      "county": "Issaquena",
+      "sources": [],
+      "isGap": true
+    },
+    "28057": {
+      "state": "MS",
+      "county": "Itawamba",
+      "sources": [],
+      "isGap": true
+    },
     "28059": {
       "state": "MS",
       "county": "Jackson",
@@ -7755,6 +8337,18 @@
         }
       ],
       "isGap": false
+    },
+    "28061": {
+      "state": "MS",
+      "county": "Jasper",
+      "sources": [],
+      "isGap": true
+    },
+    "28063": {
+      "state": "MS",
+      "county": "Jefferson",
+      "sources": [],
+      "isGap": true
     },
     "28067": {
       "state": "MS",
@@ -7798,6 +8392,18 @@
       "sources": [],
       "isGap": true
     },
+    "28077": {
+      "state": "MS",
+      "county": "Lawrence",
+      "sources": [],
+      "isGap": true
+    },
+    "28079": {
+      "state": "MS",
+      "county": "Leake",
+      "sources": [],
+      "isGap": true
+    },
     "28081": {
       "state": "MS",
       "county": "Lee",
@@ -7822,6 +8428,18 @@
       ],
       "isGap": false
     },
+    "28083": {
+      "state": "MS",
+      "county": "Leflore",
+      "sources": [],
+      "isGap": true
+    },
+    "28085": {
+      "state": "MS",
+      "county": "Lincoln",
+      "sources": [],
+      "isGap": true
+    },
     "28087": {
       "state": "MS",
       "county": "Lowndes",
@@ -7831,6 +8449,64 @@
     "28089": {
       "state": "MS",
       "county": "Madison",
+      "sources": [],
+      "isGap": true
+    },
+    "28091": {
+      "state": "MS",
+      "county": "Marion",
+      "sources": [
+        {
+          "fips": "28091",
+          "state": "MS",
+          "url": "https://marioncountyms.gov/chancery-clerk",
+          "host": "marioncountyms.gov",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28093": {
+      "state": "MS",
+      "county": "Marshall",
+      "sources": [],
+      "isGap": true
+    },
+    "28095": {
+      "state": "MS",
+      "county": "Monroe",
+      "sources": [
+        {
+          "fips": "28095",
+          "state": "MS",
+          "url": "https://monroecounty.gov/",
+          "host": "monroecounty.gov",
+          "origin": "platform_pattern",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax sale",
+            "tax sale certificate"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28099": {
+      "state": "MS",
+      "county": "Neshoba",
       "sources": [],
       "isGap": true
     },
@@ -7856,6 +8532,12 @@
         }
       ],
       "isGap": false
+    },
+    "28107": {
+      "state": "MS",
+      "county": "Panola",
+      "sources": [],
+      "isGap": true
     },
     "28109": {
       "state": "MS",
@@ -7948,6 +8630,24 @@
       ],
       "isGap": false
     },
+    "28111": {
+      "state": "MS",
+      "county": "Perry",
+      "sources": [],
+      "isGap": true
+    },
+    "28113": {
+      "state": "MS",
+      "county": "Pike",
+      "sources": [],
+      "isGap": true
+    },
+    "28115": {
+      "state": "MS",
+      "county": "Pontotoc",
+      "sources": [],
+      "isGap": true
+    },
     "28121": {
       "state": "MS",
       "county": "Rankin",
@@ -8020,6 +8720,101 @@
         }
       ],
       "isGap": false
+    },
+    "28123": {
+      "state": "MS",
+      "county": "Scott",
+      "sources": [],
+      "isGap": true
+    },
+    "28127": {
+      "state": "MS",
+      "county": "Simpson",
+      "sources": [],
+      "isGap": true
+    },
+    "28131": {
+      "state": "MS",
+      "county": "Stone",
+      "sources": [],
+      "isGap": true
+    },
+    "28135": {
+      "state": "MS",
+      "county": "Tallahatchie",
+      "sources": [],
+      "isGap": true
+    },
+    "28137": {
+      "state": "MS",
+      "county": "Tate",
+      "sources": [
+        {
+          "fips": "28137",
+          "state": "MS",
+          "url": "https://tatecountyms.gov/chancery-clerk/",
+          "host": "tatecountyms.gov",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28143": {
+      "state": "MS",
+      "county": "Tunica",
+      "sources": [],
+      "isGap": true
+    },
+    "28145": {
+      "state": "MS",
+      "county": "Union",
+      "sources": [],
+      "isGap": true
+    },
+    "28149": {
+      "state": "MS",
+      "county": "Warren",
+      "sources": [
+        {
+          "fips": "28149",
+          "state": "MS",
+          "url": "https://www.co.warren.ms.us/elected-officials/tax-collector/",
+          "host": "www.co.warren.ms.us",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "scheduleHint": "usually held the last Monday in August 8:30am-4:30pm",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "28157": {
+      "state": "MS",
+      "county": "Wilkinson",
+      "sources": [],
+      "isGap": true
+    },
+    "28159": {
+      "state": "MS",
+      "county": "Winston",
+      "sources": [],
+      "isGap": true
     },
     "29001": {
       "state": "MO",
@@ -8108,6 +8903,30 @@
       "sources": [],
       "isGap": true
     },
+    "29023": {
+      "state": "MO",
+      "county": "Butler",
+      "sources": [],
+      "isGap": true
+    },
+    "29025": {
+      "state": "MO",
+      "county": "Caldwell",
+      "sources": [],
+      "isGap": true
+    },
+    "29027": {
+      "state": "MO",
+      "county": "Callaway",
+      "sources": [],
+      "isGap": true
+    },
+    "29029": {
+      "state": "MO",
+      "county": "Camden",
+      "sources": [],
+      "isGap": true
+    },
     "29031": {
       "state": "MO",
       "county": "Cape Girardeau",
@@ -8132,6 +8951,42 @@
         }
       ],
       "isGap": false
+    },
+    "29033": {
+      "state": "MO",
+      "county": "Carroll",
+      "sources": [
+        {
+          "fips": "29033",
+          "state": "MO",
+          "url": "https://www.carrollcountymo.gov/collector-treasurer/",
+          "host": "www.carrollcountymo.gov",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.95,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase",
+            "redemption period",
+            "bidder registration",
+            "parcel id",
+            "assessed value",
+            "tax sale certificate"
+          ],
+          "scheduleHint": "4th Monday in August each year",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29035": {
+      "state": "MO",
+      "county": "Carter",
+      "sources": [],
+      "isGap": true
     },
     "29037": {
       "state": "MO",
@@ -8158,9 +9013,27 @@
       ],
       "isGap": false
     },
+    "29039": {
+      "state": "MO",
+      "county": "Cedar",
+      "sources": [],
+      "isGap": true
+    },
+    "29041": {
+      "state": "MO",
+      "county": "Chariton",
+      "sources": [],
+      "isGap": true
+    },
     "29043": {
       "state": "MO",
       "county": "Christian",
+      "sources": [],
+      "isGap": true
+    },
+    "29045": {
+      "state": "MO",
+      "county": "Clark",
       "sources": [],
       "isGap": true
     },
@@ -8221,6 +9094,12 @@
       ],
       "isGap": false
     },
+    "29049": {
+      "state": "MO",
+      "county": "Clinton",
+      "sources": [],
+      "isGap": true
+    },
     "29051": {
       "state": "MO",
       "county": "Cole",
@@ -8241,6 +9120,114 @@
             "parcel id"
           ],
           "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29053": {
+      "state": "MO",
+      "county": "Cooper",
+      "sources": [],
+      "isGap": true
+    },
+    "29055": {
+      "state": "MO",
+      "county": "Crawford",
+      "sources": [],
+      "isGap": true
+    },
+    "29057": {
+      "state": "MO",
+      "county": "Dade",
+      "sources": [
+        {
+          "fips": "29057",
+          "state": "MO",
+          "url": "https://dadecountymo.gov/",
+          "host": "dadecountymo.gov",
+          "origin": "platform_pattern",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29059": {
+      "state": "MO",
+      "county": "Dallas",
+      "sources": [],
+      "isGap": true
+    },
+    "29061": {
+      "state": "MO",
+      "county": "Daviess",
+      "sources": [],
+      "isGap": true
+    },
+    "29063": {
+      "state": "MO",
+      "county": "DeKalb",
+      "sources": [
+        {
+          "fips": "29063",
+          "state": "MO",
+          "url": "https://dekalbcounty.org/departments/treasurer-collector/",
+          "host": "dekalbcounty.org",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "scheduleHint": "A tax sale is held at the end of each tax year",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29065": {
+      "state": "MO",
+      "county": "Dent",
+      "sources": [],
+      "isGap": true
+    },
+    "29067": {
+      "state": "MO",
+      "county": "Douglas",
+      "sources": [],
+      "isGap": true
+    },
+    "29069": {
+      "state": "MO",
+      "county": "Dunklin",
+      "sources": [
+        {
+          "fips": "29069",
+          "state": "MO",
+          "url": "https://dunklincounty.gov/dunklin-county-collector-treasurer/",
+          "host": "dunklincounty.gov",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.78,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "tax sale certificate"
+          ],
+          "scheduleHint": "fourth Monday of August every year",
+          "verifiedOn": "2026-08-20",
           "httpStatus": 200
         }
       ],
@@ -8285,6 +9272,18 @@
       ],
       "isGap": false
     },
+    "29073": {
+      "state": "MO",
+      "county": "Gasconade",
+      "sources": [],
+      "isGap": true
+    },
+    "29075": {
+      "state": "MO",
+      "county": "Gentry",
+      "sources": [],
+      "isGap": true
+    },
     "29077": {
       "state": "MO",
       "county": "Greene",
@@ -8308,6 +9307,71 @@
         }
       ],
       "isGap": false
+    },
+    "29079": {
+      "state": "MO",
+      "county": "Grundy",
+      "sources": [
+        {
+          "fips": "29079",
+          "state": "MO",
+          "url": "https://grundycounty.org/departments/treasurer",
+          "host": "grundycounty.org",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29081": {
+      "state": "MO",
+      "county": "Harrison",
+      "sources": [],
+      "isGap": true
+    },
+    "29083": {
+      "state": "MO",
+      "county": "Henry",
+      "sources": [],
+      "isGap": true
+    },
+    "29085": {
+      "state": "MO",
+      "county": "Hickory",
+      "sources": [],
+      "isGap": true
+    },
+    "29087": {
+      "state": "MO",
+      "county": "Holt",
+      "sources": [],
+      "isGap": true
+    },
+    "29089": {
+      "state": "MO",
+      "county": "Howard",
+      "sources": [],
+      "isGap": true
+    },
+    "29091": {
+      "state": "MO",
+      "county": "Howell",
+      "sources": [],
+      "isGap": true
+    },
+    "29093": {
+      "state": "MO",
+      "county": "Iron",
+      "sources": [],
+      "isGap": true
     },
     "29095": {
       "state": "MO",
@@ -8439,6 +9503,30 @@
       ],
       "isGap": false
     },
+    "29103": {
+      "state": "MO",
+      "county": "Knox",
+      "sources": [],
+      "isGap": true
+    },
+    "29105": {
+      "state": "MO",
+      "county": "Laclede",
+      "sources": [],
+      "isGap": true
+    },
+    "29109": {
+      "state": "MO",
+      "county": "Lawrence",
+      "sources": [],
+      "isGap": true
+    },
+    "29111": {
+      "state": "MO",
+      "county": "Lewis",
+      "sources": [],
+      "isGap": true
+    },
     "29113": {
       "state": "MO",
       "county": "Lincoln",
@@ -8463,9 +9551,187 @@
       ],
       "isGap": false
     },
+    "29115": {
+      "state": "MO",
+      "county": "Linn",
+      "sources": [],
+      "isGap": true
+    },
+    "29117": {
+      "state": "MO",
+      "county": "Livingston",
+      "sources": [],
+      "isGap": true
+    },
+    "29119": {
+      "state": "MO",
+      "county": "McDonald",
+      "sources": [],
+      "isGap": true
+    },
+    "29121": {
+      "state": "MO",
+      "county": "Macon",
+      "sources": [],
+      "isGap": true
+    },
+    "29123": {
+      "state": "MO",
+      "county": "Madison",
+      "sources": [],
+      "isGap": true
+    },
+    "29125": {
+      "state": "MO",
+      "county": "Maries",
+      "sources": [],
+      "isGap": true
+    },
+    "29127": {
+      "state": "MO",
+      "county": "Marion",
+      "sources": [],
+      "isGap": true
+    },
+    "29129": {
+      "state": "MO",
+      "county": "Mercer",
+      "sources": [],
+      "isGap": true
+    },
+    "29131": {
+      "state": "MO",
+      "county": "Miller",
+      "sources": [],
+      "isGap": true
+    },
+    "29133": {
+      "state": "MO",
+      "county": "Mississippi",
+      "sources": [],
+      "isGap": true
+    },
+    "29135": {
+      "state": "MO",
+      "county": "Moniteau",
+      "sources": [],
+      "isGap": true
+    },
+    "29137": {
+      "state": "MO",
+      "county": "Monroe",
+      "sources": [
+        {
+          "fips": "29137",
+          "state": "MO",
+          "url": "https://monroecounty.gov/",
+          "host": "monroecounty.gov",
+          "origin": "platform_pattern",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax sale",
+            "tax sale certificate"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29139": {
+      "state": "MO",
+      "county": "Montgomery",
+      "sources": [],
+      "isGap": true
+    },
+    "29141": {
+      "state": "MO",
+      "county": "Morgan",
+      "sources": [],
+      "isGap": true
+    },
+    "29143": {
+      "state": "MO",
+      "county": "New Madrid",
+      "sources": [
+        {
+          "fips": "29143",
+          "state": "MO",
+          "url": "https://newmadridcountymo.gov/countycollector",
+          "host": "newmadridcountymo.gov",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "29145": {
       "state": "MO",
       "county": "Newton",
+      "sources": [],
+      "isGap": true
+    },
+    "29147": {
+      "state": "MO",
+      "county": "Nodaway",
+      "sources": [],
+      "isGap": true
+    },
+    "29149": {
+      "state": "MO",
+      "county": "Oregon",
+      "sources": [],
+      "isGap": true
+    },
+    "29151": {
+      "state": "MO",
+      "county": "Osage",
+      "sources": [],
+      "isGap": true
+    },
+    "29153": {
+      "state": "MO",
+      "county": "Ozark",
+      "sources": [],
+      "isGap": true
+    },
+    "29155": {
+      "state": "MO",
+      "county": "Pemiscot",
+      "sources": [],
+      "isGap": true
+    },
+    "29157": {
+      "state": "MO",
+      "county": "Perry",
+      "sources": [],
+      "isGap": true
+    },
+    "29159": {
+      "state": "MO",
+      "county": "Pettis",
+      "sources": [],
+      "isGap": true
+    },
+    "29161": {
+      "state": "MO",
+      "county": "Phelps",
+      "sources": [],
+      "isGap": true
+    },
+    "29163": {
+      "state": "MO",
+      "county": "Pike",
       "sources": [],
       "isGap": true
     },
@@ -8474,6 +9740,33 @@
       "county": "Platte",
       "sources": [],
       "isGap": true
+    },
+    "29167": {
+      "state": "MO",
+      "county": "Polk",
+      "sources": [
+        {
+          "fips": "29167",
+          "state": "MO",
+          "url": "https://polkcountymo.gov/collectors-office/",
+          "host": "polkcountymo.gov",
+          "origin": "link_followed",
+          "kind": "rules",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "certificate of purchase",
+            "redemption period",
+            "collector's deed (MO)"
+          ],
+          "scheduleHint": "4th Monday in August of every year",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "29169": {
       "state": "MO",
@@ -8497,6 +9790,42 @@
         }
       ],
       "isGap": false
+    },
+    "29171": {
+      "state": "MO",
+      "county": "Putnam",
+      "sources": [],
+      "isGap": true
+    },
+    "29173": {
+      "state": "MO",
+      "county": "Ralls",
+      "sources": [],
+      "isGap": true
+    },
+    "29175": {
+      "state": "MO",
+      "county": "Randolph",
+      "sources": [],
+      "isGap": true
+    },
+    "29177": {
+      "state": "MO",
+      "county": "Ray",
+      "sources": [],
+      "isGap": true
+    },
+    "29179": {
+      "state": "MO",
+      "county": "Reynolds",
+      "sources": [],
+      "isGap": true
+    },
+    "29181": {
+      "state": "MO",
+      "county": "Ripley",
+      "sources": [],
+      "isGap": true
     },
     "29183": {
       "state": "MO",
@@ -8560,6 +9889,35 @@
       ],
       "isGap": false
     },
+    "29185": {
+      "state": "MO",
+      "county": "St. Clair",
+      "sources": [
+        {
+          "fips": "29185",
+          "state": "MO",
+          "url": "https://stclaircounty.org/Offices/27",
+          "host": "stclaircounty.org",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.5,
+          "signals": [
+            "delinquent tax",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29186": {
+      "state": "MO",
+      "county": "Ste. Genevieve",
+      "sources": [],
+      "isGap": true
+    },
     "29187": {
       "state": "MO",
       "county": "St. Francois",
@@ -8605,9 +9963,122 @@
       "sources": [],
       "isGap": true
     },
+    "29195": {
+      "state": "MO",
+      "county": "Saline",
+      "sources": [],
+      "isGap": true
+    },
+    "29197": {
+      "state": "MO",
+      "county": "Schuyler",
+      "sources": [],
+      "isGap": true
+    },
+    "29199": {
+      "state": "MO",
+      "county": "Scotland",
+      "sources": [],
+      "isGap": true
+    },
+    "29201": {
+      "state": "MO",
+      "county": "Scott",
+      "sources": [],
+      "isGap": true
+    },
+    "29205": {
+      "state": "MO",
+      "county": "Shelby",
+      "sources": [],
+      "isGap": true
+    },
+    "29207": {
+      "state": "MO",
+      "county": "Stoddard",
+      "sources": [],
+      "isGap": true
+    },
+    "29209": {
+      "state": "MO",
+      "county": "Stone",
+      "sources": [],
+      "isGap": true
+    },
+    "29211": {
+      "state": "MO",
+      "county": "Sullivan",
+      "sources": [],
+      "isGap": true
+    },
     "29213": {
       "state": "MO",
       "county": "Taney",
+      "sources": [],
+      "isGap": true
+    },
+    "29215": {
+      "state": "MO",
+      "county": "Texas",
+      "sources": [],
+      "isGap": true
+    },
+    "29217": {
+      "state": "MO",
+      "county": "Vernon",
+      "sources": [],
+      "isGap": true
+    },
+    "29219": {
+      "state": "MO",
+      "county": "Warren",
+      "sources": [],
+      "isGap": true
+    },
+    "29221": {
+      "state": "MO",
+      "county": "Washington",
+      "sources": [],
+      "isGap": true
+    },
+    "29223": {
+      "state": "MO",
+      "county": "Wayne",
+      "sources": [],
+      "isGap": true
+    },
+    "29225": {
+      "state": "MO",
+      "county": "Webster",
+      "sources": [],
+      "isGap": true
+    },
+    "29227": {
+      "state": "MO",
+      "county": "Worth",
+      "sources": [
+        {
+          "fips": "29227",
+          "state": "MO",
+          "url": "https://worthcounty.org/treasurer/",
+          "host": "worthcounty.org",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "29229": {
+      "state": "MO",
+      "county": "Wright",
       "sources": [],
       "isGap": true
     },
@@ -11067,6 +12538,12 @@
       "sources": [],
       "isGap": true
     },
+    "36097": {
+      "state": "NY",
+      "county": "Schuyler",
+      "sources": [],
+      "isGap": true
+    },
     "36101": {
       "state": "NY",
       "county": "Steuben",
@@ -12120,6 +13597,12 @@
       ],
       "isGap": false
     },
+    "37115": {
+      "state": "NC",
+      "county": "Madison",
+      "sources": [],
+      "isGap": true
+    },
     "37119": {
       "state": "NC",
       "county": "Mecklenburg",
@@ -12275,6 +13758,12 @@
       ],
       "isGap": false
     },
+    "37145": {
+      "state": "NC",
+      "county": "Person",
+      "sources": [],
+      "isGap": true
+    },
     "37147": {
       "state": "NC",
       "county": "Pitt",
@@ -12301,6 +13790,12 @@
       ],
       "isGap": false
     },
+    "37149": {
+      "state": "NC",
+      "county": "Polk",
+      "sources": [],
+      "isGap": true
+    },
     "37151": {
       "state": "NC",
       "county": "Randolph",
@@ -12323,6 +13818,12 @@
         }
       ],
       "isGap": false
+    },
+    "37153": {
+      "state": "NC",
+      "county": "Richmond",
+      "sources": [],
+      "isGap": true
     },
     "37155": {
       "state": "NC",
@@ -14545,8 +16046,26 @@
     "42003": {
       "state": "PA",
       "county": "Allegheny",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "42003",
+          "state": "PA",
+          "url": "https://sheriffalleghenycounty.com/real-estate-faq/",
+          "host": "sheriffalleghenycounty.com",
+          "origin": "atlas",
+          "kind": "rules",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "sheriff sale",
+            "third party purchaser (KY)"
+          ],
+          "scheduleHint": "The Sheriff's Sale is the first Monday of every month. In the event of a holiday, the sale will be conducted on Tuesday.",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "42005": {
       "state": "PA",
@@ -14839,6 +16358,30 @@
       ],
       "isGap": false
     },
+    "42031": {
+      "state": "PA",
+      "county": "Clarion",
+      "sources": [
+        {
+          "fips": "42031",
+          "state": "PA",
+          "url": "https://co.clarion.pa.us/government/elected_officials/sheriff/sheriff_sale.php",
+          "host": "co.clarion.pa.us",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "tax sale",
+            "sheriff sale"
+          ],
+          "scheduleHint": "All August Sheriff Sales have been postponed till 9/11/2026",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "42033": {
       "state": "PA",
       "county": "Clearfield",
@@ -15100,6 +16643,31 @@
       ],
       "isGap": false
     },
+    "42053": {
+      "state": "PA",
+      "county": "Forest",
+      "sources": [
+        {
+          "fips": "42053",
+          "state": "PA",
+          "url": "https://co.forest.pa.us/departments/sheriff.php",
+          "host": "co.forest.pa.us",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "sheriff sale",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "scheduleHint": "April 13, 2026 Continued to June 15, Continued to July 27 @10:00a.m",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "42055": {
       "state": "PA",
       "county": "Franklin",
@@ -15125,6 +16693,42 @@
       ],
       "isGap": false
     },
+    "42057": {
+      "state": "PA",
+      "county": "Fulton",
+      "sources": [
+        {
+          "fips": "42057",
+          "state": "PA",
+          "url": "https://co.fulton.pa.us/treasurer.php",
+          "host": "co.fulton.pa.us",
+          "origin": "link_followed",
+          "kind": "calendar",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "tax sale",
+            "upset bid/sale"
+          ],
+          "scheduleHint": "Judicial Sale of 3 properties will be held on Tuesday, September 15, 2026 at 1:30 PM prevailing time. Upset Sale of various properties will be held on Monday, September 21, 2026 at 10:30 AM prevailing time.",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "42059": {
+      "state": "PA",
+      "county": "Greene",
+      "sources": [],
+      "isGap": true
+    },
+    "42061": {
+      "state": "PA",
+      "county": "Huntingdon",
+      "sources": [],
+      "isGap": true
+    },
     "42063": {
       "state": "PA",
       "county": "Indiana",
@@ -15148,6 +16752,12 @@
         }
       ],
       "isGap": false
+    },
+    "42067": {
+      "state": "PA",
+      "county": "Juniata",
+      "sources": [],
+      "isGap": true
     },
     "42069": {
       "state": "PA",
@@ -15472,6 +17082,12 @@
       ],
       "isGap": false
     },
+    "42087": {
+      "state": "PA",
+      "county": "Mifflin",
+      "sources": [],
+      "isGap": true
+    },
     "42089": {
       "state": "PA",
       "county": "Monroe",
@@ -15700,6 +17316,12 @@
       ],
       "isGap": false
     },
+    "42105": {
+      "state": "PA",
+      "county": "Potter",
+      "sources": [],
+      "isGap": true
+    },
     "42107": {
       "state": "PA",
       "county": "Schuylkill",
@@ -15739,9 +17361,54 @@
       ],
       "isGap": false
     },
+    "42109": {
+      "state": "PA",
+      "county": "Snyder",
+      "sources": [],
+      "isGap": true
+    },
     "42111": {
       "state": "PA",
       "county": "Somerset",
+      "sources": [],
+      "isGap": true
+    },
+    "42113": {
+      "state": "PA",
+      "county": "Sullivan",
+      "sources": [
+        {
+          "fips": "42113",
+          "state": "PA",
+          "url": "https://sullivancountypa.gov/offices/assessment",
+          "host": "sullivancountypa.gov",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.8,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "bidder registration",
+            "upset bid/sale",
+            "parcel id"
+          ],
+          "scheduleHint": "The delinquent tax sale is to be held on Monday, September 14, 2026, 10:00AM at the Sullivan County Courthouse.",
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "42117": {
+      "state": "PA",
+      "county": "Tioga",
+      "sources": [],
+      "isGap": true
+    },
+    "42121": {
+      "state": "PA",
+      "county": "Venango",
       "sources": [],
       "isGap": true
     },
@@ -17235,6 +18902,29 @@
       ],
       "isGap": false
     },
+    "47099": {
+      "state": "TN",
+      "county": "Lawrence",
+      "sources": [
+        {
+          "fips": "47099",
+          "state": "TN",
+          "url": "https://lawrencecountytn.gov/",
+          "host": "lawrencecountytn.gov",
+          "origin": "platform_pattern",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "47105": {
       "state": "TN",
       "county": "Loudon",
@@ -17593,6 +19283,18 @@
       ],
       "isGap": false
     },
+    "48023": {
+      "state": "TX",
+      "county": "Baylor",
+      "sources": [],
+      "isGap": true
+    },
+    "48025": {
+      "state": "TX",
+      "county": "Bee",
+      "sources": [],
+      "isGap": true
+    },
     "48027": {
       "state": "TX",
       "county": "Bell",
@@ -17727,6 +19429,12 @@
         }
       ],
       "isGap": false
+    },
+    "48049": {
+      "state": "TX",
+      "county": "Brown",
+      "sources": [],
+      "isGap": true
     },
     "48053": {
       "state": "TX",
@@ -18015,6 +19723,18 @@
       "sources": [],
       "isGap": true
     },
+    "48189": {
+      "state": "TX",
+      "county": "Hale",
+      "sources": [],
+      "isGap": true
+    },
+    "48197": {
+      "state": "TX",
+      "county": "Hardeman",
+      "sources": [],
+      "isGap": true
+    },
     "48199": {
       "state": "TX",
       "county": "Hardin",
@@ -18212,6 +19932,12 @@
       ],
       "isGap": false
     },
+    "48225": {
+      "state": "TX",
+      "county": "Houston",
+      "sources": [],
+      "isGap": true
+    },
     "48231": {
       "state": "TX",
       "county": "Hunt",
@@ -18285,6 +20011,12 @@
       ],
       "isGap": false
     },
+    "48253": {
+      "state": "TX",
+      "county": "Jones",
+      "sources": [],
+      "isGap": true
+    },
     "48257": {
       "state": "TX",
       "county": "Kaufman",
@@ -18303,9 +20035,21 @@
       "sources": [],
       "isGap": true
     },
+    "48275": {
+      "state": "TX",
+      "county": "Knox",
+      "sources": [],
+      "isGap": true
+    },
     "48277": {
       "state": "TX",
       "county": "Lamar",
+      "sources": [],
+      "isGap": true
+    },
+    "48283": {
+      "state": "TX",
+      "county": "La Salle",
       "sources": [],
       "isGap": true
     },
@@ -18523,6 +20267,12 @@
       "sources": [],
       "isGap": true
     },
+    "48353": {
+      "state": "TX",
+      "county": "Nolan",
+      "sources": [],
+      "isGap": true
+    },
     "48355": {
       "state": "TX",
       "county": "Nueces",
@@ -18657,9 +20407,21 @@
       ],
       "isGap": false
     },
+    "48407": {
+      "state": "TX",
+      "county": "San Jacinto",
+      "sources": [],
+      "isGap": true
+    },
     "48409": {
       "state": "TX",
       "county": "San Patricio",
+      "sources": [],
+      "isGap": true
+    },
+    "48413": {
+      "state": "TX",
+      "county": "Schleicher",
       "sources": [],
       "isGap": true
     },
@@ -18975,6 +20737,12 @@
     "48485": {
       "state": "TX",
       "county": "Wichita",
+      "sources": [],
+      "isGap": true
+    },
+    "48487": {
+      "state": "TX",
+      "county": "Wilbarger",
       "sources": [],
       "isGap": true
     },
@@ -19744,6 +21512,12 @@
       ],
       "isGap": false
     },
+    "51137": {
+      "state": "VA",
+      "county": "Orange",
+      "sources": [],
+      "isGap": true
+    },
     "51143": {
       "state": "VA",
       "county": "Pittsylvania",
@@ -19838,6 +21612,12 @@
       ],
       "isGap": false
     },
+    "51169": {
+      "state": "VA",
+      "county": "Scott",
+      "sources": [],
+      "isGap": true
+    },
     "51177": {
       "state": "VA",
       "county": "Spotsylvania",
@@ -19866,6 +21646,12 @@
         }
       ],
       "isGap": false
+    },
+    "51187": {
+      "state": "VA",
+      "county": "Warren",
+      "sources": [],
+      "isGap": true
     },
     "51191": {
       "state": "VA",
@@ -19905,6 +21691,12 @@
         }
       ],
       "isGap": false
+    },
+    "51195": {
+      "state": "VA",
+      "county": "Wise",
+      "sources": [],
+      "isGap": true
     },
     "51199": {
       "state": "VA",
@@ -20050,6 +21842,12 @@
     "51660": {
       "state": "VA",
       "county": "Harrisonburg",
+      "sources": [],
+      "isGap": true
+    },
+    "51670": {
+      "state": "VA",
+      "county": "Hopewell",
       "sources": [],
       "isGap": true
     },
@@ -21178,6 +22976,29 @@
       "sources": [],
       "isGap": true
     },
+    "55081": {
+      "state": "WI",
+      "county": "Monroe",
+      "sources": [
+        {
+          "fips": "55081",
+          "state": "WI",
+          "url": "https://monroecounty.gov/",
+          "host": "monroecounty.gov",
+          "origin": "platform_pattern",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax sale",
+            "tax sale certificate"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
     "55087": {
       "state": "WI",
       "county": "Outagamie",
@@ -21552,6 +23373,35 @@
     "56033": {
       "state": "WY",
       "county": "Sheridan",
+      "sources": [
+        {
+          "fips": "56033",
+          "state": "WY",
+          "url": "https://sheridancountywy.gov/",
+          "host": "sheridancountywy.gov",
+          "origin": "platform_pattern",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.7,
+          "signals": [
+            "tax sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-08-20",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "56041": {
+      "state": "WY",
+      "county": "Uinta",
+      "sources": [],
+      "isGap": true
+    },
+    "56045": {
+      "state": "WY",
+      "county": "Weston",
       "sources": [],
       "isGap": true
     },
@@ -25205,6 +27055,12 @@
         }
       ],
       "isGap": false
+    },
+    "08055": {
+      "state": "CO",
+      "county": "Huerfano",
+      "sources": [],
+      "isGap": true
     }
   }
 }

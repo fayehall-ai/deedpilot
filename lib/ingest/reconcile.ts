@@ -36,7 +36,8 @@
  * someone's attention.
  */
 
-import { and, eq, gte, isNotNull, isNull, lt, sql } from "drizzle-orm";
+import { and, eq, gte, isNotNull, isNull, lt, notLike, sql } from "drizzle-orm";
+import { IMPORT_ID_SQL_PATTERN } from "../import/provenance";
 
 /*
  * `db` and the schema are imported lazily inside the functions that touch them.
@@ -165,6 +166,13 @@ export async function withdrawAbsent(auctionId: string, cutoff: Date): Promise<n
  *   are considered, and only when the crawl returned at least one auction.
  * - **A parse failure returns nothing**, which would delist a county's whole
  *   calendar. `seenAuctions === 0` refuses outright.
+ * - **Rows the crawl was never looking at.** An imported announcement comes
+ *   from an uploaded calendar, not from the county's page, so a crawl not
+ *   seeing it says nothing about whether the county still intends to sell.
+ *   Reconciling it against a source that never carried it marked 212 of 570
+ *   imported sales as delisted on the first pass — every one still scheduled.
+ *   This column means the county published an absence; there was no county and
+ *   no absence, so imported rows are excluded outright.
  */
 export async function reconcileCountyAuctions(opts: {
   countyFips: string;
@@ -203,6 +211,8 @@ export async function reconcileCountyAuctions(opts: {
         gte(auctions.saleDate, today),
         lt(auctions.lastSeenAt, opts.cutoff),
         isNull(auctions.delistedAt),
+        // Only rows a crawl could have seen. See the header.
+        notLike(auctions.externalId, IMPORT_ID_SQL_PATTERN),
       ),
     )
     .returning({ id: auctions.id });
@@ -217,6 +227,7 @@ export async function reconcileCountyAuctions(opts: {
         eq(auctions.countyFips, opts.countyFips),
         gte(auctions.lastSeenAt, opts.cutoff),
         isNotNull(auctions.delistedAt),
+        notLike(auctions.externalId, IMPORT_ID_SQL_PATTERN),
       ),
     )
     .returning({ id: auctions.id });
