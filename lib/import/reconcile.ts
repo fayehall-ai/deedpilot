@@ -159,3 +159,76 @@ export async function parcelListCoverage(): Promise<{
     );
   return row;
 }
+
+/**
+ * Why each announced sale does or does not have a parcel list yet.
+ *
+ * "11% covered" is a number nobody can act on. These buckets are the actions
+ * behind it, and they are genuinely different work: a pending crawl needs
+ * patience, a failing one needs a look at the error, a crawl that succeeded and
+ * found nothing is adapter backlog, and a county with no job at all has no
+ * located source and needs the Prospector before any of the rest can happen.
+ *
+ * Grouped by county rather than per auction for the job lookup, because
+ * `run_jobs` is keyed by county — several sales in one county share its fate.
+ */
+export type CoverageReason =
+  | "has_list"
+  | "crawl_pending"
+  | "crawl_failed"
+  | "crawled_no_parcels"
+  | "no_source";
+
+export interface CoverageRow {
+  reason: CoverageReason;
+  sales: number;
+  parcelsAnnounced: number;
+  parcelsHeld: number;
+}
+
+export async function coverageBreakdown(): Promise<CoverageRow[]> {
+  const rows = (await db.execute(sql`
+    WITH announced AS (
+      SELECT id, county_fips, lot_count, announced_parcel_count
+      FROM auctions
+      WHERE announced_parcel_count > 0
+        AND sale_date >= current_date
+        AND delisted_at IS NULL
+    ),
+    job AS (
+      SELECT county_fips,
+             bool_or(status IN ('queued','leased')) AS pending,
+             bool_or(status = 'done')               AS done,
+             bool_or(status = 'failed')             AS failed
+      FROM run_jobs
+      WHERE county_fips IS NOT NULL
+      GROUP BY county_fips
+    )
+    SELECT CASE
+             WHEN a.lot_count > 0        THEN 'has_list'
+             WHEN j.pending              THEN 'crawl_pending'
+             WHEN j.done                 THEN 'crawled_no_parcels'
+             WHEN j.failed               THEN 'crawl_failed'
+             ELSE 'no_source'
+           END AS reason,
+           count(*)::int                                   AS sales,
+           coalesce(sum(a.announced_parcel_count), 0)::int  AS parcels_announced,
+           coalesce(sum(a.lot_count), 0)::int               AS parcels_held
+    FROM announced a
+    LEFT JOIN job j ON j.county_fips = a.county_fips
+    GROUP BY 1
+    ORDER BY 2 DESC
+  `)) as unknown as {
+    reason: CoverageReason;
+    sales: number;
+    parcels_announced: number;
+    parcels_held: number;
+  }[];
+
+  return rows.map((r) => ({
+    reason: r.reason,
+    sales: r.sales,
+    parcelsAnnounced: r.parcels_announced,
+    parcelsHeld: r.parcels_held,
+  }));
+}

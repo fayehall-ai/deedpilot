@@ -34,12 +34,16 @@
 import "../lib/env";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../lib/db";
-import { runJobs, auctions } from "../lib/db/schema";
+import { runJobs } from "../lib/db/schema";
 import { claimNext, completeJob, failJob, reapStuckRuns } from "../lib/admin/queue";
 import { getAdapter } from "../lib/ingest/adapters";
 import { runAdapter } from "../lib/ingest/runner";
 import { loadPolicyOverrides } from "../lib/admin/policy-load";
-import { foldSupersededImports } from "../lib/import/reconcile";
+import {
+  coverageBreakdown,
+  foldSupersededImports,
+  parcelListCoverage,
+} from "../lib/import/reconcile";
 
 const flag = (n: string) => process.argv.includes(`--${n}`);
 const arg = (n: string): string | undefined => {
@@ -70,21 +74,32 @@ async function status(): Promise<void> {
     .groupBy(runJobs.status);
   console.log("queue:", q.map((r) => `${r.status} ${r.n}`).join(" · ") || "empty");
 
-  const [cov] = await db
-    .select({
-      announced: sql<number>`count(*) filter (where ${auctions.announcedParcelCount} is not null)::int`,
-      withParcels: sql<number>`count(*) filter (where ${auctions.announcedParcelCount} is not null and ${auctions.lotCount} > 0)::int`,
-      parcelsHeld: sql<number>`coalesce(sum(${auctions.lotCount}) filter (where ${auctions.announcedParcelCount} is not null), 0)::int`,
-      parcelsAnnounced: sql<number>`coalesce(sum(${auctions.announcedParcelCount}), 0)::int`,
-    })
-    .from(auctions)
-    .where(sql`${auctions.saleDate} >= current_date`);
-
-  const pct = cov.announced ? Math.round((cov.withParcels / cov.announced) * 100) : 0;
+  /*
+   * The headline and the breakdown below it read the same function, so they
+   * cannot drift. They did: a local copy of this query counted announcements
+   * with a count of zero and the breakdown did not, and the two lines
+   * disagreed by 23 sales with no way to tell which was right.
+   */
+  const cov = await parcelListCoverage();
+  const pct = cov.announced ? Math.round((cov.withList / cov.announced) * 100) : 0;
   console.log(
-    `parcel-list coverage: ${cov.withParcels}/${cov.announced} announced sales have a list (${pct}%) — ` +
+    `parcel-list coverage: ${cov.withList}/${cov.announced} announced sales have a list (${pct}%) — ` +
       `${cov.parcelsHeld.toLocaleString()} of ${cov.parcelsAnnounced.toLocaleString()} announced parcels held`,
   );
+
+  const LABEL: Record<string, string> = {
+    has_list: "parcel list held",
+    crawl_pending: "crawl queued, not run yet",
+    crawled_no_parcels: "crawled, county published no parsable list",
+    crawl_failed: "crawl failed",
+    no_source: "no located source — needs the Prospector",
+  };
+  for (const b of await coverageBreakdown()) {
+    console.log(
+      `  ${String(b.sales).padStart(4)} sales  ${b.parcelsHeld.toLocaleString().padStart(8)}/` +
+        `${b.parcelsAnnounced.toLocaleString().padEnd(8)} parcels  ${LABEL[b.reason] ?? b.reason}`,
+    );
+  }
 
   const recent = await db
     .select({ adapter: runJobs.adapter, err: runJobs.lastError })
