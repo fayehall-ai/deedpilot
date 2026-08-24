@@ -172,9 +172,9 @@ export default function HomePage(props: PageProps<"/">) {
             shrunk once from 600px and wrongly called fixed. Matching the two
             columns by content is what actually removes it.
           */}
-          <div className="mt-9 grid gap-10 lg:grid-cols-[minmax(0,1fr)_clamp(20rem,24vw,28rem)] lg:items-start lg:gap-[clamp(2.5rem,4vw,5rem)]">
+          <div className="mt-9 grid gap-10 lg:grid-cols-[minmax(0,1fr)_clamp(20rem,26vw,40rem)] lg:items-start lg:gap-[clamp(2.5rem,4vw,5rem)]">
           <div className="min-w-0">
-            <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-ink-muted">
+            <p className="mt-6 max-w-[62ch] text-lg leading-relaxed text-ink-muted">
               Every county&apos;s tax sale rules, live auction inventory, and a co-pilot that
               computes your maximum bid — accounting for the liens that survive, the quiet title
               you&apos;ll have to file, and the redemption window that may hand the property back.
