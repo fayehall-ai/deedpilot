@@ -12,6 +12,7 @@
  */
 
 import type { ResolvedAuction } from "./apply";
+import { IMPORT_ID_PREFIX } from "./provenance";
 
 /** An auction already in the database, reduced to what a decision needs. */
 export interface ExistingAuction {
@@ -46,7 +47,7 @@ export interface ImportPlan {
 }
 
 /** Anything this import created carries a namespaced id. */
-const OWNED_PREFIX = "ustla:";
+const OWNED_PREFIX = IMPORT_ID_PREFIX;
 
 export function planImport(rows: ResolvedAuction[], existing: ExistingAuction[]): ImportPlan {
   const decisions: Decision[] = [];

@@ -63,7 +63,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
   const totalOpening = withBid.reduce((n, l) => n + Number(l.openingBid), 0);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
       <Breadcrumbs
         items={[
           { href: "/auctions", label: "Auctions" },
@@ -71,7 +71,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
         ]}
       />
 
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <header className="mb-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
             {county.name} County, {STATE_NAMES[county.state] ?? county.state}
@@ -87,17 +87,6 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
             <StatusBadge status={auction.status} />
             <span className="text-xs text-muted">via {platformLabel(auction.platform)}</span>
           </div>
-        </div>
-
-        <div className="flex gap-2">
-          <a
-            href={auction.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg border border-border px-4 py-2 text-sm hover:border-accent"
-          >
-            Official listing ↗
-          </a>
         </div>
       </header>
 

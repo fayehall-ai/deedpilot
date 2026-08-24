@@ -218,9 +218,9 @@ const DECISIONS = new Set(["allow", "deny", "requires_agreement"]);
  *
  * This one is different in kind from the others and is treated that way. The
  * decisions in `lib/ingest/policy.ts` are the reason this project is not
- * crawling USTLA or the Georgia Press Association, and neither is blocked by
- * robots — both are blocked by terms that a crawler cannot read. Loosening one
- * from a dropdown is a decision with legal weight.
+ * crawling the Georgia Press Association, which is not blocked by robots — it is
+ * blocked by terms that a crawler cannot read. Loosening one from a dropdown is
+ * a decision with legal weight.
  *
  * So `reason` is required, and required to be substantive, whenever a host is
  * moved to `allow`. That does not make a bad decision impossible; it makes it

@@ -2,6 +2,7 @@
  * Build the county office directory from OnlineSearches.
  *
  *   npx tsx scripts/crawl-directory.ts --state AR [--limit 5]
+ *   npx tsx scripts/crawl-directory.ts --fips-file data/needed.txt
  *   npx tsx scripts/crawl-directory.ts --all
  *
  * Writes `data/county-directory.json`, keyed by FIPS: per county, the assessor,
@@ -46,14 +47,40 @@ async function main() {
   const all = process.argv.includes("--all");
   const refresh = process.argv.includes("--refresh");
   const stateArg = arg("state")?.toUpperCase() ?? null;
+  const fipsFile = arg("fips-file");
   const limit = Number(arg("limit") ?? "0") || Infinity;
 
-  if (!all && !stateArg) {
-    console.error("pass --state XX or --all");
+  if (!all && !stateArg && !fipsFile) {
+    console.error("pass --state XX, --fips-file <path>, or --all");
     process.exit(1);
   }
 
-  const states = all ? Object.keys(STATE_NAMES) : [stateArg!];
+  /*
+   * Targeting a FIPS list rather than a state exists because the counties that
+   * need a directory entry are rarely a whole state: 218 of them, scattered
+   * across 15 states whose full county rolls come to more than 1,200. Crawling
+   * by state to reach them would be four times the requests against a host we
+   * are a guest on, for the same answer.
+   */
+  const wanted = fipsFile
+    ? new Set(
+        (await readFile(fipsFile, "utf8"))
+          .split(/\r?\n/)
+          .map((s) => s.trim())
+          .filter(Boolean),
+      )
+    : null;
+
+  const states = wanted
+    ? [...new Set([...wanted].map((f) => f.slice(0, 2)))].flatMap((sf) => {
+        const hit = Object.keys(STATE_NAMES).find((s) =>
+          countiesInState(s).some((c) => c.fips.startsWith(sf)),
+        );
+        return hit ? [hit] : [];
+      })
+    : all
+      ? Object.keys(STATE_NAMES)
+      : [stateArg!];
   const out = await load();
   let fetched = 0;
   let skipped = 0;
@@ -66,6 +93,7 @@ async function main() {
 
     for (const c of counties) {
       if (fetched >= limit) break;
+      if (wanted && !wanted.has(c.fips)) continue;
       if (out[c.fips] && !refresh) {
         skipped++;
         continue;

@@ -1,6 +1,7 @@
 import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { db } from "../db";
 import { auctions, lots } from "../db/schema";
+import { IMPORT_ID_SQL_PATTERN } from "./provenance";
 
 /**
  * Folding an imported announcement into the crawl that superseded it.
@@ -72,13 +73,13 @@ export async function foldSupersededImports(): Promise<FoldResult> {
   const groups = (await db.execute(sql`
     SELECT county_fips,
            sale_date::text AS sale_date,
-           count(*) FILTER (WHERE external_id LIKE 'ustla:%' AND lot_count = 0)::int AS imported,
-           count(*) FILTER (WHERE external_id NOT LIKE 'ustla:%')::int AS crawled
+           count(*) FILTER (WHERE external_id LIKE ${IMPORT_ID_SQL_PATTERN} AND lot_count = 0)::int AS imported,
+           count(*) FILTER (WHERE external_id NOT LIKE ${IMPORT_ID_SQL_PATTERN})::int AS crawled
     FROM auctions
     WHERE sale_date >= current_date
     GROUP BY 1, 2
-    HAVING count(*) FILTER (WHERE external_id LIKE 'ustla:%' AND lot_count = 0) > 0
-       AND count(*) FILTER (WHERE external_id NOT LIKE 'ustla:%') > 0
+    HAVING count(*) FILTER (WHERE external_id LIKE ${IMPORT_ID_SQL_PATTERN} AND lot_count = 0) > 0
+       AND count(*) FILTER (WHERE external_id NOT LIKE ${IMPORT_ID_SQL_PATTERN}) > 0
   `)) as unknown as { county_fips: string; sale_date: string; imported: number; crawled: number }[];
 
   for (const g of groups) {
@@ -97,12 +98,12 @@ export async function foldSupersededImports(): Promise<FoldResult> {
     const [announcement] = await db
       .select({ id: auctions.id, announced: auctions.announcedParcelCount })
       .from(auctions)
-      .where(and(where, sql`${auctions.externalId} LIKE 'ustla:%'`, eq(auctions.lotCount, 0)))
+      .where(and(where, sql`${auctions.externalId} LIKE ${IMPORT_ID_SQL_PATTERN}`, eq(auctions.lotCount, 0)))
       .limit(1);
     const [crawl] = await db
       .select({ id: auctions.id, announced: auctions.announcedParcelCount })
       .from(auctions)
-      .where(and(where, sql`${auctions.externalId} NOT LIKE 'ustla:%'`))
+      .where(and(where, sql`${auctions.externalId} NOT LIKE ${IMPORT_ID_SQL_PATTERN}`))
       .limit(1);
 
     if (!announcement || !crawl) continue;

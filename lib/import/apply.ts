@@ -15,6 +15,7 @@ import { auctions, counties } from "../db/schema";
 import { CountyIndex, describeFailure, type CountyRef } from "./counties";
 import type { ImportedAuction } from "./auction-rows";
 import { planImport, type Ambiguity } from "./plan";
+import { resolveSourceUrl } from "./source-url";
 
 /**
  * Writing imported auctions to the database, exactly once each.
@@ -28,7 +29,7 @@ import { planImport, type Ambiguity } from "./plan";
  *
  *  2. **The same file uploaded twice.** The natural operator motion is to
  *     re-upload after fixing a few rows, and it must update rather than
- *     duplicate. The id is namespaced (`ustla:98131`) and the upsert keys on
+ *     duplicate. The id is namespaced (`import:98131`) and the upsert keys on
  *     it, so a second upload of an unchanged file writes nothing new.
  *
  *  3. **A sale this system already crawled.** The hard one. The pipeline
@@ -90,6 +91,13 @@ export interface ImportReport {
 export interface ResolvedAuction extends ImportedAuction {
   countyFips: string;
   line: number;
+  /**
+   * Settled here rather than in the parser, because the pages worth citing are
+   * keyed by FIPS and the parser only has the county's label. `source_url` is
+   * NOT NULL and `resolveSourceUrl` always returns something, so the parser's
+   * `null` never reaches the write.
+   */
+  sourceUrl: string;
 }
 
 /**
@@ -110,6 +118,8 @@ export async function resolveCounties(
     })
     .from(counties);
   const index = new CountyIndex(refs);
+  /** For the citation lookup, which needs the county's own name and state. */
+  const byFips = new Map(refs.map((r) => [r.fips, r]));
 
   const resolved: ResolvedAuction[] = [];
   const rejected: RejectedRow[] = [];
@@ -140,7 +150,20 @@ export async function resolveCounties(
         ? [match.municipality, row.title].filter(Boolean).join(" — ")
         : row.title;
 
-    resolved.push({ ...row, title, countyFips: match.fips, line });
+    /*
+     * The citation, now that the county is known: the waterfall picks the most
+     * sale-specific county page it can reach for this FIPS — see
+     * `source-url.ts`. Never the exporter's own per-row page.
+     */
+    const ref = byFips.get(match.fips);
+    const sourceUrl = resolveSourceUrl({
+      countyFips: match.fips,
+      state: ref?.state ?? row.stateLabel,
+      countyName: ref?.name ?? row.countyLabel,
+      raw: row.raw,
+    }).url;
+
+    resolved.push({ ...row, title, countyFips: match.fips, line, sourceUrl });
   }
 
   return { resolved, rejected };

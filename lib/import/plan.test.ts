@@ -23,7 +23,7 @@ const HINDS = "28049";
 /** A resolved row with only the fields the planner reads. */
 function row(over: Partial<ResolvedAuction> & { sourceId: string }): ResolvedAuction {
   return {
-    externalId: `ustla:${over.sourceId}`,
+    externalId: `import:${over.sourceId}`,
     stateLabel: "Mississippi",
     countyLabel: "Hinds County",
     countyFips: HINDS,
@@ -52,7 +52,7 @@ const imported = (id: string, sourceId: string, saleDate = "2026-08-31"): Existi
   id,
   countyFips: HINDS,
   saleDate,
-  externalId: `ustla:${sourceId}`,
+  externalId: `import:${sourceId}`,
 });
 
 const kinds = (rows: ResolvedAuction[], existing: ExistingAuction[]) =>

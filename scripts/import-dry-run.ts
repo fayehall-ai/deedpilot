@@ -1,6 +1,6 @@
 /**
  * Import a sale calendar without writing anything.
- * Run: npx tsx scripts/import-dry-run.ts data/leads/ustla_auctions_next_8_weeks.csv
+ * Run: npx tsx scripts/import-dry-run.ts data/leads/auctions_next_8_weeks.csv
  *
  * Every stage of the real import except the writes: the file is parsed, each
  * row is translated, counties are resolved against the live reference table,
@@ -22,6 +22,7 @@ import { REQUIRED_COLUMNS, readRow, type ImportedAuction } from "../lib/import/a
 import { CountyIndex, describeFailure, type CountyRef } from "../lib/import/counties";
 import { planImport, type ExistingAuction } from "../lib/import/plan";
 import type { ResolvedAuction } from "../lib/import/apply";
+import { resolveSourceUrl } from "../lib/import/source-url";
 
 async function main() {
   const path = process.argv[2];
@@ -78,6 +79,7 @@ async function main() {
     })
     .from(counties);
   const index = new CountyIndex(refs);
+  const byFips = new Map(refs.map((r) => [r.fips, r]));
 
   const resolved: ResolvedAuction[] = [];
   let municipal = 0;
@@ -88,7 +90,14 @@ async function main() {
         m.via === "parent" && m.municipality
           ? [m.municipality, row.title].filter(Boolean).join(" — ")
           : row.title;
-      resolved.push({ ...row, title, countyFips: m.fips, line });
+      const ref = byFips.get(m.fips);
+      const sourceUrl = resolveSourceUrl({
+        countyFips: m.fips,
+        state: ref?.state ?? row.stateLabel,
+        countyName: ref?.name ?? row.countyLabel,
+        raw: row.raw,
+      }).url;
+      resolved.push({ ...row, title, countyFips: m.fips, line, sourceUrl });
       if (m.via === "parent") municipal++;
     }
     else

@@ -26,6 +26,7 @@
 
 import type { Platform } from "../ingest/types";
 import type { SaleType } from "../atlas/types";
+import { IMPORT_ID_PREFIX } from "./provenance";
 
 /**
  * Columns without which a row cannot become an auction.
@@ -53,7 +54,7 @@ const TITLE_MAX = 60;
 export interface ImportedAuction {
   /** The exporter's own id, unprefixed. */
   sourceId: string;
-  /** `ustla:<id>` — namespaced so it cannot collide with an adapter's id. */
+  /** `import:<id>` — namespaced so it cannot collide with an adapter's id. */
   externalId: string;
   stateLabel: string;
   countyLabel: string;
@@ -69,7 +70,14 @@ export interface ImportedAuction {
   announcedParcelCount: number | null;
   /** Numeric string, kept as text so no float ever touches money. */
   aggregateSaleAmount: string | null;
-  sourceUrl: string;
+  /*
+   * No `sourceUrl`. The export's `Auction URL` column is the exporter's own
+   * per-row research page — a citation of the middleman, not of the county
+   * that published the sale, and on a subscription host a bidder cannot read.
+   * The citation is chosen in `resolveCounties`, which is the first point that
+   * knows the county's FIPS and can therefore reach the county's own pages.
+   * See `source-url.ts` for the waterfall and `ResolvedAuction` for the field.
+   */
   /** Every column of the source row, for re-parsing without the file. */
   raw: Record<string, string>;
 }
@@ -141,7 +149,7 @@ const PLATFORM_HOSTS: [string, Platform][] = [
  * The inference is the honest floor rather than a guess at a vendor. It also
  * keeps `platform` meaning what the column says it means — where the sale is
  * *hosted* — instead of quietly becoming "where we got the data", which is what
- * a dedicated `ustla` platform value would have turned it into. Provenance
+ * a dedicated aggregator platform value would have turned it into. Provenance
  * lives in `external_id` and `raw`, where it belongs.
  */
 export function derivePlatform(site: string | null, venue: string | null): Platform {
@@ -271,15 +279,6 @@ export function readRow(src: RowSource, line: number): RowOutcome {
     orNull(src.cell("Online Site (Foreclosure)"));
 
   /*
-   * A sale must have a source URL — the column is NOT NULL, and a row nobody
-   * can trace back to what published it is not worth storing. The exporter's
-   * own auction page is the citation, and it can always be reconstructed from
-   * the id, so this cannot fail for a row that got this far.
-   */
-  const sourceUrl =
-    orNull(src.cell("Auction URL")) ?? `https://uls.ustla.com/research/auctions/${sourceId}`;
-
-  /*
    * The county's note becomes the title, when the note is short enough to be
    * one. Its job in the schema is separating several sales held by one county
    * on one day — Mississippi publishes "District 1" and "District 2" for the
@@ -301,7 +300,7 @@ export function readRow(src: RowSource, line: number): RowOutcome {
     ok: true,
     value: {
       sourceId,
-      externalId: `ustla:${sourceId}`,
+      externalId: `${IMPORT_ID_PREFIX}${sourceId}`,
       stateLabel,
       countyLabel,
       saleDate,
@@ -312,7 +311,7 @@ export function readRow(src: RowSource, line: number): RowOutcome {
       title,
       announcedParcelCount: parseCount(src.cell("Parcel Count")),
       aggregateSaleAmount: parseMoney(src.cell("Aggregate Sale Amount (USD)")),
-      sourceUrl,
+
       raw: src.all(),
     },
   };

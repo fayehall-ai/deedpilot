@@ -17,7 +17,7 @@
  *
  * Nothing except that reconciler has ever written `delisted_at` on an imported
  * row. The import does not set it, and the fold in `lib/import/reconcile.ts`
- * deletes rather than flags. So every flag on a `ustla:` row is one of these,
+ * deletes rather than flags. So every flag on a `import:` row is one of these,
  * and there is no legitimate delisting to preserve. The filter is on the id
  * namespace alone, deliberately — narrowing it to "flags set today" would leave
  * older ones behind for no reason.

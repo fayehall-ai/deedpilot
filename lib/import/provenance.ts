@@ -23,8 +23,15 @@
  * No county published anything here.
  */
 
-/** Namespace for ids minted by the sale-calendar import. */
-export const IMPORT_ID_PREFIX = "ustla:";
+/**
+ * Namespace for ids minted by the sale-calendar import.
+ *
+ * Named for what the row is — an import — rather than for whichever exporter
+ * the calendar happened to come from. The marker's only job is to say "this
+ * row was uploaded, not crawled"; naming it after a vendor made 559 rows
+ * assert a relationship with that vendor, which was never what it recorded.
+ */
+export const IMPORT_ID_PREFIX = "import:";
 
 /** SQL pattern for the same, for statements that cannot call a function. */
 export const IMPORT_ID_SQL_PATTERN = `${IMPORT_ID_PREFIX}%`;

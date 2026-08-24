@@ -115,7 +115,7 @@ import { setPolicyOverrides, policyOverrideCount } from "./policy";
 
 assert(policyOverrideCount() === 0, "no overrides are loaded by default");
 assert(
-  policyFor("ustla.com")?.decision === "requires_agreement",
+  policyFor("govease.com")?.decision === "requires_agreement",
   "baseline decision applies before any override is loaded",
 );
 
@@ -125,20 +125,20 @@ setPolicyOverrides([
 assert(policyFor("example.gov")?.decision === "deny", "an override applies to its host");
 assert(policyFor("data.example.gov")?.decision === "deny", "an override covers subdomains");
 assert(
-  policyFor("ustla.com")?.decision === "requires_agreement",
+  policyFor("govease.com")?.decision === "requires_agreement",
   "an unrelated override does not disturb the compiled-in decisions",
 );
 
 setPolicyOverrides([
-  { host: "ustla.com", decision: "allow", minDelayMs: 5000, reason: "operator test" },
+  { host: "govease.com", decision: "allow", minDelayMs: 5000, reason: "operator test" },
 ]);
 assert(
-  policyFor("ustla.com")?.decision === "allow",
+  policyFor("govease.com")?.decision === "allow",
   "an override takes precedence over the compiled-in decision for the same host",
 );
 
 setPolicyOverrides([]);
 assert(
-  policyFor("ustla.com")?.decision === "requires_agreement",
+  policyFor("govease.com")?.decision === "requires_agreement",
   "clearing overrides restores the reviewed decision",
 );

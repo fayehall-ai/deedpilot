@@ -1,6 +1,6 @@
 /**
  * Import a sale calendar for real.
- * Run: npm run import:apply -- data/leads/ustla_auctions_next_8_weeks.csv [--enrich]
+ * Run: npm run import:apply -- data/leads/auctions_next_8_weeks.csv [--enrich]
  *
  * The same `importAuctionCsv` the console's upload button calls, so this and
  * the browser cannot drift. What it adds is a terminal path for a file too

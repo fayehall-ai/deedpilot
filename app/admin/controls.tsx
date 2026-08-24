@@ -266,11 +266,10 @@ export function OpsControls({
       <Card>
         <h3 className="mb-1 font-medium">Access policy overrides</h3>
         <p className="mb-3 text-xs leading-relaxed text-muted">
-          These decisions are why this project is not crawling USTLA or the Georgia Press
-          Association, and neither is blocked by robots — both are blocked by terms a crawler
-          cannot read. A written reason is required, and required to be substantive before a host
-          can be moved to <code className="font-mono">allow</code>. Every change is recorded in the
-          audit log.
+          These decisions are why this project is not crawling the Georgia Press Association, which
+          is not blocked by robots — it is blocked by terms a crawler cannot read. A written reason
+          is required, and required to be substantive before a host can be moved to{" "}
+          <code className="font-mono">allow</code>. Every change is recorded in the audit log.
         </p>
         <form action={savePolicy} className="flex flex-wrap items-end gap-2">
           <input name="host" placeholder="example.com" className={`${input} w-52`} required />

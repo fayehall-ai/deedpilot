@@ -32,7 +32,6 @@ const FULL = {
   "Online Site (Lien)": "www.govease.com",
   "Additional Sale Notes": "District 1",
   "Auction ID": "98131",
-  "Auction URL": "https://uls.ustla.com/research/auctions/98131",
 };
 
 // ---------------------------------------------------------------------------
@@ -43,7 +42,7 @@ const ok = readRow(src(FULL), 2);
 assert(ok.ok, "a complete row translates");
 if (ok.ok) {
   const a = ok.value;
-  assert(a.externalId === "ustla:98131", "the id is namespaced so it cannot collide with an adapter's");
+  assert(a.externalId === "import:98131", "the id is namespaced so it cannot collide with an adapter's");
   assert(a.saleType === "Tax Lien", "Lien becomes Tax Lien");
   assert(a.platform === "govease", "the platform comes from the published sale site");
   assert(a.saleDate === "2026-08-31", "the date passes through as ISO");
@@ -107,10 +106,6 @@ if (sparse.ok) {
   assert(a.announcedParcelCount === null, "an absent parcel count is null, not 0");
   assert(a.aggregateSaleAmount === null, "an absent amount is null, not \"0\"");
   assert(a.title === null, "an absent note is null");
-  assert(
-    a.sourceUrl === "https://uls.ustla.com/research/auctions/12345",
-    "a missing URL is reconstructed from the id, since the column is NOT NULL",
-  );
   assert(a.platform === "in_person", "with no site and no venue, the floor is in_person");
 }
 

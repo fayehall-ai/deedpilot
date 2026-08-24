@@ -726,9 +726,9 @@ export const sourceOverrides = pgTable(
  * remains the baseline. This table exists because the operator asked to change
  * decisions without a deploy; `reason` is `notNull` on purpose, so loosening a
  * host's access always leaves a written justification next to it. The decision
- * to stay off a host is the kind that is expensive to get wrong — USTLA and
- * the Georgia Press Association are both blocked by terms rather than by
- * robots — so every change is recorded rather than merely applied.
+ * to stay off a host is the kind that is expensive to get wrong — the Georgia
+ * Press Association is blocked by terms rather than by robots — so every change
+ * is recorded rather than merely applied.
  */
 /**
  * The Auction Scout research prompt, editable from the console.

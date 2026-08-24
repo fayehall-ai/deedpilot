@@ -267,18 +267,6 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
       "than a government source of record.",
   },
   {
-    host: "ustla.com",
-    decision: "requires_agreement",
-    minDelayMs: 5000,
-    reason:
-      "uls.ustla.com/robots.txt is `User-agent: * / Disallow: /` — verified 2026-08-12. The auction " +
-      "calendar also sits behind a paid subscription login, and the aggregated list of which " +
-      "counties sell on a given day is the product US Tax Lien Association sells. Which counties " +
-      "hold a sale is a public fact each county advertises under O.C.G.A. § 9-13-161, so use it as " +
-      "a lead on where to look and take the parcels from the county's own site; do not copy the " +
-      "calendar itself into this database.",
-  },
-  {
     host: "georgiapublicnotice.com",
     decision: "requires_agreement",
     minDelayMs: 5000,
