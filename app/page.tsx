@@ -127,55 +127,53 @@ export default function HomePage(props: PageProps<"/">) {
         />
         <div className="relative shell py-band-lg">
           {/*
-            The lookup sits top-right rather than under the copy: it is the one
-            thing on this page a visitor might arrive already wanting to do, and
-            it now answers in place instead of navigating away.
+            The headline sits above the split, not inside it.
+
+            While it shared a row with the lookup it only ever got the leftover
+            track — 945px of a 1421px band at 1700px — so it wrapped to three
+            lines and `balance` stranded "Know your" on the first. Given the
+            full measure it sets in two lines at every width tested.
           */}
           {/*
-            A grid, not a flex row with `justify-between`.
-            
-            The old row pinned a fixed 26rem lookup to the right edge and let
-            the copy keep its own narrower measure, which is fine until the
-            band is 1792px wide — then the two sit at opposite ends with 700px
-            of nothing between them, and the hero reads as a mistake. Here the
-            copy takes whatever is left after the lookup, and the lookup itself
-            grows with the viewport, so the two always meet.
+            The eyebrow steps down from uppercase-widest to a quieter label.
+            Wide-tracked caps in the accent colour shout before the headline
+            gets a chance to speak, and the headline is the better sentence.
           */}
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_clamp(20rem,24vw,28rem)] lg:items-start lg:gap-[clamp(2.5rem,4vw,5rem)]">
+          {/* A live signal rather than a label: the dot is the only thing on
+              the band that moves, and it says the data behind this is current. */}
+          <p className="inline-flex items-center gap-2.5 text-sm font-medium text-ink-muted">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-70 motion-reduce:animate-none" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold" />
+            </span>
+            Tax deed &amp; foreclosure auctions
+          </p>
+          {/*
+            No hard <br>. It forced a two-line shape that only held at one
+            size — at 72px in a 768px column the second line overflowed, and
+            the fix each time was another breakpoint. `text-display` carries
+            `text-wrap: balance`, so the browser evens the lines itself at
+            whatever width the grid hands it.
+          */}
+          <h1 className="mt-5 text-display font-semibold">
+            {/* nowrap, or `balance` breaks the compound at its own hyphen and
+                the line ends "Know your walk-". */}
+            Know your <span className="whitespace-nowrap">walk-away</span> price{" "}
+            <span className="text-fade">before you raise the paddle.</span>
+          </h1>
+
+          {/*
+            What is left is a genuine two-up: the copy and its actions against
+            the lookup. They are within about 30px of each other in height, so
+            neither column is padding for the other.
+
+            The previous arrangement put the whole copy block opposite a 176px
+            panel and left 374px of empty navy under it — a void I had already
+            shrunk once from 600px and wrongly called fixed. Matching the two
+            columns by content is what actually removes it.
+          */}
+          <div className="mt-9 grid gap-10 lg:grid-cols-[minmax(0,1fr)_clamp(20rem,24vw,28rem)] lg:items-start lg:gap-[clamp(2.5rem,4vw,5rem)]">
           <div className="min-w-0">
-            {/*
-              The eyebrow steps down from uppercase-widest to a quieter label.
-              Wide-tracked caps in the accent colour shout before the headline
-              gets a chance to speak, and the headline is the better sentence.
-            */}
-            {/* A live signal rather than a label: the dot is the only thing on
-                the band that moves, and it says the data behind this is current. */}
-            <p className="inline-flex items-center gap-2.5 text-sm font-medium text-ink-muted">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-70 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold" />
-              </span>
-              Tax deed &amp; foreclosure auctions
-            </p>
-            {/*
-              Bigger, and tighter as it grows. A 3xl headline beside a 3xl
-              section heading gave the page no top — this now clearly leads, and
-              negative tracking at display sizes is what stops large type reading
-              as merely enlarged.
-            */}
-            {/*
-              No hard <br>. It forced a two-line shape that only held at one
-              size — at 72px in a 768px column the second line overflowed, and
-              the fix each time was another breakpoint. `text-display` carries
-              `text-wrap: balance`, so the browser evens the lines itself at
-              whatever width the grid hands it.
-            */}
-            <h1 className="mt-5 text-display font-semibold">
-              {/* nowrap, or `balance` breaks the compound at its own hyphen and
-                  the line ends "Know your walk-". */}
-              Know your <span className="whitespace-nowrap">walk-away</span> price{" "}
-              <span className="text-fade">before you raise the paddle.</span>
-            </h1>
             <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-ink-muted">
               Every county&apos;s tax sale rules, live auction inventory, and a co-pilot that
               computes your maximum bid — accounting for the liens that survive, the quiet title
