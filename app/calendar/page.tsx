@@ -32,7 +32,7 @@ export const unstable_instant = {
  */
 export default function CalendarPage(props: PageProps<"/calendar">) {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Calendar" }]} />
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>

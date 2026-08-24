@@ -72,7 +72,7 @@ export default async function StatePage(props: PageProps<"/atlas/[state]">) {
   const counties = countiesInState(abbr);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
       <Breadcrumbs items={[{ href: "/atlas", label: "Atlas" }, { label: name }]} />
 
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">

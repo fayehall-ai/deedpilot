@@ -125,14 +125,14 @@ export default function HomePage(props: PageProps<"/">) {
           className="pointer-events-none absolute inset-x-0 top-0 h-px
                      [background:linear-gradient(90deg,transparent,rgba(90,162,255,0.55),transparent)]"
         />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
+        <div className="relative mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-16 sm:px-6 sm:py-24 lg:py-32">
           {/*
             The lookup sits top-right rather than under the copy: it is the one
             thing on this page a visitor might arrive already wanting to do, and
             it now answers in place instead of navigating away.
           */}
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl 2xl:max-w-[59rem]">
             {/*
               The eyebrow steps down from uppercase-widest to a quieter label.
               Wide-tracked caps in the accent colour shout before the headline
@@ -153,7 +153,7 @@ export default function HomePage(props: PageProps<"/">) {
               negative tracking at display sizes is what stops large type reading
               as merely enlarged.
             */}
-            <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.05] tracking-[-0.032em] sm:text-6xl">
+            <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.05] tracking-[-0.032em] sm:text-6xl 2xl:text-7xl">
               Know your walk-away price
               <br className="hidden sm:block" />{" "}
               <span className="text-fade">before you raise the paddle.</span>
@@ -211,7 +211,7 @@ export default function HomePage(props: PageProps<"/">) {
 
       {/* --- Calendar ------------------------------------------------------ */}
       <section id="calendar" className="scroll-mt-16 border-b border-border bg-surface-2/20">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
           <div className="mb-6">
           </div>
           <Suspense fallback={<CalendarSkeleton />}>
@@ -225,7 +225,7 @@ export default function HomePage(props: PageProps<"/">) {
           beneath it stay real routes — they are the SEO surface, and an anchor
           on this page is not something a search engine can index. */}
       <section id="atlas" className="scroll-mt-16 border-b border-border bg-surface-2/20">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-12 sm:px-6">
           <div className="mb-6">
           </div>
           {/*
@@ -258,7 +258,7 @@ export default function HomePage(props: PageProps<"/">) {
 
       {/* --- Coverage ------------------------------------------------------ */}
       <section id="coverage" className="scroll-mt-16 border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-12 sm:px-6">
           <div className="mb-6">
           </div>
           {/* compact: the per-county ingest log is 200 rows of ops detail. */}
@@ -268,7 +268,7 @@ export default function HomePage(props: PageProps<"/">) {
 
       {/* --- Pricing ------------------------------------------------------- */}
       <section id="pricing" className="scroll-mt-16 bg-surface-2/20">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-12 sm:px-6">
           <h2 className="mb-6 text-2xl font-semibold tracking-tight">Pricing</h2>
           <PricingPlans heading={false} />
         </div>
