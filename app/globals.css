@@ -227,3 +227,86 @@ h1 {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }
+
+/* ---------------------------------------------------------------------------
+ * The fluid system
+ *
+ * The page used to have exactly one responsive step and it fired at 640px:
+ * every section was a fixed 1280px column and the headline was a fixed 60px,
+ * so from 640px to 3440px the rendering was identical and the only thing that
+ * grew was the empty gutter. On a 2700px display the content was 34% of the
+ * screen with a 60px headline stranded in the middle of it.
+ *
+ * Breakpoints cannot fix that, because the problem is not that a few widths
+ * are wrong — it is that the design was quantised at all. Everything below is
+ * a continuous function of the viewport instead: no steps, nothing to miss
+ * between two arbitrary widths, and no display too wide to be accounted for.
+ *
+ * The three numbers in every clamp are the floor, the rate, and the ceiling.
+ * The floor is what small screens get, the ceiling is where growth stops
+ * because more would hurt rather than help, and the rate is what connects
+ * them. Ceilings exist for a reason: type that never stops growing and a
+ * measure that spans an ultrawide are both worse than the thing they replaced.
+ * ------------------------------------------------------------------------ */
+
+/*
+ * The page shell.
+ *
+ * Floor is the old 1280px, so nothing at or below a laptop moves. Above that
+ * it tracks the viewport at 88%, and stops at 1792px — past that a full-width
+ * measure stops being a layout and becomes a horizon.
+ */
+@utility shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: clamp(80rem, 88vw, 112rem);
+  padding-inline: clamp(1rem, 2.2vw, 2.5rem);
+}
+
+/*
+ * Display type, for the one headline per page that leads.
+ *
+ * Tracking tightens as it grows because negative tracking at display sizes is
+ * what stops large type reading as merely enlarged.
+ */
+@utility text-display {
+  font-size: clamp(2.4rem, 4.4vw, 5.25rem);
+  line-height: 1.04;
+  letter-spacing: -0.032em;
+  /*
+   * `balance` rather than `pretty`. Greedy filling packs the first line and
+   * leaves whatever is left over on the last one, which on this headline is
+   * the single word "paddle." — `balance` spends the same three lines without
+   * the orphan. It only applies to short blocks, which is what display type is.
+   */
+  text-wrap: balance;
+}
+
+/* Section headings: the same idea, an octave down. */
+@utility text-section {
+  font-size: clamp(1.375rem, 1.6vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+/* A figure that has to read as a figure across a 4× range of screen widths. */
+@utility text-stat {
+  font-size: clamp(1.6rem, 1.9vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/*
+ * Vertical rhythm, tied to the viewport's *width*.
+ *
+ * Width rather than height on purpose: the reason a section needs more air is
+ * that it got wider, not that the window got taller. Keying off height makes
+ * a short wide window feel cramped and a tall narrow one feel empty.
+ */
+@utility py-band {
+  padding-block: clamp(2.5rem, 4.5vw, 6rem);
+}
+
+@utility py-band-lg {
+  padding-block: clamp(3.5rem, 6vw, 8.5rem);
+}

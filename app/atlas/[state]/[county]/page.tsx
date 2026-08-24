@@ -61,7 +61,7 @@ export default async function CountyPage(props: PageProps<"/atlas/[state]/[count
       />
 
       <header className="mb-6">
-        <h1 className="text-3xl font-semibold tracking-tight">
+        <h1 className="text-section font-semibold">
           {c.name} County, {STATE_NAMES[c.state] ?? c.state}
         </h1>
         <div className="mt-2 flex flex-wrap items-center gap-2">

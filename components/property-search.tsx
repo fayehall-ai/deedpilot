@@ -92,7 +92,7 @@ export function PropertySearch() {
   const [state, action] = useActionState<LookupState | null, FormData>(lookupProperty, null);
 
   return (
-    <div className="w-full sm:max-w-md">
+    <div className="w-full">
       <form action={action}>
         {/*
           Styled for the ink band it sits on. A surface-coloured field on a dark

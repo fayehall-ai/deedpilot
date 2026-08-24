@@ -17,9 +17,9 @@ export const metadata: Metadata = {
  */
 export default function AtlasPage() {
   return (
-    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
+    <div className="shell py-band">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Atlas" }]} />
-      <h1 className="mb-4 text-3xl font-semibold tracking-tight">Tax sale atlas</h1>
+      <h1 className="mb-4 text-section font-semibold">Tax sale atlas</h1>
       <AtlasExplorer states={STATE_PATHS} />
       <details className="group/states mt-10">
         <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">

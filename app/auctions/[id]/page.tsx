@@ -63,7 +63,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
   const totalOpening = withBid.reduce((n, l) => n + Number(l.openingBid), 0);
 
   return (
-    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
+    <div className="shell py-band">
       <Breadcrumbs
         items={[
           { href: "/auctions", label: "Auctions" },
@@ -73,7 +73,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
 
       <header className="mb-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-section font-semibold">
             {county.name} County, {STATE_NAMES[county.state] ?? county.state}
           </h1>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">

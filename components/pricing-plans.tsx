@@ -10,7 +10,7 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
   return (
     <>
       <header className="mb-10 max-w-2xl">
-        {heading ? <h1 className="text-3xl font-semibold tracking-tight">Pricing</h1> : null}
+        {heading ? <h1 className="text-section font-semibold">Pricing</h1> : null}
         <p className="mt-2 leading-relaxed text-muted">
           The rules atlas and the auction calendar are free, permanently. You pay when you want
           parcel-level inventory and the tools that tell you what to bid.

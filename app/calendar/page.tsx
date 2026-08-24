@@ -32,11 +32,11 @@ export const unstable_instant = {
  */
 export default function CalendarPage(props: PageProps<"/calendar">) {
   return (
-    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
+    <div className="shell py-band">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Calendar" }]} />
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Tax sale calendar</h1>
+          <h1 className="text-section font-semibold">Tax sale calendar</h1>
         </div>
         <Link
           href="/auctions"

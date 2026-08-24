@@ -35,10 +35,10 @@ export const metadata: Metadata = {
 
 export default function CapePage() {
   return (
-    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
+    <div className="shell py-band">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "CAPE" }]} />
       <header className="mb-6 max-w-3xl">
-        <h1 className="text-3xl font-semibold tracking-tight">CAPE — production board</h1>
+        <h1 className="text-section font-semibold">CAPE — production board</h1>
         <p className="mt-2 leading-relaxed text-muted">
           The County Auction Production Engine, run across every upcoming sale. Each package is
           measured against the nine components, its source tiered by how close the publisher sits

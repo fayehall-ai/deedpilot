@@ -72,12 +72,12 @@ export default async function StatePage(props: PageProps<"/atlas/[state]">) {
   const counties = countiesInState(abbr);
 
   return (
-    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
+    <div className="shell py-band">
       <Breadcrumbs items={[{ href: "/atlas", label: "Atlas" }, { label: name }]} />
 
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">{name} tax sales</h1>
+          <h1 className="text-section font-semibold">{name} tax sales</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <SaleTypeBadge type={toSaleType(rule.type)} />
             {isCovered(abbr) ? (

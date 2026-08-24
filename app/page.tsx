@@ -125,14 +125,24 @@ export default function HomePage(props: PageProps<"/">) {
           className="pointer-events-none absolute inset-x-0 top-0 h-px
                      [background:linear-gradient(90deg,transparent,rgba(90,162,255,0.55),transparent)]"
         />
-        <div className="relative mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-16 sm:px-6 sm:py-24 lg:py-32">
+        <div className="relative shell py-band-lg">
           {/*
             The lookup sits top-right rather than under the copy: it is the one
             thing on this page a visitor might arrive already wanting to do, and
             it now answers in place instead of navigating away.
           */}
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl 2xl:max-w-[59rem]">
+          {/*
+            A grid, not a flex row with `justify-between`.
+            
+            The old row pinned a fixed 26rem lookup to the right edge and let
+            the copy keep its own narrower measure, which is fine until the
+            band is 1792px wide — then the two sit at opposite ends with 700px
+            of nothing between them, and the hero reads as a mistake. Here the
+            copy takes whatever is left after the lookup, and the lookup itself
+            grows with the viewport, so the two always meet.
+          */}
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_clamp(20rem,24vw,28rem)] lg:items-start lg:gap-[clamp(2.5rem,4vw,5rem)]">
+          <div className="min-w-0">
             {/*
               The eyebrow steps down from uppercase-widest to a quieter label.
               Wide-tracked caps in the accent colour shout before the headline
@@ -153,9 +163,17 @@ export default function HomePage(props: PageProps<"/">) {
               negative tracking at display sizes is what stops large type reading
               as merely enlarged.
             */}
-            <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.05] tracking-[-0.032em] sm:text-6xl 2xl:text-7xl">
-              Know your walk-away price
-              <br className="hidden sm:block" />{" "}
+            {/*
+              No hard <br>. It forced a two-line shape that only held at one
+              size — at 72px in a 768px column the second line overflowed, and
+              the fix each time was another breakpoint. `text-display` carries
+              `text-wrap: balance`, so the browser evens the lines itself at
+              whatever width the grid hands it.
+            */}
+            <h1 className="mt-5 text-display font-semibold">
+              {/* nowrap, or `balance` breaks the compound at its own hyphen and
+                  the line ends "Know your walk-". */}
+              Know your <span className="whitespace-nowrap">walk-away</span> price{" "}
               <span className="text-fade">before you raise the paddle.</span>
             </h1>
             <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-ink-muted">
@@ -200,8 +218,33 @@ export default function HomePage(props: PageProps<"/">) {
             </div>
           </div>
 
-          <div className="w-full lg:w-[26rem] lg:shrink-0">
-            <PropertySearch />
+          {/*
+            The lookup is a panel rather than a bare pill.
+            
+            On a wide band a single input pinned to the top right left roughly
+            600px of empty navy under it, which read as a layout that had lost
+            something. Given a heading and a line saying what it answers, it
+            has enough weight to hold that side of the grid — and the sentence
+            is the thing a visitor needs anyway to know the control is worth
+            using.
+          */}
+          <div className="w-full min-w-0">
+            <div className="glass rounded-2xl p-[clamp(1.25rem,1.5vw,1.75rem)]">
+              <h2 className="text-sm font-semibold text-ink-fg">Look up any address</h2>
+              {/*
+                What it actually returns. `PropertyResult` shows owner, last
+                sale and an estimated market value, and says in as many words
+                that the estimate is *not* an assessed value — so this line
+                must not promise one.
+              */}
+              <p className="mt-1.5 text-xs leading-relaxed text-ink-muted">
+                Owner, last sale, and an estimated market value for any US
+                property — before you decide it is worth researching.
+              </p>
+              <div className="mt-4">
+                <PropertySearch />
+              </div>
+            </div>
           </div>
           </div>
 
@@ -211,7 +254,7 @@ export default function HomePage(props: PageProps<"/">) {
 
       {/* --- Calendar ------------------------------------------------------ */}
       <section id="calendar" className="scroll-mt-16 border-b border-border bg-surface-2/20">
-        <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
+        <div className="shell py-band">
           <div className="mb-6">
           </div>
           <Suspense fallback={<CalendarSkeleton />}>
@@ -225,7 +268,7 @@ export default function HomePage(props: PageProps<"/">) {
           beneath it stay real routes — they are the SEO surface, and an anchor
           on this page is not something a search engine can index. */}
       <section id="atlas" className="scroll-mt-16 border-b border-border bg-surface-2/20">
-        <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-12 sm:px-6">
+        <div className="shell py-band">
           <div className="mb-6">
           </div>
           {/*
@@ -258,7 +301,7 @@ export default function HomePage(props: PageProps<"/">) {
 
       {/* --- Coverage ------------------------------------------------------ */}
       <section id="coverage" className="scroll-mt-16 border-b border-border">
-        <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-12 sm:px-6">
+        <div className="shell py-band">
           <div className="mb-6">
           </div>
           {/* compact: the per-county ingest log is 200 rows of ops detail. */}
@@ -268,7 +311,7 @@ export default function HomePage(props: PageProps<"/">) {
 
       {/* --- Pricing ------------------------------------------------------- */}
       <section id="pricing" className="scroll-mt-16 bg-surface-2/20">
-        <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-12 sm:px-6">
+        <div className="shell py-band">
           <h2 className="mb-6 text-2xl font-semibold tracking-tight">Pricing</h2>
           <PricingPlans heading={false} />
         </div>
@@ -296,7 +339,7 @@ async function HeroStats() {
 
   return (
     <>
-      <dl className="glass mt-14 grid grid-cols-2 gap-x-5 gap-y-8 rounded-2xl p-6 sm:grid-cols-3 sm:p-7 lg:grid-cols-5">
+      <dl className="glass mt-14 grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-x-6 gap-y-8 rounded-2xl p-[clamp(1.25rem,2vw,2rem)]">
         <HeroStat label="Counties mapped" value={num(ALL_COUNTIES.length)} />
         <HeroStat label="Researched in depth" value={num(Object.keys(COUNTY_DATA).length)} />
         <HeroStat label="States with inventory" value={num(stats.byState.length)} />
@@ -345,8 +388,18 @@ async function HeroStats() {
  */
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-l border-ink-line pl-4 first:border-l-0 first:pl-0">
-      <dd className="tnum text-3xl font-semibold leading-none tracking-[-0.02em]">{value}</dd>
+    /*
+     * No dividers.
+     *
+     * They were `first:border-l-0` on a fixed five-column row, which stopped
+     * being true the moment the grid became `auto-fit`: it reflows to two or
+     * three columns on the way down, and "first child" is then not the same
+     * element as "first in its row" — every wrapped row drew a rule against
+     * the card's own edge. A rule that cannot know where the row starts is
+     * better spent as space, which reflows correctly by construction.
+     */
+    <div>
+      <dd className="tnum text-stat font-semibold">{value}</dd>
       <dt className="mt-2 text-xs leading-snug text-ink-muted">{label}</dt>
     </div>
   );

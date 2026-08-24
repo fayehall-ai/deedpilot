@@ -16,7 +16,7 @@ export const metadata: Metadata = {
  */
 export default function CoveragePage() {
   return (
-    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
+    <div className="shell py-band">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Coverage" }]} />
       <Suspense fallback={<StatsSkeleton />}>
         <CoverageReport />

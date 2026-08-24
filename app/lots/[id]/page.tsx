@@ -168,7 +168,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
   const thinListing = !assessedValue && !lot.addressLine;
 
   return (
-    <div className="mx-auto max-w-[max(80rem,min(112rem,88vw))] px-4 py-8 sm:px-6">
+    <div className="shell py-band">
       <Breadcrumbs
         items={[
           { href: "/auctions", label: "Auctions" },
@@ -183,7 +183,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
       <header className="mb-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-section font-semibold">
               {lot.addressLine ?? lot.parcelNumber ?? "Unaddressed parcel"}
             </h1>
             <p className="mt-1 text-sm text-muted">

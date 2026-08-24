@@ -47,7 +47,7 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
     <>
       <header className="mb-6 max-w-3xl">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight">Coverage and data health</h1>
+          <h1 className="text-section font-semibold">Coverage and data health</h1>
           {/* CAPE answers the per-sale version of this page's question. */}
           <Link href="/cape" className="text-sm text-muted underline hover:text-foreground">
             CAPE auction intake →
@@ -74,7 +74,7 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
             <Card>
               <div className="text-xs uppercase tracking-wide text-muted">Gold score</div>
               {/* The score is called gold; it should not have been rendered in blue. */}
-              <div className="tnum mt-1 text-3xl font-semibold" style={{ color: "var(--gold-ink)" }}>
+              <div className="tnum mt-1 text-stat font-semibold" style={{ color: "var(--gold-ink)" }}>
                 {(board.gold.score * 100).toFixed(1)}%
               </div>
               <p className="mt-1 text-xs text-muted">
