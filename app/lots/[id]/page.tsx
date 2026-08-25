@@ -345,13 +345,28 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
           </Card>
 
           {/*
-            What it looks like, after what it costs.
+            The record itself, immediately after the figures it summarises.
 
-            The figures come first because they decide whether the parcel is
-            worth a second thought at all. But "27 acres, $4,100 opening bid"
-            describes a fortune and a mistake equally well, and the overhead
-            frame is the fastest way to tell which — whether anything is built,
-            whether a road reaches it, what it sits next to.
+            The card above is seven numbers; this is the rest of them — every
+            populated field of the assessor record, in one place. It sits here
+            rather than below the imagery because it answers the same question
+            the figures do, in more detail: what is this parcel. The pictures
+            answer a different question, and reading the record then the picture
+            is the order somebody actually evaluates a lot in.
+
+            Renders nothing when the lot has no ATTOM record, which is now most
+            of them — see the note on `attomRaw`.
+          */}
+          <PropertyDetail raw={attomRaw} />
+
+          {/*
+            What it looks like, after what it is.
+
+            The figures and the record come first because they decide whether
+            the parcel is worth a second thought at all. But "27 acres, $4,100
+            opening bid" describes a fortune and a mistake equally well, and the
+            overhead frame is the fastest way to tell which — whether anything
+            is built, whether a road reaches it, what it sits next to.
 
             Renders nothing when the lot has no coordinates, which is most of
             them until the geocoder has run over the county.
@@ -372,8 +387,6 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             visible in an assessment, a tax notice or a listing feed.
           */}
           <SiteIntel signals={siteSignals} checkedSources={checkedIntelSources} />
-
-          <PropertyDetail raw={attomRaw} />
 
           <Card>
             <h3 className="mb-2 text-sm font-semibold">County records</h3>
