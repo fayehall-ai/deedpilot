@@ -89,3 +89,4 @@ scripts/.intel-sample.mts
 # superseded by the next one, and everything it carries is in the database
 # once imported.
 data/leads/
+avm-sweep.log

@@ -19,6 +19,20 @@ export interface PropertyRecord {
   marketValue?: number;
   landValue?: number;
   improvementValue?: number;
+  /*
+   * Assessment year, and flood zone as the county labels it.
+   *
+   * Both have had columns in `lot_valuations` and merge rules in `merge.ts`
+   * since those were written, and neither had a field here — so the write path
+   * had nothing to write and both columns were unfillable by any provider.
+   * RealEstateAPI returns both on every parcel, which is what surfaced the gap.
+   *
+   * `taxYear` matters because an assessment is only as good as its vintage: a
+   * 2019 number and a 2025 number are not the same evidence for a max bid, and
+   * without the year the page cannot say which one it is showing.
+   */
+  taxYear?: number;
+  floodZone?: string;
   lastSaleAmount?: number;
   lastSaleDate?: string; // YYYY-MM-DD
   beds?: number;

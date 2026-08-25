@@ -10,16 +10,18 @@ import { ProviderUnavailableError } from "./types";
 import { rentcastProvider } from "./providers/rentcast";
 import { attomProvider } from "./providers/attom";
 import { batchdataProvider } from "./providers/batchdata";
+import { realestateapiProvider } from "./providers/realestateapi";
 import { websearchProvider } from "./providers/websearch";
 import { cadastreProvider } from "./providers/cadastre";
 
 /**
- * ATTOM first for APN → assessed (max-bid).
- * BatchData next for address/owner when ATTOM misses or for address fills.
+ * RealEstateAPI first among the paid legs: APN + FIPS → assessment + AVM.
+ * ATTOM and BatchData next, both keyless-in-practice today but kept registered
+ * so a renewed key or refilled balance resumes without a code change.
  * RentCast next (address + AVM; needs street).
- * Web search LAST, and only because the three above can all be unavailable at
- * once — which is the state they are in today: ATTOM 401, BatchData out of
- * credits, RentCast healthy but unable to use a notice that publishes no street
+ * Web search LAST, and only because the paid legs can all be unavailable at
+ * once — which is the state ATTOM (401) and BatchData (out of credits) are in,
+ * with RentCast healthy but unable to use a notice that publishes no street
  * number. A searched answer is weaker evidence than any parcel API and is
  * ordered to say so; it also cannot write `assessedValue` at all, so it can
  * never feed the ratio path that turns an assessment into an ARV.
@@ -29,6 +31,15 @@ const PROVIDERS: PropertyProvider[] = [
   // the paid providers because it is the source they aggregate, not a fallback
   // for when they fail — and it is free, keyless and sub-second.
   cadastreProvider,
+  /*
+   * Ahead of ATTOM and BatchData because it is the only APN-first leg with a
+   * working key: it takes `apn` + `fips`, which is what a tax-sale list
+   * publishes, and returns an assessment and an AVM in one billed call. The two
+   * below it stay registered rather than deleted — a refilled BatchData balance
+   * or a renewed ATTOM key should start contributing again without a code
+   * change, and `configured()` already skips them when their keys are absent.
+   */
+  realestateapiProvider,
   attomProvider,
   batchdataProvider,
   rentcastProvider,
@@ -75,8 +86,13 @@ export async function lookupProperty(
    *
    * The cadastre keys on a parcel number too, and is the source ATTOM
    * aggregates. It goes first when it goes at all.
+   *
+   * `realestateapi` has to be named here as well, not just registered above:
+   * anything omitted from this list sorts *behind* everything in it, so a list
+   * of [cadastre, attom] silently put a 401 in front of the only working APN
+   * leg on exactly the parcel-only lookups it was added to serve.
    */
-  const parcelFirst = ["cadastre", "attom"];
+  const parcelFirst = ["cadastre", "realestateapi", "attom"];
   const order = [...providers].sort((a, b) => {
     if (input.addressLine) return 0;
     const ai = parcelFirst.indexOf(a.name);
@@ -250,6 +266,13 @@ export async function applyRecordToLot(lotId: string, record: PropertyRecord): P
       lastSaleDate: record.lastSaleDate ?? null,
       homestead: record.homestead ?? null,
       zoning: record.zoning ?? null,
+      /*
+       * Columns that existed with no field feeding them until `PropertyRecord`
+       * grew `taxYear` and `floodZone`. `merge.ts` has always merged both, so
+       * they were being merged out of rows that could never contain them.
+       */
+      taxYear: record.taxYear === undefined ? null : Math.round(record.taxYear),
+      floodZone: record.floodZone ?? null,
       // Columns now, not just `raw`. These were collected on every lookup and
       // written only into the JSON blob, so nothing could query them.
       beds: record.beds ?? null,
@@ -282,6 +305,8 @@ export async function applyRecordToLot(lotId: string, record: PropertyRecord): P
         assessedImprovement: sql`excluded.assessed_improvement`,
         lastSaleAmount: sql`excluded.last_sale_amount`,
         lastSaleDate: sql`excluded.last_sale_date`,
+        taxYear: sql`excluded.tax_year`,
+        floodZone: sql`excluded.flood_zone`,
         raw: sql`excluded.raw`,
         fetchedAt: sql`now()`,
       },
@@ -309,6 +334,24 @@ export async function enrichLotsMissingAssessed(opts: {
   highValueFirst?: boolean;
   /** Skip parcels below this opening bid entirely. */
   minOpeningBid?: number;
+  /**
+   * Select on a missing *market* value instead of a missing assessment.
+   *
+   * The default filter is `assessed_value IS NULL`, which made sense while no
+   * provider reliably returned an AVM on the parcel path: an assessment was the
+   * only thing a lookup could add, so a lot that had one had nothing left to
+   * gain. RealEstateAPI broke that assumption, and the filter then became a
+   * trap — 3,977 lots carry an assessment from a county scrape and no market
+   * value at all, and every one of them is invisible to this function forever,
+   * because the row that disqualifies them is the row that proves they were
+   * only half enriched. A Michigan lot with an SEV of 187,500 and no AVM is not
+   * an enriched lot; it is a lot the selector cannot see.
+   *
+   * Implies `force` at the per-lot level, since `enrichLotById` skips anything
+   * that already has an assessment and an address — the same blind spot one
+   * level down.
+   */
+  missingMarketValue?: boolean;
   onProgress?: (msg: string) => void;
 }): Promise<{
   attempted: number;
@@ -323,7 +366,18 @@ export async function enrichLotsMissingAssessed(opts: {
 
   const conditions = [];
   if (opts.state) conditions.push(eq(counties.state, opts.state));
-  if (!opts.force) conditions.push(isNull(lots.assessedValue));
+  if (opts.missingMarketValue) {
+    // The gap is a market value, so that — not the assessment — is the filter.
+    conditions.push(
+      sql`not exists (
+        select 1 from ${lotValuations} v
+        where v.lot_id = ${lots.id} and v.market_value is not null
+      )`,
+    );
+    conditions.push(sql`${lots.parcelNumber} is not null`);
+  } else if (!opts.force) {
+    conditions.push(isNull(lots.assessedValue));
+  }
   if (opts.minOpeningBid !== undefined) {
     conditions.push(gte(lots.openingBid, String(opts.minOpeningBid)));
   }
@@ -366,7 +420,12 @@ export async function enrichLotsMissingAssessed(opts: {
 
   for (const [i, r] of filtered.entries()) {
     try {
-      const result = await enrichLotById(r.id, { force: opts.force }, unavailable);
+      const result = await enrichLotById(
+        r.id,
+        // See `missingMarketValue`: the per-lot guard has the same blind spot.
+        { force: opts.force || opts.missingMarketValue },
+        unavailable,
+      );
       if (result.updated) {
         updated++;
         log(`[${i + 1}/${filtered.length}] ${r.id.slice(0, 8)} ← ${result.provider}`);

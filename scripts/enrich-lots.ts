@@ -6,7 +6,12 @@
  *   npm run enrich:lots -- --state FL --force
  *   npm run enrich:lots -- --state AR --high-value-first --min-bid 500 --limit 1500
  *
- * Requires ATTOM_API_KEY (parcel/APN) and/or RENTCAST_API_KEY (needs address).
+ * Fill the AVM gap rather than the assessment gap — lots that already carry a
+ * county assessment but no market value, which the default filter cannot see:
+ *   npm run enrich:avm -- --high-value-first --limit 500
+ *
+ * Requires REALESTATEAPI_API_KEY (parcel/APN + AVM); ATTOM_API_KEY and
+ * RENTCAST_API_KEY still contribute where their keys are live.
  */
 import "../lib/env";
 import {
@@ -45,6 +50,7 @@ async function main() {
     // Spend quota on parcels worth bidding on first — opening bid tracks
     // assessed value closely (r = 0.852 on Arkansas).
     highValueFirst: flag("high-value-first"),
+    missingMarketValue: flag("missing-market"),
     minOpeningBid: arg("min-bid") ? Number(arg("min-bid")) : undefined,
     onProgress: (m) => console.log(m),
   });

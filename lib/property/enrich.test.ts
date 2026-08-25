@@ -106,6 +106,33 @@ async function main() {
   ]);
   assert(!secondCalled, "search stops at the first record");
 
+  /*
+   * Parcel-only ordering. The hoist in `lookupProperty` reorders providers when
+   * the lot has no address, which is most auction lots — so a provider missing
+   * from that list silently loses to one that is in it, whatever the
+   * registration order says. This pins the case that regressed: ATTOM has been
+   * returning 401 for weeks, and hoisting it ahead of the working APN leg
+   * spends a failed request on every parcel-only lot before falling through.
+   */
+  const calls: string[] = [];
+  const recorder = (name: string): PropertyProvider => ({
+    name,
+    configured: () => true,
+    lookup: async () => {
+      calls.push(name);
+      return null;
+    },
+  });
+  await lookup([recorder("rentcast"), recorder("attom"), recorder("realestateapi"), recorder("cadastre")]);
+  assert(
+    calls.indexOf("cadastre") < calls.indexOf("realestateapi"),
+    `the free assessor layer goes first — got ${calls.join(" -> ")}`,
+  );
+  assert(
+    calls.indexOf("realestateapi") < calls.indexOf("attom"),
+    `realestateapi must precede attom on parcel-only lookups — got ${calls.join(" -> ")}`,
+  );
+
   console.log("enrich fallthrough: all assertions passed");
 
 }
