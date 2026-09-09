@@ -74,7 +74,7 @@ function Pending() {
     <div
       role="status"
       aria-live="polite"
-      className="mt-4 flex items-center gap-3 rounded-xl border border-border bg-surface p-4"
+      className="mt-4 flex items-center gap-3 rounded-3xl border border-border bg-surface p-4 text-foreground"
     >
       <span
         className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-accent
@@ -132,9 +132,9 @@ export function PropertySearch() {
       </form>
 
       {state?.error && (
-        <div className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/40">
-          <p className="text-sm font-medium">That search could not run.</p>
-          <p className="mt-1 text-sm text-muted">{state.error}</p>
+        <div className="mt-4 rounded-3xl border border-red-300 bg-red-50 p-4 text-foreground dark:border-red-900 dark:bg-red-950/40">
+          <p className="text-base font-medium">That search could not run.</p>
+          <p className="mt-1 text-base text-muted">{state.error}</p>
         </div>
       )}
 

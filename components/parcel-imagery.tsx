@@ -78,7 +78,7 @@ export function ParcelImagery({
   if (!sources[0] || failed) return null;
 
   return (
-    <figure className="max-w-[520px] overflow-hidden rounded-2xl border border-border/70 bg-surface shadow-[var(--shadow-sm)]">
+    <figure className="max-w-[520px] overflow-hidden rounded-3xl border border-border/70 bg-surface text-foreground shadow-[var(--shadow-sm)]">
       <div className="relative">
         {/*
           Both frames are rendered and the inactive one is hidden, rather than
@@ -145,7 +145,7 @@ export function ParcelImagery({
         </a>
       </div>
 
-      <figcaption className="border-t border-border/70 px-4 py-2.5 text-xs text-muted">
+      <figcaption className="border-t border-border/70 px-4 py-3 text-sm text-muted">
         Aerial imagery from the{" "}
         <a
           href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer"

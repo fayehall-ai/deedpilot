@@ -25,8 +25,8 @@ function Field({ label, value }: { label: string; value: string | number | null 
   if (value === null || value === undefined || value === "") return null;
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-faint">{label}</dt>
-      <dd className="tabular-nums">{value}</dd>
+      <dt className="text-sm font-medium uppercase tracking-[0.12em] text-muted">{label}</dt>
+      <dd className="tnum mt-1 text-lg font-medium text-foreground">{value}</dd>
     </div>
   );
 }
@@ -34,7 +34,7 @@ function Field({ label, value }: { label: string; value: string | number | null 
 function Sources({ citations }: { citations: ResultProps["citations"] }) {
   if (citations.length === 0) return null;
   return (
-    <ul className="mt-3 space-y-1 text-sm">
+    <ul className="mt-4 space-y-2 text-base">
       {citations.slice(0, 8).map((c) => (
         <li key={c.url}>
           <a
@@ -54,7 +54,12 @@ function Sources({ citations }: { citations: ResultProps["citations"] }) {
 function Detail({ p }: { p: SearchedProperty }) {
   return (
     <>
-      <dl className="mt-5 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+      {/*
+        Two columns, not four. This panel sits in the hero's lookup column —
+        about 400px — and four fields across made every value wrap or shrink
+        to the faint inherited ink-fg of the navy band behind it.
+      */}
+      <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5">
         <Field label="Type" value={p.propertyType} />
         <Field label="Beds" value={p.beds} />
         <Field label="Baths" value={p.baths} />
@@ -76,11 +81,11 @@ function Detail({ p }: { p: SearchedProperty }) {
       </dl>
 
       {p.features.length > 0 && (
-        <div className="mt-5">
-          <dt className="text-xs uppercase tracking-wide text-faint">Features</dt>
-          <ul className="mt-1.5 flex flex-wrap gap-1.5">
+        <div className="mt-6">
+          <dt className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Features</dt>
+          <ul className="mt-2 flex flex-wrap gap-2">
             {p.features.slice(0, 12).map((f) => (
-              <li key={f} className="rounded bg-surface-2 px-2 py-0.5 text-sm">
+              <li key={f} className="rounded-full bg-surface-2 px-3 py-1 text-base text-foreground">
                 {f}
               </li>
             ))}
@@ -89,16 +94,16 @@ function Detail({ p }: { p: SearchedProperty }) {
       )}
 
       {p.neighborhood && (
-        <div className="mt-5">
-          <dt className="text-xs uppercase tracking-wide text-faint">Neighbourhood</dt>
-          <p className="mt-1 text-sm leading-relaxed">{p.neighborhood}</p>
+        <div className="mt-6">
+          <dt className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Neighbourhood</dt>
+          <p className="mt-1.5 text-base leading-relaxed text-foreground">{p.neighborhood}</p>
         </div>
       )}
 
       {p.comparables && (
-        <div className="mt-5">
-          <dt className="text-xs uppercase tracking-wide text-faint">Comparable sales</dt>
-          <p className="mt-1 text-sm leading-relaxed">{p.comparables}</p>
+        <div className="mt-6">
+          <dt className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Comparable sales</dt>
+          <p className="mt-1.5 text-base leading-relaxed text-foreground">{p.comparables}</p>
         </div>
       )}
     </>
@@ -121,25 +126,25 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
 
     if (!hasContext) {
       return (
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <h3 className="font-semibold">No record found for that address</h3>
-          <p className="mt-2 text-sm text-muted">{p.basis}</p>
+        <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
+          <h3 className="font-display text-xl font-medium">No record found for that address</h3>
+          <p className="mt-2 text-base text-muted">{p.basis}</p>
         </div>
       );
     }
 
     return (
       <div className="space-y-4">
-        <div className="rounded-xl border border-border bg-surface p-5">
+        <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h3 className="text-base font-semibold tracking-tight">
+            <h3 className="font-display text-xl font-medium tracking-tight">
               {p.closestMatch ? "Closest match" : "What was found"}
             </h3>
-            <span className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[0.65rem] uppercase tracking-wide text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide text-amber-900 dark:bg-amber-950 dark:text-amber-200">
               not the exact address
             </span>
           </div>
-          {p.closestMatch && <p className="mt-3 leading-relaxed">{p.closestMatch}</p>}
+          {p.closestMatch && <p className="mt-3 text-lg leading-relaxed">{p.closestMatch}</p>}
           <Detail p={p} />
         </div>
 
@@ -154,13 +159,13 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
           caption={location?.matched}
         />
 
-        <div className="rounded-xl border border-border bg-surface p-5">
-          <h4 className="text-sm font-semibold">Why this is not the exact property</h4>
-          <p className="mt-2 text-sm text-muted">{p.basis}</p>
+        <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
+          <h4 className="font-display text-lg font-medium">Why this is not the exact property</h4>
+          <p className="mt-2 text-base leading-relaxed text-muted">{p.basis}</p>
           <Sources citations={citations} />
         </div>
 
-        <p className="text-xs leading-relaxed text-muted">
+        <p className="text-sm leading-relaxed text-ink-muted">
           No value is shown for the address you entered, because it was not identified. The figures
           above describe the closest match and are context, not a valuation of your property.
         </p>
@@ -170,14 +175,14 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-border bg-surface p-5">
+      <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h3 className="text-base font-semibold tracking-tight">
+          <h3 className="font-display text-xl font-medium tracking-tight text-foreground">
             {p.addressLine ?? "This property"}
             {p.city ? `, ${p.city}` : ""} {p.zip ?? ""}
           </h3>
           <span
-            className={`rounded px-2 py-0.5 font-mono text-[0.65rem] uppercase tracking-wide ${
+            className={`rounded-full px-2.5 py-1 text-xs font-medium uppercase tracking-wide ${
               p.confidence === "stated"
                 ? "bg-surface-2 text-muted"
                 : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
@@ -188,11 +193,13 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
         </div>
 
         {p.marketValue !== null && (
-          <p className="mt-4 text-3xl font-semibold tabular-nums">{money(p.marketValue)}</p>
+          <p className="tnum font-display mt-5 text-4xl font-medium text-foreground">
+            {money(p.marketValue)}
+          </p>
         )}
-        <p className="mt-1 text-sm text-muted">
-          Estimated market value. This is <strong>not</strong> an assessed value and is not used to
-          price a bid.
+        <p className="mt-2 text-base leading-relaxed text-muted">
+          Estimated market value. This is <strong className="text-foreground">not</strong> an
+          assessed value and is not used to price a bid.
           {ageHours > 0 && (
             <>
               {" "}
@@ -222,13 +229,13 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
         caption={location?.matched ?? p.addressLine}
       />
 
-      <div className="rounded-xl border border-border bg-surface p-5">
-        <h4 className="text-sm font-semibold">What was read</h4>
-        <p className="mt-2 text-sm text-muted">{p.basis}</p>
+      <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
+        <h4 className="font-display text-lg font-medium text-foreground">What was read</h4>
+        <p className="mt-2 text-base leading-relaxed text-foreground">{p.basis}</p>
         <Sources citations={citations} />
       </div>
 
-      <p className="text-xs leading-relaxed text-muted">
+      <p className="text-sm leading-relaxed text-ink-muted">
         Figures come from public web sources read at the time of the search, not from a licensed
         data provider, and are an as-is estimate rather than an after-repair value. Verify against
         the county record before bidding.
