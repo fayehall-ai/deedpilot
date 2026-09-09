@@ -146,9 +146,24 @@ export function AtlasExplorer({
     return () => window.removeEventListener("keydown", onKey);
   }, [county, openState]);
 
+  /*
+   * When a county is open the *copy* is the thing being read, and the map is
+   * orientation. The old split was `1fr / 20rem`, so Mississippi sat in a
+   * letterboxed white field while Jones County wrapped at 320px. Flip it:
+   * map becomes a fitted column, the panel takes the rest. With no county
+   * selected the map stays the lead — the national view needs the width.
+   */
+  const mapLeads = !county;
+
   return (
     <>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div
+        className={`grid items-start gap-6 ${
+          mapLeads
+            ? "lg:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)]"
+            : "lg:grid-cols-[minmax(16rem,28rem)_minmax(0,1fr)]"
+        }`}
+      >
       <div>
         {/*
           Controls above the map, driving the same state the map clicks do.
@@ -157,9 +172,13 @@ export function AtlasExplorer({
           do not — or when you are on a phone, where a 60-county map is a set of
           two-millimetre tap targets.
         */}
-        <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_14rem]">
+        <div
+          className={`mb-4 grid gap-3 sm:grid-cols-2 ${
+            mapLeads ? "lg:grid-cols-[1fr_1fr_14rem]" : "lg:grid-cols-1"
+          }`}
+        >
           <label className="block">
-            <span className="mb-1 block text-xs uppercase tracking-wide text-muted">State</span>
+            <span className="mb-1 block text-sm font-medium uppercase tracking-[0.12em] text-muted">State</span>
             <select
               value={openState?.slug ?? ""}
               onChange={(e) => {
@@ -171,7 +190,7 @@ export function AtlasExplorer({
                 }
                 void openStateBySlug(slug);
               }}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:border-accent focus:border-accent focus:outline-none"
+              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-base hover:border-accent focus:border-accent focus:outline-none"
             >
               <option value="">All states</option>
               {[...states]
@@ -185,7 +204,7 @@ export function AtlasExplorer({
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-xs uppercase tracking-wide text-muted">County</span>
+            <span className="mb-1 block text-sm font-medium uppercase tracking-[0.12em] text-muted">County</span>
             <select
               value={county?.fips ?? ""}
               disabled={!openState}
@@ -193,7 +212,7 @@ export function AtlasExplorer({
                 const fips = e.target.value;
                 setCounty(openState?.counties.find((c) => c.fips === fips) ?? null);
               }}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:border-accent focus:border-accent focus:outline-none disabled:opacity-60 disabled:hover:border-border"
+              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-base hover:border-accent focus:border-accent focus:outline-none disabled:opacity-60 disabled:hover:border-border"
             >
               <option value="">
                 {openState
@@ -212,8 +231,8 @@ export function AtlasExplorer({
 
           <div>
             <div className="mb-1 flex items-baseline justify-between gap-2">
-              <span className="text-xs uppercase tracking-wide text-muted">Min. population</span>
-              <span className="tnum text-xs font-medium">{POPULATION_STOPS[popIndex].label}</span>
+              <span className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Min. population</span>
+              <span className="tnum text-sm font-medium">{POPULATION_STOPS[popIndex].label}</span>
             </div>
             <input
               type="range"
@@ -237,7 +256,7 @@ export function AtlasExplorer({
         </div>
 
         {/* Breadcrumb + reset, mirroring where you are in the drill-down. */}
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+        <div className="mb-3 flex flex-wrap items-center gap-2 text-base">
           <button
             type="button"
             onClick={() => {
@@ -289,7 +308,7 @@ export function AtlasExplorer({
           </p>
         ) : null}
 
-        <div className="relative rounded-xl border border-border bg-surface p-3">
+        <div className="relative flex min-h-[22rem] items-center justify-center rounded-3xl border border-border bg-surface p-4">
           {loading ? (
             <span
               role="status"
@@ -303,7 +322,8 @@ export function AtlasExplorer({
           {openState ? (
             <svg
               viewBox={openState.viewBox}
-              className="h-auto max-h-[28rem] w-full"
+              className="mx-auto h-auto max-h-[min(70vh,42rem)] w-full"
+              preserveAspectRatio="xMidYMid meet"
               role="img"
               aria-label={`Counties of ${openState.name}`}
             >
@@ -360,6 +380,7 @@ export function AtlasExplorer({
             <svg
               viewBox={`${NATIONAL_VIEWBOX.x} ${NATIONAL_VIEWBOX.y} ${NATIONAL_VIEWBOX.width} ${NATIONAL_VIEWBOX.height}`}
               className="h-auto w-full"
+              preserveAspectRatio="xMidYMid meet"
               role="img"
               aria-label="United States map, each state shaded by how it sells tax-defaulted property"
             >
@@ -446,7 +467,7 @@ export function AtlasExplorer({
         </div>
 
         {/* Legend swaps with the view, because the colours mean different things. */}
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted">
           {openState ? (
             <>
               <Swatch color="var(--accent)" opacity={0.85} />
@@ -536,10 +557,10 @@ function DetailPanel({
 }) {
   if (!state) {
     return (
-      <aside className="rounded-2xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-sm)]">
-        <p className="text-xs uppercase tracking-wide text-muted">Select a state</p>
-        <h3 className="mt-1 text-lg font-semibold tracking-tight">Tax sale system</h3>
-        <p className="mt-2 text-sm leading-relaxed text-muted">
+      <aside className="rounded-3xl border border-border/70 bg-surface p-6 shadow-[var(--shadow-sm)]">
+        <p className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Select a state</p>
+        <h3 className="font-display mt-1 text-2xl font-medium tracking-tight">Tax sale system</h3>
+        <p className="mt-3 text-base leading-relaxed text-muted">
           Colour is how the state sells: a lien, a deed, a redeemable deed, or a hybrid. Select one
           to see its counties and which of them have been researched individually.
         </p>
@@ -550,14 +571,14 @@ function DetailPanel({
   if (!county) {
     const researched = state.counties.filter((c) => c.researched).length;
     return (
-      <aside className="rounded-2xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-sm)]">
-        <p className="text-xs uppercase tracking-wide text-muted">{state.saleType}</p>
-        <h3 className="mt-1 text-lg font-semibold tracking-tight">{state.name}</h3>
-        <p className="mt-2 text-sm text-muted">
+      <aside className="rounded-3xl border border-border/70 bg-surface p-6 shadow-[var(--shadow-sm)]">
+        <p className="text-sm font-medium uppercase tracking-[0.12em] text-muted">{state.saleType}</p>
+        <h3 className="font-display mt-1 text-2xl font-medium tracking-tight">{state.name}</h3>
+        <p className="mt-3 text-base text-muted">
           {state.counties.length} counties · {researched} researched individually
         </p>
         {state.stateNotes ? (
-          <p className="mt-3 text-sm leading-relaxed text-muted">{state.stateNotes}</p>
+          <p className="mt-3 text-base leading-relaxed text-muted">{state.stateNotes}</p>
         ) : null}
         {/*
           No "full state page" link.
@@ -592,15 +613,15 @@ function DetailPanel({
      * run past the map beside it, and a panel taller than the thing it
      * describes pushes the map off screen mid-read.
      */
-    <aside className="max-h-[38rem] overflow-y-auto rounded-2xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-md)]">
-      <p className="text-xs uppercase tracking-wide text-muted">{state.name}</p>
-      <h3 className="mt-1 text-lg font-semibold tracking-tight">{county.label}</h3>
+    <aside className="rounded-3xl border border-border/70 bg-surface p-7 shadow-[var(--shadow-md)]">
+      <p className="text-sm font-medium uppercase tracking-[0.12em] text-muted">{state.name}</p>
+      <h3 className="font-display mt-1 text-3xl font-medium tracking-tight">{county.label}</h3>
       {/* The county's own label when it runs a finer-grained system than the
           four national buckets the map colour can express. */}
-      {r?.type ? <p className="mt-0.5 text-sm text-muted">{r.type}</p> : null}
+      {r?.type ? <p className="mt-1 text-base text-muted">{r.type}</p> : null}
 
       {r ? (
-        <div className="mt-3 space-y-4 text-sm">
+        <div className="mt-6 space-y-6 text-base">
           {/*
             Risk first, logistics second. These two are what a bid is wrong
             about when it is wrong expensively: a surviving municipal lien and
@@ -610,7 +631,7 @@ function DetailPanel({
             information at the top and the costliest behind a navigation.
           */}
           {r.survivingLiens || r.quietTitle ? (
-            <dl className="space-y-3 rounded-lg border border-warn/30 bg-warn/5 p-3">
+            <dl className="space-y-4 rounded-2xl border border-warn/30 bg-warn/5 p-5">
               {r.survivingLiens ? (
                 <Field label="Surviving liens">{r.survivingLiens}</Field>
               ) : null}
@@ -618,7 +639,7 @@ function DetailPanel({
             </dl>
           ) : null}
 
-          <dl className="space-y-3">
+          <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
             {r.auctionFormat ? <Field label="Format">{r.auctionFormat}</Field> : null}
             {r.auctionPlatform?.label ? (
               <Field label="Platform">
@@ -630,7 +651,7 @@ function DetailPanel({
           </dl>
 
           {offices.length > 0 ? (
-            <dl className="space-y-3 border-t border-border pt-3">
+            <dl className="grid gap-x-8 gap-y-4 border-t border-border pt-5 sm:grid-cols-2">
               {offices.map(([label, ref]) => (
                 <Field key={label} label={label}>
                   <Ref link={ref!} />
@@ -701,7 +722,7 @@ function DetailPanel({
          * is which — a panel that just looked empty would imply we had looked
          * and found nothing.
          */
-        <p className="mt-3 text-sm leading-relaxed text-muted">
+        <p className="mt-4 text-base leading-relaxed text-muted">
           No county-level research yet. {county.label} shows {state.name}&apos;s state defaults —
           the sale type, redemption window and statute on the state page apply.
         </p>
@@ -727,8 +748,8 @@ function DetailPanel({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
-      <dd className="mt-0.5 leading-relaxed">{children}</dd>
+      <dt className="text-sm font-medium uppercase tracking-[0.12em] text-muted">{label}</dt>
+      <dd className="mt-1.5 max-w-prose leading-relaxed">{children}</dd>
     </div>
   );
 }
@@ -755,7 +776,7 @@ function Ref({ link }: { link: { label: string; url?: string; phone?: string } }
       ) : (
         link.label
       )}
-      {link.phone ? <span className="block text-xs text-muted">{link.phone}</span> : null}
+      {link.phone ? <span className="mt-0.5 block text-sm text-muted">{link.phone}</span> : null}
     </>
   );
 }
