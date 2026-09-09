@@ -36,7 +36,7 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
                *
                * The button below stays blue, because pressing it is an action.
                */
-              className={`relative flex flex-col rounded-2xl border p-6 transition-transform ${
+              className={`relative flex flex-col rounded-3xl border p-7 transition-transform ${
                 featured
                   ? "border-gold/50 bg-surface shadow-[0_0_0_1px_color-mix(in_srgb,var(--gold)_55%,transparent),0_18px_44px_-16px_color-mix(in_srgb,var(--gold)_60%,transparent)] lg:-mt-3 lg:pb-9"
                   : "border-border/70 bg-surface shadow-[var(--shadow-sm)] hover:border-border"
@@ -49,16 +49,16 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
                   Most popular
                 </div>
               ) : null}
-              <h2 className="font-semibold">{plan.name}</h2>
+              <h2 className="font-display text-2xl font-medium">{plan.name}</h2>
               <div className="tnum mt-2 flex items-baseline gap-1">
                 {/* The price is the thing being compared, so it should be the
                     largest thing on the card — it was the same size as a heading. */}
-                <span className="text-4xl font-semibold tracking-[-0.02em]">${plan.price}</span>
+                <span className="font-display text-5xl font-medium tracking-[-0.03em]">${plan.price}</span>
                 {plan.price > 0 ? <span className="text-sm text-muted">/month</span> : null}
               </div>
-              <p className="mt-2 min-h-10 text-sm leading-relaxed text-muted">{plan.tagline}</p>
+              <p className="mt-2 min-h-10 text-base leading-relaxed text-muted">{plan.tagline}</p>
 
-              <ul className="mt-5 flex-1 space-y-2 text-sm">
+              <ul className="mt-5 flex-1 space-y-2.5 text-base">
                 {plan.features.map((f) => (
                   <li key={f} className="flex gap-2">
                     {/* A drawn check at a fixed size, not a glyph — the text tick
@@ -83,7 +83,7 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
 
               <Link
                 href={plan.price === 0 ? "/atlas" : `/signup?plan=${plan.id}`}
-                className={`mt-6 rounded-full px-4 py-2.5 text-center text-sm font-medium
+                className={`mt-6 rounded-full px-4 py-3 text-center text-base font-medium
                             transition-all active:scale-[0.98] ${
                   featured
                     ? "bg-gold text-ink font-semibold shadow-[0_10px_28px_-10px_color-mix(in_srgb,var(--gold)_85%,transparent)] hover:brightness-105"
@@ -97,7 +97,7 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
         })}
       </div>
 
-      <p className="mt-8 max-w-2xl text-xs leading-relaxed text-muted">
+      <p className="mt-8 max-w-2xl text-sm leading-relaxed text-muted">
         Parcel-level coverage currently means Florida, Georgia, Texas, Arizona, and Michigan. If you
         bid somewhere else, the atlas is free and useful — but Starter and above will not have
         inventory for you yet. We would rather tell you that now than take the subscription.

@@ -1,12 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HomeLink } from "@/components/home-link";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { cacheLife } from "next/cache";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const plex = IBM_Plex_Mono({
+  variable: "--font-plex",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -54,7 +70,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${fraunces.variable} ${plex.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
         {/*
@@ -64,7 +80,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           site-wide also solves the scroll problem a transparent header would have
           created — no colour has to change as the light content passes under it.
         */}
-        <header className="sticky top-0 z-40 border-b border-ink-line bg-ink/90 text-ink-fg backdrop-blur">
+        <header className="sticky top-0 z-40 border-b border-ink-line bg-ink/80 text-ink-fg backdrop-blur-xl">
           {/*
             The logo plus five nav items need 551px of intrinsic width, and
             this row was `flex-wrap: nowrap` with visible overflow — so on a
@@ -77,8 +93,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             the scroll work — without it flex compresses them into unreadable
             slivers rather than overflowing into a scrollable strip.
           */}
-          <div className="shell flex h-16 items-center gap-3 sm:gap-6">
-            <HomeLink className="flex shrink-0 items-center gap-2 font-semibold tracking-tight">
+          <div className="shell flex h-[4.25rem] items-center gap-3 sm:gap-6">
+            <HomeLink className="flex shrink-0 items-center gap-2.5 font-display text-xl font-semibold tracking-tight">
               {/*
                 Gold, like the primary CTA it shares the navy bar with.
 
@@ -88,7 +104,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               */}
               <span
                 aria-hidden
-                className="grid h-7 w-7 place-items-center rounded-md bg-gold text-sm font-bold text-ink"
+                className="grid h-8 w-8 place-items-center rounded-lg bg-gold font-sans text-base font-bold text-ink"
               >
                 §
               </span>
@@ -102,7 +118,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <Link
                   key={n.href}
                   href={n.href}
-                  className="shrink-0 rounded-md px-3 py-1.5 text-ink-muted transition-colors hover:bg-white/10 hover:text-ink-fg"
+                  className="shrink-0 rounded-full px-3.5 py-1.5 text-ink-muted transition-colors hover:bg-white/10 hover:text-ink-fg"
                 >
                   {n.label}
                 </Link>

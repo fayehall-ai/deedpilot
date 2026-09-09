@@ -178,7 +178,7 @@ export async function CalendarView(props: {
           product. Grid lines drop to a third strength so they separate without
           drawing, and the whole thing sits on elevation like the other surfaces.
         */}
-        <div className="grid grid-cols-7 overflow-hidden rounded-2xl border border-border/70 bg-surface shadow-[var(--shadow-md)]">
+        <div className="grid grid-cols-7 overflow-hidden rounded-3xl border border-border/70 bg-surface shadow-[var(--shadow-md)]">
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
@@ -801,7 +801,7 @@ function CalendarControls({
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden><path d="m9 18 6-6-6-6" /></svg>
           </Link>
         </div>
-        <h3 className="text-3xl font-semibold tracking-tight">{monthLabel(filters.month)}</h3>
+        <h3 className="font-display text-4xl font-medium tracking-tight">{monthLabel(filters.month)}</h3>
         {filters.month === filters.currentMonth ? null : (
           <Link
             href={calendarHref(filters, { month: filters.currentMonth })}

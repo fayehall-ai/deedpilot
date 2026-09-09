@@ -34,8 +34,8 @@ function Submit() {
       type="submit"
       disabled={pending}
       aria-busy={pending}
-      className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink-fg px-5 py-2.5 text-sm
-                 font-medium text-ink shadow-[0_8px_24px_-12px_rgba(255,255,255,0.5)]
+      className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink-fg px-6 py-3 text-base
+                 font-semibold text-ink shadow-[0_8px_24px_-12px_rgba(255,255,255,0.5)]
                  transition-transform hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60"
     >
       {pending && (
@@ -121,8 +121,8 @@ export function PropertySearch() {
             defaultValue={state?.query ?? ""}
             placeholder="1600 Pennsylvania Ave NW, Washington, DC"
             autoComplete="street-address"
-            className="min-w-0 flex-1 rounded-full border border-white/12 bg-white/[0.06] px-4 py-2.5
-                       text-sm text-ink-fg backdrop-blur placeholder:text-ink-muted/70
+            className="min-w-0 flex-1 rounded-full border border-white/12 bg-white/[0.06] px-5 py-3
+                       text-base text-ink-fg backdrop-blur placeholder:text-ink-muted/70
                        transition-all focus:border-accent-on-ink/60 focus:bg-white/10
                        focus:shadow-[0_0_0_4px_rgba(12,107,255,0.14)] focus:outline-none"
           />

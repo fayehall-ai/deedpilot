@@ -64,7 +64,7 @@ export function DaySalesDialog({
         ref={dialogRef}
         aria-labelledby={titleId}
         className="m-auto w-[min(56rem,calc(100vw-2rem))] max-h-[min(52rem,90dvh)] overflow-hidden
-                   rounded-2xl border border-border/70 bg-surface p-0 text-foreground
+                   rounded-3xl border border-border/70 bg-surface p-0 text-foreground
                    shadow-[var(--shadow-md)] outline-none
                    backdrop:bg-ink/50 backdrop:backdrop-blur-[2px]
                    open:flex open:flex-col"

@@ -22,7 +22,7 @@ export function Card({
    */
   return (
     <div
-      className={`rounded-2xl border border-border/60 bg-surface p-6 shadow-[var(--shadow-sm)] ${className}`}
+      className={`rounded-3xl border border-border/70 bg-surface p-7 shadow-[var(--shadow-sm)] ${className}`}
     >
       {children}
     </div>
@@ -81,8 +81,8 @@ export function Stat({
 }) {
   return (
     <div>
-      <div className="text-sm uppercase tracking-wide text-muted">{label}</div>
-      <div className="tnum mt-1 text-2xl font-semibold">{value}</div>
+      <div className="text-sm font-medium uppercase tracking-[0.12em] text-muted">{label}</div>
+      <div className="tnum font-display mt-1 text-3xl font-medium">{value}</div>
       {hint ? <div className="mt-1 text-sm text-muted">{hint}</div> : null}
     </div>
   );

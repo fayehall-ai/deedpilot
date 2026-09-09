@@ -90,7 +90,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
         </div>
       </header>
 
-      <div className="mb-6 grid gap-4 rounded-xl border border-border bg-surface p-5 sm:grid-cols-4">
+      <div className="mb-6 grid gap-4 rounded-3xl border border-border bg-surface p-6 sm:grid-cols-4">
         {/*
           An announced sale has no parcel rows, and showing "0" here beside a
           confirmed date reads as a sale with nothing in it rather than one

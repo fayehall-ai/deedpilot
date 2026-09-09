@@ -155,7 +155,7 @@ export default function HomePage(props: PageProps<"/">) {
             `text-wrap: balance`, so the browser evens the lines itself at
             whatever width the grid hands it.
           */}
-          <h1 className="mt-5 text-display font-semibold">
+          <h1 className="mt-5 text-display">
             {/* nowrap, or `balance` breaks the compound at its own hyphen and
                 the line ends "Know your walk-". */}
             Know your <span className="whitespace-nowrap">walk-away</span> price{" "}
@@ -174,7 +174,7 @@ export default function HomePage(props: PageProps<"/">) {
           */}
           <div className="mt-9 grid gap-10 lg:grid-cols-[minmax(0,1fr)_clamp(20rem,26vw,40rem)] lg:items-start lg:gap-[clamp(2.5rem,4vw,5rem)]">
           <div className="min-w-0">
-            <p className="mt-6 max-w-[62ch] text-lg leading-relaxed text-ink-muted">
+            <p className="mt-6 max-w-[62ch] text-xl leading-relaxed text-ink-muted">
               Every county&apos;s tax sale rules, live auction inventory, and a co-pilot that
               computes your maximum bid — accounting for the liens that survive, the quiet title
               you&apos;ll have to file, and the redemption window that may hand the property back.
@@ -200,7 +200,7 @@ export default function HomePage(props: PageProps<"/">) {
                  * One per screen. The Search control beside it stays neutral so
                  * this is unambiguously the primary.
                  */
-                className="rounded-full bg-gold px-6 py-3 font-semibold text-ink
+                className="rounded-full bg-gold px-7 py-3.5 text-lg font-semibold text-ink
                            shadow-[0_10px_34px_-10px_color-mix(in_srgb,var(--gold)_85%,transparent)]
                            transition-all hover:brightness-105 hover:scale-[1.02] active:scale-[0.99]"
               >
@@ -208,7 +208,7 @@ export default function HomePage(props: PageProps<"/">) {
               </Link>
               <Link
                 href="/#atlas"
-                className="text-sm font-medium text-ink-muted underline-offset-4 transition-colors
+                className="text-base font-medium text-ink-muted underline-offset-4 transition-colors
                            hover:text-ink-fg hover:underline"
               >
                 Explore the atlas — free
@@ -227,15 +227,15 @@ export default function HomePage(props: PageProps<"/">) {
             using.
           */}
           <div className="w-full min-w-0">
-            <div className="glass rounded-2xl p-[clamp(1.25rem,1.5vw,1.75rem)]">
-              <h2 className="text-sm font-semibold text-ink-fg">Look up any address</h2>
+            <div className="glass rounded-3xl p-[clamp(1.35rem,1.6vw,2rem)]">
+              <h2 className="font-display text-xl font-medium text-ink-fg">Look up any address</h2>
               {/*
                 What it actually returns. `PropertyResult` shows owner, last
                 sale and an estimated market value, and says in as many words
                 that the estimate is *not* an assessed value — so this line
                 must not promise one.
               */}
-              <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
+              <p className="mt-1.5 text-base leading-relaxed text-ink-muted">
                 Owner, last sale, and an estimated market value for any US
                 property — before you decide it is worth researching.
               </p>
@@ -251,7 +251,7 @@ export default function HomePage(props: PageProps<"/">) {
       </section>
 
       {/* --- Calendar ------------------------------------------------------ */}
-      <section id="calendar" className="scroll-mt-16 border-b border-border bg-surface-2/20">
+      <section id="calendar" className="scroll-mt-20 border-b border-border bg-surface-2/20">
         <div className="shell py-band">
           <div className="mb-6">
             <h2 className="text-section font-semibold">Auction calendar</h2>
@@ -269,7 +269,7 @@ export default function HomePage(props: PageProps<"/">) {
           Only the state grid collapses into a section. The 1,010 county pages
           beneath it stay real routes — they are the SEO surface, and an anchor
           on this page is not something a search engine can index. */}
-      <section id="atlas" className="scroll-mt-16 border-b border-border bg-surface-2/20">
+      <section id="atlas" className="scroll-mt-20 border-b border-border bg-surface-2/20">
         <div className="shell py-band">
           <div className="mb-6">
           </div>
@@ -302,7 +302,7 @@ export default function HomePage(props: PageProps<"/">) {
       </section>
 
       {/* --- Coverage ------------------------------------------------------ */}
-      <section id="coverage" className="scroll-mt-16 border-b border-border">
+      <section id="coverage" className="scroll-mt-20 border-b border-border">
         <div className="shell py-band">
           <div className="mb-6">
           </div>
@@ -312,7 +312,7 @@ export default function HomePage(props: PageProps<"/">) {
       </section>
 
       {/* --- Pricing ------------------------------------------------------- */}
-      <section id="pricing" className="scroll-mt-16 bg-surface-2/20">
+      <section id="pricing" className="scroll-mt-20 bg-surface-2/20">
         <div className="shell py-band">
           <h2 className="mb-6 text-2xl font-semibold tracking-tight">Pricing</h2>
           <PricingPlans heading={false} />
