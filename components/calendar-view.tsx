@@ -23,6 +23,7 @@ import {
 } from "@/lib/queries";
 import { money, num, platformLabel, relativeDays, saleDate, saleTypeColor, parcelsShown } from "@/lib/format";
 import { STATE_NAMES, countyLabel } from "@/lib/atlas";
+import { DaySalesDialog, type DaySaleRow } from "@/components/day-sales-dialog";
 import {
   calendarHref,
   gridRange,
@@ -42,11 +43,12 @@ import {
 } from "@/lib/calendar/grid";
 
 /**
- * Entries shown in a day square before the rest fold into a disclosure.
+ * Entries shown in a day square before the rest open in a popup.
  *
  * September 1 2026 carries 17 sales — Texas's statutory first Tuesday. Letting
  * that square run to full height drags every other row in the grid down with
  * it, and the month stops being scannable at exactly the moment it matters.
+ * "+N more" used to be a `<details>` inside the cell, which did exactly that.
  */
 const MAX_PER_CELL = 4;
 
@@ -233,18 +235,13 @@ export async function CalendarView(props: {
                 </ul>
 
                 {groups.length > MAX_PER_CELL ? (
-                  <details className="mt-1">
-                    <summary className="cursor-pointer list-none px-1.5 py-0.5 text-cell font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
-                      +{groups.length - MAX_PER_CELL} more
-                    </summary>
-                    <ul className="mt-1 space-y-1">
-                      {groups.slice(MAX_PER_CELL).map((g) => (
-                        <li key={g.key}>
-                          <SaleEntry group={g} />
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
+                  <DaySalesDialog
+                    dateIso={cell.iso}
+                    extraCount={groups.length - MAX_PER_CELL}
+                    saleCount={sales.length}
+                    parcelCount={dayParcels(sales).total}
+                    rows={dayDialogRows(groups)}
+                  />
                 ) : null}
               </div>
             );
@@ -583,6 +580,49 @@ function showLeadTag(
   if (standing === "inventory") return false;
   if (standing === "announced") return verbose;
   return true;
+}
+
+/**
+ * Flatten a day's groups into the rows the popup lists.
+ *
+ * One row per sale, not per county: Harris County's eight precincts are eight
+ * real lists, and the popup is where there is finally room to say so. Labels
+ * distinguish members of a group; a lone sale does not need one.
+ */
+function dayDialogRows(groups: SaleGroup<CalendarAuctionRow>[]): DaySaleRow[] {
+  const rows: DaySaleRow[] = [];
+  for (const g of groups) {
+    for (let i = 0; i < g.sales.length; i++) {
+      const a = g.sales[i];
+      const standing = saleStanding(a);
+      const p = parcelsShown(a);
+      rows.push({
+        id: a.id,
+        stateName: STATE_NAMES[a.state] ?? a.state,
+        countyName: a.countyName,
+        saleType: a.saleType,
+        lots: p.count,
+        announced: p.announced,
+        cancelled: a.status === "cancelled" || a.status === "postponed",
+        standingLabel: standingWord(a, standing),
+        label: g.sales.length > 1 ? (g.labels[i] ?? `Sale ${i + 1}`) : null,
+        bids: sumBids([a]),
+      });
+    }
+  }
+  return rows;
+}
+
+function standingWord(
+  auction: CalendarAuctionRow,
+  standing: "inventory" | "announced" | "lead",
+): string | null {
+  if (standing === "inventory") return null;
+  if (standing === "announced") return "announced";
+  if (!auction.saleDateConfirmed) return "projected";
+  if (auction.listingKind === "delinquent_list") return "roll";
+  if (auction.listingKind === "lands_available") return "lands";
+  return "unverified";
 }
 
 function sumBids(sales: CalendarAuctionRow[]): number | null {
