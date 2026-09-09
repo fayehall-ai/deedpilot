@@ -101,10 +101,22 @@ export async function CalendarView(props: {
     includeUnconfirmed: filters.includeLeads,
   };
 
-  const [rows, facets] = await Promise.all([
+  const [fetched, facets] = await Promise.all([
     getCalendarAuctions({ ...query, from: start, to: end }),
     getCalendarFacets({ includeUnconfirmed: filters.includeLeads }),
   ]);
+
+  /*
+   * Elapsed sales stay off the current month. USTLA's calendar leaves the 1st
+   * through yesterday as empty squares and starts the list at today — a bidder
+   * opening this page is deciding where to be *next*, and Aug 31's 70k-parcel
+   * spillover is not that. Page back to a past month and the history is still
+   * there; this only applies while the month on screen contains today.
+   */
+  const rows =
+    filters.month === monthOf(today)
+      ? fetched.filter((r) => r.saleDate >= today)
+      : fetched;
 
   const byDay = new Map<string, CalendarAuctionRow[]>();
   for (const r of rows) {
@@ -185,7 +197,7 @@ export async function CalendarView(props: {
                   "min-h-52 border-border/40 p-3 transition-colors",
                   // A day is clickable in effect — its sales are — so it should
                   // acknowledge the cursor. Nothing here did before.
-                  cell.inMonth ? "hover:bg-surface-2/40" : "",
+                  cell.inMonth && cell.iso >= today ? "hover:bg-surface-2/40" : "",
                   // No right border on the last column, no bottom on the last row.
                   (i + 1) % 7 === 0 ? "" : "border-r",
                   i < weeks.flat().length - 7 ? "border-b" : "",
@@ -193,9 +205,11 @@ export async function CalendarView(props: {
                     ? "bg-surface-2/50"
                     : cell.isToday
                       ? "bg-gold/[0.12]"
-                      : cell.isWeekend
-                        ? "bg-surface-2/25"
-                        : "",
+                      : cell.iso < today
+                        ? "bg-surface-2/30"
+                        : cell.isWeekend
+                          ? "bg-surface-2/25"
+                          : "",
                 ].join(" ")}
               >
                 <div className="mb-2 flex items-center justify-between gap-1">
@@ -206,7 +220,9 @@ export async function CalendarView(props: {
                         // cannot be mistaken for the blue of an active filter.
                         // Sized in em so the disc grows with the numeral.
                         ? "grid h-[1.85em] w-[1.85em] place-items-center rounded-full bg-gold text-day text-ink shadow-[0_0_0_3px_color-mix(in_srgb,var(--gold)_28%,transparent)]"
-                        : `text-day ${cell.inMonth ? "text-foreground" : "text-muted/50"}`
+                        : `text-day ${
+                            !cell.inMonth || cell.iso < today ? "text-muted/50" : "text-foreground"
+                          }`
                     }
                   >
                     {cell.dayOfMonth}

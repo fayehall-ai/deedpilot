@@ -63,7 +63,7 @@ export function DaySalesDialog({
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}
-        className="m-auto w-[min(42rem,calc(100vw-2rem))] max-h-[min(46rem,88dvh)] overflow-hidden
+        className="m-auto w-[min(56rem,calc(100vw-2rem))] max-h-[min(52rem,90dvh)] overflow-hidden
                    rounded-2xl border border-border/70 bg-surface p-0 text-foreground
                    shadow-[var(--shadow-md)] outline-none
                    backdrop:bg-ink/50 backdrop:backdrop-blur-[2px]
@@ -80,12 +80,12 @@ export function DaySalesDialog({
           }
         }}
       >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-6 py-5">
           <div>
-            <h2 id={titleId} className="text-xl font-semibold tracking-tight">
+            <h2 id={titleId} className="text-3xl font-semibold tracking-tight">
               {longSaleDate(dateIso)}
             </h2>
-            <p className="tnum mt-1 text-base text-muted">
+            <p className="tnum mt-1.5 text-xl text-muted">
               {num(saleCount)} {saleCount === 1 ? "sale" : "sales"} · {num(parcelCount)} parcels
             </p>
           </div>
@@ -110,19 +110,19 @@ export function DaySalesDialog({
             </svg>
           </button>
         </div>
-        <ul className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+        <ul className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
           {rows.map((row) => (
             <li key={row.id}>
               <Link
                 href={`/auctions/${row.id}`}
                 className={[
-                  "flex items-start gap-3 rounded-lg px-3 py-2.5 text-lg leading-snug transition-colors hover:bg-surface-2",
+                  "flex items-start gap-4 rounded-lg px-4 py-3.5 text-2xl leading-snug transition-colors hover:bg-surface-2",
                   row.cancelled ? "text-muted line-through" : "",
                 ].join(" ")}
               >
                 <span
                   aria-hidden
-                  className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full"
+                  className="mt-2.5 h-3.5 w-3.5 shrink-0 rounded-full"
                   style={{ background: saleTypeColor(row.saleType) }}
                 />
                 <span className="min-w-0 flex-1">
@@ -136,12 +136,12 @@ export function DaySalesDialog({
                     </>
                   ) : null}
                   {row.standingLabel ? (
-                    <span className="ml-2 inline-block rounded bg-surface-2 px-1.5 align-middle text-sm font-medium uppercase tracking-wide text-muted">
+                    <span className="ml-2 inline-block rounded bg-surface-2 px-1.5 align-middle text-base font-medium uppercase tracking-wide text-muted">
                       {row.standingLabel}
                     </span>
                   ) : null}
                 </span>
-                <span className="ml-auto shrink-0 pl-3 text-right text-base text-muted">
+                <span className="ml-auto shrink-0 pl-4 text-right text-xl text-muted">
                   <span
                     className={`tnum whitespace-nowrap ${
                       row.announced ? "underline decoration-dotted underline-offset-2" : ""
