@@ -48,7 +48,7 @@ import {
  * that square run to full height drags every other row in the grid down with
  * it, and the month stops being scannable at exactly the moment it matters.
  */
-const MAX_PER_CELL = 5;
+const MAX_PER_CELL = 4;
 
 
 /*
@@ -168,7 +168,7 @@ export async function CalendarView(props: {
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
-              className="border-b border-border/70 bg-surface-2/50 px-2 py-3 text-center text-xs font-semibold uppercase tracking-[0.12em] text-muted"
+              className="border-b border-border/70 bg-surface-2/50 px-2 py-3.5 text-center text-sm font-semibold uppercase tracking-[0.12em] text-muted"
             >
               {label}
             </div>
@@ -180,7 +180,7 @@ export async function CalendarView(props: {
               <div
                 key={cell.iso}
                 className={[
-                  "min-h-44 border-border/40 p-2.5 transition-colors",
+                  "min-h-52 border-border/40 p-3 transition-colors",
                   // A day is clickable in effect — its sales are — so it should
                   // acknowledge the cursor. Nothing here did before.
                   cell.inMonth ? "hover:bg-surface-2/40" : "",
@@ -214,7 +214,7 @@ export async function CalendarView(props: {
                       counties selling three parcels each. */}
                   {sales.length > 0 ? (
                     <span
-                      className="tnum text-xs font-semibold text-foreground"
+                      className="tnum text-cell font-semibold text-foreground"
                       title={`${num(dayParcels(sales).total)} parcels across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
                         sumBids(sales),
                       )}${announcedPhrase(dayParcels(sales).announced)}`}
@@ -260,14 +260,14 @@ export async function CalendarView(props: {
           <div className="space-y-6">
             {[...byDay.entries()].map(([day, sales]) => (
               <section key={day}>
-                <div className="mb-2.5 flex items-baseline gap-2 border-b border-border pb-2">
-                  <h2 className="text-base font-semibold">{saleDate(day)}</h2>
-                  <span className="text-sm text-muted">{relativeDays(day)}</span>
-                  <span className="tnum ml-auto text-sm font-medium text-foreground">
+                <div className="mb-3 flex items-baseline gap-2 border-b border-border pb-2">
+                  <h2 className="text-lg font-semibold">{saleDate(day)}</h2>
+                  <span className="text-base text-muted">{relativeDays(day)}</span>
+                  <span className="tnum ml-auto text-base font-medium text-foreground">
                     {num(dayParcels(sales).total)} parcels
                   </span>
                 </div>
-                <ul className="space-y-1.5">
+                <ul className="space-y-2">
                   {groupSalesByCounty(sales).map((g) => (
                     <li key={g.key}>
                       <SaleEntry group={g} verbose />
@@ -383,7 +383,7 @@ function SaleEntry({
         }`}
         className={[
           "flex cursor-pointer list-none items-start gap-2 rounded-md px-1.5 py-1 leading-snug transition-colors hover:bg-surface-2 [&::-webkit-details-marker]:hidden",
-          verbose ? "text-base" : "text-cell",
+          verbose ? "text-lg" : "text-cell",
           isLead ? "border-l-2 border-dashed border-border pl-1.5" : "",
         ].join(" ")}
       >
@@ -397,7 +397,7 @@ function SaleEntry({
             group.allCancelled ? "text-muted line-through" : ""
           }`}
         >
-          <span className="max-w-full truncate">
+          <span className="max-w-full">
             <span className="font-medium">{verbose ? stateName : lead.state}</span>
             <span className="text-muted"> · </span>
             {lead.countyName}
@@ -433,7 +433,7 @@ function SaleEntry({
                   parcelsShown(a).announced ? " announced, list not yet fetched" : ""
                 }${bidPhrase(sumBids([a]))}${cancelled ? `, ${a.status}` : ""}`}
                 className={`flex items-baseline gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-surface-2 ${
-                  verbose ? "text-base" : "text-cell"
+                  verbose ? "text-lg" : "text-cell"
                 }`}
               >
                 <span
@@ -477,7 +477,7 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
         // the entry, and a lead tag alongside it turns "SC · Greenville" into
         // "SC · Gree…" in a 200px square. Two lines beats an ellipsis.
         "flex items-start gap-2 rounded-md px-1.5 py-1 leading-snug transition-colors hover:bg-surface-2",
-        verbose ? "text-base" : "text-cell",
+        verbose ? "text-lg" : "text-cell",
         isLead ? "border-l-2 border-dashed border-border pl-1.5" : "",
       ].join(" ")}
     >
@@ -494,7 +494,7 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
           cancelled ? "text-muted line-through" : ""
         }`}
       >
-        <span className="max-w-full truncate">
+        <span className="max-w-full">
           <span className="font-medium">{verbose ? stateName : auction.state}</span>
           <span className="text-muted"> · </span>
           {auction.countyName}
@@ -519,7 +519,7 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
  */
 function Totals({ lots, bids }: { lots: number; bids: number | null }) {
   return (
-    <span className="ml-auto shrink-0 pl-2 text-right text-sm text-muted">
+    <span className="ml-auto shrink-0 pl-2 text-right text-base text-muted">
       <span className="tnum whitespace-nowrap">{num(lots)} parcels</span>
       {bids === null ? null : (
         <>
@@ -745,7 +745,7 @@ function CalendarControls({
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden><path d="m9 18 6-6-6-6" /></svg>
           </Link>
         </div>
-        <h3 className="text-2xl font-semibold tracking-tight">{monthLabel(filters.month)}</h3>
+        <h3 className="text-3xl font-semibold tracking-tight">{monthLabel(filters.month)}</h3>
         {filters.month === filters.currentMonth ? null : (
           <Link
             href={calendarHref(filters, { month: filters.currentMonth })}
@@ -783,7 +783,7 @@ function CalendarControls({
               includeLeads: false,
             })}
             {...STAY_PUT}
-            className="ml-1 text-sm text-muted underline hover:text-foreground"
+            className="ml-1 text-base text-muted underline hover:text-foreground"
           >
             Clear all
           </Link>
@@ -791,7 +791,7 @@ function CalendarControls({
       </div>
 
       <details open={secondaryActive} className="group/filters">
-        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-sm text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-base text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
           <span aria-hidden className="transition-transform group-open/filters:rotate-90">
             ›
           </span>
@@ -893,7 +893,7 @@ function Chip({
        * Gold, because "which filter am I on" is the single fact this row exists
        * to report, and gold is now what the page uses to say "this one".
        */
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-base
                   font-medium transition-all active:scale-[0.97] ${
         active
           ? "border-gold bg-gold text-ink shadow-[0_4px_14px_-4px_color-mix(in_srgb,var(--gold)_70%,transparent)]"
@@ -913,7 +913,7 @@ function Chip({
 
 function Legend({ types }: { types: string[] }) {
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted">
+    <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-base text-muted">
       {types.map((t) => (
         <span key={t} className="inline-flex items-center gap-2">
           <span

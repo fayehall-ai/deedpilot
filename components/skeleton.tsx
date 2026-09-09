@@ -81,7 +81,7 @@ export function AuctionListSkeleton({ groups = 3, perGroup = 3 }: { groups?: num
 /**
  * The month grid.
  *
- * Six rows of seven, at the same `min-h-44` as a real day square, so the
+ * Six rows of seven, at the same `min-h-52` as a real day square, so the
  * calendar occupies its final height before a single sale has loaded — this is
  * the page where a height change would be most obvious. Hidden below `xl` to
  * match the live grid; the agenda fallback is what a tablet actually sees.
@@ -111,7 +111,7 @@ export function CalendarSkeleton() {
           {Array.from({ length: 42 }, (_, i) => (
             <div
               key={i}
-              className={`min-h-44 border-border p-2.5 ${(i + 1) % 7 === 0 ? "" : "border-r"} ${
+              className={`min-h-52 border-border p-3 ${(i + 1) % 7 === 0 ? "" : "border-r"} ${
                 i < 35 ? "border-b" : ""
               }`}
             >

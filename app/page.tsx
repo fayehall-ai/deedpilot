@@ -255,7 +255,7 @@ export default function HomePage(props: PageProps<"/">) {
         <div className="shell py-band">
           <div className="mb-6">
             <h2 className="text-section font-semibold">Auction calendar</h2>
-            <p className="mt-1.5 max-w-prose text-sm text-muted">
+            <p className="mt-1.5 max-w-prose text-base text-muted">
               Every tracked tax sale this month, by day. Filter by state, type, or platform.
             </p>
           </div>
