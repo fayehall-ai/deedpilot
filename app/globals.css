@@ -366,6 +366,35 @@ html {
 }
 
 /*
+ * The month grid, which is not micro type and had been set as if it were.
+ *
+ * Every element in the grid — day numbers, county entries, parcel counts, the
+ * weekday header, the "+60 more" — sat at `text-micro`, the floor of the
+ * scale. That was the right call at 1024px, where seven columns of a 1280px
+ * shell are 154px each and a county name and its badge only just fit. It kept
+ * being the call at 2475px, where the same columns are 297px and the entries
+ * were using 63% of the width available to them. The grid was reading as
+ * unreadable on wide screens for the same reason the page did: a number
+ * chosen at the narrow end and then never revisited.
+ *
+ * Scaling the root helped and could not fix this on its own, because it moves
+ * everything by the same 1.375× while what changed here is the *column*, which
+ * roughly doubles across the same range. So this tier carries its own viewport
+ * term on top of the root's.
+ *
+ * The floor is `text-micro` exactly, so the narrow end of the grid — 1024px to
+ * about 1400px, where the cells genuinely have no room — renders as it does
+ * today and nothing regresses. The ceiling stops it before a calendar cell
+ * starts looking like a paragraph.
+ *
+ * Measured: 11px at 1280, 13px at 1728, 17px at 2475, 21px at 3456, against
+ * columns of 154 / 208 / 297 / 415px.
+ */
+@utility text-cell {
+  font-size: clamp(0.6875rem, 0.25rem + 0.5vw, 0.95rem);
+}
+
+/*
  * Vertical rhythm, tied to the viewport's *width*.
  *
  * Width rather than height on purpose: the reason a section needs more air is

@@ -168,7 +168,7 @@ export async function CalendarView(props: {
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
-              className="border-b border-border/70 bg-surface-2/50 px-2 py-2.5 text-center text-micro font-semibold uppercase tracking-[0.08em] text-faint"
+              className="border-b border-border/70 bg-surface-2/50 px-2 py-2.5 text-center text-cell font-semibold uppercase tracking-[0.08em] text-faint"
             >
               {label}
             </div>
@@ -197,8 +197,8 @@ export async function CalendarView(props: {
                       cell.isToday
                         // Today is a fact, not a control — gold marks it, so it
                         // cannot be mistaken for the blue of an active filter.
-                        ? "grid h-6 w-6 place-items-center rounded-full bg-gold text-micro font-semibold text-ink shadow-[0_0_0_3px_color-mix(in_srgb,var(--gold)_28%,transparent)]"
-                        : `text-micro ${cell.inMonth ? "text-muted" : "text-muted/50"}`
+                        ? "grid h-6 w-6 place-items-center rounded-full bg-gold text-cell font-semibold text-ink shadow-[0_0_0_3px_color-mix(in_srgb,var(--gold)_28%,transparent)]"
+                        : `text-cell ${cell.inMonth ? "text-muted" : "text-muted/50"}`
                     }
                   >
                     {cell.dayOfMonth}
@@ -208,7 +208,7 @@ export async function CalendarView(props: {
                       counties selling three parcels each. */}
                   {sales.length > 0 ? (
                     <span
-                      className="tnum text-micro font-medium text-faint"
+                      className="tnum text-cell font-medium text-faint"
                       title={`${num(dayParcels(sales).total)} parcels across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
                         sumBids(sales),
                       )}${announcedPhrase(dayParcels(sales).announced)}`}
@@ -228,7 +228,7 @@ export async function CalendarView(props: {
 
                 {groups.length > MAX_PER_CELL ? (
                   <details className="mt-0.5">
-                    <summary className="cursor-pointer list-none px-1 text-micro text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+                    <summary className="cursor-pointer list-none px-1 text-cell text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
                       +{groups.length - MAX_PER_CELL} more
                     </summary>
                     <ul className="mt-0.5 space-y-0.5">
@@ -377,7 +377,7 @@ function SaleEntry({
         }`}
         className={[
           "flex cursor-pointer list-none items-start gap-1.5 rounded px-1 py-0.5 leading-tight transition-colors hover:bg-surface-2 [&::-webkit-details-marker]:hidden",
-          verbose ? "text-sm" : "text-micro",
+          verbose ? "text-sm" : "text-cell",
           isLead ? "border-l-2 border-dashed border-border pl-1" : "",
         ].join(" ")}
       >
@@ -427,7 +427,7 @@ function SaleEntry({
                   parcelsShown(a).announced ? " announced, list not yet fetched" : ""
                 }${bidPhrase(sumBids([a]))}${cancelled ? `, ${a.status}` : ""}`}
                 className={`flex items-baseline gap-2 rounded px-1 py-0.5 transition-colors hover:bg-surface-2 ${
-                  verbose ? "text-sm" : "text-micro"
+                  verbose ? "text-sm" : "text-cell"
                 }`}
               >
                 <span
@@ -471,7 +471,7 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
         // the entry, and a lead tag alongside it turns "SC · Greenville" into
         // "SC · Gree…" in a 200px square. Two lines beats an ellipsis.
         "flex items-start gap-1.5 rounded px-1 py-0.5 leading-tight transition-colors hover:bg-surface-2",
-        verbose ? "text-sm" : "text-micro",
+        verbose ? "text-sm" : "text-cell",
         isLead ? "border-l-2 border-dashed border-border pl-1" : "",
       ].join(" ")}
     >
