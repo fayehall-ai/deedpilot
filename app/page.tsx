@@ -254,6 +254,10 @@ export default function HomePage(props: PageProps<"/">) {
       <section id="calendar" className="scroll-mt-16 border-b border-border bg-surface-2/20">
         <div className="shell py-band">
           <div className="mb-6">
+            <h2 className="text-section font-semibold">Auction calendar</h2>
+            <p className="mt-1.5 max-w-prose text-sm text-muted">
+              Every tracked tax sale this month, by day. Filter by state, type, or platform.
+            </p>
           </div>
           <Suspense fallback={<CalendarSkeleton />}>
             <CalendarView searchParams={props.searchParams} basePath="/" />

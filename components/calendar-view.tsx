@@ -148,14 +148,14 @@ export async function CalendarView(props: {
       {typesInView.length > 0 ? <Legend types={typesInView} /> : null}
 
       {/*
-        The month grid, from `lg` up.
-        It used to appear at `md` (768px), where seven columns leave 105px per
-        day — a county name at 11px, truncated, with a "+7 more" disclosure
-        under it. That is a grid you can see but not read, and 768px is a
-        tablet in portrait, which is a real way people open this page. The
-        agenda below carries everything narrower.
+        The month grid, from `xl` up.
+        It used to appear at `lg` (1024px), where seven columns leave ~140px
+        per day. Raising the type to a readable size made that a grid you can
+        see but not read — county names truncated to a letter, "ANNOUNCED"
+        wrapping under every row. 1024px is a tablet in landscape and a small
+        laptop; the agenda below carries everything narrower, with full names.
       */}
-      <div className="hidden lg:block">
+      <div className="hidden xl:block">
         {/*
           A card, not a table.
           
@@ -168,7 +168,7 @@ export async function CalendarView(props: {
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
-              className="border-b border-border/70 bg-surface-2/50 px-2 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-faint"
+              className="border-b border-border/70 bg-surface-2/50 px-2 py-3 text-center text-xs font-semibold uppercase tracking-[0.12em] text-muted"
             >
               {label}
             </div>
@@ -180,25 +180,31 @@ export async function CalendarView(props: {
               <div
                 key={cell.iso}
                 className={[
-                  "min-h-28 border-border/40 p-2 transition-colors",
+                  "min-h-44 border-border/40 p-2.5 transition-colors",
                   // A day is clickable in effect — its sales are — so it should
                   // acknowledge the cursor. Nothing here did before.
                   cell.inMonth ? "hover:bg-surface-2/40" : "",
                   // No right border on the last column, no bottom on the last row.
                   (i + 1) % 7 === 0 ? "" : "border-r",
                   i < weeks.flat().length - 7 ? "border-b" : "",
-                  cell.inMonth ? "" : "bg-surface-2/50",
-                  cell.inMonth && cell.isWeekend ? "bg-surface-2/25" : "",
+                  !cell.inMonth
+                    ? "bg-surface-2/50"
+                    : cell.isToday
+                      ? "bg-gold/[0.12]"
+                      : cell.isWeekend
+                        ? "bg-surface-2/25"
+                        : "",
                 ].join(" ")}
               >
-                <div className="mb-1 flex items-center justify-between gap-1">
+                <div className="mb-2 flex items-center justify-between gap-1">
                   <span
                     className={
                       cell.isToday
                         // Today is a fact, not a control — gold marks it, so it
                         // cannot be mistaken for the blue of an active filter.
-                        ? "grid h-6 w-6 place-items-center rounded-full bg-gold text-[11px] font-semibold text-ink shadow-[0_0_0_3px_color-mix(in_srgb,var(--gold)_28%,transparent)]"
-                        : `text-[11px] ${cell.inMonth ? "text-muted" : "text-muted/50"}`
+                        // Sized in em so the disc grows with the numeral.
+                        ? "grid h-[1.85em] w-[1.85em] place-items-center rounded-full bg-gold text-day text-ink shadow-[0_0_0_3px_color-mix(in_srgb,var(--gold)_28%,transparent)]"
+                        : `text-day ${cell.inMonth ? "text-foreground" : "text-muted/50"}`
                     }
                   >
                     {cell.dayOfMonth}
@@ -208,7 +214,7 @@ export async function CalendarView(props: {
                       counties selling three parcels each. */}
                   {sales.length > 0 ? (
                     <span
-                      className="tnum text-[10px] font-medium text-faint"
+                      className="tnum text-xs font-semibold text-foreground"
                       title={`${num(dayParcels(sales).total)} parcels across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
                         sumBids(sales),
                       )}${announcedPhrase(dayParcels(sales).announced)}`}
@@ -218,7 +224,7 @@ export async function CalendarView(props: {
                   ) : null}
                 </div>
 
-                <ul className="space-y-0.5">
+                <ul className="space-y-1">
                   {groups.slice(0, MAX_PER_CELL).map((g) => (
                     <li key={g.key}>
                       <SaleEntry group={g} />
@@ -227,11 +233,11 @@ export async function CalendarView(props: {
                 </ul>
 
                 {groups.length > MAX_PER_CELL ? (
-                  <details className="mt-0.5">
-                    <summary className="cursor-pointer list-none px-1 text-[10px] text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+                  <details className="mt-1">
+                    <summary className="cursor-pointer list-none px-1.5 py-0.5 text-cell font-medium text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
                       +{groups.length - MAX_PER_CELL} more
                     </summary>
-                    <ul className="mt-0.5 space-y-0.5">
+                    <ul className="mt-1 space-y-1">
                       {groups.slice(MAX_PER_CELL).map((g) => (
                         <li key={g.key}>
                           <SaleEntry group={g} />
@@ -246,22 +252,22 @@ export async function CalendarView(props: {
         </div>
       </div>
 
-      {/* The same days as an agenda, everywhere narrower than `lg`. A
-          7-column grid on a phone is unreadable, and this is the view someone
-          opens standing in a courthouse hallway. */}
-      <div className="lg:hidden">
+      {/* The same days as an agenda, everywhere narrower than `xl`. A
+          7-column grid on a phone or a small laptop is unreadable, and this
+          is the view someone opens standing in a courthouse hallway. */}
+      <div className="xl:hidden">
         {[...byDay.entries()].length === 0 ? null : (
-          <div className="space-y-5">
+          <div className="space-y-6">
             {[...byDay.entries()].map(([day, sales]) => (
               <section key={day}>
-                <div className="mb-2 flex items-baseline gap-2 border-b border-border pb-1.5">
-                  <h2 className="text-sm font-semibold">{saleDate(day)}</h2>
-                  <span className="text-xs text-muted">{relativeDays(day)}</span>
-                  <span className="tnum ml-auto text-xs text-muted">
-                    {num(sales.length)} {sales.length === 1 ? "sale" : "sales"}
+                <div className="mb-2.5 flex items-baseline gap-2 border-b border-border pb-2">
+                  <h2 className="text-base font-semibold">{saleDate(day)}</h2>
+                  <span className="text-sm text-muted">{relativeDays(day)}</span>
+                  <span className="tnum ml-auto text-sm font-medium text-foreground">
+                    {num(dayParcels(sales).total)} parcels
                   </span>
                 </div>
-                <ul className="space-y-1">
+                <ul className="space-y-1.5">
                   {groupSalesByCounty(sales).map((g) => (
                     <li key={g.key}>
                       <SaleEntry group={g} verbose />
@@ -376,14 +382,14 @@ function SaleEntry({
           group.cancelledCount ? ` (${num(group.cancelledCount)} cancelled)` : ""
         }`}
         className={[
-          "flex cursor-pointer list-none items-start gap-1.5 rounded px-1 py-0.5 leading-tight transition-colors hover:bg-surface-2 [&::-webkit-details-marker]:hidden",
-          verbose ? "text-sm" : "text-[11px]",
-          isLead ? "border-l-2 border-dashed border-border pl-1" : "",
+          "flex cursor-pointer list-none items-start gap-2 rounded-md px-1.5 py-1 leading-snug transition-colors hover:bg-surface-2 [&::-webkit-details-marker]:hidden",
+          verbose ? "text-base" : "text-cell",
+          isLead ? "border-l-2 border-dashed border-border pl-1.5" : "",
         ].join(" ")}
       >
         <span
           aria-hidden
-          className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full"
+          className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
           style={{ background: saleTypeColor(lead.saleType) }}
         />
         <span
@@ -398,17 +404,17 @@ function SaleEntry({
           </span>
           {/* The badge doubles as the disclosure affordance — a summary row
               styled like every other entry gives no hint that it opens. */}
-          <span className="tnum inline-flex items-center gap-0.5 whitespace-nowrap rounded bg-surface-2 px-1 text-[9px] text-muted">
+          <span className="tnum inline-flex items-center gap-0.5 whitespace-nowrap rounded bg-surface-2 px-1 text-[0.85em] text-muted">
             ×{group.sales.length}
             <span aria-hidden className="transition-transform group-open/entry:rotate-90">
               ›
             </span>
           </span>
-          {standing !== "inventory" ? <LeadTag auction={lead} standing={standing} /> : null}
+          {showLeadTag(standing, verbose) ? <LeadTag auction={lead} standing={standing} /> : null}
           {/* A cancellation must be visible without opening the group — the one
               thing collapsing rows could otherwise bury. */}
           {group.cancelledCount > 0 && !group.allCancelled ? (
-            <span className="whitespace-nowrap text-[9px] uppercase tracking-wide text-warn">
+            <span className="whitespace-nowrap text-[0.85em] uppercase tracking-wide text-warn">
               {num(group.cancelledCount)} cancelled
             </span>
           ) : null}
@@ -426,8 +432,8 @@ function SaleEntry({
                 title={`${a.title ?? county} — ${num(parcelsShown(a).count)} parcels${
                   parcelsShown(a).announced ? " announced, list not yet fetched" : ""
                 }${bidPhrase(sumBids([a]))}${cancelled ? `, ${a.status}` : ""}`}
-                className={`flex items-baseline gap-2 rounded px-1 py-0.5 transition-colors hover:bg-surface-2 ${
-                  verbose ? "text-sm" : "text-[11px]"
+                className={`flex items-baseline gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-surface-2 ${
+                  verbose ? "text-base" : "text-cell"
                 }`}
               >
                 <span
@@ -470,14 +476,14 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
         // Wraps rather than truncates: the county name is the whole point of
         // the entry, and a lead tag alongside it turns "SC · Greenville" into
         // "SC · Gree…" in a 200px square. Two lines beats an ellipsis.
-        "flex items-start gap-1.5 rounded px-1 py-0.5 leading-tight transition-colors hover:bg-surface-2",
-        verbose ? "text-sm" : "text-[11px]",
-        isLead ? "border-l-2 border-dashed border-border pl-1" : "",
+        "flex items-start gap-2 rounded-md px-1.5 py-1 leading-snug transition-colors hover:bg-surface-2",
+        verbose ? "text-base" : "text-cell",
+        isLead ? "border-l-2 border-dashed border-border pl-1.5" : "",
       ].join(" ")}
     >
       <span
         aria-hidden
-        className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full"
+        className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
         style={{ background: saleTypeColor(auction.saleType) }}
       />
       {/* The name is one unbreakable unit; the lead tag wraps beneath it when
@@ -493,11 +499,9 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
           <span className="text-muted"> · </span>
           {auction.countyName}
         </span>
-        {standing !== "inventory" ? <LeadTag auction={auction} standing={standing} /> : null}
+        {showLeadTag(standing, verbose) ? <LeadTag auction={auction} standing={standing} /> : null}
       </span>
-      {verbose ? (
-        <Totals lots={parcelsShown(auction).count} bids={sumBids([auction])} />
-      ) : null}
+      {verbose ? <Totals lots={parcelsShown(auction).count} bids={sumBids([auction])} /> : null}
     </Link>
   );
 }
@@ -507,15 +511,15 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
  *
  * Two numbers rather than one because they answer different questions: lots is
  * how much there is to work through, opening bids is whether it is worth the
- * drive. The grid squares stay lots-only — there is no room for a second figure
- * at 11px, and it hangs off the tooltip there instead.
+ * drive. The grid squares stay lots-only — a second figure still will not fit
+ * next to a county name — and the bid total hangs off the tooltip there.
  *
  * "lots" is spelled out now that the column carries two figures; a bare pair of
  * numbers side by side gives no clue which is which.
  */
 function Totals({ lots, bids }: { lots: number; bids: number | null }) {
   return (
-    <span className="ml-auto shrink-0 pl-2 text-right text-xs text-muted">
+    <span className="ml-auto shrink-0 pl-2 text-right text-sm text-muted">
       <span className="tnum whitespace-nowrap">{num(lots)} parcels</span>
       {bids === null ? null : (
         <>
@@ -562,6 +566,22 @@ function saleStanding(a: {
   return a.listingKind === "sale_list" ? "inventory" : "lead";
 }
 
+/**
+ * Whether a standing-tag belongs on this row.
+ *
+ * In the month grid, "announced" applies to most of the imported calendar —
+ * rendering it as a badge wraps every county name onto two lines and then
+ * truncates the name anyway. The dotted underline on nested precinct counts
+ * and the tooltip already carry that fact. The agenda has the width, so it
+ * still shows the word. Leads (projected / roll / lands) stay visible in both:
+ * those are the rows that might not be a sale at all.
+ */
+function showLeadTag(standing: "inventory" | "announced" | "lead", verbose: boolean): boolean {
+  if (standing === "inventory") return false;
+  if (standing === "announced") return verbose;
+  return true;
+}
+
 function sumBids(sales: CalendarAuctionRow[]): number | null {
   const present = sales
     .map((s) => s.totalOpeningBids)
@@ -579,9 +599,9 @@ function bidPhrase(total: number | null): string {
 /**
  * Parcels on a day, and how many of them are only announced.
  *
- * The calendar's density is its value — a day cell is about 100px wide — so an
- * announced sale cannot carry a badge there. It carries the number, and the
- * distinction moves into the tooltip and into the dotted underline below.
+ * The grid now has room for the number itself. An announced sale still cannot
+ * carry a badge there — a second word would wrap the row — so the distinction
+ * moves into the tooltip and into the dotted underline below.
  */
 function dayParcels(sales: CalendarAuctionRow[]): { total: number; announced: number } {
   let total = 0;
@@ -602,10 +622,9 @@ function announcedPhrase(announced: number): string {
 /**
  * A sale's parcel count, marked when it is the county's claim rather than ours.
  *
- * A dotted underline rather than a badge or a colour: this renders inside a
- * calendar cell at 11px, where a badge would wrap the row and a colour would
- * collide with the sale-type legend. The underline is the conventional "there
- * is more to know here" affordance and it survives being small.
+ * A dotted underline rather than a badge or a colour: a badge would wrap the
+ * row and a colour would collide with the sale-type legend. The underline is
+ * the conventional "there is more to know here" affordance.
  */
 function AnnouncedCount({
   sale,
@@ -613,10 +632,10 @@ function AnnouncedCount({
   sale: { lotCount: number; announcedParcelCount?: number | null };
 }) {
   const p = parcelsShown(sale);
-  if (!p.announced) return <span className="tnum shrink-0 text-muted">{num(p.count)}</span>;
+  if (!p.announced) return <span className="tnum shrink-0 pl-1 font-medium text-muted">{num(p.count)}</span>;
   return (
     <span
-      className="tnum shrink-0 text-muted underline decoration-dotted underline-offset-2"
+      className="tnum shrink-0 pl-1 font-medium text-muted underline decoration-dotted underline-offset-2"
       title={`${num(p.count)} parcels announced by the county — the parcel list has not been fetched yet`}
     >
       {num(p.count)}
@@ -647,8 +666,14 @@ function LeadTag({
           : auction.listingKind === "lands_available"
             ? "lands"
             : "unverified";
+  /*
+   * `em`, not a tier. This badge annotates rows of two different sizes: the
+   * month grid (`text-cell`) and the mobile list (`text-base`). Pinned at an
+   * absolute 9px it was right in the old 11px grid and unreadable on a phone.
+   * Sized against its parent it stays one step under whatever it annotates.
+   */
   return (
-    <span className="whitespace-nowrap rounded bg-surface-2 px-1 text-[9px] uppercase tracking-wide text-muted">
+    <span className="whitespace-nowrap rounded bg-surface-2 px-1 text-[0.8em] font-medium uppercase tracking-wide text-muted">
       {label}
     </span>
   );
@@ -685,7 +710,7 @@ function CalendarControls({
     filters.saleTypes.length > 0 || filters.platforms.length > 0 || filters.includeLeads;
 
   return (
-    <div className="mb-4 space-y-2.5">
+    <div className="mb-5 space-y-3">
       {/* Month, and what is in it. */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <div className="flex items-center gap-2">
@@ -717,17 +742,17 @@ function CalendarControls({
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden><path d="m9 18 6-6-6-6" /></svg>
           </Link>
         </div>
-        <h3 className="text-lg font-semibold tracking-tight">{monthLabel(filters.month)}</h3>
+        <h3 className="text-2xl font-semibold tracking-tight">{monthLabel(filters.month)}</h3>
         {filters.month === filters.currentMonth ? null : (
           <Link
             href={calendarHref(filters, { month: filters.currentMonth })}
             {...STAY_PUT}
-            className="rounded-md border border-border px-2 py-0.5 text-xs text-muted transition-colors hover:border-accent hover:text-foreground"
+            className="rounded-md border border-border px-2.5 py-1 text-sm text-muted transition-colors hover:border-accent hover:text-foreground"
           >
             Today
           </Link>
         )}
-        <span className="tnum ml-auto text-sm text-muted">{summary}</span>
+        <span className="tnum ml-auto text-base text-muted">{summary}</span>
       </div>
 
       {/* The filter people actually reach for. */}
@@ -755,7 +780,7 @@ function CalendarControls({
               includeLeads: false,
             })}
             {...STAY_PUT}
-            className="ml-1 text-xs text-muted underline hover:text-foreground"
+            className="ml-1 text-sm text-muted underline hover:text-foreground"
           >
             Clear all
           </Link>
@@ -763,13 +788,13 @@ function CalendarControls({
       </div>
 
       <details open={secondaryActive} className="group/filters">
-        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-xs text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+        <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-sm text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
           <span aria-hidden className="transition-transform group-open/filters:rotate-90">
             ›
           </span>
           Type, platform &amp; leads
           {secondaryActive ? (
-            <span className="rounded-full bg-gold px-1.5 text-[10px] font-medium text-ink">on</span>
+            <span className="rounded-full bg-gold px-1.5 text-xs font-medium text-ink">on</span>
           ) : null}
         </summary>
 
@@ -865,7 +890,7 @@ function Chip({
        * Gold, because "which filter am I on" is the single fact this row exists
        * to report, and gold is now what the page uses to say "this one".
        */
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm
                   font-medium transition-all active:scale-[0.97] ${
         active
           ? "border-gold bg-gold text-ink shadow-[0_4px_14px_-4px_color-mix(in_srgb,var(--gold)_70%,transparent)]"
@@ -873,7 +898,7 @@ function Chip({
       }`}
     >
       {dot ? (
-        <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: dot }} />
+        <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: dot }} />
       ) : null}
       {children}
       {count === undefined ? null : (
@@ -885,12 +910,12 @@ function Chip({
 
 function Legend({ types }: { types: string[] }) {
   return (
-    <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
+    <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted">
       {types.map((t) => (
-        <span key={t} className="inline-flex items-center gap-1.5">
+        <span key={t} className="inline-flex items-center gap-2">
           <span
             aria-hidden
-            className="h-1.5 w-1.5 rounded-full"
+            className="h-2.5 w-2.5 rounded-full"
             style={{ background: saleTypeColor(t) }}
           />
           {t}

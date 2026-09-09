@@ -81,9 +81,10 @@ export function AuctionListSkeleton({ groups = 3, perGroup = 3 }: { groups?: num
 /**
  * The month grid.
  *
- * Six rows of seven, at the same `min-h-28` as a real day square, so the
+ * Six rows of seven, at the same `min-h-44` as a real day square, so the
  * calendar occupies its final height before a single sale has loaded — this is
- * the page where a height change would be most obvious.
+ * the page where a height change would be most obvious. Hidden below `xl` to
+ * match the live grid; the agenda fallback is what a tablet actually sees.
  */
 export function CalendarSkeleton() {
   return (
@@ -100,33 +101,33 @@ export function CalendarSkeleton() {
           </div>
         ))}
       </div>
-      <div className="hidden md:block">
-        <div className="grid grid-cols-7 overflow-hidden rounded-xl border border-border bg-surface">
+      <div className="hidden xl:block">
+        <div className="grid grid-cols-7 overflow-hidden rounded-2xl border border-border bg-surface">
           {Array.from({ length: 7 }, (_, i) => (
-            <div key={`h${i}`} className="border-b border-border bg-surface-2/60 px-2 py-1.5">
-              <Bar className="mx-auto h-3 w-8" />
+            <div key={`h${i}`} className="border-b border-border bg-surface-2/60 px-2 py-3">
+              <Bar className="mx-auto h-3.5 w-10" />
             </div>
           ))}
           {Array.from({ length: 42 }, (_, i) => (
             <div
               key={i}
-              className={`min-h-28 border-border p-1.5 ${(i + 1) % 7 === 0 ? "" : "border-r"} ${
+              className={`min-h-44 border-border p-2.5 ${(i + 1) % 7 === 0 ? "" : "border-r"} ${
                 i < 35 ? "border-b" : ""
               }`}
             >
-              <Bar className="h-3 w-4" />
-              {i % 3 === 0 ? <Bar className="mt-2 h-3 w-full" /> : null}
-              {i % 4 === 0 ? <Bar className="mt-1 h-3 w-4/5" /> : null}
+              <Bar className="h-4 w-6" />
+              {i % 3 === 0 ? <Bar className="mt-3 h-3.5 w-full" /> : null}
+              {i % 4 === 0 ? <Bar className="mt-1.5 h-3.5 w-4/5" /> : null}
             </div>
           ))}
         </div>
       </div>
-      <div className="space-y-5 md:hidden">
+      <div className="space-y-5 xl:hidden">
         {Array.from({ length: 4 }, (_, i) => (
           <div key={i}>
-            <Bar className="h-4 w-28" />
-            <Bar className="mt-2 h-4 w-full" />
-            <Bar className="mt-1 h-4 w-3/4" />
+            <Bar className="h-5 w-36" />
+            <Bar className="mt-2 h-5 w-full" />
+            <Bar className="mt-1.5 h-5 w-3/4" />
           </div>
         ))}
       </div>

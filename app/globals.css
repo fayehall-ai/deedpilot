@@ -297,6 +297,33 @@ h1 {
 }
 
 /*
+ * Type inside a month-grid cell.
+ *
+ * The previous floor was 11px — chosen so five county names would fit a 154px
+ * column at 1024px. That is a size you can see and cannot read, and it is the
+ * size the grid actually shipped at on a laptop. Density lost: a calendar
+ * someone has to lean into is not denser, it is smaller.
+ *
+ * Floor is 13px at the `lg` breakpoint where the grid first appears. The
+ * viewport term then rides the column as it widens, so a county name is 14px
+ * at 1280, 16px at 1728, and stops at 18px before a cell starts looking like
+ * a paragraph. Day numbers use `text-day` on top of this; they have to outrank
+ * the entries they caption.
+ */
+@utility text-cell {
+  font-size: clamp(0.8125rem, 0.45rem + 0.55vw, 1.125rem);
+  line-height: 1.35;
+}
+
+/* The date numeral in a day square — one step above the entries it captions. */
+@utility text-day {
+  font-size: clamp(0.9375rem, 0.55rem + 0.5vw, 1.25rem);
+  font-weight: 650;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
  * Vertical rhythm, tied to the viewport's *width*.
  *
  * Width rather than height on purpose: the reason a section needs more air is
