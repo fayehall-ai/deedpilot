@@ -321,11 +321,11 @@ Passes Component Nine&apos;s quality gate
                     </td>
                     <td className="px-4 py-2.5">
                       <div>{TIER_LABEL[cape.source.tier]}</div>
-                      <div className="font-mono text-[11px] text-muted">{cape.source.host}</div>
+                      <div className="font-mono text-xs text-muted">{cape.source.host}</div>
                     </td>
                     <td className="tnum px-4 py-2.5 text-right">
                       {Math.round(cape.score * 100)}%
-                      <div className="text-[11px] text-muted">
+                      <div className="text-xs text-muted">
                         due {cape.deadline.dueDate}
                         {cape.deadline.overdue ? " · overdue" : ""}
                         {cape.components[9]?.items[0]?.state === "have" ? (

@@ -257,7 +257,7 @@ function Inherited() {
   return (
     <span
       title="Inherited from the state default, not verified for this county"
-      className="ml-1 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted"
+      className="ml-1 rounded bg-surface-2 px-1.5 py-0.5 text-xs uppercase tracking-wide text-muted"
     >
       state default
     </span>

@@ -237,7 +237,7 @@ function Figure({
       >
         {value}
       </dd>
-      {hint ? <p className="text-[11px] leading-tight text-faint">{hint}</p> : null}
+      {hint ? <p className="text-xs leading-tight text-faint">{hint}</p> : null}
     </div>
   );
 }

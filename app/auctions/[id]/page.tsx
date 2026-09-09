@@ -76,7 +76,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
           <h1 className="text-section font-semibold">
             {county.name} County, {STATE_NAMES[county.state] ?? county.state}
           </h1>
-          <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-base text-muted">
             <span>
               {saleDate(auction.saleDate)} · {relativeDays(auction.saleDate)}
             </span>
@@ -85,7 +85,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <SaleTypeBadge type={auction.saleType} />
             <StatusBadge status={auction.status} />
-            <span className="text-xs text-muted">via {platformLabel(auction.platform)}</span>
+            <span className="text-sm text-muted">via {platformLabel(auction.platform)}</span>
           </div>
         </div>
       </header>
@@ -184,20 +184,20 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
       */}
       {rule ? (
         <details className="group/rules mb-6 rounded-xl border border-border bg-surface">
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-sm font-semibold hover:text-accent [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-base font-semibold hover:text-accent [&::-webkit-details-marker]:hidden">
             <span aria-hidden className="text-muted transition-transform group-open/rules:rotate-90">
               ›
             </span>
             {county.name} County rules
             {rule.isStateDefault ? (
-              <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wide text-muted">
+              <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-normal uppercase tracking-wide text-muted">
                 state defaults
               </span>
             ) : null}
           </summary>
 
           <div className="space-y-5 border-t border-border px-5 py-4">
-            <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            <dl className="grid gap-x-6 gap-y-3 text-base sm:grid-cols-2 lg:grid-cols-3">
               <Row label="Sale type" value={rule.type} />
               <Row label="Redemption period" value={rule.redemption} />
               <Row label="Investor return" value={rule.returns} />
@@ -210,8 +210,8 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
                 header reads as a section that failed to load. */}
             {rule.auctionFormat || rule.auctionFrequency || rule.auctionPlatform?.label || rule.depositRules ? (
             <section className="border-t border-border pt-4">
-              <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">Auction logistics</h3>
-              <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+              <h3 className="mb-2 text-sm uppercase tracking-wide text-muted">Auction logistics</h3>
+              <dl className="grid gap-x-6 gap-y-3 text-base sm:grid-cols-2 lg:grid-cols-3">
                 <Row label="Format" value={rule.auctionFormat} />
                 <Row label="Frequency" value={rule.auctionFrequency} />
                 <RefRow label="Platform" link={rule.auctionPlatform} />
@@ -228,17 +228,17 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
             */}
             {rule.quietTitle ? (
               <section className="border-t border-border pt-4">
-                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">Title risk</h3>
-                <p className="text-sm leading-relaxed">{rule.quietTitle}</p>
+                <h3 className="mb-2 text-sm uppercase tracking-wide text-muted">Title risk</h3>
+                <p className="text-base leading-relaxed">{rule.quietTitle}</p>
               </section>
             ) : null}
 
             {rule.taxCollector || rule.clerkOfCourt || rule.propertyAppraiser || rule.gisMap ? (
               <section className="border-t border-border pt-4">
-                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">
+                <h3 className="mb-2 text-sm uppercase tracking-wide text-muted">
                   Offices and records
                 </h3>
-                <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                <dl className="grid gap-x-6 gap-y-3 text-base sm:grid-cols-2 lg:grid-cols-3">
                   <RefRow label="Tax collector" link={rule.taxCollector} />
                   <RefRow label="Clerk of court" link={rule.clerkOfCourt} />
                   <RefRow label="Property appraiser" link={rule.propertyAppraiser} />
@@ -249,7 +249,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
 
             {rule.growthNeighborhoods?.length ? (
               <section className="border-t border-border pt-4">
-                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">
+                <h3 className="mb-2 text-sm uppercase tracking-wide text-muted">
                   Areas trending up
                 </h3>
                 <ul className="space-y-1.5 text-sm">
@@ -265,7 +265,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
 
             {rule.notes ? (
               <section className="border-t border-border pt-4">
-                <h3 className="mb-2 text-xs uppercase tracking-wide text-muted">Notes</h3>
+                <h3 className="mb-2 text-sm uppercase tracking-wide text-muted">Notes</h3>
                 <p className="text-sm leading-relaxed text-muted">{rule.notes}</p>
               </section>
             ) : null}
@@ -276,7 +276,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
             */}
             {rule.sources?.length ? (
               <details className="group/src border-t border-border pt-4">
-                <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-xs uppercase tracking-wide text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+                <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm uppercase tracking-wide text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
                   <span aria-hidden className="transition-transform group-open/src:rotate-90">
                     ›
                   </span>
@@ -290,7 +290,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
                         target="_blank"
                         rel="noopener noreferrer"
                         title={src}
-                        className="text-xs text-muted underline hover:text-foreground"
+                        className="text-sm text-muted underline hover:text-foreground"
                       >
                         {src.replace(/^https?:\/\/(www\.)?/, "")}
                       </a>
@@ -301,7 +301,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
             ) : null}
 
             {rule.inherited.length > 0 ? (
-              <p className="border-t border-border pt-3 text-xs text-muted">
+              <p className="border-t border-border pt-3 text-sm text-muted">
                 Inherited from {STATE_NAMES[county.state] ?? county.state} rather than researched
                 for {county.name}: {rule.inherited.join(", ")}.
               </p>
@@ -337,7 +337,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
         <Card className="overflow-hidden p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b border-border bg-surface-2/50 text-left text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b border-border bg-surface-2/50 text-left text-sm uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-4 py-2.5 font-medium">Parcel</th>
                   <th className="px-4 py-2.5 font-medium">Address</th>
@@ -362,7 +362,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
                       <td className="px-4 py-2.5">
                         <Link
                           href={`/lots/${l.id}`}
-                          className="font-mono text-xs hover:text-accent hover:underline"
+                          className="font-mono text-sm hover:text-accent hover:underline"
                         >
                           {l.parcelNumber ?? l.externalId ?? "—"}
                         </Link>
@@ -404,7 +404,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
         </Card>
       )}
 
-      <p className="mt-4 max-w-3xl text-xs leading-relaxed text-muted">
+      <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted">
         <strong className="text-foreground">Spread is not profit.</strong> It compares the opening
         bid to the county&apos;s assessed value, which is not market value —{" "}
         {statute
@@ -447,7 +447,7 @@ function AnnouncedFacts({
   return (
     <Card className="mb-6">
       <h2 className="mb-1 text-base font-semibold">As announced by the county</h2>
-      <p className="mb-4 text-xs text-muted">
+      <p className="mb-4 text-base text-muted">
         Published sale details.{" "}
         {hasLots
           ? "The parcel list below was fetched separately."
@@ -456,7 +456,7 @@ function AnnouncedFacts({
 
       {d.venue ? (
         <div className="mb-4">
-          <div className="text-xs uppercase tracking-wide text-muted">Held at</div>
+          <div className="text-sm uppercase tracking-wide text-muted">Held at</div>
           <div className="mt-0.5 leading-relaxed">{d.venue}</div>
         </div>
       ) : null}
@@ -465,7 +465,7 @@ function AnnouncedFacts({
         <dl className="grid gap-3 sm:grid-cols-3">
           {d.facts.map((f) => (
             <div key={f.label}>
-              <dt className="text-xs uppercase tracking-wide text-muted">{f.label}</dt>
+              <dt className="text-sm uppercase tracking-wide text-muted">{f.label}</dt>
               <dd className="mt-0.5 break-words leading-relaxed">
                 {f.href ? (
                   <a
@@ -489,7 +489,7 @@ function AnnouncedFacts({
         <dl className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-4">
           {d.contacts.map((c) => (
             <div key={c.label}>
-              <dt className="text-xs uppercase tracking-wide text-muted">{c.label}</dt>
+              <dt className="text-sm uppercase tracking-wide text-muted">{c.label}</dt>
               <dd className="mt-0.5 break-words leading-relaxed">
                 {c.href ? (
                   <a href={c.href} className="text-accent hover:underline">
@@ -527,7 +527,7 @@ function Row({ label, value }: { label: string; value?: string | null }) {
   if (!v) return null;
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
+      <dt className="text-sm uppercase tracking-wide text-muted">{label}</dt>
       <dd className="mt-0.5 leading-relaxed">{v}</dd>
     </div>
   );
@@ -544,7 +544,7 @@ function RefRow({ label, link }: { label: string; link?: LinkRef | null }) {
   if (!link?.label) return null;
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-muted">{label}</dt>
+      <dt className="text-sm uppercase tracking-wide text-muted">{label}</dt>
       <dd className="mt-0.5 leading-relaxed">
         {link.url ? (
           <a
@@ -558,7 +558,7 @@ function RefRow({ label, link }: { label: string; link?: LinkRef | null }) {
         ) : (
           link.label
         )}
-        {link.phone ? <span className="block text-xs text-muted">{link.phone}</span> : null}
+        {link.phone ? <span className="block text-sm text-muted">{link.phone}</span> : null}
       </dd>
     </div>
   );

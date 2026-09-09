@@ -29,7 +29,7 @@ export function CorpusBars({ rules, total }: { rules: StatusRule[]; total: numbe
           >
             <div className="min-w-0">
               <div className="truncate font-mono text-xs">{r.rule}</div>
-              <div className="text-[11px] text-muted">
+              <div className="text-xs text-muted">
                 {percent(r.n / total, 0)} of rows
               </div>
             </div>
@@ -38,16 +38,16 @@ export function CorpusBars({ rules, total }: { rules: StatusRule[]; total: numbe
                 className="flex h-6 items-center rounded px-2"
                 style={{ width: `${Math.max(2, (r.n / max) * 100)}%`, background: color }}
               >
-                <span className="tnum whitespace-nowrap text-[11px] font-semibold text-white">
+                <span className="tnum whitespace-nowrap text-xs font-semibold text-white">
                   {num(r.n)}
                 </span>
               </div>
               {r.price_usable > 0 ? (
-                <span className="tnum whitespace-nowrap text-[11px] text-muted">
+                <span className="tnum whitespace-nowrap text-xs text-muted">
                   {num(r.price_usable)} usable
                 </span>
               ) : (
-                <span className="whitespace-nowrap text-[11px] text-muted">no price signal</span>
+                <span className="whitespace-nowrap text-xs text-muted">no price signal</span>
               )}
             </div>
           </div>
@@ -217,7 +217,7 @@ export function PolicyBars({ rows }: { rows: Record<string, import("@/lib/status
             >
               <div className="min-w-0">
                 <div className="truncate font-mono text-xs">{name}</div>
-                <div className="text-[11px] text-muted">
+                <div className="text-xs text-muted">
                   {isSearch ? "current" : isShipped ? "previously shipping" : "baseline"}
                 </div>
               </div>
@@ -233,7 +233,7 @@ export function PolicyBars({ rows }: { rows: Record<string, import("@/lib/status
                         : "var(--muted)",
                   }}
                 />
-                <span className="tnum whitespace-nowrap text-[11px] text-muted">
+                <span className="tnum whitespace-nowrap text-xs text-muted">
                   ${(r.totalSurplus / 1e6).toFixed(2)}M · win {percent(r.winRate, 0)} · overpay $
                   {num(Math.round(r.meanOverpay))}
                   {r.oracleViolations > 0 ? (

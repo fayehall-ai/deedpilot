@@ -164,11 +164,44 @@
   --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /*
+   * Readable type, not dense type.
+   *
+   * Tailwind's defaults (12 / 14 / 16) were chosen for dashboards. This site
+   * is read at arm's length during a live auction, and 12px labels on a 27"
+   * display are what the "too small" report keeps coming back as. The html
+   * root stays 16px so `sm:`/`md:`/`lg:` still fire at the same pixel widths;
+   * the scale itself moves.
+   *
+   *   xs    14px  captions, uppercase labels
+   *   sm    17px  secondary copy
+   *   base  19px  body — also set on `body` so unclassed text matches
+   *   lg    22px
+   *   xl    26px
+   *   2xl   30px
+   */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 1.0625rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1.1875rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.375rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.625rem;
+  --text-xl--line-height: 1.35;
+  --text-2xl: 1.875rem;
+  --text-2xl--line-height: 1.25;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 1.2;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
   /* Apple's own stack renders these greys as intended on macOS and iOS, which
      is where most of this audience reads it. */
   -webkit-font-smoothing: antialiased;
@@ -284,7 +317,7 @@ h1 {
 
 /* Section headings: the same idea, an octave down. */
 @utility text-section {
-  font-size: clamp(1.375rem, 1.6vw, 2rem);
+  font-size: clamp(1.5rem, 1.8vw, 2.25rem);
   line-height: 1.15;
   letter-spacing: -0.02em;
 }
@@ -308,13 +341,13 @@ h1 {
  * it captions.
  */
 @utility text-cell {
-  font-size: clamp(1rem, 0.65rem + 0.5vw, 1.25rem);
+  font-size: clamp(1.125rem, 0.75rem + 0.5vw, 1.375rem);
   line-height: 1.35;
 }
 
 /* The date numeral in a day square — one step above the entries it captions. */
 @utility text-day {
-  font-size: clamp(1.125rem, 0.75rem + 0.5vw, 1.5rem);
+  font-size: clamp(1.25rem, 0.85rem + 0.5vw, 1.625rem);
   font-weight: 650;
   line-height: 1;
   font-variant-numeric: tabular-nums;

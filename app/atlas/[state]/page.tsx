@@ -155,7 +155,7 @@ export default async function StatePage(props: PageProps<"/atlas/[state]">) {
                 {researched ? (
                   <span
                     title="Individually researched"
-                    className="shrink-0 rounded bg-accent px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-fg"
+                    className="shrink-0 rounded bg-accent px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-accent-fg"
                   >
                     ✓
                   </span>

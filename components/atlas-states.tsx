@@ -83,7 +83,7 @@ export function AtlasStates({
                     {STATE_NAMES[s] ?? s}
                   </span>
                   {isCovered(s) ? (
-                    <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-fg">
+                    <span className="rounded bg-accent px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-accent-fg">
                       Live auctions
                     </span>
                   ) : null}

@@ -32,7 +32,7 @@ export function Card({
 export function SaleTypeBadge({ type }: { type: string }) {
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"
+      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium"
       style={{ borderColor: saleTypeColor(type), color: saleTypeColor(type) }}
     >
       <span
@@ -61,7 +61,7 @@ const STATUS_STYLES: Record<string, string> = {
 export function StatusBadge({ status }: { status: string }) {
   return (
     <span
-      className={`inline-block rounded border px-2 py-0.5 text-xs capitalize ${
+      className={`inline-block rounded border px-2.5 py-1 text-sm capitalize ${
         STATUS_STYLES[status] ?? "text-muted border-border"
       }`}
     >
@@ -81,9 +81,9 @@ export function Stat({
 }) {
   return (
     <div>
-      <div className="text-xs uppercase tracking-wide text-muted">{label}</div>
+      <div className="text-sm uppercase tracking-wide text-muted">{label}</div>
       <div className="tnum mt-1 text-2xl font-semibold">{value}</div>
-      {hint ? <div className="mt-0.5 text-xs text-muted">{hint}</div> : null}
+      {hint ? <div className="mt-1 text-sm text-muted">{hint}</div> : null}
     </div>
   );
 }
@@ -94,7 +94,7 @@ export function Stat({
  */
 export function AssumedTag({ children = "assumed" }: { children?: React.ReactNode }) {
   return (
-    <span className="ml-1.5 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
+    <span className="ml-1.5 rounded bg-surface-2 px-1.5 py-0.5 text-xs uppercase tracking-wide text-muted">
       {children}
     </span>
   );
@@ -113,7 +113,7 @@ export function Callout({
     tone === "danger" ? "var(--danger)" : tone === "warn" ? "var(--warn)" : "var(--muted)";
   return (
     <div
-      className="rounded-lg border-l-2 bg-surface-2/60 px-4 py-3 text-sm"
+      className="rounded-lg border-l-2 bg-surface-2/60 px-4 py-3 text-base"
       style={{ borderLeftColor: color }}
     >
       {title ? (
@@ -128,7 +128,7 @@ export function Callout({
 
 export function Breadcrumbs({ items }: { items: { href?: string; label: string }[] }) {
   return (
-    <nav className="mb-4 flex flex-wrap items-center gap-1.5 text-sm text-muted">
+    <nav className="mb-4 flex flex-wrap items-center gap-1.5 text-base text-muted">
       {items.map((it, i) => (
         <span key={i} className="flex items-center gap-1.5">
           {i > 0 && <span aria-hidden>/</span>}
@@ -149,7 +149,7 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
   return (
     <div className="rounded-xl border border-dashed border-border px-6 py-12 text-center">
       <p className="font-medium">{title}</p>
-      {children ? <div className="mx-auto mt-2 max-w-prose text-sm text-muted">{children}</div> : null}
+      {children ? <div className="mx-auto mt-2 max-w-prose text-base text-muted">{children}</div> : null}
     </div>
   );
 }

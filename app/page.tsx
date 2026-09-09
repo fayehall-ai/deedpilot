@@ -235,7 +235,7 @@ export default function HomePage(props: PageProps<"/">) {
                 that the estimate is *not* an assessed value — so this line
                 must not promise one.
               */}
-              <p className="mt-1.5 text-xs leading-relaxed text-ink-muted">
+              <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
                 Owner, last sale, and an estimated market value for any US
                 property — before you decide it is worth researching.
               </p>
@@ -402,7 +402,7 @@ function HeroStat({ label, value }: { label: string; value: string }) {
      */
     <div>
       <dd className="tnum text-stat font-semibold">{value}</dd>
-      <dt className="mt-2 text-xs leading-snug text-ink-muted">{label}</dt>
+      <dt className="mt-2 text-sm leading-snug text-ink-muted">{label}</dt>
     </div>
   );
 }

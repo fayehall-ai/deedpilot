@@ -186,7 +186,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             <h1 className="text-section font-semibold">
               {lot.addressLine ?? lot.parcelNumber ?? "Unaddressed parcel"}
             </h1>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-base text-muted">
               {[lot.city, STATE_NAMES[county.state] ?? county.state, lot.zip]
                 .filter(Boolean)
                 .join(", ") || `${county.name} County, ${county.state}`}
@@ -194,7 +194,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <SaleTypeBadge type={auction.saleType} />
               <StatusBadge status={lot.status} />
-              <span className="text-xs text-muted">
+              <span className="text-sm text-muted">
                 Sells {saleDate(auction.saleDate)} · {relativeDays(auction.saleDate)}
               </span>
             </div>
@@ -393,7 +393,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
                     {l.label} ↗
                   </a>
                   {l.searchOnly && lot.parcelNumber ? (
-                    <span className="mt-0.5 block font-mono text-[11px] text-muted">
+                    <span className="mt-0.5 block font-mono text-xs text-muted">
                       search: {lot.parcelNumber}
                     </span>
                   ) : null}

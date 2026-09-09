@@ -106,8 +106,8 @@ export async function AuctionsList(props: {
           {[...byDate.entries()].slice(0, props.maxGroups ?? Infinity).map(([date, group]) => (
             <section key={date}>
               <div className="mb-3 flex items-baseline gap-3 border-b border-border pb-2">
-                <h2 className="text-sm font-semibold">{saleDate(date)}</h2>
-                <span className="text-xs text-muted">{relativeDays(date)}</span>
+                <h2 className="text-lg font-semibold">{saleDate(date)}</h2>
+                <span className="text-sm text-muted">{relativeDays(date)}</span>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -146,7 +146,7 @@ export async function AuctionsList(props: {
                           {num(parcelsShown(a).count)}
                           {parcelsShown(a).announced ? (
                             <span
-                              className="ml-1 align-middle text-[10px] uppercase tracking-wide text-muted"
+                              className="ml-1 align-middle text-xs uppercase tracking-wide text-muted"
                               title="The county published this count; the parcel list has not been fetched yet"
                             >
                               announced

@@ -125,7 +125,7 @@ async function StatusBody() {
                     <td className="py-2 pr-3 font-mono text-xs">{b.key}</td>
                     <td className="py-2 pr-3">
                       <span
-                        className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wide"
+                        className="rounded px-1.5 py-0.5 text-xs uppercase tracking-wide"
                         style={{
                           color: b.source === "observed" ? "var(--accent)" : "var(--warn)",
                           background:
@@ -215,7 +215,7 @@ async function StatusBody() {
               {priors.unobservedFields.map((f) => (
                 <li
                   key={f}
-                  className="rounded bg-surface-2 px-2 py-1 font-mono text-[11px] text-muted"
+                  className="rounded bg-surface-2 px-2 py-1 font-mono text-xs text-muted"
                 >
                   {f}
                 </li>

@@ -77,7 +77,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             the scroll work — without it flex compresses them into unreadable
             slivers rather than overflowing into a scrollable strip.
           */}
-          <div className="shell flex h-14 items-center gap-3 sm:gap-6">
+          <div className="shell flex h-16 items-center gap-3 sm:gap-6">
             <HomeLink className="flex shrink-0 items-center gap-2 font-semibold tracking-tight">
               {/*
                 Gold, like the primary CTA it shares the navy bar with.
@@ -95,7 +95,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               DeedPilot
             </HomeLink>
             <nav
-              className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-base [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               aria-label="Primary"
             >
               {NAV.map((n) => (
@@ -114,7 +114,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <main className="flex-1">{children}</main>
 
         <footer className="border-t border-border bg-surface-2/50">
-          <div className="shell py-band text-xs leading-relaxed text-muted">
+          <div className="shell py-band text-sm leading-relaxed text-muted">
             <p className="mb-2 max-w-3xl">
               <strong className="text-foreground">Not legal or investment advice.</strong> Tax sale
               rules vary by state, county, and municipality, and change with legislation. Auction
