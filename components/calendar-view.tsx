@@ -576,7 +576,10 @@ function saleStanding(a: {
  * still shows the word. Leads (projected / roll / lands) stay visible in both:
  * those are the rows that might not be a sale at all.
  */
-function showLeadTag(standing: "inventory" | "announced" | "lead", verbose: boolean): boolean {
+function showLeadTag(
+  standing: "inventory" | "announced" | "lead",
+  verbose: boolean,
+): standing is "announced" | "lead" {
   if (standing === "inventory") return false;
   if (standing === "announced") return verbose;
   return true;
