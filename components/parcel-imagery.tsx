@@ -55,7 +55,8 @@ export function ParcelImagery({
   caption?: string | null;
 }) {
   const [frame, setFrame] = useState(0);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState(() => FRAMES.map(() => false));
+  const [ready, setReady] = useState(() => FRAMES.map(() => false));
 
   const lat = Number(latitude);
   const lon = Number(longitude);
@@ -75,10 +76,10 @@ export function ParcelImagery({
     });
   });
 
-  if (!sources[0] || failed) return null;
+  if (!sources[0]) return null;
 
   return (
-    <figure className="max-w-[520px] overflow-hidden rounded-3xl border border-border/70 bg-surface text-foreground shadow-[var(--shadow-sm)]">
+    <figure className="w-full max-w-[520px] shrink-0 overflow-hidden rounded-3xl border border-border/70 bg-surface text-foreground shadow-[var(--shadow-sm)]">
       <div className="relative">
         {/*
           Both frames are rendered and the inactive one is hidden, rather than
@@ -106,9 +107,24 @@ export function ParcelImagery({
               }
               width={DISPLAY_WIDTH}
               height={DISPLAY_HEIGHT}
-              loading="lazy"
+              loading={i === 0 ? "eager" : "lazy"}
               decoding="async"
-              onError={() => i === frame && setFailed(true)}
+              onLoad={() =>
+                setReady((prev) => {
+                  if (prev[i]) return prev;
+                  const next = [...prev];
+                  next[i] = true;
+                  return next;
+                })
+              }
+              onError={() =>
+                setFailed((prev) => {
+                  if (prev[i]) return prev;
+                  const next = [...prev];
+                  next[i] = true;
+                  return next;
+                })
+              }
               aria-hidden={i !== frame}
               className={`block aspect-[520/340] w-full bg-surface-2 object-cover ${
                 i === frame ? "" : "absolute inset-0 opacity-0"
@@ -117,8 +133,14 @@ export function ParcelImagery({
           ) : null,
         )}
 
+        {(!ready[frame] || failed[frame]) && (
+          <div className="absolute inset-0 z-[1] flex items-center justify-center bg-surface-2 px-4 text-center text-sm text-muted">
+            {failed[frame] ? "Aerial imagery could not be loaded." : "Loading aerial imagery…"}
+          </div>
+        )}
+
         {/* The frame control. Two states, so a segmented pair beats a dropdown. */}
-        <div className="absolute left-3 top-3 flex gap-1 rounded-full bg-ink/70 p-1 backdrop-blur">
+        <div className="absolute left-3 top-3 z-[2] flex gap-1 rounded-full bg-ink/70 p-1 backdrop-blur">
           {FRAMES.map((f, i) => (
             <button
               key={f.label}
@@ -138,7 +160,7 @@ export function ParcelImagery({
           href={`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute bottom-3 right-3 rounded-full bg-ink/70 px-2.5 py-1 text-xs
+          className="absolute bottom-3 right-3 z-[2] rounded-full bg-ink/70 px-2.5 py-1 text-xs
                      font-medium text-ink-fg backdrop-blur transition-colors hover:bg-ink/85"
         >
           Open in Maps ↗

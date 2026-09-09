@@ -172,7 +172,7 @@ export default function HomePage(props: PageProps<"/">) {
             shrunk once from 600px and wrongly called fixed. Matching the two
             columns by content is what actually removes it.
           */}
-          <div className="mt-9 grid gap-10 lg:grid-cols-[minmax(0,1fr)_clamp(20rem,26vw,40rem)] lg:items-start lg:gap-[clamp(2.5rem,4vw,5rem)]">
+          <div className="mt-9 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,34rem)] lg:items-start lg:gap-[clamp(2.5rem,4vw,5rem)]">
           <div className="min-w-0">
             <p className="mt-6 max-w-[62ch] text-xl leading-relaxed text-ink-muted">
               Every county&apos;s tax sale rules, live auction inventory, and a co-pilot that
@@ -218,32 +218,19 @@ export default function HomePage(props: PageProps<"/">) {
 
           {/*
             The lookup is a panel rather than a bare pill.
-            
+
             On a wide band a single input pinned to the top right left roughly
             600px of empty navy under it, which read as a layout that had lost
             something. Given a heading and a line saying what it answers, it
             has enough weight to hold that side of the grid — and the sentence
             is the thing a visitor needs anyway to know the control is worth
             using.
+
+            PropertySearch returns a fragment. The panel occupies this second
+            column; a result is a third grid child spanning both tracks, so a
+            listing is not trapped in the ~34rem lookup column.
           */}
-          <div className="w-full min-w-0">
-            <div className="glass rounded-3xl p-[clamp(1.35rem,1.6vw,2rem)]">
-              <h2 className="font-display text-xl font-medium text-ink-fg">Look up any address</h2>
-              {/*
-                What it actually returns. `PropertyResult` shows owner, last
-                sale and an estimated market value, and says in as many words
-                that the estimate is *not* an assessed value — so this line
-                must not promise one.
-              */}
-              <p className="mt-1.5 text-base leading-relaxed text-ink-muted">
-                Owner, last sale, and an estimated market value for any US
-                property — before you decide it is worth researching.
-              </p>
-              <div className="mt-4">
-                <PropertySearch />
-              </div>
-            </div>
-          </div>
+          <PropertySearch />
           </div>
 
           <HeroStats />

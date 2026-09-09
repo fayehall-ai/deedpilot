@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { SearchedProperty } from "@/lib/property/providers/websearch";
 import { ParcelImagery } from "./parcel-imagery";
 
@@ -7,6 +8,14 @@ import { ParcelImagery } from "./parcel-imagery";
  * Deliberately a plain synchronous component taking data as props, so the same
  * markup serves a server render and the inline client panel on the home page.
  * The lookup itself is a server action; this only draws the answer.
+ *
+ * ## Why this is one card, not a stack
+ *
+ * It used to render as three cream cards inside the hero's ~34rem lookup
+ * column: figures, then a 520×340 aerial, then sources. The aerial sat in that
+ * narrow track as a tall empty beige box while USGS loaded, and every field
+ * wrapped. A listing card — address and price, a spec strip, the photograph
+ * beside the remaining facts — is how this information is actually read.
  */
 
 export interface ResultProps {
@@ -51,21 +60,82 @@ function Sources({ citations }: { citations: ResultProps["citations"] }) {
   );
 }
 
-function Detail({ p }: { p: SearchedProperty }) {
+function SpecStrip({ p }: { p: SearchedProperty }) {
+  const specs: { key: string; node: ReactNode }[] = [];
+  if (p.beds != null) {
+    specs.push({
+      key: "beds",
+      node: (
+        <>
+          <strong className="font-semibold">{p.beds}</strong> beds
+        </>
+      ),
+    });
+  }
+  if (p.baths != null) {
+    specs.push({
+      key: "baths",
+      node: (
+        <>
+          <strong className="font-semibold">{p.baths}</strong> baths
+        </>
+      ),
+    });
+  }
+  if (p.buildingSqft) {
+    specs.push({
+      key: "size",
+      node: (
+        <>
+          <strong className="tnum font-semibold">{p.buildingSqft.toLocaleString()}</strong> sqft
+        </>
+      ),
+    });
+  }
+  if (p.lotSqft) {
+    specs.push({
+      key: "lot",
+      node: (
+        <>
+          <strong className="tnum font-semibold">{p.lotSqft.toLocaleString()}</strong> sqft lot
+        </>
+      ),
+    });
+  }
+  if (p.yearBuilt) {
+    specs.push({
+      key: "year",
+      node: (
+        <>
+          Built <strong className="tnum font-semibold">{p.yearBuilt}</strong>
+        </>
+      ),
+    });
+  }
+
+  if (specs.length === 0) return null;
+
   return (
-    <>
-      {/*
-        Two columns, not four. This panel sits in the hero's lookup column —
-        about 400px — and four fields across made every value wrap or shrink
-        to the faint inherited ink-fg of the navy band behind it.
-      */}
-      <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5">
+    <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-border py-4 text-lg text-foreground">
+      {specs.map((s, i) => (
+        <span key={s.key} className="inline-flex items-center gap-3">
+          {i > 0 ? (
+            <span aria-hidden className="text-muted">
+              ·
+            </span>
+          ) : null}
+          {s.node}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function Remaining({ p }: { p: SearchedProperty }) {
+  return (
+    <div className="min-w-0 flex-1">
+      <dl className="grid gap-x-10 gap-y-5 sm:grid-cols-2">
         <Field label="Type" value={p.propertyType} />
-        <Field label="Beds" value={p.beds} />
-        <Field label="Baths" value={p.baths} />
-        <Field label="Size" value={p.buildingSqft ? `${p.buildingSqft.toLocaleString()} sqft` : null} />
-        <Field label="Lot" value={p.lotSqft ? `${p.lotSqft.toLocaleString()} sqft` : null} />
-        <Field label="Year built" value={p.yearBuilt} />
         <Field label="Status" value={p.status} />
         <Field label="Last sale" value={money(p.lastSaleAmount)} />
         <Field label="Sale date" value={p.lastSaleDate} />
@@ -82,7 +152,7 @@ function Detail({ p }: { p: SearchedProperty }) {
 
       {p.features.length > 0 && (
         <div className="mt-6">
-          <dt className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Features</dt>
+          <p className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Features</p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {p.features.slice(0, 12).map((f) => (
               <li key={f} className="rounded-full bg-surface-2 px-3 py-1 text-base text-foreground">
@@ -95,18 +165,51 @@ function Detail({ p }: { p: SearchedProperty }) {
 
       {p.neighborhood && (
         <div className="mt-6">
-          <dt className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Neighbourhood</dt>
+          <p className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Neighbourhood</p>
           <p className="mt-1.5 text-base leading-relaxed text-foreground">{p.neighborhood}</p>
         </div>
       )}
 
       {p.comparables && (
         <div className="mt-6">
-          <dt className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Comparable sales</dt>
+          <p className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Comparable sales</p>
           <p className="mt-1.5 text-base leading-relaxed text-foreground">{p.comparables}</p>
         </div>
       )}
-    </>
+    </div>
+  );
+}
+
+function Listing({
+  p,
+  location,
+  caption,
+}: {
+  p: SearchedProperty;
+  location?: ResultProps["location"];
+  caption?: string | null;
+}) {
+  return (
+    <div className="mt-6 flex flex-col gap-8 lg:flex-row lg:items-start">
+      {/*
+        Not wrapped. ParcelImagery renders nothing without coordinates, and a
+        wrapper would leave a 520px empty column in the flex row when it does.
+      */}
+      <ParcelImagery
+        latitude={location?.lat}
+        longitude={location?.lon}
+        caption={caption}
+      />
+      <Remaining p={p} />
+    </div>
+  );
+}
+
+function Card({ children }: { children: ReactNode }) {
+  return (
+    <article className="w-full min-w-0 rounded-3xl border border-border bg-surface p-[clamp(1.35rem,2vw,2.25rem)] text-foreground shadow-[var(--shadow-sm)]">
+      {children}
+    </article>
   );
 }
 
@@ -126,120 +229,93 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
 
     if (!hasContext) {
       return (
-        <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
-          <h3 className="font-display text-xl font-medium">No record found for that address</h3>
+        <Card>
+          <h3 className="font-display text-2xl font-medium">No record found for that address</h3>
           <p className="mt-2 text-base text-muted">{p.basis}</p>
-        </div>
+        </Card>
       );
     }
 
     return (
-      <div className="space-y-4">
-        <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h3 className="font-display text-xl font-medium tracking-tight">
-              {p.closestMatch ? "Closest match" : "What was found"}
-            </h3>
-            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-              not the exact address
-            </span>
-          </div>
-          {p.closestMatch && <p className="mt-3 text-lg leading-relaxed">{p.closestMatch}</p>}
-          <Detail p={p} />
+      <Card>
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
+          <h3 className="min-w-0 font-display text-2xl font-medium tracking-tight">
+            {p.closestMatch ? "Closest match" : "What was found"}
+          </h3>
+          <span className="self-start rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            not the exact address
+          </span>
         </div>
+        {p.closestMatch && <p className="mt-3 text-lg leading-relaxed">{p.closestMatch}</p>}
+        <SpecStrip p={p} />
+        <Listing p={p} location={location} caption={location?.matched} />
 
-        {/*
-          Shown even here, because the coordinates came from the geocoder
-          placing the address that was typed — not from the closest match. The
-          picture is of the right place even when the valuation is not.
-        */}
-        <ParcelImagery
-          latitude={location?.lat}
-          longitude={location?.lon}
-          caption={location?.matched}
-        />
-
-        <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
+        <div className="mt-8 border-t border-border pt-6">
           <h4 className="font-display text-lg font-medium">Why this is not the exact property</h4>
           <p className="mt-2 text-base leading-relaxed text-muted">{p.basis}</p>
           <Sources citations={citations} />
         </div>
 
-        <p className="text-sm leading-relaxed text-ink-muted">
+        <p className="mt-6 text-sm leading-relaxed text-muted">
           No value is shown for the address you entered, because it was not identified. The figures
           above describe the closest match and are context, not a valuation of your property.
         </p>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h3 className="font-display text-xl font-medium tracking-tight text-foreground">
-            {p.addressLine ?? "This property"}
-            {p.city ? `, ${p.city}` : ""} {p.zip ?? ""}
-          </h3>
-          <span
-            className={`rounded-full px-2.5 py-1 text-xs font-medium uppercase tracking-wide ${
-              p.confidence === "stated"
-                ? "bg-surface-2 text-muted"
-                : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
-            }`}
-          >
-            {p.confidence === "stated" ? "stated by a source" : "derived from comparables"}
-          </span>
-        </div>
-
-        {p.marketValue !== null && (
-          <p className="tnum font-display mt-5 text-4xl font-medium text-foreground">
-            {money(p.marketValue)}
-          </p>
-        )}
-        <p className="mt-2 text-base leading-relaxed text-muted">
-          Estimated market value. This is <strong className="text-foreground">not</strong> an
-          assessed value and is not used to price a bid.
-          {ageHours > 0 && (
-            <>
-              {" "}
-              Read{" "}
-              {ageHours < 24
-                ? `${ageHours} hour${ageHours === 1 ? "" : "s"} ago`
-                : `${Math.floor(ageHours / 24)} day${Math.floor(ageHours / 24) === 1 ? "" : "s"} ago`}
-              .
-            </>
-          )}
-        </p>
-
-        <Detail p={p} />
+    <Card>
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
+        <h3 className="min-w-0 font-display text-2xl font-medium tracking-tight text-foreground sm:text-3xl">
+          {p.addressLine ?? "This property"}
+          {p.city ? `, ${p.city}` : ""} {p.zip ?? ""}
+        </h3>
+        <span
+          className={`self-start rounded-full px-2.5 py-1 text-xs font-medium uppercase tracking-wide ${
+            p.confidence === "stated"
+              ? "bg-surface-2 text-muted"
+              : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+          }`}
+        >
+          {p.confidence === "stated" ? "stated by a source" : "derived from comparables"}
+        </span>
       </div>
 
-      {/*
-        Placed after the figures rather than above them.
+      {p.marketValue !== null && (
+        <p className="tnum font-display mt-4 text-4xl font-medium text-foreground sm:text-5xl">
+          {money(p.marketValue)}
+        </p>
+      )}
+      <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-muted">
+        Estimated market value. This is <strong className="text-foreground">not</strong> an
+        assessed value and is not used to price a bid.
+        {ageHours > 0 && (
+          <>
+            {" "}
+            Read{" "}
+            {ageHours < 24
+              ? `${ageHours} hour${ageHours === 1 ? "" : "s"} ago`
+              : `${Math.floor(ageHours / 24)} day${Math.floor(ageHours / 24) === 1 ? "" : "s"} ago`}
+            .
+          </>
+        )}
+      </p>
 
-        The number is what was asked for; the picture is what makes it mean
-        something. Leading with the image would also imply the search returned
-        a photograph, when what it returned is a valuation and the photograph
-        comes from a separate, federal source.
-      */}
-      <ParcelImagery
-        latitude={location?.lat}
-        longitude={location?.lon}
-        caption={location?.matched ?? p.addressLine}
-      />
+      <SpecStrip p={p} />
+      <Listing p={p} location={location} caption={location?.matched ?? p.addressLine} />
 
-      <div className="rounded-3xl border border-border bg-surface p-6 text-foreground">
+      <div className="mt-8 border-t border-border pt-6">
         <h4 className="font-display text-lg font-medium text-foreground">What was read</h4>
         <p className="mt-2 text-base leading-relaxed text-foreground">{p.basis}</p>
         <Sources citations={citations} />
       </div>
 
-      <p className="text-sm leading-relaxed text-ink-muted">
+      <p className="mt-6 text-sm leading-relaxed text-muted">
         Figures come from public web sources read at the time of the search, not from a licensed
         data provider, and are an as-is estimate rather than an after-repair value. Verify against
         the county record before bidding.
       </p>
-    </div>
+    </Card>
   );
 }
