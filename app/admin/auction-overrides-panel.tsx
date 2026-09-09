@@ -92,7 +92,7 @@ export async function AuctionOverridesPanel() {
                           </li>
                         ))}
                       </ul>
-                      <div className="mt-1 font-mono text-[0.65rem] text-muted">{a.id}</div>
+                      <div className="mt-1 font-mono text-micro text-muted">{a.id}</div>
                     </td>
                     <td className="py-2 pr-3 text-xs text-muted">{a.editedBy ?? "—"}</td>
                     <td className="py-2 pr-3">

@@ -53,9 +53,9 @@ export function HistoricalComps({
       {result.comps.length === 0 ? (
         <p className="text-xs text-muted">
           No recorded comps yet for this state/sale type. Run{" "}
-          <code className="text-[11px]">deedpilot-copilot import-history --deep</code>{" "}
+          <code className="text-micro">deedpilot-copilot import-history --deep</code>{" "}
           and{" "}
-          <code className="text-[11px]">build-history-index</code>.
+          <code className="text-micro">build-history-index</code>.
         </p>
       ) : (
         <ul className="divide-y divide-border text-xs">
@@ -66,7 +66,7 @@ export function HistoricalComps({
       )}
 
       {result.builtAt ? (
-        <p className="mt-3 text-[10px] text-muted">
+        <p className="mt-3 text-micro text-muted">
           Index {result.builtAt.slice(0, 10)} · {num(result.nOutcomesTotal)} total recorded
           outcomes
         </p>

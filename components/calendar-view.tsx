@@ -168,7 +168,7 @@ export async function CalendarView(props: {
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
-              className="border-b border-border/70 bg-surface-2/50 px-2 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-faint"
+              className="border-b border-border/70 bg-surface-2/50 px-2 py-2.5 text-center text-micro font-semibold uppercase tracking-[0.08em] text-faint"
             >
               {label}
             </div>
@@ -197,8 +197,8 @@ export async function CalendarView(props: {
                       cell.isToday
                         // Today is a fact, not a control — gold marks it, so it
                         // cannot be mistaken for the blue of an active filter.
-                        ? "grid h-6 w-6 place-items-center rounded-full bg-gold text-[11px] font-semibold text-ink shadow-[0_0_0_3px_color-mix(in_srgb,var(--gold)_28%,transparent)]"
-                        : `text-[11px] ${cell.inMonth ? "text-muted" : "text-muted/50"}`
+                        ? "grid h-6 w-6 place-items-center rounded-full bg-gold text-micro font-semibold text-ink shadow-[0_0_0_3px_color-mix(in_srgb,var(--gold)_28%,transparent)]"
+                        : `text-micro ${cell.inMonth ? "text-muted" : "text-muted/50"}`
                     }
                   >
                     {cell.dayOfMonth}
@@ -208,7 +208,7 @@ export async function CalendarView(props: {
                       counties selling three parcels each. */}
                   {sales.length > 0 ? (
                     <span
-                      className="tnum text-[10px] font-medium text-faint"
+                      className="tnum text-micro font-medium text-faint"
                       title={`${num(dayParcels(sales).total)} parcels across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
                         sumBids(sales),
                       )}${announcedPhrase(dayParcels(sales).announced)}`}
@@ -228,7 +228,7 @@ export async function CalendarView(props: {
 
                 {groups.length > MAX_PER_CELL ? (
                   <details className="mt-0.5">
-                    <summary className="cursor-pointer list-none px-1 text-[10px] text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+                    <summary className="cursor-pointer list-none px-1 text-micro text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
                       +{groups.length - MAX_PER_CELL} more
                     </summary>
                     <ul className="mt-0.5 space-y-0.5">
@@ -377,7 +377,7 @@ function SaleEntry({
         }`}
         className={[
           "flex cursor-pointer list-none items-start gap-1.5 rounded px-1 py-0.5 leading-tight transition-colors hover:bg-surface-2 [&::-webkit-details-marker]:hidden",
-          verbose ? "text-sm" : "text-[11px]",
+          verbose ? "text-sm" : "text-micro",
           isLead ? "border-l-2 border-dashed border-border pl-1" : "",
         ].join(" ")}
       >
@@ -398,7 +398,7 @@ function SaleEntry({
           </span>
           {/* The badge doubles as the disclosure affordance — a summary row
               styled like every other entry gives no hint that it opens. */}
-          <span className="tnum inline-flex items-center gap-0.5 whitespace-nowrap rounded bg-surface-2 px-1 text-[9px] text-muted">
+          <span className="tnum inline-flex items-center gap-0.5 whitespace-nowrap rounded bg-surface-2 px-1 text-[0.85em] text-muted">
             ×{group.sales.length}
             <span aria-hidden className="transition-transform group-open/entry:rotate-90">
               ›
@@ -408,7 +408,7 @@ function SaleEntry({
           {/* A cancellation must be visible without opening the group — the one
               thing collapsing rows could otherwise bury. */}
           {group.cancelledCount > 0 && !group.allCancelled ? (
-            <span className="whitespace-nowrap text-[9px] uppercase tracking-wide text-warn">
+            <span className="whitespace-nowrap text-[0.85em] uppercase tracking-wide text-warn">
               {num(group.cancelledCount)} cancelled
             </span>
           ) : null}
@@ -427,7 +427,7 @@ function SaleEntry({
                   parcelsShown(a).announced ? " announced, list not yet fetched" : ""
                 }${bidPhrase(sumBids([a]))}${cancelled ? `, ${a.status}` : ""}`}
                 className={`flex items-baseline gap-2 rounded px-1 py-0.5 transition-colors hover:bg-surface-2 ${
-                  verbose ? "text-sm" : "text-[11px]"
+                  verbose ? "text-sm" : "text-micro"
                 }`}
               >
                 <span
@@ -471,7 +471,7 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
         // the entry, and a lead tag alongside it turns "SC · Greenville" into
         // "SC · Gree…" in a 200px square. Two lines beats an ellipsis.
         "flex items-start gap-1.5 rounded px-1 py-0.5 leading-tight transition-colors hover:bg-surface-2",
-        verbose ? "text-sm" : "text-[11px]",
+        verbose ? "text-sm" : "text-micro",
         isLead ? "border-l-2 border-dashed border-border pl-1" : "",
       ].join(" ")}
     >
@@ -647,8 +647,22 @@ function LeadTag({
           : auction.listingKind === "lands_available"
             ? "lands"
             : "unverified";
+  /*
+   * `em`, not a tier.
+   *
+   * This badge is subordinate to the row it annotates, and it renders in two
+   * rows of very different sizes: the month grid, where the entry is 11px, and
+   * the mobile list, where it is 14px. Pinned at an absolute 9px it was right
+   * in the grid and too small to read on a phone. Raised to a flat 11px it was
+   * readable on the phone and exactly as heavy as the county name beside it,
+   * which is what put every grid entry onto two lines.
+   *
+   * Sized against its parent it is always one step under whatever it is
+   * annotating — 9.4px in the grid, 11.9px in the list — so the relationship,
+   * which is the thing actually being designed, holds in both.
+   */
   return (
-    <span className="whitespace-nowrap rounded bg-surface-2 px-1 text-[9px] uppercase tracking-wide text-muted">
+    <span className="whitespace-nowrap rounded bg-surface-2 px-1 text-[0.85em] uppercase tracking-wide text-muted">
       {label}
     </span>
   );
@@ -769,7 +783,7 @@ function CalendarControls({
           </span>
           Type, platform &amp; leads
           {secondaryActive ? (
-            <span className="rounded-full bg-gold px-1.5 text-[10px] font-medium text-ink">on</span>
+            <span className="rounded-full bg-gold px-1.5 text-micro font-medium text-ink">on</span>
           ) : null}
         </summary>
 

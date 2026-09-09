@@ -43,7 +43,7 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
               }`}
             >
               {featured ? (
-                <div className="mb-3 -mt-1 self-start rounded-full bg-gold px-3 py-1 text-[10px]
+                <div className="mb-3 -mt-1 self-start rounded-full bg-gold px-3 py-1 text-micro
                                 font-semibold uppercase tracking-[0.08em] text-ink
                                 shadow-[0_4px_14px_-4px_color-mix(in_srgb,var(--gold)_80%,transparent)]">
                   Most popular

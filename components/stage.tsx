@@ -61,7 +61,7 @@ export function Stage({
         <span className="font-mono text-xs tabular-nums text-faint">{String(n).padStart(2, "0")}</span>
         <span className="text-base font-semibold tracking-tight">{title}</span>
         {state !== "ok" && (
-          <span className={`rounded px-1.5 py-0.5 font-mono text-[0.65rem] uppercase tracking-wide ${chip.cls}`}>
+          <span className={`rounded px-1.5 py-0.5 font-mono text-micro uppercase tracking-wide ${chip.cls}`}>
             {chip.label}
           </span>
         )}

@@ -152,7 +152,7 @@ export function ParcelBrief({
       <Card>
         <div className="flex items-baseline justify-between gap-3">
           <h3 className="text-sm font-semibold">AI risk brief</h3>
-          {model ? <span className="font-mono text-[10px] text-muted">{model}</span> : null}
+          {model ? <span className="font-mono text-micro text-muted">{model}</span> : null}
         </div>
         <p className="mt-2 text-base leading-relaxed">{brief.headline}</p>
       </Card>
@@ -165,7 +165,7 @@ export function ParcelBrief({
               <li key={f.title} className="border-l-2 pl-3" style={{ borderColor: SEVERITY_COLOR[f.severity] }}>
                 <div className="flex items-center gap-2">
                   <span
-                    className="text-[10px] font-medium uppercase tracking-wide"
+                    className="text-micro font-medium uppercase tracking-wide"
                     style={{ color: SEVERITY_COLOR[f.severity] }}
                   >
                     {f.severity}

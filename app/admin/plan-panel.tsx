@@ -211,7 +211,7 @@ export async function PlanPanel() {
                     <td className="py-1.5 pr-3 font-mono text-xs">{a.action}</td>
                     <td className="py-1.5 pr-3 font-mono text-xs">{a.target ?? "—"}</td>
                     <td className="py-1.5 pr-3 text-xs">{a.actor}</td>
-                    <td className="py-1.5 pr-3 font-mono text-[0.65rem] text-muted">
+                    <td className="py-1.5 pr-3 font-mono text-micro text-muted">
                       {a.detail ? JSON.stringify(a.detail).slice(0, 90) : ""}
                     </td>
                   </tr>

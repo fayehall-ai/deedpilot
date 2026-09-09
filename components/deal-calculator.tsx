@@ -335,7 +335,7 @@ export function DealCalculator({
               <dd className="tnum font-medium">
                 {money(result.arv.value)}
                 {result.arv.assumed ? (
-                  <span className="ml-1.5 rounded bg-warn/15 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-warn">
+                  <span className="ml-1.5 rounded bg-warn/15 px-1.5 py-0.5 text-micro uppercase tracking-wide text-warn">
                     assumed
                   </span>
                 ) : null}

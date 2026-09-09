@@ -94,7 +94,7 @@ export function Stat({
  */
 export function AssumedTag({ children = "assumed" }: { children?: React.ReactNode }) {
   return (
-    <span className="ml-1.5 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted">
+    <span className="ml-1.5 rounded bg-surface-2 px-1.5 py-0.5 text-micro uppercase tracking-wide text-muted">
       {children}
     </span>
   );

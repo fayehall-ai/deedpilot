@@ -190,7 +190,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
             </span>
             {county.name} County rules
             {rule.isStateDefault ? (
-              <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wide text-muted">
+              <span className="rounded bg-surface-2 px-1.5 py-0.5 text-micro font-normal uppercase tracking-wide text-muted">
                 state defaults
               </span>
             ) : null}

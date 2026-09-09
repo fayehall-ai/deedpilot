@@ -250,16 +250,60 @@ h1 {
  * ------------------------------------------------------------------------ */
 
 /*
+ * The root, which the rest of the fluid system was measured against and which
+ * was itself the one fixed thing in it.
+ *
+ * `shell`, `text-display` and the band paddings all track the viewport, so a
+ * 3456px window gets a 1792px column and an 84px headline. Everything *inside*
+ * that column stayed quantised: `text-xs` is 12px and `text-sm` is 14px at
+ * every width, and between them they set 568 of the elements on this site.
+ *
+ * So the page did not read as too small because the type was too small — at
+ * 1280px it is right, which is where it was drawn. It read as too small
+ * because the column kept growing and the type in it did not. A 12px label in
+ * a 1792px table is not the same object as a 12px label in a 1280px one, and
+ * the second one is the one that was designed.
+ *
+ * Scaling the root moves all 568 at once, and every other rem with them —
+ * spacing, radii, and the rem terms of the clamps below — so the proportions
+ * survive and only the ratio to the viewport changes, which is the part that
+ * was wrong. Arbitrary px sizes are the exception, which is why the handful of
+ * `text-[10px]`-style values in the components were rewritten in rem.
+ *
+ * The floor is `1rem` and not `16px` deliberately: on the root element rem
+ * resolves against the browser's own default, so a reader who has set 20px
+ * text keeps 20px, and the viewport term is added to their number rather than
+ * replacing it. A vw-only root font-size would silently override that setting,
+ * which is the usual reason this technique gets called an accessibility bug.
+ *
+ * Anchored at both ends rather than picked: 16px at 1280px, a laptop, where
+ * this was designed and where nothing should move; 22px at 3456px, a 16"
+ * display at native scaling, which is the window the complaint came from.
+ */
+html {
+  font-size: clamp(1rem, 0.78rem + 0.276vw, 1.375rem);
+}
+
+/*
  * The page shell.
  *
  * Floor is the old 1280px, so nothing at or below a laptop moves. Above that
- * it tracks the viewport at 88%, and stops at 1792px — past that a full-width
+ * it tracks the viewport at 88%, and stops — past some width a full-width
  * measure stops being a layout and becomes a horizon.
+ *
+ * The ceiling is in rem, so now that the root scales it fixes a *measure*
+ * rather than a width: 128rem is the same number of characters across at every
+ * viewport and only its pixel value grows. That is what makes raising it from
+ * 112rem safe — the line length a reader actually experiences is unchanged,
+ * and the 29% of a 3456px screen that used to be empty gutter is now column.
+ *
+ * It only binds above ~3200px. Everything narrower is still governed by the
+ * 88vw term and renders exactly as it did.
  */
 @utility shell {
   margin-inline: auto;
   width: 100%;
-  max-width: clamp(80rem, 88vw, 112rem);
+  max-width: clamp(80rem, 88vw, 128rem);
   padding-inline: clamp(1rem, 2.2vw, 2.5rem);
 }
 
@@ -294,6 +338,31 @@ h1 {
   font-size: clamp(1.6rem, 1.9vw, 2.75rem);
   line-height: 1.1;
   letter-spacing: -0.02em;
+}
+
+/*
+ * The floor of the scale, for legends, badges and column headers.
+ *
+ * There were four tiers below `text-xs` — 9px, 10px, 10.4px and 11px — spread
+ * across 44 elements. Four steps inside a 2px range is not a hierarchy; it is
+ * a small number picked four times independently, and on screen it read as one
+ * size anyway. So it is one size.
+ *
+ * 11px and not 9px because the floor is set by the phone. Root is 16px there,
+ * these are the labels a reader is most often squinting at, and the dense
+ * calendar grid that justified 9px is not even rendered at that width — it
+ * becomes a list. The density was being paid for on the screens that could
+ * least afford it and bought nothing on the screens that wanted it.
+ *
+ * No line-height: the values this replaced set none either, and inheriting the
+ * surrounding leading is what keeps these labels sitting on the same baseline
+ * grid as the rows they annotate.
+ *
+ * Being plain rem it rides the root like everything else — 11px on a phone,
+ * 15px on a 3456px display.
+ */
+@utility text-micro {
+  font-size: 0.6875rem;
 }
 
 /*

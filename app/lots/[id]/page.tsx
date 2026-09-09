@@ -406,7 +406,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
                     {l.label} ↗
                   </a>
                   {l.searchOnly && lot.parcelNumber ? (
-                    <span className="mt-0.5 block font-mono text-[11px] text-muted">
+                    <span className="mt-0.5 block font-mono text-micro text-muted">
                       search: {lot.parcelNumber}
                     </span>
                   ) : null}

@@ -146,7 +146,7 @@ export async function AuctionsList(props: {
                           {num(parcelsShown(a).count)}
                           {parcelsShown(a).announced ? (
                             <span
-                              className="ml-1 align-middle text-[10px] uppercase tracking-wide text-muted"
+                              className="ml-1 align-middle text-micro uppercase tracking-wide text-muted"
                               title="The county published this count; the parcel list has not been fetched yet"
                             >
                               announced

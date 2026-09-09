@@ -135,7 +135,7 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
             <h3 className="text-base font-semibold tracking-tight">
               {p.closestMatch ? "Closest match" : "What was found"}
             </h3>
-            <span className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[0.65rem] uppercase tracking-wide text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            <span className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-micro uppercase tracking-wide text-amber-900 dark:bg-amber-950 dark:text-amber-200">
               not the exact address
             </span>
           </div>
@@ -177,7 +177,7 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
             {p.city ? `, ${p.city}` : ""} {p.zip ?? ""}
           </h3>
           <span
-            className={`rounded px-2 py-0.5 font-mono text-[0.65rem] uppercase tracking-wide ${
+            className={`rounded px-2 py-0.5 font-mono text-micro uppercase tracking-wide ${
               p.confidence === "stated"
                 ? "bg-surface-2 text-muted"
                 : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"

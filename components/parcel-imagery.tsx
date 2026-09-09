@@ -125,7 +125,7 @@ export function ParcelImagery({
               type="button"
               onClick={() => setFrame(i)}
               aria-pressed={i === frame}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              className={`rounded-full px-2.5 py-1 text-micro font-medium transition-colors ${
                 i === frame ? "bg-gold text-ink" : "text-ink-fg/80 hover:text-ink-fg"
               }`}
             >
@@ -138,7 +138,7 @@ export function ParcelImagery({
           href={`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute bottom-3 right-3 rounded-full bg-ink/70 px-2.5 py-1 text-[11px]
+          className="absolute bottom-3 right-3 rounded-full bg-ink/70 px-2.5 py-1 text-micro
                      font-medium text-ink-fg backdrop-blur transition-colors hover:bg-ink/85"
         >
           Open in Maps ↗
