@@ -37,9 +37,9 @@ export default function CapePage() {
   return (
     <div className="shell py-band">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "CAPE" }]} />
-      <header className="mb-6 max-w-3xl">
-        <h1 className="text-section font-semibold">CAPE — production board</h1>
-        <p className="mt-2 leading-relaxed text-muted">
+      <header className="mb-8 max-w-3xl">
+        <h1 className="text-section">CAPE — production board</h1>
+        <p className="mt-3 text-lg leading-relaxed text-muted">
           The County Auction Production Engine, run across every upcoming sale. Each package is
           measured against the nine components, its source tiered by how close the publisher sits
           to the authority for the sale, and its deadline set by Component Eight — Monday night for
@@ -164,22 +164,27 @@ async function Board() {
   }
   const tiers = [...byTier.entries()].sort((x, y) => TIER_RANK[x[0]] - TIER_RANK[y[0]]);
 
+  const byDate = new Map<string, typeof assessed>();
+  for (const a of assessed) {
+    const day = byDate.get(a.row.saleDate) ?? [];
+    day.push(a);
+    byDate.set(a.row.saleDate, day);
+  }
+
   return (
     <>
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+      <div className="mb-10 grid gap-4 sm:grid-cols-3">
         <Card>
-          <div className="text-xs uppercase tracking-wide text-muted">Releasable</div>
-          <div className="tnum mt-1 text-3xl font-semibold" style={{ color: "var(--accent)" }}>
+          <div className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Releasable</div>
+          <div className="tnum font-display mt-2 text-4xl font-medium" style={{ color: "var(--accent)" }}>
             {num(ready.length)}
-            <span className="text-base font-normal text-muted"> / {num(assessed.length)}</span>
+            <span className="text-xl font-normal text-muted"> / {num(assessed.length)}</span>
           </div>
-          <p className="mt-1 text-xs text-muted">
-Passes Component Nine&apos;s quality gate
-          </p>
+          <p className="mt-2 text-base text-muted">Passes Component Nine&apos;s quality gate</p>
         </Card>
         <Card>
-          <div className="text-xs uppercase tracking-wide text-muted">Mean package</div>
-          <div className="tnum mt-1 text-3xl font-semibold">
+          <div className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Mean package</div>
+          <div className="tnum font-display mt-2 text-4xl font-medium">
             {assessed.length
               ? Math.round(
                   (assessed.reduce((n, a) => n + a.cape.score, 0) / assessed.length) * 100,
@@ -187,38 +192,36 @@ Passes Component Nine&apos;s quality gate
               : 0}
             %
           </div>
-          <p className="mt-1 text-xs text-muted">Across the nine components, averaged</p>
+          <p className="mt-2 text-base text-muted">Across the nine components, averaged</p>
         </Card>
         <Card>
-          <div className="text-xs uppercase tracking-wide text-muted">
-            Component Two — source of record
+          <div className="text-sm font-medium uppercase tracking-[0.12em] text-muted">
+            Government source of record
           </div>
-          <div className="tnum mt-1 text-3xl font-semibold">
+          <div className="tnum font-display mt-2 text-4xl font-medium">
             {num(byTier.get("government")?.parcels ?? 0)}
           </div>
-          <p className="mt-1 text-xs text-muted">
-            parcels from a county office or state agency
-          </p>
+          <p className="mt-2 text-base text-muted">parcels from a county office or state agency</p>
         </Card>
       </div>
 
       {/* The work-list: which intake field is missing most often. */}
       {ranked.length > 0 ? (
-        <section className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold">Requiring manual verification</h2>
+        <section className="mb-10">
+          <h2 className="font-display mb-4 text-2xl font-medium">Requiring manual verification</h2>
           <Card className="overflow-hidden p-0">
-            <table className="w-full text-sm">
-              <thead className="border-b border-border bg-surface-2/50 text-left text-xs uppercase tracking-wide text-muted">
+            <table className="w-full text-base">
+              <thead className="border-b border-border bg-surface-2/50 text-left text-sm font-medium uppercase tracking-[0.12em] text-muted">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Item</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Packages</th>
+                  <th className="px-5 py-3.5 font-medium">Item</th>
+                  <th className="px-5 py-3.5 text-right font-medium">Packages</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {ranked.map((g) => (
                   <tr key={g.label}>
-                    <td className="px-4 py-2.5">{g.label}</td>
-                    <td className="tnum px-4 py-2.5 text-right">{num(g.n)}</td>
+                    <td className="px-5 py-3.5">{g.label}</td>
+                    <td className="tnum px-5 py-3.5 text-right">{num(g.n)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -228,30 +231,30 @@ Passes Component Nine&apos;s quality gate
       ) : null}
 
       {byComponent.length > 0 ? (
-        <section className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold">The nine components</h2>
+        <section className="mb-10">
+          <h2 className="font-display mb-4 text-2xl font-medium">The nine components</h2>
           <Card className="overflow-hidden p-0">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="border-b border-border bg-surface-2/50 text-left text-xs uppercase tracking-wide text-muted">
+              <table className="w-full text-base">
+                <thead className="border-b border-border bg-surface-2/50 text-left text-sm font-medium uppercase tracking-[0.12em] text-muted">
                   <tr>
-                    <th className="px-4 py-2.5 font-medium">Component</th>
-                    <th className="px-4 py-2.5 text-right font-medium">Mean</th>
-                    <th className="px-4 py-2.5 text-right font-medium">On record</th>
-                    <th className="px-4 py-2.5 text-right font-medium">Needs verifying</th>
-                    <th className="px-4 py-2.5 text-right font-medium">No source</th>
+                    <th className="px-5 py-3.5 font-medium">Component</th>
+                    <th className="px-5 py-3.5 text-right font-medium">Mean</th>
+                    <th className="px-5 py-3.5 text-right font-medium">On record</th>
+                    <th className="px-5 py-3.5 text-right font-medium">Needs verifying</th>
+                    <th className="px-5 py-3.5 text-right font-medium">No source</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {byComponent.map((c) => (
                     <tr key={c.n}>
-                      <td className="px-4 py-2.5">
+                      <td className="px-5 py-3.5">
                         <span className="text-muted">{c.n}.</span> {c.title}
                       </td>
-                      <td className="tnum px-4 py-2.5 text-right">{Math.round(c.mean * 100)}%</td>
-                      <td className="tnum px-4 py-2.5 text-right">{num(c.counts.have)}</td>
-                      <td className="tnum px-4 py-2.5 text-right">{num(c.counts.verify)}</td>
-                      <td className="tnum px-4 py-2.5 text-right text-muted">
+                      <td className="tnum px-5 py-3.5 text-right">{Math.round(c.mean * 100)}%</td>
+                      <td className="tnum px-5 py-3.5 text-right">{num(c.counts.have)}</td>
+                      <td className="tnum px-5 py-3.5 text-right">{num(c.counts.verify)}</td>
+                      <td className="tnum px-5 py-3.5 text-right text-muted">
                         {c.counts.absent ? num(c.counts.absent) : "—"}
                       </td>
                     </tr>
@@ -260,7 +263,7 @@ Passes Component Nine&apos;s quality gate
               </table>
             </div>
           </Card>
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-3 text-base text-muted">
             &ldquo;No source&rdquo; is not a gap to close — those are items no source available to
             this product can answer, so they are excluded from the mean rather than counted
             against it.
@@ -269,24 +272,24 @@ Passes Component Nine&apos;s quality gate
         </section>
       ) : null}
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-lg font-semibold">Where the sales come from</h2>
+      <section className="mb-10">
+        <h2 className="font-display mb-4 text-2xl font-medium">Where the sales come from</h2>
         <Card className="overflow-hidden p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-border bg-surface-2/50 text-left text-xs uppercase tracking-wide text-muted">
+            <table className="w-full text-base">
+              <thead className="border-b border-border bg-surface-2/50 text-left text-sm font-medium uppercase tracking-[0.12em] text-muted">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Source tier</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Sales</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Parcels</th>
+                  <th className="px-5 py-3.5 font-medium">Source tier</th>
+                  <th className="px-5 py-3.5 text-right font-medium">Sales</th>
+                  <th className="px-5 py-3.5 text-right font-medium">Parcels</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {tiers.map(([tier, v]) => (
                   <tr key={tier}>
-                    <td className="px-4 py-2.5">{TIER_LABEL[tier]}</td>
-                    <td className="tnum px-4 py-2.5 text-right">{num(v.auctions)}</td>
-                    <td className="tnum px-4 py-2.5 text-right">{num(v.parcels)}</td>
+                    <td className="px-5 py-3.5">{TIER_LABEL[tier]}</td>
+                    <td className="tnum px-5 py-3.5 text-right">{num(v.auctions)}</td>
+                    <td className="tnum px-5 py-3.5 text-right">{num(v.parcels)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -296,85 +299,75 @@ Passes Component Nine&apos;s quality gate
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Every upcoming sale</h2>
-        <Card className="overflow-hidden p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-border bg-surface-2/50 text-left text-xs uppercase tracking-wide text-muted">
-                <tr>
-                  <th className="px-4 py-2.5 font-medium">Sale</th>
-                  <th className="px-4 py-2.5 font-medium">Source</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Intake</th>
-                  <th className="px-4 py-2.5 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {assessed.map(({ row, cape }) => (
-                  <tr key={row.id}>
-                    <td className="px-4 py-2.5">
-                      <Link href={`/auctions/${row.id}`} className="hover:text-accent">
+        <h2 className="font-display mb-4 text-2xl font-medium">Every upcoming sale</h2>
+        <div className="space-y-8">
+          {[...byDate.entries()].map(([day, group]) => (
+            <div key={day}>
+              <div className="mb-3 flex items-baseline gap-3 border-b border-border pb-2">
+                <h3 className="font-display text-xl font-medium">{saleDate(day)}</h3>
+                <span className="tnum text-base text-muted">
+                  {num(group.length)} {group.length === 1 ? "sale" : "sales"}
+                </span>
+              </div>
+              <ul className="divide-y divide-border overflow-hidden rounded-3xl border border-border/70 bg-surface shadow-[var(--shadow-sm)]">
+                {group.map(({ row, cape }) => (
+                  <li key={row.id} className="grid gap-3 px-5 py-4 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_auto] sm:items-start">
+                    <div>
+                      <Link href={`/auctions/${row.id}`} className="text-lg font-medium hover:text-accent">
                         {row.countyName} County, {row.state}
                       </Link>
-                      <div className="text-xs text-muted">
-                        {saleDate(row.saleDate)} · {num(row.lotCount)} parcels
+                      <div className="tnum mt-1 text-base text-muted">
+                        {num(row.lotCount)} parcels
                       </div>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <div>{TIER_LABEL[cape.source.tier]}</div>
-                      <div className="font-mono text-xs text-muted">{cape.source.host}</div>
-                    </td>
-                    <td className="tnum px-4 py-2.5 text-right">
-                      {Math.round(cape.score * 100)}%
-                      <div className="text-xs text-muted">
+                    </div>
+                    <div>
+                      <div className="text-base">{TIER_LABEL[cape.source.tier]}</div>
+                      <div className="mt-0.5 break-all font-mono text-sm text-muted">{cape.source.host}</div>
+                    </div>
+                    <div className="sm:text-right">
+                      <div className="tnum text-lg font-medium">{Math.round(cape.score * 100)}%</div>
+                      <div
+                        className={`mt-1 text-sm ${cape.deadline.overdue ? "font-medium text-warn" : "text-muted"}`}
+                      >
                         due {cape.deadline.dueDate}
                         {cape.deadline.overdue ? " · overdue" : ""}
+                      </div>
+                      <div className="mt-2">
+                        {cape.releasable ? (
+                          <span className="inline-block rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-accent">
+                            Releasable
+                          </span>
+                        ) : (
+                          <span className="text-sm text-muted">{cape.blockedBy[0]}</span>
+                        )}
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm sm:justify-end">
                         {cape.components[9]?.items[0]?.state === "have" ? (
-                          <>
-                            {" · "}
-                            <a
-                              href={`/api/cape/${row.id}/propstream`}
-                              className="underline hover:text-foreground"
-                            >
-                              PropStream CSV
-                            </a>
-                          </>
+                          <a
+                            href={`/api/cape/${row.id}/propstream`}
+                            className="underline hover:text-foreground"
+                          >
+                            PropStream CSV
+                          </a>
                         ) : null}
-                        {/*
-                          The produced briefing, where one has been published.
-                          Only a hosted URL is linked — a local artifact path is
-                          real but unreachable from this page, and a dead link
-                          on an operations board is worse than none.
-                        */}
                         {videoUrls[row.id] ? (
-                          <>
-                            {" · "}
-                            <a
-                              href={videoUrls[row.id]}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="underline hover:text-foreground"
-                            >
-                              Briefing video ↗
-                            </a>
-                          </>
+                          <a
+                            href={videoUrls[row.id]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-foreground"
+                          >
+                            Briefing video ↗
+                          </a>
                         ) : null}
                       </div>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      {cape.releasable ? (
-                        <span className="rounded bg-accent/15 px-1.5 py-0.5 text-xs text-accent">
-                          Releasable
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted">{cape.blockedBy[0]}</span>
-                      )}
-                    </td>
-                  </tr>
+                    </div>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+              </ul>
+            </div>
+          ))}
+        </div>
       </section>
     </>
   );
