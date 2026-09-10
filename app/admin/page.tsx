@@ -19,6 +19,7 @@ import { DiscoverSummary, FunnelBars, PriceSummary, SummaryPending } from "./cov
 import { EnrichmentPanel } from "./enrichment-panel";
 import { ImportPanel } from "./import-panel";
 import { ImportHistoryPanel } from "./import-history-panel";
+import { OpsPanel } from "./ops-panel";
 import { SourcesPanel } from "./sources-panel";
 import { CapePanel } from "./cape-panel";
 import { PolicyPanel } from "./policy-panel";
@@ -379,6 +380,7 @@ async function Body({
           <Suspense fallback={<TableSkeleton />}>
             <CadencePanel outcome={outcome} />
           </Suspense>
+          <OpsPanel outcome={outcome} />
           <OpsControls
             adapters={adapters.map((a) => a.name)}
             queue={queue}
