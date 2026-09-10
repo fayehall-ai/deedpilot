@@ -63,38 +63,26 @@ export async function uploadAuctionCsv(
   const actor = await currentActor();
   const alsoEnrich = String(formData.get("enrich") ?? "") === "on";
 
+  /*
+   * Both the applied and the refused cases are written by `importAuctionCsv`
+   * itself now, from the provenance handed to it here. The audit used to live
+   * in this function, which meant the terminal path recorded nothing — see
+   * `lib/import/history.ts`. Anything added to the record belongs there, below
+   * both callers, rather than here where only the browser would benefit.
+   */
   let report: ImportReport;
   try {
-    report = await importAuctionCsv(await file.text());
-  } catch (e) {
-    /*
-     * A file in the wrong format is an operator mistake, not a fault: it is
-     * reported as a message and audited, because "I uploaded it and nothing
-     * happened" is otherwise indistinguishable from a silent failure.
-     */
-    const message = e instanceof UnreadableFile ? e.message : "The file could not be read.";
-    await audit("import.rejected", file.name, { reason: message, bytes: file.size }, actor);
-    if (!(e instanceof UnreadableFile)) throw e;
-    return { ok: false, error: message };
-  }
-
-  await audit(
-    "import.applied",
-    file.name,
-    {
+    report = await importAuctionCsv(await file.text(), {
+      source: file.name,
+      via: "console",
       bytes: file.size,
-      totalRows: report.totalRows,
-      inserted: report.inserted,
-      updated: report.updated,
-      mergedIntoCrawled: report.mergedIntoCrawled,
-      duplicateInFile: report.duplicateInFile,
-      rejected: report.rejected.length,
-      ambiguous: report.ambiguous.length,
-      counties: report.countiesTouched.length,
-      dateRange: report.dateRange,
-    },
-    actor,
-  );
+      actor,
+    });
+  } catch (e) {
+    // A file in the wrong format is an operator mistake, not a fault.
+    if (!(e instanceof UnreadableFile)) throw e;
+    return { ok: false, error: e.message };
+  }
 
   let enrichment: ImportEnrichment | undefined;
   if (alsoEnrich && report.countiesTouched.length > 0) {

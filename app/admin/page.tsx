@@ -18,6 +18,7 @@ import { whatNeedsAttention } from "@/lib/admin/attention";
 import { DiscoverSummary, FunnelBars, PriceSummary, SummaryPending } from "./coverage-summary";
 import { EnrichmentPanel } from "./enrichment-panel";
 import { ImportPanel } from "./import-panel";
+import { ImportHistoryPanel } from "./import-history-panel";
 import { SourcesPanel } from "./sources-panel";
 import { CapePanel } from "./cape-panel";
 import { PolicyPanel } from "./policy-panel";
@@ -264,6 +265,15 @@ async function Body({
             </p>
             <ImportPanel />
           </Card>
+          {/*
+            Directly under the control that causes it. "When was this last
+            imported, and did it work" is asked in the same breath as "should I
+            import it again", and the answer used to exist nowhere on this page
+            — a calendar loaded from a terminal left no trace at all.
+          */}
+          <Suspense fallback={<TableSkeleton />}>
+            <ImportHistoryPanel />
+          </Suspense>
           <Suspense fallback={<TableSkeleton />}>
             <ScoutPanel />
           </Suspense>

@@ -28,7 +28,18 @@ async function main() {
 
   let report;
   try {
-    report = await importAuctionCsv(readFileSync(path, "utf8"));
+    const text = readFileSync(path, "utf8");
+    /*
+     * The provenance is what makes this run visible on the console afterwards.
+     * Without it the importer records nothing, and a calendar loaded from a
+     * terminal becomes indistinguishable from one that appeared by itself.
+     */
+    report = await importAuctionCsv(text, {
+      source: path,
+      via: "cli",
+      bytes: Buffer.byteLength(text),
+      actor: process.env.USER ? `cli:${process.env.USER}` : "cli",
+    });
   } catch (e) {
     if (e instanceof UnreadableFile) {
       console.error(e.message);

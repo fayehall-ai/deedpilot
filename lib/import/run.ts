@@ -12,6 +12,12 @@
 import { CsvTable, parseCsv } from "./csv";
 import { REQUIRED_COLUMNS, readRow, type ImportedAuction } from "./auction-rows";
 import { applyImport, resolveCounties, type ImportReport, type RejectedRow } from "./apply";
+import {
+  recordImport,
+  recordImportRejected,
+  recordSafely,
+  type ImportContext,
+} from "./history";
 
 /**
  * A whole upload, from file text to a report.
@@ -26,11 +32,30 @@ import { applyImport, resolveCounties, type ImportReport, type RejectedRow } fro
 /** Thrown when the file is not this format at all. Nothing is written. */
 export class UnreadableFile extends Error {}
 
-export async function importAuctionCsv(text: string): Promise<ImportReport> {
+/**
+ * @param ctx Where this file came from, for the history log. Optional so a
+ *   throwaway call — a test, a one-off in a REPL — does not have to invent a
+ *   provenance it does not have; when it is absent nothing is recorded, because
+ *   an unattributed row in the audit log is worse than no row.
+ */
+export async function importAuctionCsv(
+  text: string,
+  ctx?: ImportContext,
+): Promise<ImportReport> {
+  const startedAt = Date.now();
+
+  /** Refusals are recorded too: "I uploaded it and nothing happened" is
+   *  otherwise indistinguishable from a silent failure, and the file that was
+   *  refused is the single most useful thing to know afterwards. */
+  const refuse = async (message: string): Promise<never> => {
+    if (ctx) await recordSafely(() => recordImportRejected(ctx, message));
+    throw new UnreadableFile(message);
+  };
+
   const table = new CsvTable(parseCsv(text));
 
   if (table.headers.length === 0) {
-    throw new UnreadableFile("The file is empty.");
+    await refuse("The file is empty.");
   }
   const missing = table.missing(REQUIRED_COLUMNS);
   if (missing.length > 0) {
@@ -40,7 +65,7 @@ export async function importAuctionCsv(text: string): Promise<ImportReport> {
      * rows on the calendar that nobody meant to add and that no re-upload of
      * the right file will clean up.
      */
-    throw new UnreadableFile(
+    await refuse(
       `Not an auction export — missing ${missing.map((m) => `"${m}"`).join(", ")}. ` +
         `Found: ${table.headers.slice(0, 12).join(", ")}${table.headers.length > 12 ? "…" : ""}`,
     );
@@ -48,6 +73,8 @@ export async function importAuctionCsv(text: string): Promise<ImportReport> {
 
   const parsed: { row: ImportedAuction; line: number }[] = [];
   const rejected: RejectedRow[] = [];
+  /** Trailing spreadsheet newlines. Counted, not reported as errors — see below. */
+  let blank = 0;
 
   table.rows.forEach((cells, i) => {
     // The header is line 1, so the first data row is line 2 — which is what a
@@ -57,7 +84,10 @@ export async function importAuctionCsv(text: string): Promise<ImportReport> {
     // A row of empty cells is what a trailing blank line in a spreadsheet
     // looks like. Skipping it silently is right; reporting it as an error
     // would put a scary number on every export that ends with a newline.
-    if (cells.every((c) => c.trim() === "")) return;
+    if (cells.every((c) => c.trim() === "")) {
+      blank++;
+      return;
+    }
 
     const outcome = readRow(
       {
@@ -77,8 +107,36 @@ export async function importAuctionCsv(text: string): Promise<ImportReport> {
     }
   });
 
-  const { resolved, rejected: unresolved } = await resolveCounties(parsed);
+  const { resolved, rejected: unresolved, viaParent } = await resolveCounties(parsed);
   const written = await applyImport(resolved, table.rows.length);
 
-  return { ...written, rejected: [...rejected, ...unresolved].sort((a, b) => a.line - b.line) };
+  const allRejected = [...rejected, ...unresolved].sort((a, b) => a.line - b.line);
+
+  if (ctx) {
+    await recordSafely(() =>
+      recordImport(
+        ctx,
+        {
+          read: { columns: table.headers.length, rows: table.rows.length, blank },
+          translate: { parsed: parsed.length, rejected: rejected.length },
+          resolve: { resolved: resolved.length, viaParent, rejected: unresolved.length },
+          write: {
+            inserted: written.inserted,
+            updated: written.updated,
+            merged: written.mergedIntoCrawled,
+            duplicateInFile: written.duplicateInFile,
+            ambiguous: written.ambiguous.length,
+          },
+        },
+        {
+          dateRange: written.dateRange,
+          counties: written.countiesTouched.length,
+          durationMs: Date.now() - startedAt,
+          rejects: allRejected,
+        },
+      ),
+    );
+  }
+
+  return { ...written, rejected: allRejected };
 }

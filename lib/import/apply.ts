@@ -108,7 +108,7 @@ export interface ResolvedAuction extends ImportedAuction {
  */
 export async function resolveCounties(
   rows: { row: ImportedAuction; line: number }[],
-): Promise<{ resolved: ResolvedAuction[]; rejected: RejectedRow[] }> {
+): Promise<{ resolved: ResolvedAuction[]; rejected: RejectedRow[]; viaParent: number }> {
   const refs: CountyRef[] = await db
     .select({
       fips: counties.fips,
@@ -123,6 +123,14 @@ export async function resolveCounties(
 
   const resolved: ResolvedAuction[] = [];
   const rejected: RejectedRow[] = [];
+  /**
+   * Rows filed under a parent county because their own jurisdiction has no
+   * FIPS of its own — New Jersey's municipalities, Georgia's cities, New
+   * England towns. Counted because it is the number that explains a county
+   * total far larger than the number of counties actually holding sales, and
+   * because a sudden change in it means the label format moved.
+   */
+  let viaParent = 0;
 
   for (const { row, line } of rows) {
     const match = index.resolve(row.stateLabel, row.countyLabel);
@@ -164,9 +172,10 @@ export async function resolveCounties(
     }).url;
 
     resolved.push({ ...row, title, countyFips: match.fips, line, sourceUrl });
+    if (match.via === "parent") viaParent++;
   }
 
-  return { resolved, rejected };
+  return { resolved, rejected, viaParent };
 }
 
 /**
