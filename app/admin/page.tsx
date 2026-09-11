@@ -20,6 +20,7 @@ import { EnrichmentPanel } from "./enrichment-panel";
 import { ImportPanel } from "./import-panel";
 import { ImportHistoryPanel } from "./import-history-panel";
 import { OpsPanel } from "./ops-panel";
+import { StatutePanel } from "./statute-panel";
 import { SourcesPanel } from "./sources-panel";
 import { CapePanel } from "./cape-panel";
 import { PolicyPanel } from "./policy-panel";
@@ -355,6 +356,15 @@ async function Body({
           */}
           <Suspense fallback={<TableSkeleton />}>
             <EnrichmentPanel />
+          </Suspense>
+          {/*
+            The ceiling on everything else in this stage. A parcel in a state
+            with no statutory parameters cannot be priced however well it is
+            enriched, so the statute list belongs beside the valuation gap
+            rather than buried in a source file nobody opens.
+          */}
+          <Suspense fallback={<TableSkeleton />}>
+            <StatutePanel />
           </Suspense>
           <Collapsed label="Inventory by state" count={inventory.states.length}>
             <InventoryPanel inventory={inventory} />
