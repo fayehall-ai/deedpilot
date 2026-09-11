@@ -2182,6 +2182,72 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
     ],
   },
+  /*
+   * Washington is the simplest state in this file, and the only one whose 1.0
+   * assessment ratio is both legally correct and actually current.
+   *
+   * RCW 84.40.030: "All property must be valued at one hundred percent of its
+   * true and fair value in money and assessed on the same basis unless
+   * specifically provided otherwise by law." RCW 84.41.030 then requires that
+   * "all taxable real property within a county must be revalued annually", with
+   * physical inspection at least every six years. California's 1.0 is undone by
+   * Proposition 13, Virginia's by six-year reassessment cycles and North
+   * Carolina's by eight — Washington revalues every year, so the number means
+   * what it says.
+   */
+  WA: {
+    state: "WA",
+    saleType: "Tax Deed",
+    /*
+     * No post-sale redemption in the ordinary case. RCW 84.64.070 allows
+     * redemption "at any time before the close of business the day before the
+     * day of the sale". The exception is a real title risk rather than a return
+     * — see the caveat: a minor or a person adjudicated legally incompetent
+     * "may redeem at any time within three years after the date of sale".
+     */
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: true, and for an unusual reason. The deed itself is strong,
+       * but the three-year disability redemption under RCW 84.64.070 is a
+       * latent claim no examination of the record will rule out — nothing in a
+       * chain of title records that a former owner was a minor or had been
+       * adjudicated incompetent.
+       */
+      typicalLow: 2000,
+      typicalHigh: 5000,
+      typicalMonths: 4,
+      required: true,
+    },
+    closingCosts: 250,
+    auctionToMarketableMonths: 6,
+    /*
+     * 1.0, and here it is a measurement rather than a floor. See the file
+     * comment above this entry.
+     */
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "RCW 84.40.030: \"All property must be valued at one hundred percent of its true and fair value in money and assessed on the same basis unless specifically provided otherwise by law.\" RCW 84.41.030 requires annual revaluation of all taxable real property, with physical inspection at least once every six years.",
+    derivedArvCaveat:
+      "This is the most trustworthy derived ARV in the file — full market value, revalued every year — but the parcel is only physically inspected once every six years, so an annual revaluation is a model applied to a property nobody has looked at recently. On a tax-foreclosure parcel, where deterioration is the norm and is exactly what a model of comparable sales will miss, the assessment is likely to describe a building in better condition than the one being sold. Farm, agricultural, timber and open space land also has its own valuation basis outside RCW 84.40.030 and will sit far below market.",
+    statute:
+      "RCW 84.64.050 (certificate of delinquency and foreclosure), 84.64.070 (redemption before sale; three-year disability exception), 84.64.080 (sale, minimum bid, surplus, treasurer's deed); RCW 84.40.030 (valuation at 100%), 84.41.030 (annual revaluation)",
+    asOf: "2026-09",
+    sources: [
+      "https://app.leg.wa.gov/RCW/default.aspx?cite=84.64.070",
+      "https://app.leg.wa.gov/RCW/default.aspx?cite=84.64.080",
+      "https://app.leg.wa.gov/RCW/default.aspx?cite=84.40.030",
+      "https://app.leg.wa.gov/RCW/default.aspx?cite=84.41.030",
+    ],
+    caveats: [
+      "A WASHINGTON TAX DEED CAN BE UNWOUND FOR THREE YEARS AND THE RECORD WILL NOT WARN YOU. RCW 84.64.070: \"If the real property of any minor, or any person adjudicated to be legally incompetent, be sold for nonpayment of taxes, the same may be redeemed at any time within three years after the date of sale.\" Nothing in a title search reveals that a former owner was a minor or had been adjudicated incompetent, so this is a latent claim on every Washington parcel for three years. It is the reason quietTitle is marked required in a state whose deed is otherwise clean.",
+      "The minimum bid is low, which is the opposite of Ohio. RCW 84.64.080: \"The acceptable minimum bid must be the total amount of taxes, interest, and costs.\" There is no appraisal floor and no market-value floor, so a Washington sale can clear well below value — the discount that Ohio's fair-market-value floor forecloses.",
+      "Recorded water-sewer district liens come out of the surplus before the former owner is paid (RCW 84.64.080), which means they are satisfied from the proceeds rather than following the parcel. Surplus above the minimum bid is refunded to the record owner on application, unclaimed after three years going to the county current expense fund — so Washington was already on the right side of Tyler v. Hennepin County.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
+    ],
+  },
   WI: {
     state: "WI",
     saleType: "Tax Deed",
