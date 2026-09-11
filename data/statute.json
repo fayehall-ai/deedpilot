@@ -788,6 +788,49 @@
         "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
         "The 25% is a flat penalty, not annual interest."
       ]
+    },
+    "WY": {
+      "state": "WY",
+      "saleType": "Tax Lien",
+      "redemption": {
+        "interestKind": "annual",
+        "tiers": [
+          {
+            "throughDays": 1460,
+            "penalty": 0.15
+          }
+        ],
+        "maxDays": 1460
+      },
+      "quietTitle": {
+        "typicalLow": 2000,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
+        "required": true
+      },
+      "closingCosts": 200,
+      "auctionToMarketableMonths": 54,
+      "assessmentRatio": 0.095,
+      "assessmentBasis": "W.S. 39-13-103: property used for industrial purposes is assessed at 11.5% of fair market value; all other property, real and personal, at 9.5%. Wyoming assesses by use, not by county.",
+      "derivedArvCaveat": "Two things pull a Wyoming derived ARV in opposite directions. Industrial property is assessed at 11.5% rather than 9.5%, so dividing by 0.095 overstates it by about 1.2x — the dangerous direction. And since tax year 2025 a homeowner claiming the exemption in W.S. 39-11-105(a)(xlvi) has 25% of fair market value exempted, capped at the first $1,000,000, so an owner-occupied assessment reflects roughly three quarters of value and a derived ARV understates it — the safe direction, but by a quarter. Neither is visible in a bare assessed figure; check the assessor's record.",
+      "statute": "W.S. 39-13-108 (enforcement: tax lien sales, certificates of purchase, redemption and tax deeds); W.S. 39-13-103 (assessment rates); W.S. 39-11-105(a)(xlvi) (homeowner exemption, 2025 Enrolled Act No. 60)",
+      "asOf": "2026-09",
+      "sources": [
+        "https://law.justia.com/codes/wyoming/title-39/chapter-13/section-39-13-108/",
+        "https://codes.findlaw.com/wy/title-39-taxation-and-revenue/wy-st-sect-39-13-108/",
+        "https://codes.findlaw.com/wy/title-39-taxation-and-revenue/wy-st-sect-39-13-103.html",
+        "https://wyoleg.gov/2025/Enroll/SF0069.pdf",
+        "https://www.albanycountywy.gov/299/Tax-Lien-Sale"
+      ],
+      "caveats": [
+        "NO BIDDING. Wyoming allocates liens by random draw rather than auction — the certificate is taxes plus costs and the return does not depend on competition. Our own calendar records Uinta County's procedure as 'Random Selection'. A model that assumes premium or bid-down behaviour does not apply here.",
+        "A FURTHER 3% PENALTY IS EARNED IN THE FIRST YEAR, on top of the 15% per annum, and is not in the tier — one number cannot hold both. Year one is therefore better than modelled and years two to four are as modelled.",
+        "FOUR YEARS BEFORE A DEED, SIX BEFORE THE RIGHT LAPSES. The holder may apply for a tax deed only after four years from the sale and not more than six. Capital is committed for at least four years, the owner may redeem throughout, and a holder who sleeps past six loses the ability to take title at all.",
+        "Wyoming is the longest hold in this file. At 15% simple that is attractive on paper, but auctionToMarketableMonths is 54 and the money is illiquid throughout — compare against what else that capital could do over four and a half years rather than against a one-year lien state.",
+        "Assessment is by use, not county: 11.5% industrial, 9.5% everything else. This row uses 9.5%.",
+        "The 2025 homeowner exemption (W.S. 39-11-105(a)(xlvi), Enrolled Act No. 60) exempts 25% of fair market value on a single family residence and its improved land, capped at the first $1,000,000, first applying to tax year 2025; from tax year 2026 the claimant must actually reside there at least eight months of the year. Note this is an EXEMPTION, not a rate change — press reporting of an 8.3% owner-occupied rate described a floor amendment that did not survive into the enrolled act.",
+        "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Wyoming max bid until they are set."
+      ]
     }
   },
   "floorRatios": {

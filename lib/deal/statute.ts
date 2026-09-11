@@ -1061,6 +1061,94 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "Recorded San Diego sale lists mark pre-sale cures as 'REDEEMED'. That is the owner paying before the auction, not a post-sale redemption, and it is quarantined in the copilot's label rules.",
     ],
   },
+  /*
+   * Wyoming is the only state in this file where you do not bid.
+   *
+   * ## Liens are allocated, not auctioned
+   *
+   * The county treasurer offers each lien in turn and buyers are drawn at
+   * random; there is no bidding up the price and no bidding down the rate. The
+   * certificate is taxes plus costs, and the statutory return is the same
+   * whoever draws it. Our own imported calendar records the mechanism in
+   * USTLA's words — Uinta County's sale carries "Random Selection" where every
+   * other state's rows say "Bid Up or Premium", "Bid Down" or "Combination".
+   *
+   * That removes, in one state, every distortion the rest of this file has to
+   * warn about: no premium to dilute the yield, no minimum-bid base, no cap, no
+   * observed median that collapses to zero. What you see is what the instrument
+   * pays.
+   *
+   * ## Four years before you can act, six before you lose the right
+   *
+   * The owner may redeem at any time until a deed issues. The certificate
+   * holder may apply for a tax deed only after four years from the sale, and
+   * not more than six — so the window to act is two years wide and closes.
+   * `maxDays` is the four-year floor, which is the period the buyer is
+   * certainly waiting.
+   */
+  WY: {
+    state: "WY",
+    saleType: "Tax Lien",
+    redemption: {
+      interestKind: "annual",
+      /*
+       * 15% per annum from the date of sale. A further 3% penalty on the amount
+       * purchased is earned in the first year and is NOT modelled here: the
+       * tier is one number and 15% is the sustained rate, so encoding 18% would
+       * overstate years two through four. The first-year uplift is a caveat.
+       */
+      tiers: [{ throughDays: 1460, penalty: 0.15 }],
+      maxDays: 1460,
+    },
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as for PA, KY, IN, SC
+       * and TN. Wyoming issues a treasurer's tax deed on application rather
+       * than through a court, so the deed arrives without judicial blessing and
+       * an action is the usual route to an insurable title.
+       */
+      typicalLow: 2000,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
+    },
+    closingCosts: 200,
+    /*
+     * Four years of waiting before the deed application is even permitted, then
+     * the application and an action. Wyoming is the longest hold in this file
+     * and the arithmetic should say so.
+     */
+    auctionToMarketableMonths: 54,
+    /*
+     * "All other property" under W.S. 39-13-103(b)(xi) — agricultural,
+     * commercial and residential alike. Industrial sits at 11.5%, which is the
+     * dangerous direction; see the derived-ARV note.
+     */
+    assessmentRatio: 0.095,
+    assessmentBasis:
+      "W.S. 39-13-103: property used for industrial purposes is assessed at 11.5% of fair market value; all other property, real and personal, at 9.5%. Wyoming assesses by use, not by county.",
+    derivedArvCaveat:
+      "Two things pull a Wyoming derived ARV in opposite directions. Industrial property is assessed at 11.5% rather than 9.5%, so dividing by 0.095 overstates it by about 1.2x — the dangerous direction. And since tax year 2025 a homeowner claiming the exemption in W.S. 39-11-105(a)(xlvi) has 25% of fair market value exempted, capped at the first $1,000,000, so an owner-occupied assessment reflects roughly three quarters of value and a derived ARV understates it — the safe direction, but by a quarter. Neither is visible in a bare assessed figure; check the assessor's record.",
+    statute:
+      "W.S. 39-13-108 (enforcement: tax lien sales, certificates of purchase, redemption and tax deeds); W.S. 39-13-103 (assessment rates); W.S. 39-11-105(a)(xlvi) (homeowner exemption, 2025 Enrolled Act No. 60)",
+    asOf: "2026-09",
+    sources: [
+      "https://law.justia.com/codes/wyoming/title-39/chapter-13/section-39-13-108/",
+      "https://codes.findlaw.com/wy/title-39-taxation-and-revenue/wy-st-sect-39-13-108/",
+      "https://codes.findlaw.com/wy/title-39-taxation-and-revenue/wy-st-sect-39-13-103.html",
+      "https://wyoleg.gov/2025/Enroll/SF0069.pdf",
+      "https://www.albanycountywy.gov/299/Tax-Lien-Sale",
+    ],
+    caveats: [
+      "NO BIDDING. Wyoming allocates liens by random draw rather than auction — the certificate is taxes plus costs and the return does not depend on competition. Our own calendar records Uinta County's procedure as 'Random Selection'. A model that assumes premium or bid-down behaviour does not apply here.",
+      "A FURTHER 3% PENALTY IS EARNED IN THE FIRST YEAR, on top of the 15% per annum, and is not in the tier — one number cannot hold both. Year one is therefore better than modelled and years two to four are as modelled.",
+      "FOUR YEARS BEFORE A DEED, SIX BEFORE THE RIGHT LAPSES. The holder may apply for a tax deed only after four years from the sale and not more than six. Capital is committed for at least four years, the owner may redeem throughout, and a holder who sleeps past six loses the ability to take title at all.",
+      "Wyoming is the longest hold in this file. At 15% simple that is attractive on paper, but auctionToMarketableMonths is 54 and the money is illiquid throughout — compare against what else that capital could do over four and a half years rather than against a one-year lien state.",
+      "Assessment is by use, not county: 11.5% industrial, 9.5% everything else. This row uses 9.5%.",
+      "The 2025 homeowner exemption (W.S. 39-11-105(a)(xlvi), Enrolled Act No. 60) exempts 25% of fair market value on a single family residence and its improved land, capped at the first $1,000,000, first applying to tax year 2025; from tax year 2026 the claimant must actually reside there at least eight months of the year. Note this is an EXEMPTION, not a rate change — press reporting of an 8.3% owner-occupied rate described a floor amendment that did not survive into the enrolled act.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Wyoming max bid until they are set.",
+    ],
+  },
 };
 
 export function statuteFor(state: string): StatuteParams | null {
