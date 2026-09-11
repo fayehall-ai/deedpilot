@@ -550,6 +550,102 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
    * rate, which `RedemptionTier` cannot express — tiers are sequential windows
    * of one redemption — so it is a caveat.
    */
+  /*
+   * Indiana is the cleanest fit for `RedemptionTier` in this file and, for that
+   * exact reason, the easiest to get quietly wrong.
+   *
+   * ## The tiers are real, the base is not what this type assumes
+   *
+   * IC 6-1.1-25-2: redemption costs 110% of the MINIMUM BID within six months
+   * of the sale, 115% between six months and a year — plus, for sales after
+   * 30 June 2014, only 5% per annum on the amount by which the purchase price
+   * exceeded that minimum bid, plus any subsequent taxes the buyer paid.
+   *
+   * `RedemptionTier.penalty` is documented as a fraction OF THE BID. In Indiana
+   * it is a fraction of the minimum bid, and Indiana sells by premium bidding,
+   * so the two diverge the moment anyone competes. A parcel with a $1,200
+   * minimum taken at $6,000 does not return 10% on $6,000; it returns 10% on
+   * $1,200 and 5% per annum on the other $4,800. Encoding 0.10 and stopping
+   * there would overstate a competitive purchase by roughly half — the same
+   * shape of error as reading Illinois' 18% cap as its yield.
+   *
+   * The tiers below are the statute. The divergence is the first caveat, and
+   * the fix is a `penaltyBase` on the type rather than a fudged number here.
+   *
+   * ## Three redemption regimes, one row
+   *
+   * IC 6-1.1-25-4(a) sets one year for an ordinary county tax sale; 120 days
+   * where the county executive holds the lien and the certificate went unsold,
+   * or on a sale to a qualified purchasing agency; and NO right of redemption
+   * at all where the parcel sits on the county auditor's vacant-and-abandoned
+   * list under IC 6-1.1-24-1.5. The last is a deed sale wearing a lien state's
+   * clothes, and nothing in a sale row says which regime a parcel is in.
+   *
+   * One year is encoded because it is the default and the conservative reading:
+   * it assumes the longest wait and the smallest penalty tier available.
+   */
+  IN: {
+    state: "IN",
+    saleType: "Tax Lien",
+    redemption: {
+      /*
+       * Flat penalties, not interest — 110% is 110% whether the owner redeems
+       * on day 3 or day 180, which is Georgia's and Texas's treatment rather
+       * than Arizona's or Kentucky's. 182 days is "not more than six months"
+       * (IC 6-1.1-25-2(b)).
+       */
+      tiers: [
+        { throughDays: 182, penalty: 0.1 },
+        { throughDays: 365, penalty: 0.15 },
+      ],
+      maxDays: 365,
+    },
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as for PA and KY.
+       *
+       * Indiana does issue a deed: once redemption lapses the purchaser
+       * petitions the court for a tax deed under IC 6-1.1-25-4.6, after the
+       * notices required by IC 6-1.1-25-4.5. The petition is not the expensive
+       * part; making the resulting deed insurable usually is.
+       */
+      typicalLow: 2500,
+      typicalHigh: 6000,
+      typicalMonths: 6,
+      required: true,
+    },
+    closingCosts: 250,
+    /*
+     * A year of redemption, then the petition and deed, then quiet title. The
+     * redemption year dominates and cannot be shortened by the buyer.
+     */
+    auctionToMarketableMonths: 18,
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "Indiana assesses at 100% of true tax value (assessed value has equalled 100% of true tax value since the 2001 assessment year), so the statutory ratio is 1.0.",
+    derivedArvCaveat:
+      "Indiana's ratio is 1.0, but IC 6-1.1-31-6(c) says in terms that true tax value DOES NOT mean fair market value — it means market value-in-use, the value of the parcel for its current use. On a derelict or under-used parcel, which is most of what reaches a tax sale, value-in-use can sit well below what the land would fetch redeveloped, and on special-purpose property it can sit above. A 1.0 ratio here is not a licence to treat the assessment as an appraisal; get comparable sales.",
+    statute:
+      "IC 6-1.1-24 (sale of real property when taxes delinquent); IC 6-1.1-25 (redemption and tax deeds); IC 6-1.1-31-6 (true tax value)",
+    asOf: "2026-09",
+    sources: [
+      "https://iga.in.gov/ic/2026/Title_6/Article_1.1/Chapter_25.pdf",
+      "https://codes.findlaw.com/in/title-6-taxation/in-code-sect-6-1-1-25-2/",
+      "https://codes.findlaw.com/in/title-6-taxation/in-code-sect-6-1-1-25-4/",
+      "https://codes.findlaw.com/in/title-6-taxation/in-code-sect-6-1-1-31-6/",
+      "https://www.in.gov/dlgf/files/2021-assessment-guidelines/Assessment-Manual.pdf",
+      "https://www.in.gov/dlgf/assessments/overview/",
+    ],
+    caveats: [
+      "THE PENALTY BASE IS THE MINIMUM BID, NOT YOUR BID. 110%/115% under IC 6-1.1-25-2 is computed on the minimum bid; the amount you paid above it earns only 5% per annum, and only for sales after 2014-06-30. Indiana sells by premium bidding, so on any competitive parcel the modelled tier overstates the return — a $1,200 minimum taken at $6,000 returns 10% on $1,200 and 5%/yr on $4,800, not 10% on $6,000. Treat the computed penalty as a ceiling until the type carries a penalty base.",
+      "THREE REDEMPTION REGIMES AND THIS ROW ENCODES ONE. IC 6-1.1-25-4(a): one year at an ordinary county tax sale; 120 days where the county executive holds the lien and the certificate went unsold, or on sale to a qualified purchasing agency; and NO redemption at all for a parcel on the county auditor's vacant-and-abandoned list under IC 6-1.1-24-1.5. Establish which applies before trusting the hold period — a vacant-and-abandoned parcel is effectively a deed sale.",
+      "Redemption also repays every subsequent tax, special assessment, interest, penalty and fee the purchaser paid after the sale, so carrying taxes during the redemption year is recoverable rather than sunk — but only if the parcel is in fact redeemed.",
+      "Commissioners' certificate sales under IC 6-1.1-24-6.1 sell previously unsold parcels at a discounted minimum bid set by the county executive, advertised three consecutive weeks at least thirty days ahead. Cheaper entry, 120-day redemption, and generally the parcels nobody wanted at the regular sale.",
+      "A tax deed is not a marketable title. After redemption lapses the purchaser must petition the court under IC 6-1.1-25-4.6, having given the notices required by IC 6-1.1-25-4.5; defective notice is the usual ground on which an Indiana tax deed is later attacked.",
+      "If the parcel sells above the minimum bid and is NOT redeemed, the former owner may claim the tax sale surplus. That money is not the purchaser's and should never be modelled as recoverable.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Indiana max bid until they are set.",
+    ],
+  },
   KY: {
     state: "KY",
     saleType: "Tax Lien",
