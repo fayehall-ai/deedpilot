@@ -1305,6 +1305,95 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     ],
   },
 
+  /*
+   * Colorado stopped handing the property to the lien holder on 1 July 2024.
+   *
+   * Under HB24-1056 a treasurer's deed is no longer issued automatically to the
+   * certificate holder when the three years run. The county now auctions an
+   * "option for a treasurer's deed" publicly, and the holder takes the deed
+   * only if nobody outbids the minimum; otherwise they are paid off and the
+   * excess goes where Tyler v. Hennepin County said it has to. The state's own
+   * summary is that the change "brings Colorado law into compliance with the
+   * United States supreme court's recent decision affirming property owners'
+   * constitutional right to the value of their property in excess of their tax
+   * debt."
+   *
+   * That removes the deed remainder, which is the thing that makes a tax lien
+   * interesting at a low rate. In Illinois, buyers bid to zero because the real
+   * prize is the property; the Cook County catalogue behind the IL entry shows
+   * 81.4% of liens clearing at 0%. A Colorado investor after mid-2024 should
+   * expect interest and nothing else. Any guide written before then — and most
+   * of them were — describes a lien that could become a house.
+   */
+  CO: {
+    state: "CO",
+    saleType: "Tax Lien",
+    redemption: {
+      interestKind: "annual",
+      /*
+       * 13% is the rate for liens sold at the 2026 sales, and it is a rate with
+       * an expiry date. C.R.S. 39-12-103(3) sets it at nine percentage points
+       * above the federal discount rate in effect on 1 September, rounded to
+       * the nearest whole percent, so it is redetermined every year. A lien
+       * carries the rate from its own sale year for life.
+       */
+      tiers: [{ throughDays: 1095, penalty: 0.13 }],
+      maxDays: 1095,
+    },
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: true, conservatively. The treasurer's deed route is new as of
+       * July 2024 and has not been tested; a Colorado treasurer's deed has
+       * historically been regarded as needing an action to make it insurable,
+       * and nothing in HB24-1056 changes the deed itself — only who gets to
+       * apply for one.
+       */
+      typicalLow: 2500,
+      typicalHigh: 6000,
+      typicalMonths: 5,
+      required: true,
+    },
+    closingCosts: 250,
+    /*
+     * Three years of redemption before the option auction can even happen, then
+     * the auction, the deed and the action to clear it. Capital is committed
+     * from the day the certificate is bought.
+     */
+    auctionToMarketableMonths: 44,
+    /*
+     * 0.0705 — the residential rate for school district purposes in 2026.
+     *
+     * Colorado now assesses the same residential property twice. For school
+     * districts the rate is applied to full actual value; for local government
+     * SB24-233 applies 6.95% to actual value reduced by the lesser of 10% of
+     * actual value or $70,000, which works out near 6.26% on a parcel under
+     * $700,000. This entry takes the school rate because it is the higher of
+     * the two, and a higher ratio produces a lower ARV and a lower max bid.
+     */
+    assessmentRatio: 0.0705,
+    assessmentBasis:
+      "Colorado assesses residential property at two rates since SB24-233. For school district purposes the 2026 residential rate is 7.05% of actual value; for local government purposes 6.95% is applied to actual value less the lesser of 10% of actual value or $70,000 as adjusted for inflation, an effective rate near 6.26% below $700,000. Commercial and agricultural property is 25% for 2026, down from 27% in 2025. This entry uses the school rate, the higher of the two residential figures.",
+    derivedArvCaveat:
+      "Colorado's residential and nonresidential rates differ by a factor of three and a half — about 7% against 25% — so deriving an ARV for a commercial, industrial or agricultural parcel at the residential ratio overstates it roughly 3.5x, which is the dangerous direction and the largest such gap in this file. Confirm the classification before accepting a derived Colorado value. The rates themselves also change almost every year: 27% became 25% between 2025 and 2026, and the residential rates have moved every session since the Gallagher Amendment was repealed in 2020. An out-of-date asOf here means the ratio is simply wrong, not that a statute might have been amended.",
+    statute:
+      "C.R.S. §§ 39-11-101 et seq. (tax lien sales), 39-12-103 (redemption and interest), 39-11-120 et seq. (treasurer's deeds) as amended by HB24-1056 (public auction of the option for a treasurer's deed, effective 2024-07-01); SB24-233 (assessment rates)",
+    asOf: "2026-09",
+    sources: [
+      "https://leg.colorado.gov/bills/hb24-1056",
+      "https://leg.colorado.gov/bills/sb24-233",
+      "https://treasurer.elpasoco.com/real-estate-tax-lien-questions/",
+      "https://riograndecounty.colorado.gov/hb24-1056-frequently-asked-questions",
+    ],
+    caveats: [
+      "THE LIEN NO LONGER BECOMES THE PROPERTY. Since 1 July 2024 (HB24-1056) the county auctions an option for a treasurer's deed to the highest bidder rather than deeding the parcel to the certificate holder, who takes it only if no one bids above the minimum. Colorado is now an interest-only instrument in the ordinary case. Do not model a Colorado lien on the deed remainder, and discount every pre-2024 Colorado guide accordingly.",
+      "THE PREMIUM IS A DEAD LOSS, NOT AN INVESTMENT. Colorado bidders compete by bidding a premium above the taxes owed, and per the El Paso County treasurer that overbid \"is credited to the county general fund and is not recovered by the investor\". It is never returned and it earns no interest — interest accrues only on the tax amount. The real yield is therefore 13% x taxes / (taxes + premium), and a bidder who pays a 30% premium has turned a 13% instrument into a 10% one while also losing the premium outright. The tier below is the statutory rate on the taxes, not the yield on the money spent.",
+      "THE RATE IS RESET EVERY YEAR AND THIS ENTRY IS ONE YEAR'S NUMBER. C.R.S. 39-12-103(3) fixes it at nine points over the federal discount rate on 1 September, so the 13% here belongs to liens sold in 2026. A lien keeps its own sale year's rate, which means a portfolio bought across several years earns several different rates.",
+      "An unredeemed certificate expires on the fifteenth anniversary of the sale. A holder who neither redeems nor pursues the deed option loses the lien entirely.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator, and they price a deed process that has existed only since July 2024.",
+    ],
+  },
   FL: {
     state: "FL",
     saleType: "Tax Deed",
