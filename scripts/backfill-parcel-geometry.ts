@@ -48,12 +48,22 @@ function candidates(parcel: string): string[] {
   return [...new Set([raw, digits].filter((s) => s.length >= 4))];
 }
 
-/** Ask a layer only where the parcel is. */
+/**
+ * Ask a layer where the parcel is — and, where it publishes one, what it is called.
+ *
+ * The address rides along for the same reason the geometry did: it is in the
+ * response already. This script exists because 16,001 lookups asked for a value
+ * and threw away the coordinates in the same payload; asking for the point and
+ * discarding the street line beside it would be the identical mistake one field
+ * over. Indiana is the case that makes it concrete — its statewide layer
+ * publishes `prop_add` and no value at all, so the address is the *only* thing
+ * of substance it has to give.
+ */
 async function locate(
   fips: string,
   state: string,
   parcelNumber: string,
-): Promise<{ latitude: number; longitude: number; basis: string } | null> {
+): Promise<{ latitude: number; longitude: number; basis: string; addressLine?: string } | null> {
   const src = CADASTRE_SOURCES[fips] ?? CADASTRE_SOURCES[state.toUpperCase()];
   if (!src) return null;
 
@@ -63,9 +73,12 @@ async function locate(
 
     const params = new URLSearchParams({
       where: clauses.join(" AND "),
-      // Only the id. The values are already in `lot_valuations` and asking for
-      // them again would make a wide response out of a narrow question.
-      outFields: src.parcelField,
+      /*
+       * The id, plus the situs address where the layer has one. Still not the
+       * values — those are already in `lot_valuations`, and asking for them
+       * again would make a wide response out of a narrow question.
+       */
+      outFields: [src.parcelField, src.addressField].filter(Boolean).join(","),
       returnGeometry: "true",
       outSR: "4326",
       f: "json",
@@ -75,7 +88,7 @@ async function locate(
       const res = await fetch(`${src.url}?${params}`, { signal: AbortSignal.timeout(25_000) });
       if (!res.ok) continue;
       const data = (await res.json()) as {
-        features?: { geometry?: unknown }[];
+        features?: { attributes?: Record<string, unknown>; geometry?: unknown }[];
         error?: unknown;
       };
       if (data.error) continue;
@@ -85,8 +98,23 @@ async function locate(
       // coordinate is worse than none.
       if (rows.length !== 1) continue;
 
+      /*
+       * Collapsed, because situs addresses arrive column-aligned from the
+       * assessor's mainframe — "195   FOWLER  CIR  NE" — and every downstream
+       * match fails on the whitespace. Same treatment as the valuation path.
+       */
+      const addressLine = src.addressField
+        ? ((rows[0].attributes?.[src.addressField] as string) || "").replace(/\s+/g, " ").trim() ||
+          undefined
+        : undefined;
+
       const located = parcelLocation(rows[0].geometry as never);
-      if (located) return located;
+      /*
+       * A layer with no geometry but a usable address is still worth the row.
+       * Returning null there would discard the only thing some layers publish.
+       */
+      if (located) return { ...located, addressLine };
+      if (addressLine) return { latitude: NaN, longitude: NaN, basis: "address only", addressLine };
     } catch {
       // A slow state service is not a fact about the parcel.
       continue;
@@ -154,6 +182,8 @@ async function main() {
     .select({
       id: lots.id,
       parcelNumber: lots.parcelNumber,
+      /* Read so an address already on the lot is never overwritten. */
+      addressLine: lots.addressLine,
       fips: counties.fips,
       state: counties.state,
       county: counties.name,
@@ -218,6 +248,7 @@ async function main() {
   let located = 0;
   let missed = 0;
   let rowsUpdated = 0;
+  let addressed = 0;
   let i = 0;
 
   for (const group of byParcel.values()) {
@@ -225,18 +256,37 @@ async function main() {
     const t = group[0];
     const point = await locate(t.fips, t.state, t.parcelNumber!);
     if (point) {
-      await db
-        .update(lots)
-        .set({
-          latitude: String(point.latitude),
-          longitude: String(point.longitude),
-        })
-        .where(inArray(lots.id, group.map((g) => g.id)));
+      const hasPoint = Number.isFinite(point.latitude) && Number.isFinite(point.longitude);
+      /*
+       * Never overwrite an address already on the lot. The sale notice's own
+       * line is the one the bidder will be reading; this is filling a blank,
+       * not correcting the county.
+       */
+      const blanks = group.filter((g) => !g.addressLine);
+      const patch: Record<string, string> = {};
+      if (hasPoint) {
+        patch.latitude = String(point.latitude);
+        patch.longitude = String(point.longitude);
+      }
+      if (hasPoint) {
+        await db.update(lots).set(patch).where(inArray(lots.id, group.map((g) => g.id)));
+      }
+      if (point.addressLine && blanks.length > 0) {
+        await db
+          .update(lots)
+          .set({ addressLine: point.addressLine })
+          .where(inArray(lots.id, blanks.map((g) => g.id)));
+        addressed += blanks.length;
+      }
+      if (!hasPoint && !point.addressLine) { missed++; continue; }
       located++;
       rowsUpdated += group.length;
       console.log(
         `[${i}/${byParcel.size}] ${t.parcelNumber} (${t.county}, ${t.state}) → ` +
-          `${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)} (${point.basis})` +
+          (hasPoint
+            ? `${point.latitude.toFixed(5)}, ${point.longitude.toFixed(5)} (${point.basis})`
+            : `${point.basis}`) +
+          (point.addressLine ? `  "${point.addressLine}"` : "") +
           (group.length > 1 ? ` ×${group.length} rows` : ""),
       );
     } else {
@@ -250,7 +300,8 @@ async function main() {
 
   console.log(
     `\nLocated ${located} parcel(s) covering ${rowsUpdated} lot row(s); ` +
-      `unmatched ${missed}, of ${byParcel.size} attempted.`,
+      `unmatched ${missed}, of ${byParcel.size} attempted.` +
+      (addressed > 0 ? `\nFilled ${addressed} blank address line(s) from the same responses.` : ""),
   );
 }
 

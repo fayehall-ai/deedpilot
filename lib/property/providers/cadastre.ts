@@ -162,6 +162,38 @@ export const CADASTRE_SOURCES: Record<string, CadastreSource> = {
     note: "Lincoln County NM — parcels; land + improvement values summed",
   },
 
+  /*
+   * Indiana, and the one entry here that deliberately prices nothing.
+   *
+   * The state publishes every parcel — `parcel_id` in the dotted form our sale
+   * lists use, `state_parcel_id` in digits, so `candidates()` matches on either
+   * without help — along with the situs address and a geometry. What it does
+   * not publish is a value: the assessment attributes live in a separate feed
+   * named, with admirable clarity, `CountyParcels_DLGF_RESTRICTED`. Lake
+   * County's own open layer has no value fields either, and the South Bend
+   * service that does have them keys on a 13-digit local id that no rule
+   * converts to the 18-digit state number.
+   *
+   * So `cadastreProvider` will find this source, read no value, and move on —
+   * which is correct, and is why an Indiana lookup still costs a paid provider.
+   * The entry earns its place through `intel:locate`, which asks the narrower
+   * question this layer can answer: where is the parcel. That unlocks 8,611
+   * Lake County lots for every surroundings signal we compute, at no cost.
+   *
+   * `countyField` matters more here than usual. These lots were filed under
+   * St. Joseph until `repair-lake-county-misassignment.ts` moved them, and
+   * while they were, this filter would have rejected every correct match.
+   */
+  IN: {
+    url: "https://gisdata.in.gov/server/rest/services/Hosted/Parcel_Boundaries_of_Indiana_Current/FeatureServer/0/query",
+    parcelField: "parcel_id",
+    countyField: "county_fips",
+    assessedField: "",
+    marketField: "",
+    addressField: "prop_add",
+    note: "Indiana IGIO statewide parcels — geometry and situs address only; assessed values are in the RESTRICTED DLGF feed",
+  },
+
   AR: {
     url: "https://gis.arkansas.gov/arcgis/rest/services/FEATURESERVICES/Planning_Cadastre/FeatureServer/0/query",
     parcelField: "parcelid",
