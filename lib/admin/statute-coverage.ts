@@ -20,6 +20,25 @@
  * orders of magnitude apart. Ranking on sales would have pointed at the wrong
  * state.
  *
+ * ## Why it no longer filters the gap to upcoming sales
+ *
+ * Because tax sales are seasonal and this query was blind to it. It asked only
+ * for sales dated today or later, so a state between seasons looked exactly
+ * like a state that does not hold tax sales at all.
+ *
+ * Mississippi is the case. Its annual sale is the last Monday in August — 74
+ * sales carrying 123,409 announced parcels, more than every upcoming sale in
+ * every other state put together. Eleven days after it closed the console
+ * showed Mississippi nowhere, because every row we hold for it is in the past.
+ * The research queue called the gap empty while the largest gap in the product
+ * sat just outside the window.
+ *
+ * So the gap is ranked on everything we have ever seen, and `parcels` — what is
+ * unpriceable right now — is reported separately from `seenParcels`, which is
+ * what researching the state is worth. Our whole corpus spans July to November,
+ * so even `seenParcels` understates any state selling in the other seven
+ * months. It is a floor on the gap, not a measure of it.
+ *
  * ## Why staleness is a first-class field
  *
  * `statute.ts` opens by warning that its figures "move with legislation" and to
@@ -31,7 +50,7 @@
  * schedule whether or not anyone notices.
  */
 
-import { gte, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { db } from "../db";
 import { auctions, counties } from "../db/schema";
 import { NOT_ENCODED, STATUTE_PARAMS, type StatuteParams } from "../deal/statute";
@@ -67,9 +86,20 @@ export interface CoveredState {
 export interface UncoveredState {
   state: string;
   name: string;
+  /** Upcoming sales and announced parcels — the gap right now. */
   sales: number;
   parcels: number;
   soonest: string | null;
+  /** Everything we have ever held for this state — what researching it is worth. */
+  seenSales: number;
+  seenParcels: number;
+  /** Most recent sale date on record, upcoming or past. */
+  lastSale: string | null;
+  /**
+   * We hold sales for this state but none upcoming, so a forward-looking query
+   * cannot see it. Seasonality, not absence.
+   */
+  betweenSeasons: boolean;
   /**
    * Set when the state was researched and deliberately left uncovered.
    *
@@ -83,10 +113,24 @@ export interface UncoveredState {
 
 export interface StatuteCoverage {
   covered: CoveredState[];
-  /** States holding upcoming inventory with no entry, worst gap first. */
+  /** States we have ever seen sales for with no entry, worst gap first. */
   uncovered: UncoveredState[];
-  /** Parcels we hold that no statute can price. */
+  /** Upcoming parcels we hold that no statute can price. */
   unpriceableParcels: number;
+  /**
+   * States with no statutory parameters AND no auction we have ever recorded.
+   *
+   * The uncovered list is built from the auctions table, so it can only rank
+   * what discovery has found. A state nobody has crawled is not at the bottom
+   * of that list, it is absent from it — and absent looks identical to "has no
+   * tax sales". Alabama, Iowa and Oklahoma all run substantial tax sales and
+   * all have zero rows here.
+   *
+   * This is a discovery gap rather than a statute gap, which is why it is a
+   * separate field: researching the statute for a state we cannot see any sales
+   * in would price nothing.
+   */
+  neverSeen: string[];
 }
 
 /** How long ago a YYYY-MM stamp was, in whole months. */
@@ -116,16 +160,22 @@ function describeRedemption(p: StatuteParams): string {
 export async function getStatuteCoverage(): Promise<StatuteCoverage> {
   const today = new Date().toISOString().slice(0, 10);
 
+  /*
+   * Deliberately unfiltered by date, taking the upcoming figures as conditional
+   * aggregates instead. A WHERE clause here is what hid Mississippi.
+   */
   const rows = await db
     .select({
       state: counties.state,
-      sales: sql<number>`count(*)::int`,
-      parcels: sql<number>`coalesce(sum(${auctions.announcedParcelCount}), 0)::int`,
-      soonest: sql<string>`min(${auctions.saleDate})`,
+      sales: sql<number>`count(*) filter (where ${auctions.saleDate} >= ${today})::int`,
+      parcels: sql<number>`coalesce(sum(${auctions.announcedParcelCount}) filter (where ${auctions.saleDate} >= ${today}), 0)::int`,
+      soonest: sql<string | null>`min(${auctions.saleDate}) filter (where ${auctions.saleDate} >= ${today})`,
+      seenSales: sql<number>`count(*)::int`,
+      seenParcels: sql<number>`coalesce(sum(${auctions.announcedParcelCount}), 0)::int`,
+      lastSale: sql<string | null>`max(${auctions.saleDate})`,
     })
     .from(auctions)
     .innerJoin(counties, sql`${counties.fips} = ${auctions.countyFips}`)
-    .where(gte(auctions.saleDate, today))
     .groupBy(counties.state);
 
   const held = new Map(rows.map((r) => [r.state, r]));
@@ -162,6 +212,10 @@ export async function getStatuteCoverage(): Promise<StatuteCoverage> {
         sales: r.sales,
         parcels: r.parcels,
         soonest: r.soonest ?? null,
+        seenSales: r.seenSales,
+        seenParcels: r.seenParcels,
+        lastSale: r.lastSale ?? null,
+        betweenSeasons: r.sales === 0 && r.seenSales > 0,
         deliberate: closed
           ? { summary: closed.summary, blocker: closed.blocker, unblockedBy: closed.unblockedBy }
           : undefined,
@@ -176,14 +230,21 @@ export async function getStatuteCoverage(): Promise<StatuteCoverage> {
     .sort(
       (a, b) =>
         Number(Boolean(a.deliberate)) - Number(Boolean(b.deliberate)) ||
-        b.parcels - a.parcels ||
-        b.sales - a.sales ||
+        /* Everything seen, not only what is upcoming — see the header. */
+        b.seenParcels - a.seenParcels ||
+        b.seenSales - a.seenSales ||
         a.state.localeCompare(b.state),
     );
+
+  const seen = new Set(rows.map((r) => r.state));
+  const neverSeen = Object.keys(STATE_NAMES)
+    .filter((st) => st.length === 2 && !(st in STATUTE_PARAMS) && !(st in NOT_ENCODED) && !seen.has(st))
+    .sort();
 
   return {
     covered,
     uncovered,
     unpriceableParcels: uncovered.reduce((n, s) => n + s.parcels, 0),
+    neverSeen,
   };
 }

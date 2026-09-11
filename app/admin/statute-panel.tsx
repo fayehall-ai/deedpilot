@@ -48,7 +48,7 @@ function SourceLink({ url }: { url: string }) {
 }
 
 export async function StatutePanel() {
-  const { covered, uncovered, unpriceableParcels } = await getStatuteCoverage();
+  const { covered, uncovered, unpriceableParcels, neverSeen } = await getStatuteCoverage();
   const stale = covered.filter((c) => c.stale);
 
   return (
@@ -127,14 +127,16 @@ export async function StatutePanel() {
 
       <div>
         <h3 className="font-medium">
-          {uncovered.length} state{uncovered.length === 1 ? "" : "s"} holding inventory with no
+          {uncovered.length} state{uncovered.length === 1 ? "" : "s"} we have seen sales in with no
           statute
         </h3>
         <p className="mt-1 text-sm text-muted">
-          {unpriceableParcels.toLocaleString()} announced parcels no max bid can be computed for.
-          Ranked by what is at stake, so the next state to research is the top row — that is how
-          Pennsylvania was chosen. States already researched and ruled out sort to the bottom with
-          the reason, because they are a closed question rather than a queue item.
+          {unpriceableParcels.toLocaleString()} upcoming announced parcels no max bid can be
+          computed for. Ranked by every parcel we have ever seen in the state rather than only the
+          upcoming ones, because tax sales are seasonal: Mississippi sells once a year in August and
+          would otherwise read as empty for eleven months while being the largest gap here. States
+          already researched and ruled out sort to the bottom with the reason, because they are a
+          closed question rather than a queue item.
         </p>
       </div>
 
@@ -149,9 +151,10 @@ export async function StatutePanel() {
               <thead className="text-left text-xs uppercase tracking-wide text-muted">
                 <tr className="border-b border-border">
                   <th className="py-1.5 pr-3">State</th>
-                  <th className="py-1.5 pr-3 text-right">Announced parcels</th>
-                  <th className="py-1.5 pr-3 text-right">Sales</th>
+                  <th className="py-1.5 pr-3 text-right">Upcoming parcels</th>
+                  <th className="py-1.5 pr-3 text-right">Ever seen</th>
                   <th className="py-1.5 pr-3">Soonest</th>
+                  <th className="py-1.5 pr-3">Last sale</th>
                 </tr>
               </thead>
               <tbody>
@@ -172,9 +175,23 @@ export async function StatutePanel() {
                       ) : null}
                     </td>
                     <td className="tnum py-1.5 pr-3 text-right">{u.parcels.toLocaleString()}</td>
-                    <td className="tnum py-1.5 pr-3 text-right text-muted">{u.sales}</td>
+                    <td className="tnum py-1.5 pr-3 text-right">
+                      {u.seenParcels.toLocaleString()}
+                      <div className="text-xs font-normal text-muted">
+                        {u.seenSales} sale{u.seenSales === 1 ? "" : "s"}
+                      </div>
+                    </td>
                     <td className="tnum py-1.5 pr-3 whitespace-nowrap text-xs text-muted">
-                      {u.soonest ?? "—"}
+                      {u.betweenSeasons ? (
+                        <span className="rounded bg-surface-2 px-1.5 py-0.5 uppercase tracking-wide">
+                          between seasons
+                        </span>
+                      ) : (
+                        (u.soonest ?? "—")
+                      )}
+                    </td>
+                    <td className="tnum py-1.5 pr-3 whitespace-nowrap text-xs text-muted">
+                      {u.lastSale ?? "—"}
                     </td>
                   </tr>
                 ))}
@@ -183,6 +200,18 @@ export async function StatutePanel() {
           </div>
         )}
       </Card>
+
+      {neverSeen.length > 0 && (
+        <Callout
+          tone="warn"
+          title={`${neverSeen.length} state${neverSeen.length === 1 ? "" : "s"} we have never recorded a single sale in`}
+        >
+          {neverSeen.join(", ")} — these have no statutory parameters and no auctions in the
+          database, so they cannot appear in the ranking above at all. Several of them run
+          substantial tax sales. This is a gap in discovery rather than in research: finding the
+          statute for a state we see no sales in would price nothing.
+        </Callout>
+      )}
     </div>
   );
 }
