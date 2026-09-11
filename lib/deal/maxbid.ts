@@ -383,17 +383,31 @@ export function computeMaxBid(inputs: DealInputs): DealResult {
     );
   }
 
+  /*
+   * The expected cost of clearing title, not the cost of doing it.
+   *
+   * `required` used to change only this line's label while the full midpoint
+   * was charged either way, so a Michigan parcel was reserving $2,750 against a
+   * line that told the operator the work was "often unnecessary". Weighting by
+   * likelihood makes the number mean what the label says.
+   */
+  const likelihood = statute ? (statute.quietTitle.likelihood ?? 1) : 1;
   const titleCost = statute
-    ? (statute.quietTitle.typicalLow + statute.quietTitle.typicalHigh) / 2
+    ? ((statute.quietTitle.typicalLow + statute.quietTitle.typicalHigh) / 2) * likelihood
     : 0;
   if (statute) {
+    const range =
+      `$${statute.quietTitle.typicalLow.toLocaleString()}–$${statute.quietTitle.typicalHigh.toLocaleString()}, ` +
+      `~${statute.quietTitle.typicalMonths} months`;
+    const share = Math.round(likelihood * 100);
     costs.push({
-      label: statute.quietTitle.required ? "Quiet title (required)" : "Quiet title (often unnecessary)",
+      label: likelihood >= 1 ? "Quiet title (required)" : `Quiet title (${share}% of parcels)`,
       amount: round2(titleCost),
       note:
-        `Midpoint of the typical ${statute.state} range ` +
-        `($${statute.quietTitle.typicalLow.toLocaleString()}–$${statute.quietTitle.typicalHigh.toLocaleString()}, ` +
-        `~${statute.quietTitle.typicalMonths} months).`,
+        likelihood >= 1
+          ? `Midpoint of the typical ${statute.state} range (${range}).`
+          : `${share}% of the midpoint of the typical ${statute.state} range (${range}) — ` +
+            `the share of ${statute.state} parcels that need an action at all.`,
       assumed: true,
     });
   }

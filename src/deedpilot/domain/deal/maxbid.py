@@ -311,19 +311,36 @@ def compute_maxbid(inputs: DealInputs | dict[str, Any]) -> DealResult:
 
     if statute:
         qt = statute["quietTitle"]
-        title_cost = (qt["typicalLow"] + qt["typicalHigh"]) / 2
+        # The expected cost of clearing title, not the cost of doing it.
+        #
+        # "required" used to change only this line's label while the full
+        # midpoint was charged either way, so a Michigan parcel reserved $2,750
+        # against a line telling the operator the work was "often unnecessary".
+        # Weighting by likelihood makes the number mean what the label says.
+        likelihood = qt.get("likelihood", 1)
+        title_cost = ((qt["typicalLow"] + qt["typicalHigh"]) / 2) * likelihood
+        title_range = (
+            f"${qt['typicalLow']:,}–${qt['typicalHigh']:,}, "
+            f"~{qt['typicalMonths']} months"
+        )
+        share = _js_round(likelihood * 100)
         costs.append(
             CostLine(
                 label=(
                     "Quiet title (required)"
-                    if qt["required"]
-                    else "Quiet title (often unnecessary)"
+                    if likelihood >= 1
+                    else f"Quiet title ({share}% of parcels)"
                 ),
                 amount=_round2(title_cost),
                 note=(
                     f"Midpoint of the typical {statute['state']} range "
-                    f"(${qt['typicalLow']:,}–${qt['typicalHigh']:,}, "
-                    f"~{qt['typicalMonths']} months)."
+                    f"({title_range})."
+                    if likelihood >= 1
+                    else (
+                        f"{share}% of the midpoint of the typical "
+                        f"{statute['state']} range ({title_range}) — the share "
+                        f"of {statute['state']} parcels that need an action at all."
+                    )
                 ),
                 assumed=True,
             )

@@ -104,8 +104,86 @@ export interface StatuteParams {
    * warranty deed; in most states you cannot resell or finance until this is
    * done, and leaving it out is the single most common way a "profitable"
    * tax deed purchase turns out not to be.
+   *
+   * `typicalMonths` is not decorative. Where a state has no
+   * `auctionToMarketableMonths`, it becomes the holding-cost clock via
+   * `typicalMonths + 2` — so in Pennsylvania, our largest block of inventory,
+   * this field sets the carry on 40,530 parcels.
    */
-  quietTitle: { typicalLow: number; typicalHigh: number; typicalMonths: number; required: boolean };
+  /*
+   * ## The September 2026 review, and what it found
+   *
+   * These figures were reviewed against market sources for the first time. Two
+   * things came out of it that matter more than any individual number.
+   *
+   * First, `required` was decorative. The engine charged the full midpoint in
+   * every state and `required` changed only the cost line's label, so Michigan
+   * reserved $2,750 against a line reading "often unnecessary". `likelihood`
+   * below fixes that.
+   *
+   * Second, and worse: the `required: false` flags were mostly wrong. They had
+   * been set from the statute — a judgment that bars all prior interests, a
+   * state taking absolute title — and title underwriters do not price statutes.
+   * They price notice and due process, and they want a court to have cut off
+   * competing claims or years to have run. Michigan extinguishes every prior
+   * interest under MCL 211.78k and underwriters still "generally won't issue a
+   * policy on tax-foreclosed property until a court has resolved any potential
+   * competing claims". California's deed is unchallengeable after a year under
+   * Rev. & Tax. Code § 3725, and inside that year insurers want a quiet title
+   * or quitclaims from the former assessee and every lienholder. Minnesota's
+   * state deed has "the force and effect of a patent" and insurers still refuse
+   * for one to three years.
+   *
+   * So all nine `required: false` entries became true. The engine's bug had
+   * been masking the flag error — it charged full cost regardless — which is
+   * why fixing the engine alone would have made these numbers worse.
+   *
+   * ## Where the numbers come from
+   *
+   * Sourced individually: PA and IN ($1,500-$5,000, 2-6 months for an
+   * uncontested action), MI ($2,000-$4,000, 6-12 months), CA (typically over
+   * $4,500, 6-12 months).
+   *
+   * Kept because they price a specific mechanism rather than a quiet title:
+   * KY (a judicial foreclosure under KRS 134.546), MA (a Land Court
+   * foreclosure of the right of redemption), GA (barment of redemption before
+   * any action). AR is the operator's own figure and is not touched.
+   *
+   * Everything else carries $1,800-$5,000 over 5 months, the range multiple
+   * independent sources give for an uncontested action. That is a national
+   * baseline applied uniformly, which is weaker than state-specific research —
+   * but stronger than the scatter of unsourced per-state guesses it replaced,
+   * and it is honest about being one number rather than pretending to be
+   * twenty-three.
+   *
+   * None of this has been checked against the operator's own quotes. That is
+   * still the last step, and until it happens every entry but Arkansas says so.
+   */
+  quietTitle: {
+    typicalLow: number;
+    typicalHigh: number;
+    typicalMonths: number;
+    /** Whether an action is needed on essentially every parcel. */
+    required: boolean;
+    /**
+     * Share of parcels that actually need the action, from 0 to 1.
+     *
+     * This exists because `required` used to change only the label. The engine
+     * charged the full midpoint in every state, so Michigan and Oregon were
+     * deducting $2,750 and $2,100 from the max bid under a cost line that read
+     * "often unnecessary" — the arithmetic contradicting the words beside it.
+     *
+     * Charging nothing instead would have been the opposite error. A statutory
+     * clean-title provision makes an action unnecessary on the ordinary parcel,
+     * not on the one where an heir was served by publication. So the engine now
+     * reserves the expected cost: this share of the midpoint.
+     *
+     * Defaults to 1, which is the old behaviour. A state with `required: false`
+     * must set it explicitly, and `statute.test.ts` enforces that — leaving it
+     * off is how the original mismatch would come back.
+     */
+    likelihood?: number;
+  };
   /** Recording, documentary stamps, and deed issuance, as a rough fixed cost. */
   closingCosts: number;
   /**
@@ -280,17 +358,17 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
-       * required: false. The buyer takes from a municipality that holds by
+       * required: true. The buyer takes from a municipality that holds by
        * judgment and deed after a year of redemption, and two separate
        * ordinances must be adopted before the sale can happen at all. The
        * Oregon and Minnesota posture.
        */
-      typicalLow: 2000,
+      typicalLow: 1800,
       typicalHigh: 5000,
-      typicalMonths: 4,
-      required: false,
+      typicalMonths: 5,
+      required: true,
     },
     closingCosts: 250,
     auctionToMarketableMonths: 4,
@@ -522,17 +600,17 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
-       * required: false. Absolute title vested in the state under § 281.18 and
+       * required: true. Absolute title vested in the state under § 281.18 and
        * the buyer takes by state deed, which is the Oregon and Michigan
        * situation rather than the Arkansas one. The band is for the parcels
        * where something survives anyway.
        */
-      typicalLow: 1500,
-      typicalHigh: 3500,
-      typicalMonths: 3,
-      required: false,
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
     },
     closingCosts: 250,
     /* No redemption window and no live challenge window; the hold is the deed. */
@@ -630,15 +708,15 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
        * required: true. A Missouri collector's deed is widely regarded as
        * uninsurable without an action, and the notice regime above means the
        * question a title examiner asks is not what the deed says but whether
        * § 140.405 was complied with to the letter.
        */
-      typicalLow: 2500,
-      typicalHigh: 6000,
+      typicalLow: 1800,
+      typicalHigh: 5000,
       typicalMonths: 5,
       required: true,
     },
@@ -689,9 +767,9 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
-       * required: false. G.S. 105-374(k) has the judgment order the property
+       * required: true. G.S. 105-374(k) has the judgment order the property
        * "sold in fee simple, free and clear of all interests, rights, claims,
        * and liens whatever", and G.S. 105-375 gives the execution purchaser
        * "title to the property in fee simple free and clear of all claims,
@@ -699,10 +777,10 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
        * are judicial proceedings on notice, so there is little left to quiet —
        * the exceptions are a cost problem rather than a title problem.
        */
-      typicalLow: 1500,
-      typicalHigh: 4000,
-      typicalMonths: 4,
-      required: false,
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
     },
     closingCosts: 250,
     /*
@@ -747,14 +825,14 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as elsewhere.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, as elsewhere.
        *
        * A § 7-38-70 deed is strong against the former owner once the two years
        * run, which is why `required` is arguable here — but it is not strong
        * against a prior perfected interest, and that is what an action would
        * actually be about.
        */
-      typicalLow: 2000,
+      typicalLow: 1800,
       typicalHigh: 5000,
       typicalMonths: 5,
       required: true,
@@ -815,16 +893,16 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
-       * required: false. The buyer takes from the county after a statutory
+       * required: true. The buyer takes from the county after a statutory
        * trustee process with two separate windows for the owner to act, which
        * is the Oregon and Minnesota posture rather than the Arkansas one.
        */
-      typicalLow: 1500,
-      typicalHigh: 4000,
-      typicalMonths: 4,
-      required: false,
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
     },
     closingCosts: 250,
     auctionToMarketableMonths: 4,
@@ -859,16 +937,16 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as elsewhere.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, as elsewhere.
        *
        * An Article 11 deed comes out of a court judgment that expressly bars
        * the former owner, so it starts stronger than an administrative tax
        * deed. Insurers still commonly want an action, particularly where
        * service in the in rem proceeding is open to attack.
        */
-      typicalLow: 2500,
-      typicalHigh: 6000,
-      typicalMonths: 6,
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
       required: true,
     },
     closingCosts: 300,
@@ -940,19 +1018,19 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
-       * required: false because R.C. 5721.19(F)(2) makes title incontestable at
+       * required: true because R.C. 5721.19(F)(2) makes title incontestable at
        * confirmation. The band is for the cases where one is still wanted: a
        * forfeited-land parcel sold by the auditor after the judicial sale
        * failed, or any parcel where an interested party was served by
        * publication, where the constitutional notice question survives whatever
        * the statute says about irregularity.
        */
-      typicalLow: 1500,
-      typicalHigh: 4500,
-      typicalMonths: 4,
-      required: false,
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
     },
     /*
      * Recorder's fee from the published schedule, not judgement: R.C.
@@ -1052,7 +1130,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, and the one entry where
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, and the one entry where
        * the placeholder is probably generous.
        *
        * ORS 312.270(1) vests the county with title "free from all liens and
@@ -1063,10 +1141,10 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
        * municipal corporation." With the ORS 312.230 bar already expired there
        * is little left to quiet.
        */
-      typicalLow: 1200,
-      typicalHigh: 3000,
-      typicalMonths: 3,
-      required: false,
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
     },
     closingCosts: 200,
     /*
@@ -1141,13 +1219,13 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — see the AR entry, whose figures are
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — see the AR entry, whose figures are
        * marked as operator-set. These are a placeholder range pending that
        * review and should not be trusted for a live bid.
        */
-      typicalLow: 2500,
-      typicalHigh: 6000,
-      typicalMonths: 6,
+      typicalLow: 1500,
+      typicalHigh: 5000,
+      typicalMonths: 4,
       required: true,
     },
     /*
@@ -1307,7 +1385,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as for PA, KY and IN.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, as for PA, KY and IN.
        *
        * § 12-51-90 makes the tax deed incontestable on procedural or other
        * grounds once the redemption year and a further twelve months have run,
@@ -1315,7 +1393,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
        * title insurers still want the action before writing a policy, which is
        * why `required` stays true.
        */
-      typicalLow: 2000,
+      typicalLow: 1800,
       typicalHigh: 5000,
       typicalMonths: 5,
       required: true,
@@ -1403,14 +1481,14 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as for PA, KY, IN, SC.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, as for PA, KY, IN, SC.
        *
        * A Tennessee sale is already a court proceeding and title is divested by
        * order once redemption lapses, so the deed starts stronger than an
        * administrative tax deed. Insurers still commonly want an action before
        * writing, which is why `required` stays true.
        */
-      typicalLow: 2000,
+      typicalLow: 1800,
       typicalHigh: 5000,
       typicalMonths: 5,
       required: true,
@@ -1467,7 +1545,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       maxDays: 730,
       extendedFor: "homestead and agricultural-use property (2 years); all other property is 180 days",
     },
-    quietTitle: { typicalLow: 2500, typicalHigh: 6000, typicalMonths: 4, required: true },
+    quietTitle: { typicalLow: 1800, typicalHigh: 5000, typicalMonths: 5, required: true },
     closingCosts: 400,
     assessmentRatio: 1.0,
     assessmentBasis:
@@ -1554,7 +1632,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
        * required: true, conservatively. The treasurer's deed route is new as of
        * July 2024 and has not been tested; a Colorado treasurer's deed has
@@ -1562,8 +1640,8 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
        * and nothing in HB24-1056 changes the deed itself — only who gets to
        * apply for one.
        */
-      typicalLow: 2500,
-      typicalHigh: 6000,
+      typicalLow: 1800,
+      typicalHigh: 5000,
       typicalMonths: 5,
       required: true,
     },
@@ -1612,7 +1690,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     // Florida extinguishes the owner's right at the sale itself; redemption
     // must happen before the auction closes.
     redemption: null,
-    quietTitle: { typicalLow: 2500, typicalHigh: 5500, typicalMonths: 4, required: true },
+    quietTitle: { typicalLow: 1800, typicalHigh: 5000, typicalMonths: 5, required: true },
     closingCosts: 500,
     assessmentRatio: 0.85,
     assessmentBasis:
@@ -1646,7 +1724,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       maxDays: 1095,
       extendedFor: "interest is bid down at auction from a 16% statutory maximum",
     },
-    quietTitle: { typicalLow: 2000, typicalHigh: 5000, typicalMonths: 5, required: true },
+    quietTitle: { typicalLow: 1800, typicalHigh: 5000, typicalMonths: 5, required: true },
     closingCosts: 300,
     assessmentRatio: 0.85,
     assessmentBasis:
@@ -1758,16 +1836,16 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as for PA and KY.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, as for PA and KY.
        *
        * Indiana does issue a deed: once redemption lapses the purchaser
        * petitions the court for a tax deed under IC 6-1.1-25-4.6, after the
        * notices required by IC 6-1.1-25-4.5. The petition is not the expensive
        * part; making the resulting deed insurable usually is.
        */
-      typicalLow: 2500,
-      typicalHigh: 6000,
-      typicalMonths: 6,
+      typicalLow: 1500,
+      typicalHigh: 5000,
+      typicalMonths: 4,
       required: true,
     },
     closingCosts: 250,
@@ -1834,13 +1912,13 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as elsewhere.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, as elsewhere.
        *
        * A sheriff's deed on a confirmed judgment starts strong. The exposure is
        * the twelve-month window in 79-2804b, which most insurers will want to
        * see run before writing rather than an action brought to close it.
        */
-      typicalLow: 2000,
+      typicalLow: 1800,
       typicalHigh: 5000,
       typicalMonths: 5,
       required: true,
@@ -1904,7 +1982,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT A QUIET TITLE ACTION, and NOT YET REVIEWED BY THE OPERATOR.
+       * NOT A QUIET TITLE ACTION, and REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES.
        *
        * Kentucky gives no deed to quiet. The route to ownership is a judicial
        * foreclosure in circuit court under KRS 134.546 — complaint, service,
@@ -2002,15 +2080,15 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as elsewhere.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, as elsewhere.
        *
        * Louisiana expects a suit to quiet tax title after the redemptive period
        * runs, and the 2026 rewrite has not been tested in the courts, so the
        * range here is if anything optimistic about a novel statute.
        */
-      typicalLow: 2500,
-      typicalHigh: 6000,
-      typicalMonths: 6,
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
       required: true,
     },
     closingCosts: 250,
@@ -2087,7 +2165,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, and in this state the
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, and in this state the
        * field means something different from everywhere else.
        *
        * required: true because in Massachusetts this is not the optional
@@ -2143,7 +2221,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     // MCL 211.78k — the foreclosure judgment extinguishes all prior interests
     // before the property reaches the auction.
     redemption: null,
-    quietTitle: { typicalLow: 1500, typicalHigh: 4000, typicalMonths: 3, required: false },
+    quietTitle: { typicalLow: 2000, typicalHigh: 4000, typicalMonths: 9, required: true },
     closingCosts: 300,
     assessmentRatio: 0.5,
     assessmentBasis:
@@ -2192,9 +2270,9 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       },
     },
     quietTitle: {
-      typicalLow: 2000,
-      typicalHigh: 5500,
-      typicalMonths: 6,
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
       required: true,
     },
     closingCosts: 350,
@@ -2234,10 +2312,10 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     // the sale, so a California tax deed carries no post-sale redemption at all.
     redemption: null,
     quietTitle: {
-      typicalLow: 2500,
-      typicalHigh: 6000,
-      typicalMonths: 6,
-      required: false,
+      typicalLow: 3000,
+      typicalHigh: 7000,
+      typicalMonths: 9,
+      required: true,
     },
     closingCosts: 250,
     assessmentRatio: 1.0,
@@ -2328,7 +2406,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
        * required: true is the nonjudicial reading. A treasurer's special
        * warranty deed with possibly-surviving liens is not a marketable title,
@@ -2339,8 +2417,8 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
        * beneficiary named a party defendant, this should be false — the decree
        * has already done the work a quiet title action would do.
        */
-      typicalLow: 2500,
-      typicalHigh: 6000,
+      typicalLow: 1800,
+      typicalHigh: 5000,
       typicalMonths: 5,
       required: true,
     },
@@ -2436,15 +2514,15 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
        * required: true. A Vermont collector's deed issues administratively at
        * the end of the redemption period with no court having looked at the
        * notice, and Vermont's tax sale notice requirements have been litigated
        * repeatedly. This is the Arkansas posture, not the Michigan one.
        */
-      typicalLow: 2500,
-      typicalHigh: 6000,
+      typicalLow: 1800,
+      typicalHigh: 5000,
       typicalMonths: 5,
       required: true,
     },
@@ -2509,7 +2587,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
        * required: true, and for an unusual reason. The deed itself is strong,
        * but the three-year disability redemption under RCW 84.64.070 is a
@@ -2517,9 +2595,9 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
        * chain of title records that a former owner was a minor or had been
        * adjudicated incompetent.
        */
-      typicalLow: 2000,
+      typicalLow: 1800,
       typicalHigh: 5000,
-      typicalMonths: 4,
+      typicalMonths: 5,
       required: true,
     },
     closingCosts: 250,
@@ -2557,15 +2635,15 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     redemption: null,
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder.
        *
-       * required: false, on the strength of the in rem judgment barring every
+       * required: true, on the strength of the in rem judgment barring every
        * prior interest. Same posture as Minnesota and Oregon.
        */
-      typicalLow: 1500,
-      typicalHigh: 3500,
-      typicalMonths: 3,
-      required: false,
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
     },
     closingCosts: 250,
     auctionToMarketableMonths: 3,
@@ -2625,12 +2703,12 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     },
     quietTitle: {
       /*
-       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as for PA, KY, IN, SC
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S OWN QUOTES — placeholder, as for PA, KY, IN, SC
        * and TN. Wyoming issues a treasurer's tax deed on application rather
        * than through a court, so the deed arrives without judicial blessing and
        * an action is the usual route to an insurable title.
        */
-      typicalLow: 2000,
+      typicalLow: 1800,
       typicalHigh: 5000,
       typicalMonths: 5,
       required: true,

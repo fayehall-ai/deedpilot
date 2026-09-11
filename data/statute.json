@@ -5,10 +5,10 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 2000,
+        "typicalLow": 1800,
         "typicalHigh": 5000,
-        "typicalMonths": 4,
-        "required": false
+        "typicalMonths": 5,
+        "required": true
       },
       "closingCosts": 250,
       "auctionToMarketableMonths": 4,
@@ -78,7 +78,7 @@
         "extendedFor": "interest is bid down at auction from a 16% statutory maximum"
       },
       "quietTitle": {
-        "typicalLow": 2000,
+        "typicalLow": 1800,
         "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true
@@ -102,10 +102,10 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
-        "typicalMonths": 6,
-        "required": false
+        "typicalLow": 3000,
+        "typicalHigh": 7000,
+        "typicalMonths": 9,
+        "required": true
       },
       "closingCosts": 250,
       "assessmentRatio": 1,
@@ -141,8 +141,8 @@
         "maxDays": 1095
       },
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true
       },
@@ -172,9 +172,9 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 5500,
-        "typicalMonths": 4,
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
         "required": true
       },
       "closingCosts": 500,
@@ -270,9 +270,9 @@
         }
       },
       "quietTitle": {
-        "typicalLow": 2000,
-        "typicalHigh": 5500,
-        "typicalMonths": 6,
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
         "required": true
       },
       "closingCosts": 350,
@@ -317,9 +317,9 @@
         "maxDays": 365
       },
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
-        "typicalMonths": 6,
+        "typicalLow": 1500,
+        "typicalHigh": 5000,
+        "typicalMonths": 4,
         "required": true
       },
       "closingCosts": 250,
@@ -352,7 +352,7 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 2000,
+        "typicalLow": 1800,
         "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true
@@ -442,9 +442,9 @@
         "extendedFor": "three years from recordation for most property; blighted or abandoned property redeems in eighteen months"
       },
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
-        "typicalMonths": 6,
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
         "required": true
       },
       "closingCosts": 250,
@@ -517,10 +517,10 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 1500,
+        "typicalLow": 2000,
         "typicalHigh": 4000,
-        "typicalMonths": 3,
-        "required": false
+        "typicalMonths": 9,
+        "required": true
       },
       "closingCosts": 300,
       "assessmentRatio": 0.5,
@@ -541,10 +541,10 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 1500,
-        "typicalHigh": 3500,
-        "typicalMonths": 3,
-        "required": false
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
+        "required": true
       },
       "closingCosts": 250,
       "auctionToMarketableMonths": 3,
@@ -584,8 +584,8 @@
         "maxDays": 365
       },
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true
       },
@@ -614,10 +614,10 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 1500,
-        "typicalHigh": 4000,
-        "typicalMonths": 4,
-        "required": false
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
+        "required": true
       },
       "closingCosts": 250,
       "auctionToMarketableMonths": 6,
@@ -647,7 +647,7 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 2000,
+        "typicalLow": 1800,
         "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true
@@ -679,10 +679,10 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 1500,
-        "typicalHigh": 4000,
-        "typicalMonths": 4,
-        "required": false
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
+        "required": true
       },
       "closingCosts": 250,
       "auctionToMarketableMonths": 4,
@@ -709,9 +709,9 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
-        "typicalMonths": 6,
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
         "required": true
       },
       "closingCosts": 300,
@@ -741,10 +741,10 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 1500,
-        "typicalHigh": 4500,
-        "typicalMonths": 4,
-        "required": false
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
+        "required": true
       },
       "closingCosts": 150,
       "auctionToMarketableMonths": 14,
@@ -777,10 +777,10 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 1200,
-        "typicalHigh": 3000,
-        "typicalMonths": 3,
-        "required": false
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
+        "required": true
       },
       "closingCosts": 200,
       "auctionToMarketableMonths": 3,
@@ -822,9 +822,9 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
-        "typicalMonths": 6,
+        "typicalLow": 1500,
+        "typicalHigh": 5000,
+        "typicalMonths": 4,
         "required": true
       },
       "closingCosts": 250,
@@ -1147,7 +1147,7 @@
         "maxDays": 365
       },
       "quietTitle": {
-        "typicalLow": 2000,
+        "typicalLow": 1800,
         "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true
@@ -1190,7 +1190,7 @@
         "extendedFor": "property delinquent five years or less; deeper arrears redeem faster — 180 days over five years, 90 days at eight or more, and 30 days for property shown vacant or abandoned"
       },
       "quietTitle": {
-        "typicalLow": 2000,
+        "typicalLow": 1800,
         "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true
@@ -1236,9 +1236,9 @@
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
       },
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
-        "typicalMonths": 4,
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
         "required": true
       },
       "closingCosts": 400,
@@ -1261,8 +1261,8 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true
       },
@@ -1306,8 +1306,8 @@
         "maxDays": 365
       },
       "quietTitle": {
-        "typicalLow": 2500,
-        "typicalHigh": 6000,
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true
       },
@@ -1338,9 +1338,9 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 2000,
+        "typicalLow": 1800,
         "typicalHigh": 5000,
-        "typicalMonths": 4,
+        "typicalMonths": 5,
         "required": true
       },
       "closingCosts": 250,
@@ -1368,10 +1368,10 @@
       "saleType": "Tax Deed",
       "redemption": null,
       "quietTitle": {
-        "typicalLow": 1500,
-        "typicalHigh": 3500,
-        "typicalMonths": 3,
-        "required": false
+        "typicalLow": 1800,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
+        "required": true
       },
       "closingCosts": 250,
       "auctionToMarketableMonths": 3,
@@ -1410,7 +1410,7 @@
         "maxDays": 1460
       },
       "quietTitle": {
-        "typicalLow": 2000,
+        "typicalLow": 1800,
         "typicalHigh": 5000,
         "typicalMonths": 5,
         "required": true

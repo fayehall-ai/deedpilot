@@ -318,3 +318,35 @@ if (arFloor.recommendation === "bid") {
     "a bid off an assumed floor carries its own warning",
   );
 }
+
+/*
+ * `likelihood` and `required` must stay coherent.
+ *
+ * This exists because they were not. `required` used to change only the cost
+ * line's label while the engine charged the full midpoint either way, so nine
+ * states reserved thousands against a line that told the operator the work was
+ * optional. A future `required: false` entry that inherits the default
+ * likelihood of 1 would silently recreate exactly that mismatch, so it has to
+ * say what share of parcels it means.
+ */
+for (const p of Object.values(STATUTE_PARAMS)) {
+  const { required, likelihood } = p.quietTitle;
+  if (!required) {
+    assert(
+      likelihood !== undefined,
+      `${p.state}: quietTitle.required is false, so likelihood must be explicit — ` +
+        `defaulting to 1 would charge the full cost under a label saying it is unnecessary`,
+    );
+  }
+  if (likelihood !== undefined) {
+    assert(
+      likelihood > 0 && likelihood <= 1,
+      `${p.state}: quietTitle.likelihood must be a share between 0 and 1, got ${likelihood}`,
+    );
+    assert(
+      likelihood >= 1 || !required,
+      `${p.state}: quietTitle is required but priced at ${likelihood} of the cost — ` +
+        `one of the two is wrong`,
+    );
+  }
+}

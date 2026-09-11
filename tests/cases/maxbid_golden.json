@@ -9,7 +9,7 @@
       "openingBid": 10000
     },
     "result": {
-      "maxBid": 97550,
+      "maxBid": 98100,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -33,8 +33,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical TX range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -44,8 +44,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 1800,
+          "label": "Holding costs (7 months)",
+          "amount": 2100,
           "note": "Taxes, insurance, and securing the property at ~$300/month.",
           "assumed": true
         },
@@ -56,13 +56,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 42450,
+      "totalCosts": 41900,
       "projectedProfit": 60000,
-      "bidRoom": 87550,
+      "bidRoom": 88100,
       "redemption": {
         "windowDays": 730,
         "flatPenalty": 0.25,
-        "penaltyAtMaxBid": 24387.5,
+        "penaltyAtMaxBid": 24525,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
         "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
@@ -85,9 +85,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -118,7 +118,7 @@
       "assessedValue": 200000
     },
     "result": {
-      "maxBid": 117550,
+      "maxBid": 118100,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -142,8 +142,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical TX range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -153,8 +153,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 1800,
+          "label": "Holding costs (7 months)",
+          "amount": 2100,
           "note": "Taxes, insurance, and securing the property at ~$300/month.",
           "assumed": true
         },
@@ -165,13 +165,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 22450,
+      "totalCosts": 21900,
       "projectedProfit": 60000,
       "bidRoom": null,
       "redemption": {
         "windowDays": 730,
         "flatPenalty": 0.25,
-        "penaltyAtMaxBid": 29387.5,
+        "penaltyAtMaxBid": 29525,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
         "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
@@ -194,9 +194,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -231,7 +231,7 @@
       "openingBid": 12000
     },
     "result": {
-      "maxBid": 139760,
+      "maxBid": 140145,
       "recommendation": "bid",
       "confidence": "high",
       "arv": {
@@ -254,8 +254,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical TX range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -265,8 +265,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 2790,
+          "label": "Holding costs (7 months)",
+          "amount": 3255,
           "note": "Taxes, insurance, and securing the property at ~$465/month.",
           "assumed": true
         },
@@ -277,13 +277,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 77240,
+      "totalCosts": 76855,
       "projectedProfit": 93000,
-      "bidRoom": 127760,
+      "bidRoom": 128145,
       "redemption": {
         "windowDays": 730,
         "flatPenalty": 0.25,
-        "penaltyAtMaxBid": 34940,
+        "penaltyAtMaxBid": 35036.25,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
         "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
@@ -306,9 +306,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -341,7 +341,7 @@
       "rehabCost": 10000
     },
     "result": {
-      "maxBid": 22010,
+      "maxBid": 22770,
       "recommendation": "no-bid",
       "confidence": "medium",
       "arv": {
@@ -365,8 +365,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical TX range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -376,8 +376,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 540,
+          "label": "Holding costs (7 months)",
+          "amount": 630,
           "note": "Taxes, insurance, and securing the property at ~$90/month.",
           "assumed": true
         },
@@ -388,13 +388,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 19990,
+      "totalCosts": 19230,
       "projectedProfit": 18000,
-      "bidRoom": -32990,
+      "bidRoom": -32230,
       "redemption": {
         "windowDays": 730,
         "flatPenalty": 0.25,
-        "penaltyAtMaxBid": 5502.5,
+        "penaltyAtMaxBid": 5692.5,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
         "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
@@ -417,9 +417,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -439,7 +439,7 @@
       },
       "warnings": [
         "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
-        "The opening bid of $55,000 is already above your ceiling of $22,010."
+        "The opening bid of $55,000 is already above your ceiling of $22,770."
       ]
     }
   },
@@ -453,7 +453,7 @@
       "rehabCost": 15000
     },
     "result": {
-      "maxBid": 145076.42,
+      "maxBid": 145831.46,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -477,8 +477,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 3750,
-          "note": "Midpoint of the typical IL range ($2,000–$5,500, ~6 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical IL range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -488,8 +488,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (8 months)",
-          "amount": 3240.32,
+          "label": "Holding costs (7 months)",
+          "amount": 2835.28,
           "note": "Taxes, insurance, and securing the property at ~$405/month.",
           "assumed": true
         },
@@ -500,13 +500,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 43942.48,
+      "totalCosts": 43187.44,
       "projectedProfit": 81008.1,
-      "bidRoom": 142076.42,
+      "bidRoom": 142831.46,
       "redemption": {
         "windowDays": 912,
         "flatPenalty": 0.18,
-        "penaltyAtMaxBid": 26113.76,
+        "penaltyAtMaxBid": 26249.66,
         "annualisedBestCase": 0.36,
         "extendedFor": "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
         "note": "IL sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after 912 days.",
@@ -557,9 +557,9 @@
           }
         },
         "quietTitle": {
-          "typicalLow": 2000,
-          "typicalHigh": 5500,
-          "typicalMonths": 6,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 350,
@@ -604,7 +604,7 @@
       "openingBid": 3000
     },
     "result": {
-      "maxBid": 543100,
+      "maxBid": 544800,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -628,8 +628,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 3750,
-          "note": "Midpoint of the typical IL range ($2,000–$5,500, ~6 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical IL range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -639,8 +639,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (8 months)",
-          "amount": 10800,
+          "label": "Holding costs (7 months)",
+          "amount": 9450,
           "note": "Taxes, insurance, and securing the property at ~$1,350/month.",
           "assumed": true
         },
@@ -651,13 +651,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 86900,
+      "totalCosts": 85200,
       "projectedProfit": 270000,
-      "bidRoom": 540100,
+      "bidRoom": 541800,
       "redemption": {
         "windowDays": 912,
         "flatPenalty": 0.18,
-        "penaltyAtMaxBid": 97758,
+        "penaltyAtMaxBid": 98064,
         "annualisedBestCase": 0.36,
         "extendedFor": "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
         "note": "IL sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after 912 days.",
@@ -708,9 +708,9 @@
           }
         },
         "quietTitle": {
-          "typicalLow": 2000,
-          "typicalHigh": 5500,
-          "typicalMonths": 6,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 350,
@@ -753,7 +753,7 @@
       "assessedValue": 90000
     },
     "result": {
-      "maxBid": 160076.42,
+      "maxBid": 160831.46,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -777,8 +777,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 3750,
-          "note": "Midpoint of the typical IL range ($2,000–$5,500, ~6 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical IL range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -788,8 +788,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (8 months)",
-          "amount": 3240.32,
+          "label": "Holding costs (7 months)",
+          "amount": 2835.28,
           "note": "Taxes, insurance, and securing the property at ~$405/month.",
           "assumed": true
         },
@@ -800,13 +800,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 28942.48,
+      "totalCosts": 28187.44,
       "projectedProfit": 81008.1,
       "bidRoom": null,
       "redemption": {
         "windowDays": 912,
         "flatPenalty": 0.18,
-        "penaltyAtMaxBid": 28813.76,
+        "penaltyAtMaxBid": 28949.66,
         "annualisedBestCase": 0.36,
         "extendedFor": "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
         "note": "IL sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after 912 days.",
@@ -857,9 +857,9 @@
           }
         },
         "quietTitle": {
-          "typicalLow": 2000,
-          "typicalHigh": 5500,
-          "typicalMonths": 6,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 350,
@@ -905,7 +905,7 @@
       "rehabCost": 30000
     },
     "result": {
-      "maxBid": 56700,
+      "maxBid": 55275,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -928,9 +928,9 @@
           "assumed": false
         },
         {
-          "label": "Quiet title (often unnecessary)",
-          "amount": 4250,
-          "note": "Midpoint of the typical CA range ($2,500–$6,000, ~6 months).",
+          "label": "Quiet title (required)",
+          "amount": 5000,
+          "note": "Midpoint of the typical CA range ($3,000–$7,000, ~9 months).",
           "assumed": true
         },
         {
@@ -940,8 +940,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (8 months)",
-          "amount": 1800,
+          "label": "Holding costs (11 months)",
+          "amount": 2475,
           "note": "Taxes, insurance, and securing the property at ~$225/month.",
           "assumed": true
         },
@@ -952,19 +952,19 @@
           "assumed": true
         }
       ],
-      "totalCosts": 48300,
+      "totalCosts": 49725,
       "projectedProfit": 45000,
-      "bidRoom": 36700,
+      "bidRoom": 35275,
       "redemption": null,
       "statute": {
         "state": "CA",
         "saleType": "Tax Deed",
         "redemption": null,
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 6,
-          "required": false
+          "typicalLow": 3000,
+          "typicalHigh": 7000,
+          "typicalMonths": 9,
+          "required": true
         },
         "closingCosts": 250,
         "assessmentRatio": 1,
@@ -1115,7 +1115,7 @@
       "openingBid": 4000
     },
     "result": {
-      "maxBid": 82247.06,
+      "maxBid": 82347.06,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -1139,8 +1139,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 3500,
-          "note": "Midpoint of the typical AZ range ($2,000–$5,000, ~5 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical AZ range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -1162,13 +1162,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 16576.47,
+      "totalCosts": 16476.47,
       "projectedProfit": 42352.94,
-      "bidRoom": 78247.06,
+      "bidRoom": 78347.06,
       "redemption": {
         "windowDays": 1095,
         "flatPenalty": 0.16,
-        "penaltyAtMaxBid": 13159.53,
+        "penaltyAtMaxBid": 13175.53,
         "annualisedBestCase": 0.16,
         "extendedFor": "interest is bid down at auction from a 16% statutory maximum",
         "note": "AZ sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after 1095 days."
@@ -1177,6 +1177,7 @@
         "state": "AZ",
         "saleType": "Tax Lien",
         "redemption": {
+          "interestKind": "annual",
           "tiers": [
             {
               "throughDays": 1095,
@@ -1187,7 +1188,7 @@
           "extendedFor": "interest is bid down at auction from a 16% statutory maximum"
         },
         "quietTitle": {
-          "typicalLow": 2000,
+          "typicalLow": 1800,
           "typicalHigh": 5000,
           "typicalMonths": 5,
           "required": true
@@ -1222,7 +1223,7 @@
       "openingBid": 18000
     },
     "result": {
-      "maxBid": 133017.64,
+      "maxBid": 133194.11,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -1246,8 +1247,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4000,
-          "note": "Midpoint of the typical FL range ($2,500–$5,500, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical FL range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -1257,8 +1258,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 2541.18,
+          "label": "Holding costs (7 months)",
+          "amount": 2964.71,
           "note": "Taxes, insurance, and securing the property at ~$424/month.",
           "assumed": true
         },
@@ -1269,18 +1270,18 @@
           "assumed": true
         }
       ],
-      "totalCosts": 64629.42,
+      "totalCosts": 64452.95,
       "projectedProfit": 84705.88,
-      "bidRoom": 115017.64,
+      "bidRoom": 115194.11,
       "redemption": null,
       "statute": {
         "state": "FL",
         "saleType": "Tax Deed",
         "redemption": null,
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 5500,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 500,
@@ -1312,7 +1313,7 @@
       "openingBid": 6000
     },
     "result": {
-      "maxBid": 60700,
+      "maxBid": 59190,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -1335,9 +1336,9 @@
           "assumed": false
         },
         {
-          "label": "Quiet title (often unnecessary)",
-          "amount": 2750,
-          "note": "Midpoint of the typical MI range ($1,500–$4,000, ~3 months).",
+          "label": "Quiet title (required)",
+          "amount": 3000,
+          "note": "Midpoint of the typical MI range ($2,000–$4,000, ~9 months).",
           "assumed": true
         },
         {
@@ -1347,8 +1348,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (5 months)",
-          "amount": 1050,
+          "label": "Holding costs (11 months)",
+          "amount": 2310,
           "note": "Taxes, insurance, and securing the property at ~$210/month.",
           "assumed": true
         },
@@ -1359,19 +1360,19 @@
           "assumed": true
         }
       ],
-      "totalCosts": 37300,
+      "totalCosts": 38810,
       "projectedProfit": 42000,
-      "bidRoom": 54700,
+      "bidRoom": 53190,
       "redemption": null,
       "statute": {
         "state": "MI",
         "saleType": "Tax Deed",
         "redemption": null,
         "quietTitle": {
-          "typicalLow": 1500,
+          "typicalLow": 2000,
           "typicalHigh": 4000,
-          "typicalMonths": 3,
-          "required": false
+          "typicalMonths": 9,
+          "required": true
         },
         "closingCosts": 300,
         "assessmentRatio": 0.5,
@@ -1400,7 +1401,7 @@
       "openingBid": 4500
     },
     "result": {
-      "maxBid": 2824.6,
+      "maxBid": 2124.6,
       "recommendation": "no-bid",
       "confidence": "low",
       "arv": {
@@ -1423,9 +1424,9 @@
           "assumed": true
         },
         {
-          "label": "Quiet title (often unnecessary)",
-          "amount": 2750,
-          "note": "Midpoint of the typical MI range ($1,500–$4,000, ~3 months).",
+          "label": "Quiet title (required)",
+          "amount": 3000,
+          "note": "Midpoint of the typical MI range ($2,000–$4,000, ~9 months).",
           "assumed": true
         },
         {
@@ -1435,8 +1436,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (5 months)",
-          "amount": 375,
+          "label": "Holding costs (11 months)",
+          "amount": 825,
           "note": "Taxes, insurance, and securing the property at ~$75/month.",
           "assumed": true
         },
@@ -1447,19 +1448,19 @@
           "assumed": true
         }
       ],
-      "totalCosts": 4231.4,
+      "totalCosts": 4931.4,
       "projectedProfit": 3024,
-      "bidRoom": -1675.4,
+      "bidRoom": -2375.4,
       "redemption": null,
       "statute": {
         "state": "MI",
         "saleType": "Tax Deed",
         "redemption": null,
         "quietTitle": {
-          "typicalLow": 1500,
+          "typicalLow": 2000,
           "typicalHigh": 4000,
-          "typicalMonths": 3,
-          "required": false
+          "typicalMonths": 9,
+          "required": true
         },
         "closingCosts": 300,
         "assessmentRatio": 0.5,
@@ -1478,7 +1479,7 @@
       "warnings": [
         "Rehab is assumed to be $0. You cannot inspect these properties before bidding — budget for the worst plausible condition.",
         "Surviving liens assumed $0. Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean — quiet title is often unnecessary.",
-        "The opening bid of $4,500 is already above your ceiling of $2,824.6."
+        "The opening bid of $4,500 is already above your ceiling of $2,124.6."
       ]
     }
   },
@@ -1597,7 +1598,7 @@
       "openingBid": 9000
     },
     "result": {
-      "maxBid": 9240.6,
+      "maxBid": 10015.6,
       "recommendation": "bid",
       "confidence": "low",
       "arv": {
@@ -1621,8 +1622,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical TX range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -1632,8 +1633,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 450,
+          "label": "Holding costs (7 months)",
+          "amount": 525,
           "note": "Taxes, insurance, and securing the property at ~$75/month.",
           "assumed": true
         },
@@ -1644,13 +1645,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 6950.4,
+      "totalCosts": 6175.4,
       "projectedProfit": 6939,
-      "bidRoom": 240.6,
+      "bidRoom": 1015.6,
       "redemption": {
         "windowDays": 730,
         "flatPenalty": 0.25,
-        "penaltyAtMaxBid": 2310.15,
+        "penaltyAtMaxBid": 2503.9,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
         "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
@@ -1673,9 +1674,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -1958,9 +1959,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -1992,7 +1993,7 @@
       "rehabCost": 40000
     },
     "result": {
-      "maxBid": -26500,
+      "maxBid": -25725,
       "recommendation": "no-bid",
       "confidence": "medium",
       "arv": {
@@ -2016,8 +2017,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical TX range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -2027,8 +2028,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 450,
+          "label": "Holding costs (7 months)",
+          "amount": 525,
           "note": "Taxes, insurance, and securing the property at ~$75/month.",
           "assumed": true
         },
@@ -2039,7 +2040,7 @@
           "assumed": true
         }
       ],
-      "totalCosts": 47500,
+      "totalCosts": 46725,
       "projectedProfit": 9000,
       "bidRoom": null,
       "redemption": {
@@ -2068,9 +2069,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -2105,7 +2106,7 @@
       "sellingCostRate": 0.06
     },
     "result": {
-      "maxBid": 131550,
+      "maxBid": 132100,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -2129,8 +2130,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical TX range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -2140,8 +2141,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 1800,
+          "label": "Holding costs (7 months)",
+          "amount": 2100,
           "note": "Taxes, insurance, and securing the property at ~$300/month.",
           "assumed": true
         },
@@ -2152,13 +2153,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 38450,
+      "totalCosts": 37900,
       "projectedProfit": 30000,
       "bidRoom": null,
       "redemption": {
         "windowDays": 730,
         "flatPenalty": 0.25,
-        "penaltyAtMaxBid": 32887.5,
+        "penaltyAtMaxBid": 33025,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
         "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
@@ -2181,9 +2182,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -2330,7 +2331,7 @@
       "targetMargin": 0
     },
     "result": {
-      "maxBid": 97676.48,
+      "maxBid": 98100.01,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -2354,8 +2355,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4000,
-          "note": "Midpoint of the typical FL range ($2,500–$5,500, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical FL range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -2365,8 +2366,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 1058.82,
+          "label": "Holding costs (7 months)",
+          "amount": 1235.29,
           "note": "Taxes, insurance, and securing the property at ~$176/month.",
           "assumed": true
         },
@@ -2377,7 +2378,7 @@
           "assumed": true
         }
       ],
-      "totalCosts": 19970.58,
+      "totalCosts": 19547.05,
       "projectedProfit": 0,
       "bidRoom": null,
       "redemption": null,
@@ -2386,9 +2387,9 @@
         "saleType": "Tax Deed",
         "redemption": null,
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 5500,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 500,
@@ -2475,7 +2476,7 @@
       "rehabCost": 15000
     },
     "result": {
-      "maxBid": 142265,
+      "maxBid": 142717.5,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -2499,8 +2500,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical TX range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -2510,8 +2511,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 2385,
+          "label": "Holding costs (7 months)",
+          "amount": 2782.5,
           "note": "Taxes, insurance, and securing the property at ~$398/month.",
           "assumed": true
         },
@@ -2522,13 +2523,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 43235,
+      "totalCosts": 42782.5,
       "projectedProfit": 79500,
       "bidRoom": null,
       "redemption": {
         "windowDays": 730,
         "flatPenalty": 0.25,
-        "penaltyAtMaxBid": 35566.25,
+        "penaltyAtMaxBid": 35679.38,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
         "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
@@ -2551,9 +2552,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -2585,7 +2586,7 @@
       "rehabCost": 1000
     },
     "result": {
-      "maxBid": 6300,
+      "maxBid": 7075,
       "recommendation": "bid",
       "confidence": "high",
       "arv": {
@@ -2608,8 +2609,8 @@
         },
         {
           "label": "Quiet title (required)",
-          "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
+          "amount": 3400,
+          "note": "Midpoint of the typical TX range ($1,800–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -2619,8 +2620,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (6 months)",
-          "amount": 450,
+          "label": "Holding costs (7 months)",
+          "amount": 525,
           "note": "Taxes, insurance, and securing the property at ~$75/month.",
           "assumed": true
         },
@@ -2631,13 +2632,13 @@
           "assumed": true
         }
       ],
-      "totalCosts": 7700,
+      "totalCosts": 6925,
       "projectedProfit": 6000,
       "bidRoom": null,
       "redemption": {
         "windowDays": 730,
         "flatPenalty": 0.25,
-        "penaltyAtMaxBid": 1575,
+        "penaltyAtMaxBid": 1768.75,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
         "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
@@ -2660,9 +2661,9 @@
           "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days"
         },
         "quietTitle": {
-          "typicalLow": 2500,
-          "typicalHigh": 6000,
-          "typicalMonths": 4,
+          "typicalLow": 1800,
+          "typicalHigh": 5000,
+          "typicalMonths": 5,
           "required": true
         },
         "closingCosts": 400,
@@ -2695,7 +2696,7 @@
       "openingBid": 3000
     },
     "result": {
-      "maxBid": 55450,
+      "maxBid": 54120,
       "recommendation": "bid",
       "confidence": "medium",
       "arv": {
@@ -2718,9 +2719,9 @@
           "assumed": false
         },
         {
-          "label": "Quiet title (often unnecessary)",
-          "amount": 2750,
-          "note": "Midpoint of the typical MI range ($1,500–$4,000, ~3 months).",
+          "label": "Quiet title (required)",
+          "amount": 3000,
+          "note": "Midpoint of the typical MI range ($2,000–$4,000, ~9 months).",
           "assumed": true
         },
         {
@@ -2730,8 +2731,8 @@
           "assumed": true
         },
         {
-          "label": "Holding costs (5 months)",
-          "amount": 900,
+          "label": "Holding costs (11 months)",
+          "amount": 1980,
           "note": "Taxes, insurance, and securing the property at ~$180/month.",
           "assumed": true
         },
@@ -2742,19 +2743,19 @@
           "assumed": true
         }
       ],
-      "totalCosts": 28550,
+      "totalCosts": 29880,
       "projectedProfit": 36000,
-      "bidRoom": 52450,
+      "bidRoom": 51120,
       "redemption": null,
       "statute": {
         "state": "MI",
         "saleType": "Tax Deed",
         "redemption": null,
         "quietTitle": {
-          "typicalLow": 1500,
+          "typicalLow": 2000,
           "typicalHigh": 4000,
-          "typicalMonths": 3,
-          "required": false
+          "typicalMonths": 9,
+          "required": true
         },
         "closingCosts": 300,
         "assessmentRatio": 0.5,
