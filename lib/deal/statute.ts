@@ -952,6 +952,86 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Indiana max bid until they are set.",
     ],
   },
+  /*
+   * Kansas, like New York, does its redeeming before the auction — but it
+   * leaves a year of title risk behind afterwards, which New York does not.
+   *
+   * ## The redemption is spent by the time you bid
+   *
+   * Delinquent real estate is first bid off to the county and held subject to
+   * redemption under K.S.A. 79-2401a: one year if abandoned, two years for
+   * general non-homestead property, three for a homestead. Only when that runs
+   * does the county counselor bring the judicial foreclosure under K.S.A.
+   * 79-2801 et seq., and redemption closes at 5pm the day before the sheriff's
+   * sale. An investor bidding at that sale faces no redemption, so `redemption`
+   * is null.
+   *
+   * ## Two things that are not redemption but behave like overhang
+   *
+   * You do not own the parcel when the hammer falls — only when the court
+   * confirms the sale. Until confirmation there is no right to possession or to
+   * collect rent.
+   *
+   * And K.S.A. 79-2804b gives twelve months from confirmation for an action to
+   * open, vacate, modify or set aside the judgment or the order of sale. That is
+   * a defect window rather than a right the owner earns, so it pays the
+   * purchaser nothing — it is pure carry, and it is why
+   * `auctionToMarketableMonths` is fourteen rather than three.
+   */
+  KS: {
+    state: "KS",
+    saleType: "Tax Deed",
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as elsewhere.
+       *
+       * A sheriff's deed on a confirmed judgment starts strong. The exposure is
+       * the twelve-month window in 79-2804b, which most insurers will want to
+       * see run before writing rather than an action brought to close it.
+       */
+      typicalLow: 2000,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
+    },
+    closingCosts: 250,
+    /*
+     * Sale, confirmation, then the twelve months in 79-2804b during which the
+     * judgment can still be attacked. The waiting is after the purchase here,
+     * not before it as in New York.
+     */
+    auctionToMarketableMonths: 14,
+    /*
+     * Residential. Kansas assesses by constitutional SUBCLASS, not by county,
+     * and residential at 11.5% sits next to vacant lots at 12% — between them
+     * they cover most of what reaches a tax sale. Commercial at 25% and the
+     * "all other" residual at 30% are the dangerous directions.
+     */
+    assessmentRatio: 0.115,
+    assessmentBasis:
+      "Kansas Constitution art. 11, § 1: real property is assessed uniformly by subclass — residential including multi-family at 11.5%, vacant lots 12%, not-for-profit 12%, commercial and industrial 25%, land devoted to agricultural use 30% of agricultural income value, public utility 33%, and all other urban and rural real property 30%. This entry uses the 11.5% residential rate.",
+    derivedArvCaveat:
+      "Kansas assesses by subclass and this entry assumes residential at 11.5%. Vacant lots at 12% are close enough not to matter. Commercial and industrial at 25% and the 'all other' residual at 30% are not: dividing by 0.115 overstates those by roughly 2.2x and 2.6x — the dangerous direction, and 'all other' is a residual that catches more than its name suggests. Agricultural land is assessed at 30% of agricultural income value rather than of market value at all, so a derived ARV there is meaningless. Check the subclass on the appraiser's record before bidding on anything that is not plainly a house or a vacant lot.",
+    statute:
+      "K.S.A. 79-2801 et seq. (judicial foreclosure and sale by county), 79-2401a (redemption while held by the county), 79-2804b (twelve-month action to set aside); Kan. Const. art. 11, § 1 (assessment subclasses)",
+    asOf: "2026-09",
+    sources: [
+      "https://ksrevisor.gov/statutes/chapters/ch79/079_028_0001.html",
+      "https://ksrevisor.gov/statutes/chapters/ch79/079_024_0001a.html",
+      "https://ksrevisor.gov/statutes/chapters/ch79/079_028_0004b.html",
+      "https://ksrevisor.gov/kanconst/093_011_0001.html",
+      "https://www.snco.gov/counselor/tax_sale.php",
+    ],
+    caveats: [
+      "TWELVE MONTHS OF TITLE RISK AFTER THE SALE, AND IT PAYS NOTHING. K.S.A. 79-2804b allows an action to open, vacate, modify or set aside the judgment or order of sale within twelve months of confirmation. It is a defect window, not a redemption — the purchaser earns no penalty for waiting it out, so unlike a redeemable-deed state the wait is pure carry.",
+      "YOU DO NOT OWN IT AT THE HAMMER. Title passes on the court's confirmation of the sale, not at the auction. Before confirmation there is no right to possession and no right to collect rent, which matters if the parcel is tenanted.",
+      "The redemption is spent before you bid. K.S.A. 79-2401a holds county-bid real estate subject to redemption for one year if abandoned, two for general non-homestead property and three for a homestead; the judicial foreclosure follows only after that, and the last chance to redeem is 5pm the day before the sheriff's sale.",
+      "Assessment is by constitutional subclass, not county: 11.5% residential, 12% vacant lots and not-for-profit, 25% commercial and industrial, 30% all other urban and rural, 33% public utility. Agricultural land is assessed on agricultural income value rather than market value.",
+      "Proceeds above the judgment go to the former owner, so a premium is not recoverable equity — Kansas already did what Tyler v. Hennepin County later required of other states.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Kansas max bid until they are set.",
+    ],
+  },
   KY: {
     state: "KY",
     saleType: "Tax Lien",
