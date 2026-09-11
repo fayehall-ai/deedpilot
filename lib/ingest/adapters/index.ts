@@ -11,6 +11,7 @@ import { sriAdapter } from "./sri";
 import { taxSaleInfoAdapter } from "./taxsaleinfo";
 import { floridaAdapter, floridaClerksAdapter } from "./florida";
 import { clarkNvAdapter } from "./clark-nv";
+import { zeusAdapter } from "./zeus";
 
 /**
  * Order is precedence. Bespoke first, generic last.
@@ -27,6 +28,7 @@ export const ADAPTERS: SourceAdapter[] = [
   goveaseAdapter,
   sriAdapter,
   clarkNvAdapter,
+  zeusAdapter,
   genericAdapter,
 ];
 
