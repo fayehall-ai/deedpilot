@@ -69,9 +69,18 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     decision: "requires_agreement",
     minDelayMs: 5000,
     reason:
-      "Returns 403 Access Denied on robots.txt itself — verified 2026-08-05 — so the crawl posture " +
-      "cannot even be read without defeating an active edge control. Same stance as RealAuction. " +
-      "40 counties across CA, FL, LA, NV, PA, WA.",
+      "THE OPERATOR HOLDS AN AGREEMENT WITH THIS HOST, confirmed 2026-09-11, and " +
+      "`lib/ingest/adapters/bid4assets.ts` is the only caller that passes `underAgreement`. " +
+      "The decision stays `requires_agreement` rather than becoming `allow` because that is what " +
+      "it is: permitted to us, on the strength of a specific agreement, and not to anyone else " +
+      "reading this file. Same stance as RealAuction for everybody without one. " +
+      "40 counties across CA, FL, LA, NV, PA, WA. " +
+      "Correcting the record on the original basis: this entry said the host returned 403 on " +
+      "robots.txt, verified 2026-08-05, so the crawl posture could not be read without defeating " +
+      "an edge control. Re-checked 2026-09-11 and it is a 404 — no robots file at all, which " +
+      "conventionally permits crawling. The 403 is gone. That does not by itself settle the " +
+      "posture, which was always about a commercial platform rather than only about robots, but a " +
+      "reason that cites evidence should cite evidence that is still true.",
   },
   {
     host: "tax-sale.info",
