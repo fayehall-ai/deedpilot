@@ -487,16 +487,25 @@ export function computeMaxBid(inputs: DealInputs): DealResult {
     // Texas's short window is 180 days; Georgia's and Arizona's first tier is
     // a full year. Use the shortest realistic window for the best case.
     const shortestDays = inputs.state === "TX" ? 180 : firstTier.throughDays;
+    /*
+     * An annual rate is already annual. Dividing it across its own window is
+     * what made Arizona's 16% report as 5.33% and Kentucky's 12% as 1.09%.
+     */
+    const isAnnual = statute.redemption.interestKind === "annual";
     redemption = {
       windowDays: statute.redemption.maxDays,
       flatPenalty: firstTier.penalty,
       penaltyAtMaxBid: round2(Math.max(maxBid, 0) * firstTier.penalty),
-      annualisedBestCase: round2((firstTier.penalty * 365) / shortestDays),
+      annualisedBestCase: isAnnual
+        ? firstTier.penalty
+        : round2((firstTier.penalty * 365) / shortestDays),
       extendedFor: statute.redemption.extendedFor,
       note:
         statute.saleType === "Tax Lien"
           ? `${inputs.state} sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after ${statute.redemption.maxDays} days.`
-          : `A ${(firstTier.penalty * 100).toFixed(0)}% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem.`,
+          : isAnnual
+            ? `${(firstTier.penalty * 100).toFixed(0)}% per year accrues while the owner can still redeem. It is interest, not a flat penalty — redeeming early costs them less.`
+            : `A ${(firstTier.penalty * 100).toFixed(0)}% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem.`,
     };
 
     const bidDown = statute.redemption.bidDown;

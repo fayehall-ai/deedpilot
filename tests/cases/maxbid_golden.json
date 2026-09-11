@@ -1169,7 +1169,7 @@
         "windowDays": 1095,
         "flatPenalty": 0.16,
         "penaltyAtMaxBid": 13159.53,
-        "annualisedBestCase": 0.05,
+        "annualisedBestCase": 0.16,
         "extendedFor": "interest is bid down at auction from a 16% statutory maximum",
         "note": "AZ sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after 1095 days."
       },

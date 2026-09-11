@@ -428,17 +428,30 @@ def compute_maxbid(inputs: DealInputs | dict[str, Any]) -> DealResult:
         # Texas's short window is 180 days; Georgia's and Arizona's first tier
         # is a full year. Use the shortest realistic window for the best case.
         shortest_days = 180 if inputs.state == "TX" else first_tier["throughDays"]
+        # An annual rate is already annual. Dividing it across its own window is
+        # what made Arizona's 16% report as 5.33% and Kentucky's 12% as 1.09%.
+        is_annual = red.get("interestKind") == "annual"
         redemption = RedemptionOutlook(
             window_days=red["maxDays"],
             flat_penalty=first_tier["penalty"],
             penalty_at_max_bid=_round2(max(max_bid, 0) * first_tier["penalty"]),
-            annualised_best_case=_round2((first_tier["penalty"] * 365) / shortest_days),
+            annualised_best_case=(
+                first_tier["penalty"]
+                if is_annual
+                else _round2((first_tier["penalty"] * 365) / shortest_days)
+            ),
             extended_for=red.get("extendedFor"),
             note=(
                 f"{inputs.state} sells liens: the expected outcome is redemption with interest, "
                 f"not ownership. Taking title needs a separate foreclosure after "
                 f"{red['maxDays']} days."
                 if statute["saleType"] == "Tax Lien"
+                else (
+                    f"{first_tier['penalty'] * 100:.0f}% per year accrues while the owner can "
+                    f"still redeem. It is interest, not a flat penalty — redeeming early costs "
+                    f"them less."
+                )
+                if is_annual
                 else (
                     f"A {first_tier['penalty'] * 100:.0f}% flat penalty applies if the owner "
                     f"redeems. It is a penalty, not annual interest — the rate does not change "

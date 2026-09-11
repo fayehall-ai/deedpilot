@@ -39,6 +39,7 @@
       "state": "AZ",
       "saleType": "Tax Lien",
       "redemption": {
+        "interestKind": "annual",
         "tiers": [
           {
             "throughDays": 1095,
@@ -282,6 +283,7 @@
       "state": "KY",
       "saleType": "Tax Lien",
       "redemption": {
+        "interestKind": "annual",
         "tiers": [
           {
             "throughDays": 4015,
@@ -710,6 +712,7 @@
       "state": "TN",
       "saleType": "Redeemable Deed",
       "redemption": {
+        "interestKind": "annual",
         "tiers": [
           {
             "throughDays": 365,

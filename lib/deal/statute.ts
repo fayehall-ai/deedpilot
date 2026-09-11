@@ -61,6 +61,21 @@ export interface StatuteParams {
   saleType: SaleType;
   /** Null when the sale conveys clear title with no post-sale redemption. */
   redemption: {
+    /**
+     * Whether `tiers[].penalty` is a one-off penalty or a yearly rate.
+     *
+     * This existed only as prose and the engine guessed, always wrongly in the
+     * same direction. Georgia's 20% is flat: 20% whether the owner redeems in
+     * month one or month twelve, so annualising it over a short window
+     * correctly produces a large number. Arizona's 16% is per year, and the
+     * same arithmetic divided it across a three-year window and reported 5.33%
+     * — understating a 16% instrument by three times. Kentucky was worse: 12%
+     * per annum over an eleven-year statutory life came out as 1.09%.
+     *
+     * Defaults to "flat", which is what every entry written before this field
+     * assumed and what the majority of states actually are.
+     */
+    interestKind?: "flat" | "annual";
     tiers: RedemptionTier[];
     /** Longest possible redemption window, in days. */
     maxDays: number;
@@ -531,6 +546,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     state: "TN",
     saleType: "Redeemable Deed",
     redemption: {
+      interestKind: "annual",
       // Annual rate, like AZ and KY — not a flat penalty like GA, TX and SC.
       tiers: [{ throughDays: 365, penalty: 0.12 }],
       maxDays: 365,
@@ -678,6 +694,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     state: "AZ",
     saleType: "Tax Lien",
     redemption: {
+      interestKind: "annual",
       // A.R.S. § 42-18152. Three years from the sale before the certificate
       // holder may bring a judicial foreclosure. Interest is bid down from
       // 16% and accrues annually, so it is modelled as an annual rate rather
@@ -845,6 +862,7 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     state: "KY",
     saleType: "Tax Lien",
     redemption: {
+      interestKind: "annual",
       /*
        * 12% per annum simple, modelled as an annual rate rather than a flat
        * penalty — the same treatment as Arizona, and the opposite of Georgia
