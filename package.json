@@ -43,7 +43,8 @@
     "intel:status": "tsx scripts/intel-worker.ts --status",
     "intel:locate": "tsx scripts/backfill-parcel-geometry.ts",
     "cape:plan": "tsx scripts/cape-produce.ts --plan",
-    "cape:produce": "tsx scripts/cape-produce.ts"
+    "cape:produce": "tsx scripts/cape-produce.ts",
+    "export:statute": "tsx scripts/export-statute-json.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
