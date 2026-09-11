@@ -1999,6 +1999,81 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Virginia max bid until they are set.",
     ],
   },
+  /*
+   * Wisconsin is another county-resale state — the county forecloses in rem,
+   * takes title, and later sells what it owns. § 75.521(8) has the court
+   * "render final judgment ordering and adjudging that the county is vested
+   * with an estate in fee simple absolute in such lands", with all prior
+   * claimants "forever barred and foreclosed of such right, title, interest,
+   * claim, lien or equity of redemption". By auction day there is nothing left
+   * to redeem and nothing left to earn for waiting.
+   *
+   * What is unusual here is the pressure on the county to sell. § 75.69
+   * requires the land to be advertised with its appraised value within 180 days
+   * of acquisition — 240 before 2026 — and if it does not move, the county may
+   * re-advertise and then "sell for any amount". Wisconsin has a statutory
+   * clock pushing inventory out of the door and no floor under the second pass.
+   */
+  WI: {
+    state: "WI",
+    saleType: "Tax Deed",
+    // § 75.521(8): fee simple absolute in the county, everyone else foreclosed,
+    // all of it before the parcel is offered for sale.
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: false, on the strength of the in rem judgment barring every
+       * prior interest. Same posture as Minnesota and Oregon.
+       */
+      typicalLow: 1500,
+      typicalHigh: 3500,
+      typicalMonths: 3,
+      required: false,
+    },
+    closingCosts: 250,
+    auctionToMarketableMonths: 3,
+    /*
+     * 1.0 as a deliberate floor, not as a measurement — the New York posture.
+     *
+     * Wisconsin assesses at full value (§ 70.32(1)), and § 70.05(5)(b) requires
+     * each taxation district to "assess property at full value at least once in
+     * every 5-year period", with the Department of Revenue computing the actual
+     * ratio annually and notifying a district whose major classes have drifted
+     * outside 10% of full value over a four-year window. So the true ratio sits
+     * near 1.0 and wanders between revaluations.
+     *
+     * Choosing 1.0 fails safe in the ordinary case. In a rising market a
+     * district's assessments lag full value, the real ratio is below 1.0, and
+     * dividing by 1.0 understates the property — a lower ARV and a lower max
+     * bid. The unsafe case is an over-assessed district, which is the rarer one
+     * and the one the DOR's notice process exists to correct.
+     */
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "Wis. Stat. § 70.32(1) requires real property to be valued at the full value which could ordinarily be obtained at private sale, and § 70.05(5)(b) requires each taxation district to assess at full value at least once in every 5-year period. The Department of Revenue computes the actual assessed-to-full-value ratio for every district annually under § 70.05(5)(c) and notifies districts that drift more than 10% off over four years.",
+    derivedArvCaveat:
+      "Wisconsin's assessment ratio is set per taxation district — town, village or city — and there are roughly 1,850 of them, so it cannot be expressed in countyAssessmentRatios, which is keyed by county FIPS. The 1.0 here is a deliberate floor rather than a measured figure: between revaluations a district's assessments typically lag the market, which makes a derived Wisconsin ARV conservative. The Department of Revenue publishes the real ratio for every district each year, and on a parcel where the number matters it is worth looking up — particularly in a district that has just revalued, where the assessment jumps to full value in a single year.",
+    statute:
+      "Wis. Stat. §§ 75.521 (in rem foreclosure, title vesting), 75.35 (sale of tax-deeded lands), 75.69 (advertising, appraised value, sale for any amount after re-advertisement), 75.36 (surplus proceeds), 70.32 and 70.05 (assessment at full value); 2023 Wisconsin Act 207",
+    asOf: "2026-09",
+    sources: [
+      "https://docs.legis.wisconsin.gov/statutes/statutes/75/521",
+      "https://docs.legis.wisconsin.gov/statutes/statutes/75/35",
+      "https://docs.legis.wisconsin.gov/statutes/statutes/75/69",
+      "https://docs.legis.wisconsin.gov/statutes/statutes/70/05",
+      "https://docs.legis.wisconsin.gov/2023/related/acts/207",
+    ],
+    caveats: [
+      "A WISCONSIN LISTING CAN BE TAKEN BACK BY ITS FORMER OWNER BEFORE IT SELLS. 2023 Wisconsin Act 207 requires every county to adopt an ordinance letting a former owner, their beneficiaries or heirs repurchase land lost to a tax deed by paying the county's costs, the taxes that would have accrued while the county held it, and the amounts needed to satisfy liens at foreclosure. The ordinance must cover single-family owner-occupied property and may cover everything else. The right is exercised before the county's sale, so it does not cloud a completed purchase — but it means the best inventory is filtered out before auction and a listing can disappear.",
+      "THE SECOND PASS HAS NO FLOOR. § 75.69 requires the appraised value to be advertised and bars a sale below it unless the county board or its committee has reviewed and approved the sale. But a county may also \"sell for any amount any land previously advertised for sale after advertising the sale of such land by publication of a class 1 notice\". A parcel on its second advertisement is a different proposition from one on its first, and nothing in the listing data distinguishes them.",
+      "THE COUNTY DOES NOT HAVE TO TAKE THE HIGHEST BID. Under § 75.69 a county may accept less than the highest bid provided the board or its committee \"prepares a written statement, available for public inspection, that explains the reasons\". Winning on price is not the same as winning.",
+      "The county is under a clock, which is unusual and helpful. § 75.69 requires tax-delinquent real estate to be advertised within 180 days of acquisition, reduced from 240 days beginning in 2026. Wisconsin counties cannot sit on inventory the way land banks elsewhere can.",
+      "Surplus belongs to the former owner under § 75.36, as amended by Act 207 to net out real estate agent and broker fees and other actual costs of sale, and to offset other delinquent taxes the former owner owes the county. This does not affect the buyer.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
+    ],
+  },
   WY: {
     state: "WY",
     saleType: "Tax Lien",
