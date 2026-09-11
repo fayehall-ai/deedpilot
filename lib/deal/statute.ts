@@ -233,6 +233,168 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "§ 26-37-203(c) cuts the other way and favours the purchaser: a deed issued after 1 January 1987 is not void or voidable merely because the county failed to strictly comply with the tax-delinquent land laws.",
     ],
   },
+  /*
+   * Pennsylvania is two statutes wearing one state's name, and the split
+   * changes the maths more than anything else in this file.
+   *
+   * ## Two regimes
+   *
+   * The Real Estate Tax Sale Law (72 P.S. § 5860.101 et seq., "RETSL") governs
+   * 65 of the 67 counties through their county Tax Claim Bureaus. Philadelphia
+   * and Allegheny run instead under the Municipal Claims and Tax Liens Act
+   * (53 P.S. § 7101 et seq., "MCTLA"). USTLA's own calendar already reflects
+   * this: every Pennsylvania row imports as "Deed" except Philadelphia
+   * City-County, which imports as "Redeemable Deed".
+   *
+   * ## No post-sale redemption — under RETSL
+   *
+   * RETSL gives the owner a right to pay up to the sale, not after it. There is
+   * no statutory right to redeem once an upset or judicial sale is confirmed,
+   * which is why `redemption` is null.
+   *
+   * That is wrong for Philadelphia, and deliberately so. MCTLA § 7293 gives a
+   * nine-month redemption running from acknowledgment of the sheriff's deed, at
+   * the price paid plus 10% per annum — but only where the property was
+   * owner-occupied, determined 90 days before the sale. This type has no
+   * per-county redemption override, so encoding it here would apply a
+   * Philadelphia rule to 65 counties that do not have it and invent a return
+   * in every one of them. Null is the conservative reading: it assumes the
+   * investor earns no redemption penalty anywhere. The Philadelphia risk is
+   * recorded in `caveats` instead, and the missing capability is noted there
+   * too. ~180 of Pennsylvania's ~40,500 announced parcels are Philadelphia's.
+   *
+   * ## Upset vs judicial is a title question, not a price question
+   *
+   * An upset sale (§§ 5860.601-609) conveys SUBJECT TO existing mortgages,
+   * judgments and liens — they are not divested. A judicial sale
+   * (§§ 5860.610-612) is ordered free and clear. Same state, same parcel, two
+   * completely different `survivingLiens` inputs, and nothing in the sale row
+   * distinguishes them. Treating an upset purchase as clear title is the most
+   * expensive mistake available in Pennsylvania.
+   */
+  PA: {
+    state: "PA",
+    saleType: "Tax Deed",
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — see the AR entry, whose figures are
+       * marked as operator-set. These are a placeholder range pending that
+       * review and should not be trusted for a live bid.
+       */
+      typicalLow: 2500,
+      typicalHigh: 6000,
+      typicalMonths: 6,
+      required: true,
+    },
+    /*
+     * Recording and deed issuance only. This deliberately EXCLUDES Pennsylvania
+     * realty transfer tax, which is the larger cost and is a percentage, not a
+     * fixed fee — see caveats. A fixed field cannot carry it.
+     */
+    closingCosts: 250,
+    /*
+     * There is no statewide assessment ratio, so this number is a placeholder
+     * that should never be reached: every one of the 67 counties is listed in
+     * countyAssessmentRatios below. It is the median county ratio, present only
+     * so the field is not a lie by omission if a FIPS ever misses.
+     */
+    assessmentRatio: 0.4065,
+    assessmentBasis:
+      "Pennsylvania has no statewide assessment ratio. Counties assess against their own base years, some decades old, and the State Tax Equalization Board publishes a Common Level Ratio per county each year. Always use the county ratio.",
+    countyAssessmentRatios: {
+      "42001": { ratio: 0.6757, basis: "Adams County CLR factor 1.48 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42003": { ratio: 0.4926, basis: "Allegheny County CLR factor 2.03 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42005": { ratio: 0.2457, basis: "Armstrong County CLR factor 4.07 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42007": { ratio: 0.7463, basis: "Beaver County CLR factor 1.34 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42009": { ratio: 0.5236, basis: "Bedford County CLR factor 1.91 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42011": { ratio: 0.3205, basis: "Berks County CLR factor 3.12 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42013": { ratio: 0.7813, basis: "Blair County CLR factor 1.28 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42015": { ratio: 0.1669, basis: "Bradford County CLR factor 5.99 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42017": { ratio: 0.056, basis: "Bucks County CLR factor 17.86 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42019": { ratio: 0.06, basis: "Butler County CLR factor 16.67 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42021": { ratio: 0.112, basis: "Cambria County CLR factor 8.93 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42023": { ratio: 0.1988, basis: "Cameron County CLR factor 5.03 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42025": { ratio: 0.1721, basis: "Carbon County CLR factor 5.81 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42027": { ratio: 0.1639, basis: "Centre County CLR factor 6.10 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42029": { ratio: 0.3058, basis: "Chester County CLR factor 3.27 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42031": { ratio: 1, basis: "Clarion County CLR factor 1.00 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42033": { ratio: 0.1919, basis: "Clearfield County CLR factor 5.21 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42035": { ratio: 0.5181, basis: "Clinton County CLR factor 1.93 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42037": { ratio: 0.1361, basis: "Columbia County CLR factor 7.35 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42039": { ratio: 0.158, basis: "Crawford County CLR factor 6.33 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42041": { ratio: 0.641, basis: "Cumberland County CLR factor 1.56 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42043": { ratio: 0.3831, basis: "Dauphin County CLR factor 2.61 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42045": { ratio: 0.5464, basis: "Delaware County CLR factor 1.83 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42047": { ratio: 0.1799, basis: "Elk County CLR factor 5.56 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42049": { ratio: 0.5025, basis: "Erie County CLR factor 1.99 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42051": { ratio: 0.4065, basis: "Fayette County CLR factor 2.46 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42053": { ratio: 0.114, basis: "Forest County CLR factor 8.77 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42055": { ratio: 0.072, basis: "Franklin County CLR factor 13.89 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42057": { ratio: 0.202, basis: "Fulton County CLR factor 4.95 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42059": { ratio: 0.3636, basis: "Greene County CLR factor 2.75 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42061": { ratio: 0.125, basis: "Huntingdon County CLR factor 8.00 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42063": { ratio: 0.7042, basis: "Indiana County CLR factor 1.42 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42065": { ratio: 0.1908, basis: "Jefferson County CLR factor 5.24 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42067": { ratio: 0.074, basis: "Juniata County CLR factor 13.51 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42069": { ratio: 1, basis: "Lackawanna County CLR factor 1.00 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42071": { ratio: 0.5, basis: "Lancaster County CLR factor 2.00 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42073": { ratio: 0.4545, basis: "Lawrence County CLR factor 2.20 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42075": { ratio: 0.5208, basis: "Lebanon County CLR factor 1.92 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42077": { ratio: 0.4695, basis: "Lehigh County CLR factor 2.13 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42079": { ratio: 0.8772, basis: "Luzerne County CLR factor 1.14 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42081": { ratio: 0.4367, basis: "Lycoming County CLR factor 2.29 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42083": { ratio: 0.4808, basis: "McKean County CLR factor 2.08 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42085": { ratio: 0.105, basis: "Mercer County CLR factor 9.52 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42087": { ratio: 0.207, basis: "Mifflin County CLR factor 4.83 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42089": { ratio: 0.4405, basis: "Monroe County CLR factor 2.27 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42091": { ratio: 0.2976, basis: "Montgomery County CLR factor 3.36 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42093": { ratio: 0.4484, basis: "Montour County CLR factor 2.23 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42095": { ratio: 0.161, basis: "Northampton County CLR factor 6.21 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42097": { ratio: 0.095, basis: "Northumberland County CLR factor 10.53 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42099": { ratio: 1, basis: "Perry County CLR factor 1.00 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42101": { ratio: 0.9434, basis: "Philadelphia County CLR factor 1.06 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42103": { ratio: 0.089, basis: "Pike County CLR factor 11.24 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42105": { ratio: 0.161, basis: "Potter County CLR factor 6.21 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42107": { ratio: 1, basis: "Schuylkill County CLR factor 1.00 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42109": { ratio: 0.092, basis: "Snyder County CLR factor 10.87 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42111": { ratio: 0.1812, basis: "Somerset County CLR factor 5.52 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42113": { ratio: 0.4049, basis: "Sullivan County CLR factor 2.47 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42115": { ratio: 0.1631, basis: "Susquehanna County CLR factor 6.13 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42117": { ratio: 0.8, basis: "Tioga County CLR factor 1.25 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42119": { ratio: 0.4292, basis: "Union County CLR factor 2.33 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42121": { ratio: 0.4878, basis: "Venango County CLR factor 2.05 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42123": { ratio: 1, basis: "Warren County CLR factor 1.00 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42125": { ratio: 0.6803, basis: "Washington County CLR factor 1.47 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42127": { ratio: 0.6711, basis: "Wayne County CLR factor 1.49 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42129": { ratio: 0.087, basis: "Westmoreland County CLR factor 11.49 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42131": { ratio: 0.111, basis: "Wyoming County CLR factor 9.01 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+      "42133": { ratio: 0.4878, basis: "York County CLR factor 2.05 (STEB 2025 CLR, effective 2026-07-01 to 2027-06-30); ratio is its reciprocal." },
+    },
+    derivedArvCaveat:
+      "Pennsylvania county assessments run against base years that can be decades stale, and the spread is extreme — Bucks assesses at about 5.6% of market and Schuylkill at 100%, an 18x range inside one state. The Common Level Ratio is a county MEDIAN published for realty transfer tax equalisation, not a per-parcel appraisal, so deriving ARV from it multiplies any error in that one parcel's assessment by the factor: in Bucks a $50,000 assessment derives an ARV near $893,000. Treat a derived ARV in a high-factor county as a research lead, not a valuation, and get comparable sales before bidding.",
+    statute:
+      "72 P.S. §§ 5860.101-5860.803 (Real Estate Tax Sale Law); 53 P.S. §§ 7101-7505 (Municipal Claims and Tax Liens Act, Philadelphia and Allegheny)",
+    asOf: "2026-09",
+    sources: [
+      "https://www.legis.state.pa.us/WU01/LI/LI/US/PDF/1947/0/0542..PDF",
+      "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/taxtypes/rtt/documents/clr_factor_current.pdf",
+      "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/realty-transfer-tax/common-level-ratios",
+      "https://www.law.cornell.edu/regulations/pennsylvania/61-Pa-Code-SS-91-193",
+      "https://www.pacodeandbulletin.gov/Display/pacode?file=/secure/pacode/data/061/chapter91/s91.193.html&d=reduce",
+    ],
+    caveats: [
+      "UPSET SALE vs JUDICIAL SALE is the single most important distinction in Pennsylvania and this row cannot express it. An upset sale (72 P.S. §§ 5860.601-609) conveys subject to existing mortgages, judgments and liens, which are NOT divested; a judicial sale (§§ 5860.610-612) is ordered free and clear. Establish which one a parcel is in before treating survivingLiens as zero.",
+      "REALTY TRANSFER TAX IS NOT IN closingCosts. 61 Pa. Code § 91.193 excludes a conveyance to a local taxing authority acquiring at a tax claim bureau sale, and exempts a mortgage holder purchasing at judicial sale — it grants NO exclusion to a third-party purchaser. A third-party investor should expect 1% state plus local transfer tax (commonly 1%, and about 3.278% in Philadelphia) on the price. On a $50,000 parcel that is roughly $1,000 outside Philadelphia and materially more inside it. The engine has no percentage field for this; budget it manually.",
+      "PHILADELPHIA HAS A REDEMPTION AND THIS ROW SAYS IT DOES NOT. Under MCTLA 53 P.S. § 7293 an owner-occupied property (occupancy determined 90 days before the sale) may be redeemed within nine months of acknowledgment of the sheriff's deed, at the price paid plus 10% per annum. Non-owner-occupied and abandoned property carries no such right. Modelling that here would apply it to the 65 RETSL counties that lack it, so it is recorded as a caveat and the redemption field stays null — conservative for return, but it means the engine does not warn about redemption risk on a Philadelphia parcel.",
+      "Allegheny County also runs under MCTLA rather than RETSL, so its procedure and notice rules differ from the other 65 counties.",
+      "Common Level Ratios are re-published by STEB every year and take effect each 1 July. The figures here are the 2025 CLR set effective 2026-07-01 to 2027-06-30; re-verify after the next July.",
+      "Philadelphia's CLR factor is 1.06 for documents accepted 2026-07-01 through 2026-12-31 and 1.00 after 2026-12-31, following an assessment base change. The ratio recorded here (0.9434) is the former; it becomes 1.00 on 2027-01-01.",
+      "In high-CLR-factor counties (Bucks 17.86, Butler 16.67, Franklin 13.89, Juniata 13.51, Westmoreland 11.49, Pike 11.24, Northumberland 10.53) a derived ARV is amplified roughly 11-18x from the assessment. Do not bid off a ratio-derived ARV in those counties; supply arvOverride from comparable sales.",
+      "quietTitle costs in this entry are a placeholder and have not been reviewed by the operator, unlike AR. Do not rely on the computed max bid in Pennsylvania until they are set.",
+      "RETSL requires publication, posting and certified mail notice, and an owner-occupied property cannot be sold unless the owner was personally served at least ten days before the sale. Defective notice is the most common ground on which Pennsylvania tax sales are set aside, which is a risk to the purchaser's title rather than to the price.",
+    ],
+  },
   TX: {
     state: "TX",
     saleType: "Redeemable Deed",
