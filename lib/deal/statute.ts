@@ -506,6 +506,90 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
     ],
   },
+  /*
+   * In North Carolina, winning the auction does not mean you bought anything.
+   *
+   * Every tax foreclosure sale here is followed by an upset bid period, and it
+   * works the same way on both of the state's two tracks. For the mortgage-
+   * style foreclosure under G.S. 105-374: "(o) At any time within 10 days after
+   * the commissioner files the report of the foreclosure sale ... an increased
+   * bid may be filed in the amount specified by and subject to the provisions
+   * of Article 29A". For the in rem method under G.S. 105-375, which ends in an
+   * execution sale, G.S. 1-339.64 says the same thing. Either way the raise is
+   * "a minimum of five percent (5%) thereof, but in any event with a minimum
+   * increase of seven hundred fifty dollars ($750.00)", and "there may be
+   * successive upset bids, each of which shall be followed by a period of 10
+   * days for a further upset bid".
+   *
+   * So the high bid at the auction is an opening position in a slow ascending
+   * auction with no fixed end. That is not a caveat about title or cost; it
+   * changes what a max bid means. See the first caveat.
+   */
+  NC: {
+    state: "NC",
+    saleType: "Tax Deed",
+    /*
+     * No post-sale redemption. Under G.S. 105-374(e) a person may redeem
+     * "before confirmation of the foreclosure sale", and under G.S. 105-375 the
+     * owner may move to set the judgment aside for payment "prior to the
+     * issuance of execution". Both windows close before the buyer holds
+     * anything, so neither pays the investor a penalty for waiting.
+     */
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: false. G.S. 105-374(k) has the judgment order the property
+       * "sold in fee simple, free and clear of all interests, rights, claims,
+       * and liens whatever", and G.S. 105-375 gives the execution purchaser
+       * "title to the property in fee simple free and clear of all claims,
+       * rights, interests, and liens" subject to a short exception list. Both
+       * are judicial proceedings on notice, so there is little left to quiet —
+       * the exceptions are a cost problem rather than a title problem.
+       */
+      typicalLow: 1500,
+      typicalHigh: 4000,
+      typicalMonths: 4,
+      required: false,
+    },
+    closingCosts: 250,
+    /*
+     * Longer than the deed states with no redemption, because the upset bid
+     * period has no fixed end and confirmation cannot be applied for until ten
+     * quiet days have passed. Two months of that is process before anything is
+     * owned.
+     */
+    auctionToMarketableMonths: 6,
+    /*
+     * 1.0 — G.S. 105-283 requires appraisal at "true value in money", which the
+     * statute defines as market value. The problem is not the ratio, it is how
+     * old the number is. See derivedArvCaveat.
+     */
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "N.C. Gen. Stat. § 105-283 requires all property to be appraised at its true value in money, which the statute defines as market value. There is no classification ratio and no county variation in the ratio itself — only in how recently it was measured.",
+    derivedArvCaveat:
+      "North Carolina has the longest reappraisal cycle in the country. G.S. 105-286(a)(1) requires each county to reappraise \"as of January 1 of the year set out in the following schedule and every eighth year thereafter\", so an assessment can be eight years old and still current by law. Only counties of 75,000 or more face an earlier trigger, and only when their sales assessment ratio drifts out of bounds. A derived North Carolina ARV is a market value as of a date that may predate the last cycle of the market entirely — treat it as the weakest derived figure in this file and override it with comparable sales wherever the number matters.",
+    statute:
+      "N.C. Gen. Stat. §§ 105-374 (mortgage-style foreclosure, upset bids, title), 105-375 (in rem foreclosure and execution sale), 105-283 (true value in money), 105-286 (octennial reappraisal), 105-277.4 (present-use value deferral and rollback); G.S. 1-339.25 and 1-339.64 (upset bids)",
+    asOf: "2026-09",
+    sources: [
+      "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_105/GS_105-374.html",
+      "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_105/GS_105-375.html",
+      "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_105/GS_105-286.html",
+      "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_105/GS_105-277.4.html",
+      "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_1/GS_1-339.25.html",
+      "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_1/GS_1-339.64.html",
+    ],
+    caveats: [
+      "THE MAX BID IS A WALK-AWAY PRICE, NOT AN OPENING BID, AND NORTH CAROLINA WILL TEST IT. Any sale can be upset within ten days by 5% or $750, whichever is greater, and each upset restarts the ten days. Bidding the computed ceiling at the auction leaves nowhere to go when someone raises it, and matching the raise puts the operator past the ceiling. Bid low, expect to be upset, and treat the computed figure as the point at which to stop — in this state, uniquely, that discipline is enforced by the process rather than left to the bidder.",
+      "THE TIMELINE HAS NO FIXED END. Confirmation cannot be applied for until ten days pass with no exception or increased bid, and a determined underbidder can extend that indefinitely in ten-day increments for $750 a time. Deposits are tied up throughout. auctionToMarketableMonths assumes this resolves in roughly two months; a contested parcel will take longer.",
+      "SOME TAX LIENS SURVIVE, BY NAME. G.S. 105-375 conveys fee simple free and clear \"except the liens of other taxes or special assessments not paid from the purchase price and not included in the judgment, liens arising from C-PACE assessments authorized under Article 10B of Chapter 160A of the General Statutes, and conservation agreements\". A tax year outside the judgment stays with the parcel, and C-PACE — commercial energy financing, repaid through the tax bill — can be a large balance that survives specifically because it is not an ordinary lien.",
+      "FARM AND FOREST LAND CARRIES THREE YEARS OF DEFERRED TAX THAT THE BUYER CAN TRIGGER. Land classified at present-use value under G.S. 105-277.4 is taxed on its use rather than its market value, and on a disqualifying event \"the deferred taxes for the preceding three fiscal years are due and payable\", as a lien on the property under G.S. 105-355(a). Changing the use is the disqualifying event, so the act that realises the value also crystallises the bill. A derived ARV from a present-use assessment also badly understates the parcel.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
+    ],
+  },
   NM: {
     state: "NM",
     saleType: "Tax Deed",
