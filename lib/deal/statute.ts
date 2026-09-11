@@ -1551,6 +1551,109 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
    * `maxDays` is the four-year floor, which is the period the buyer is
    * certainly waiting.
    */
+  /*
+   * Virginia sells the same parcel two ways, and which way it went decides
+   * whether the buyer owns it free of the mortgage.
+   *
+   * A JUDICIAL sale under § 58.1-3965 is a suit in circuit court. Every lienor,
+   * claimant of title and "beneficiary and trustees under a deed of trust
+   * shall be named as a party defendant", and the resulting title "shall be
+   * free of all claims of any creditor, person, or entity, including those
+   * claims of beneficiaries under any deed of trust or mortgage, provided that
+   * such creditor, person, or entity was made a party defendant" (§ 58.1-3967).
+   * Whether that proviso was satisfied is on the court record, so a title
+   * examiner can check it.
+   *
+   * A NONJUDICIAL sale under § 58.1-3975 is the treasurer selling a low-value
+   * parcel at auction with no suit at all. The conveyance is "free and clear of
+   * the locality's tax lien, but shall not affect easements or other rights of
+   * record recorded prior to the date of sale or liens recorded prior to the
+   * date of sale unless the treasurer has given the lienholder written notice
+   * of the sale at least 30 days prior to the sale". The tax lien goes; a deed
+   * of trust survives unless one official mailed one letter, and nothing in the
+   * listing tells a bidder whether that happened.
+   *
+   * Both appear in our inventory, sometimes in the same auction — Carroll and
+   * Warren each ran a judicial and a nonjudicial sale on one day. The engine
+   * has one entry per state and cannot tell them apart from the fields it has,
+   * so everything below takes the nonjudicial reading wherever the two differ.
+   * That is the conservative direction, and the caveats name what to relax on a
+   * parcel confirmed to be judicial.
+   */
+  VA: {
+    state: "VA",
+    saleType: "Tax Deed",
+    /*
+     * No post-sale redemption on either track. Judicial: the owner "shall have
+     * the right to redeem such real estate prior to the date set for a judicial
+     * sale thereof" (§ 58.1-3974). Nonjudicial: "may redeem it at any time
+     * prior to the date of the sale" (§ 58.1-3975). Both windows close before
+     * the gavel, so there is no penalty for an investor to earn.
+     */
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: true is the nonjudicial reading. A treasurer's special
+       * warranty deed with possibly-surviving liens is not a marketable title,
+       * and an examiner cannot confirm the 30-day lienholder notice from the
+       * public record the way they can read a court file.
+       *
+       * On a parcel confirmed to be judicial, with the deed of trust
+       * beneficiary named a party defendant, this should be false — the decree
+       * has already done the work a quiet title action would do.
+       */
+      typicalLow: 2500,
+      typicalHigh: 6000,
+      typicalMonths: 5,
+      required: true,
+    },
+    /*
+     * Anchored on a fee actually charged rather than a rate: the City of
+     * Chesapeake's nonjudicial terms add a flat $200 recordation fee to the
+     * bid, and clerk's recording runs a few tens on top. Virginia's recordation
+     * tax is ad valorem and is NOT in this figure — see the caveat.
+     */
+    closingCosts: 250,
+    /*
+     * Auction to a recorded deed is about three months on the judicial track —
+     * the sale binds immediately, the court confirms, and the balance is due to
+     * the special commissioner within fifteen days of confirmation. The
+     * remainder is the quiet title action this entry assumes is needed.
+     */
+    auctionToMarketableMonths: 8,
+    /*
+     * 1.0 by constitution, and 1.0 is the dangerous kind of honest — the same
+     * trap as California. See derivedArvCaveat.
+     */
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "Va. Const. art. X, § 2: \"All assessments of real estate and tangible personal property shall be at their fair market value, to be ascertained as prescribed by law.\" There is no classification and no ratio below full value, except the agricultural, horticultural, forest and open-space use-value deferral the same section authorises.",
+    derivedArvCaveat:
+      "Virginia assesses at full fair market value, so the ratio is honestly 1.0 — but it is the value as of the last general reassessment, not today. Counties reassess every four years, or every three by vote of the board, and a county of 50,000 or fewer may stretch to five- or six-year intervals (§ 58.1-3252). Most of the Virginia inventory sits in exactly those small counties, so an assessment here can be half a decade old in either direction. Agricultural, horticultural, forest and open-space land enrolled in use-value deferral is assessed on its use value rather than market value, which understates it sharply on development-fringe parcels. A 1.0 ratio is not a licence to treat the assessment as an appraisal.",
+    statute:
+      "Va. Code §§ 58.1-3965 to 58.1-3974 (judicial sale of tax-delinquent real estate), 58.1-3967 (parties defendant and effect on liens), 58.1-3975 (nonjudicial sale of low-value parcels), 58.1-3252 (reassessment cycle); Va. Const. art. X, § 2 (assessment at fair market value)",
+    asOf: "2026-09",
+    sources: [
+      "https://law.lis.virginia.gov/vacode/title58.1/chapter39/section58.1-3965/",
+      "https://law.lis.virginia.gov/vacode/title58.1/chapter39/section58.1-3967/",
+      "https://law.lis.virginia.gov/vacode/title58.1/chapter39/section58.1-3974/",
+      "https://law.lis.virginia.gov/vacode/title58.1/chapter39/section58.1-3975/",
+      "https://law.lis.virginia.gov/vacode/title58.1/chapter32/section58.1-3252/",
+      "https://law.lis.virginia.gov/constitution/article10/section2/",
+    ],
+    caveats: [
+      "THE COMPUTED MAX BID IS AN ALL-IN CEILING AND VIRGINIA ADDS A BUYER'S PREMIUM ON TOP OF THE BID. Both sales in our own inventory charge one: Shenandoah County's judicial sale adds 10% of the high bid, and the City of Chesapeake's nonjudicial sale adds 15% plus a $200 recordation fee. Bid at most maxBid ÷ 1.10, or ÷ 1.15 where the terms say 15%. Bidding the computed figure itself overshoots the ceiling by the whole premium — on a $20,000 parcel that is $2,000 to $3,000 of profit that was never there. closingCosts is a flat dollar field and cannot hold a rate; read the auctioneer's terms for every sale.",
+      "AT A NONJUDICIAL SALE A PRIOR DEED OF TRUST CAN SURVIVE, AND THE LISTING WILL NOT SAY SO. § 58.1-3975 conveys free of the locality's tax lien \"but shall not affect ... liens recorded prior to the date of sale unless the treasurer has given the lienholder written notice of the sale at least 30 days prior to the sale\". Whether that notice went out is not on the public record. The Chesapeake terms in our own inventory advertise the parcels as \"sold free and clear of liens & encumbrances\", which is the auctioneer's phrasing and not what the statute says. Pull a title search before bidding on any nonjudicial parcel.",
+      "A JUDICIAL SALE IS THE STRONGER TITLE, BUT ONLY AS TO PARTIES SERVED. § 58.1-3967 frees the title of creditors' claims, \"provided that such creditor, person, or entity was made a party defendant\". A lienholder who was never named keeps their lien. The court file shows who was named, which is the whole advantage over the nonjudicial track.",
+      "NONJUDICIAL PARCELS ARE SMALL AND USUALLY UNBUILDABLE BY STATUTORY DESIGN. § 58.1-3975 reaches parcels assessed at $15,000 or less, or $15,001-$30,000 if unimproved and under an acre or unsuitable for building or condemned or derelict or blighted, or $30,001-$40,000 if in a revitalization zone, unimproved and under half an acre. A derived ARV can make one of these look like a house lot when the statute that put it in the sale says it is not.",
+      "Virginia localities are not all counties. Thirty-eight independent cities sit outside any county and levy their own tax — Chesapeake, Newport News, Suffolk, Danville, Martinsville and Portsmouth are all in the current inventory. Towns are a further layer: § 58.1-3974 makes a redeeming owner pay \"any outstanding taxes, penalties, and interest owed to a town or other concurrent taxing entity\", so a parcel can owe two governments and a county's sale does not necessarily clear the town's lien.",
+      "Virginia's recordation tax is ad valorem and is not in closingCosts. That figure is anchored on Chesapeake's flat $200 recordation fee plus clerk's recording; the state and local recordation tax scales with the price and is owed on top.",
+      "Surplus is the former owner's. At a nonjudicial sale \"any excess proceeds shall remain the property of the former owner, subject to claims of creditors\", escrowed for two years. This does not affect the buyer's title, but it means Virginia is not exposed on the Tyler v. Hennepin question.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Virginia max bid until they are set.",
+    ],
+  },
   WY: {
     state: "WY",
     saleType: "Tax Lien",
