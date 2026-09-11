@@ -359,6 +359,50 @@
         "quietTitle costs here are a placeholder and have not been reviewed by the operator, and they stand for a judicial foreclosure rather than a quiet title suit. Do not rely on a computed Kentucky max bid until they are set."
       ]
     },
+    "LA": {
+      "state": "LA",
+      "saleType": "Tax Lien",
+      "redemption": {
+        "interestKind": "annual",
+        "tiers": [
+          {
+            "throughDays": 1095,
+            "penalty": 0.084
+          }
+        ],
+        "maxDays": 1095,
+        "extendedFor": "three years from recordation for most property; blighted or abandoned property redeems in eighteen months"
+      },
+      "quietTitle": {
+        "typicalLow": 2500,
+        "typicalHigh": 6000,
+        "typicalMonths": 6,
+        "required": true
+      },
+      "closingCosts": 250,
+      "auctionToMarketableMonths": 40,
+      "assessmentRatio": 0.1,
+      "assessmentBasis": "La. Const. art. VII, § 18: land is assessed at 10% of fair market value, improvements for residential purposes at 10%, and other property at 15%. This entry uses the 10% residential rate.",
+      "derivedArvCaveat": "Louisiana assesses land and residential improvements at 10% and 'other property' at 15%. On a commercial parcel actually assessed at 15%, dividing by 0.10 overstates value by half — the dangerous direction. The homestead exemption also removes a slice of assessed value on an owner-occupied home, so a bare assessed figure there understates the property. Check the classification and whether a homestead exemption is in force before treating a derived ARV as a valuation.",
+      "statute": "La. R.S. 47:2151 et seq. as rewritten by Acts 774 and 557 of 2024, effective 2026-01-01 (tax lien auctions; R.S. 47:2154 time and price); La. Const. art. VII, §§ 18 (assessment), 25 (tax sales and redemption)",
+      "asOf": "2026-09",
+      "sources": [
+        "https://law.justia.com/codes/louisiana/revised-statutes/title-47/rs-47-2154/",
+        "https://www.legis.la.gov/legis/ViewDocument.aspx?d=1383044",
+        "https://codes.findlaw.com/la/louisiana-constitution-of-1974/la-const-art-vii-sect-18/",
+        "https://louisianalawhelp.org/resource/tax-sales",
+        "https://www.keanmiller.com/insights/blog/louisiana-law-blog/tax-sale-redemption-period-reduced-for-blighted-and-abandoned-property/"
+      ],
+      "caveats": [
+        "THE SYSTEM CHANGED ON 2026-01-01 AND MOST WRITING ABOUT LOUISIANA IS NOW WRONG. Acts 774 and 557 of 2024 replaced the ownership bid-down sale with a tax lien certificate auction. 'Tax sale title' is repealed, no adjudicated property is created after that date, and a bidder no longer ends up owning an undivided percentage of a house. Any guide, course or comparable sale predating 2026 describes the old mechanism.",
+        "THE RATE IS BID DOWN, AND THIS ROW ENCODES THE FLOOR. Bidding opens at 1% per month, moves in tenths of a percent, and no bid may reduce it below 0.7% per month. The tier is 8.4% a year — the floor, annualised — so a realised certificate pays between that and 12%. Modelling the 12% opening rate would repeat the Illinois error of quoting a ceiling as an expectation.",
+        "A FLAT 5% PENALTY IS ALSO DUE ON REDEMPTION and is not in the tier, which holds one number. It is not bid down, so it accrues whatever the auction does to the rate.",
+        "NO OBSERVED CLEARING DATA EXISTS. The market is months old; there is no Louisiana equivalent of the Cook County catalogue behind the Illinois entry. The floor makes the downside knowable, not the expectation. Treat the realised rate as unknown within 8.4%-12% until sales are recorded.",
+        "Redemption is three years from recordation, or eighteen months for blighted or abandoned property. The shorter period began as a New Orleans rule and was extended by constitutional amendment; confirm it applies in the parish in question. The period is peremptive but can be extended where required notice was not given, so a defective notice keeps the owner's right alive.",
+        "Louisiana has parishes, not counties, and Orleans has historically run its own procedure. Confirm the collector and the local rules before assuming a statewide process.",
+        "quietTitle costs here are a placeholder and have not been reviewed by the operator, and they price a suit under a statute the courts have not yet interpreted. Do not rely on a computed Louisiana max bid until they are set."
+      ]
+    },
     "MI": {
       "state": "MI",
       "saleType": "Tax Deed",
