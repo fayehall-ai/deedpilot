@@ -3941,26 +3941,8 @@
     "18141": {
       "state": "IN",
       "county": "St. Joseph",
-      "sources": [
-        {
-          "fips": "18141",
-          "state": "IN",
-          "url": "https://www.zeusauction.com/publicauctions.php",
-          "host": "www.zeusauction.com",
-          "origin": "link_followed",
-          "kind": "listing",
-          "isGovernment": false,
-          "confidence": 0.43,
-          "signals": [
-            "tax lien sale",
-            "tax sale"
-          ],
-          "scheduleHint": "9/4/2026 5:30 PM CDT – 9/8/2026 10:00 PM CDT",
-          "verifiedOn": "2026-08-20",
-          "httpStatus": 200
-        }
-      ],
-      "isGap": false
+      "sources": [],
+      "isGap": true
     },
     "18143": {
       "state": "IN",
