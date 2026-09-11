@@ -647,6 +647,120 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Ohio max bid until they are set.",
     ],
   },
+  /*
+   * Oregon does not auction tax liens or tax-foreclosed parcels. It auctions
+   * land the county already owns outright.
+   *
+   * The chain runs: three years delinquent (ORS 312.010), a foreclosure
+   * judgment, then the county holds the property for two more years while the
+   * owner may still redeem by paying the judgment "with interest thereon as
+   * provided by law, plus a penalty of five percent" (ORS 312.120). Only then
+   * is the property "deeded to the county by the tax collector", at which point
+   * "all rights of redemption ... shall terminate on the execution of the deed"
+   * (ORS 312.200). Everything in our calendar is the county reselling that
+   * land under ORS 275.
+   *
+   * So the buyer takes no redemption risk, earns no redemption penalty, and —
+   * unusually — inherits a challenge window that has already closed. ORS
+   * 312.230 bars any action to determine the validity of the sale or quiet
+   * title against it "within two years from the date of the judgment of
+   * foreclosure and sale to the county", and the county must sit through two
+   * years of redemption before it can even take its deed. The two clocks run
+   * concurrently, so by the time a parcel reaches auction the bar has run.
+   *
+   * That makes this the cleanest title in the file.
+   */
+  OR: {
+    state: "OR",
+    saleType: "Tax Deed",
+    // ORS 312.200: all rights of redemption terminate when the county's deed
+    // is executed, which is before the parcel is ever offered for sale.
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder, and the one entry where
+       * the placeholder is probably generous.
+       *
+       * ORS 312.270(1) vests the county with title "free from all liens and
+       * encumbrances except assessments levied by a municipal corporation for
+       * local improvements", and (2) clears even that for the buyer: "a private
+       * purchaser at resale of such property by the county acquires title free
+       * and clear of all assessments for local improvements levied by any
+       * municipal corporation." With the ORS 312.230 bar already expired there
+       * is little left to quiet.
+       */
+      typicalLow: 1200,
+      typicalHigh: 3000,
+      typicalMonths: 3,
+      required: false,
+    },
+    closingCosts: 200,
+    /*
+     * Short, and for once that is not optimism. There is no redemption window
+     * to wait out and no live challenge window, so the hold is the conveyance
+     * and the resale.
+     */
+    auctionToMarketableMonths: 3,
+    /*
+     * 0.536 statewide, and this number moves every year — see the caveat.
+     *
+     * Oregon is the one state in this file whose ratio is an observed
+     * aggregate rather than a legal rule. Measure 50 froze each property's
+     * taxable value at 90% of its 1995-96 real market value and caps growth at
+     * 3% a year, so assessed value drifts further below market the longer a
+     * property goes unchanged. There is no statutory ratio to cite; the
+     * Department of Revenue simply reports what the gap has become.
+     */
+    assessmentRatio: 0.536,
+    assessmentBasis:
+      "Oregon has no statutory assessment ratio. Measure 50 (Or. Const. art. XI, § 11) set each property's maximum assessed value at 90% of its 1995-96 real market value and caps growth at 3% a year, so assessed value is the lesser of MAV and real market value and drifts below market over time. 0.536 is the statewide ratio of assessed value to real market value the Department of Revenue reports for FY 2025-26, up from 0.526 in FY 2024-25.",
+    /*
+     * County ratios computed from the DOR's own Exhibit 6a, which reports
+     * assessed value against Measure 5 value rather than real market value.
+     * The two are not identical by definition, but the statewide figures
+     * reconcile — the totals give 0.5367 against the DOR's stated 0.536 — so
+     * the county figures are sound to three decimals.
+     *
+     * Only the three counties currently holding inventory are listed. Adding
+     * the other thirty-three would be transcription for its own sake, and every
+     * one of them would go stale next July.
+     */
+    countyAssessmentRatios: {
+      "41001": {
+        ratio: 0.592,
+        basis:
+          "Baker County: assessed value $2,174,134k against Measure 5 value $3,670,343k, Oregon DOR Property Tax Statistics FY 2025-26, Exhibit 6a.",
+      },
+      "41039": {
+        ratio: 0.513,
+        basis:
+          "Lane County: assessed value $44,980,819k against Measure 5 value $87,659,683k, Oregon DOR Property Tax Statistics FY 2025-26, Exhibit 6a.",
+      },
+      "41047": {
+        ratio: 0.549,
+        basis:
+          "Marion County: assessed value $34,979,794k against Measure 5 value $63,756,395k, Oregon DOR Property Tax Statistics FY 2025-26, Exhibit 6a.",
+      },
+    },
+    derivedArvCaveat:
+      "Oregon county assessors publish BOTH a real market value and a Measure 50 assessed value for every parcel, and the ratio here converts the second into the first. If the figure captured for a parcel was already the real market value, dividing it by 0.536 inflates the property by about 1.9x — the single easiest way to get an Oregon number badly wrong, and it fails in the unsafe direction. Beyond that, 0.536 is a statewide aggregate and no individual parcel is the aggregate: a property that has not changed hands or been improved since 1995 sits far below it, while one recently built or partitioned is reassessed toward market and sits near 1.0. Treat a derived Oregon ARV as a starting point and check the assessor's own RMV, which is published.",
+    statute:
+      "ORS 312.010 (three years to foreclosure), 312.120 (two-year redemption, 5% penalty), 312.200 (deed to county, redemption terminates), 312.230 (two-year bar on challenges), 312.270 (title free of liens); ORS 275.110-275.200 (county resale); Or. Const. art. XI, § 11 (Measure 50)",
+    asOf: "2026-09",
+    sources: [
+      "https://www.oregonlegislature.gov/bills_laws/ors/ors312.html",
+      "https://www.oregonlegislature.gov/bills_laws/ors/ors275.html",
+      "https://www.oregon.gov/dor/programs/gov-research/Documents/FY%202025-26%20Oregon%20Property%20Tax%20Statistics%20Report-UA.pdf",
+    ],
+    caveats: [
+      "THE ASSESSMENT RATIO IS AN OBSERVATION, NOT A LAW, AND IT MOVES EVERY YEAR. Oregon has no statutory ratio. The statewide figure went from 0.526 to 0.536 in one year because assessed values grew faster than market values, and it will move again when the Department of Revenue publishes the next report each summer. An asOf that has gone stale matters more here than in any other state in this file — elsewhere a stale date means a statute might have been amended, here it means the number is simply out of date.",
+      "THE COUNTY SETS THE MINIMUM PRICE AT ITS OWN DISCRETION AND CAN DROP IT TO 15%. ORS 275.110 has the governing body 'fix the minimum price' with no appraisal required, and the sheriff sells 'to the highest and best bidder' (ORS 275.190). If nothing sells, ORS 275.200(2) lets the county sell privately 'for not less than the largest amount bid for the land at the sheriff's sale, or, if no bid was made, at a price the governing body of the county deems reasonable, but at a price no less than 15 percent of the minimum bid'. A parcel on its second pass is a different proposition from one on its first, and neither the price nor the discount is set by statute.",
+      "Oregon counties may sell on installments of up to twenty years (ORS 275.190). A contract sale is not the cash purchase the engine models, and the parcel is not free to resell while the county holds the contract.",
+      "The county ratios cover only the three counties currently holding inventory — Baker, Lane and Marion. A parcel in any other Oregon county falls back to the statewide 0.536, which will be wrong in one direction or the other by several points.",
+      "Redemption is the owner's, not the investor's. The 5% penalty and interest under ORS 312.120 are paid to the county during the two years before it takes its deed. Nothing in an Oregon sale pays a return to the buyer for waiting, which is why redemption is null rather than a tier.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator, though ORS 312.270 makes this the state least likely to need one.",
+    ],
+  },
   PA: {
     state: "PA",
     saleType: "Tax Deed",
