@@ -89,3 +89,11 @@ scripts/.intel-sample.mts
 # superseded by the next one, and everything it carries is in the database
 # once imported.
 data/leads/
+
+# Python — the src/deedpilot engine and its tooling.
+# The rules above are scoped to copilot/ and do not cover this tree, so a
+# first `git add src` would otherwise sweep in bytecode and the virtualenv.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
