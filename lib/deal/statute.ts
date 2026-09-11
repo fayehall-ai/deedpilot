@@ -495,6 +495,101 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed South Carolina max bid until they are set.",
     ],
   },
+  /*
+   * Tennessee is the only state here where the redemption clock is shortened by
+   * the delinquency that caused the sale, and where it does not start at the
+   * sale at all.
+   *
+   * ## The clock starts at confirmation, not the auction
+   *
+   * T.C.A. § 67-5-2701(a)(1) runs every period "from the entry of the order
+   * confirming the sale". Tennessee sells judicially, through the Clerk and
+   * Master of the Chancery Court, so there is a gap between the hammer and the
+   * order — weeks, sometimes longer — during which the buyer holds money and
+   * the redemption period has not begun. `auctionToMarketableMonths` carries
+   * that gap; `maxDays` cannot, because it is measured from the wrong event.
+   *
+   * ## A sliding scale, shortest where the arrears are deepest
+   *
+   * One year where the delinquency is five years or less, 180 days where it is
+   * more than five and less than eight, 90 days at eight or more, and 30 days
+   * for property shown to be vacant or abandoned regardless of arrears. The
+   * default encoded here is the longest — one year — which is the conservative
+   * reading: it assumes the slowest return of capital and the largest accrual
+   * the buyer must wait out.
+   *
+   * ## The premium earns, which is unusual in this file
+   *
+   * § 67-5-2701(b)(1) accrues 12% per annum on "the entire purchase price paid
+   * by the purchaser", from payment until the redemption motion is filed. Not
+   * on a minimum bid as in Indiana, and not capped at an opening bid as in
+   * South Carolina. A Tennessee premium is working capital rather than dead
+   * money, which makes it the one state so far where bidding up does not
+   * quietly dilute the yield.
+   */
+  TN: {
+    state: "TN",
+    saleType: "Redeemable Deed",
+    redemption: {
+      // Annual rate, like AZ and KY — not a flat penalty like GA, TX and SC.
+      tiers: [{ throughDays: 365, penalty: 0.12 }],
+      maxDays: 365,
+      extendedFor:
+        "property delinquent five years or less; deeper arrears redeem faster — 180 days over five years, 90 days at eight or more, and 30 days for property shown vacant or abandoned",
+    },
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as for PA, KY, IN, SC.
+       *
+       * A Tennessee sale is already a court proceeding and title is divested by
+       * order once redemption lapses, so the deed starts stronger than an
+       * administrative tax deed. Insurers still commonly want an action before
+       * writing, which is why `required` stays true.
+       */
+      typicalLow: 2000,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
+    },
+    closingCosts: 250,
+    /*
+     * Auction, then the confirmation order the clock actually starts from, then
+     * a year of redemption, then divestiture. The gap before confirmation is
+     * why this is not simply 12 plus filing.
+     */
+    auctionToMarketableMonths: 18,
+    /*
+     * Residential. Tennessee assesses by CLASS under T.C.A. § 67-5-801 —
+     * residential and farm at 25%, industrial and commercial at 40% — and
+     * residential is the modal tax-sale parcel. Unlike South Carolina there is
+     * no residual class to fall back on, so this is a choice about the common
+     * case rather than the safe direction, and the commercial error is called
+     * out in the derived-ARV note.
+     */
+    assessmentRatio: 0.25,
+    assessmentBasis:
+      "T.C.A. § 67-5-801 and Tenn. Const. art. II, § 28: residential and farm property is assessed at 25% of value, industrial and commercial at 40%, public utility at 55%. This entry uses the 25% residential rate.",
+    derivedArvCaveat:
+      "Tennessee assesses by class and this entry assumes residential at 25%. On an industrial or commercial parcel actually assessed at 40%, dividing by 0.25 overstates the property by about 1.6x — the dangerous direction. A mixed-use parcel is apportioned between subclasses by State Board of Equalization rules, so it will sit somewhere between. Check the class on the assessor's record before bidding on anything that is not plainly residential.",
+    statute:
+      "T.C.A. Title 67, ch. 5: §§ 67-5-2701 to 67-5-2703 (redemption), § 67-5-801 (classification and rate of assessment)",
+    asOf: "2026-09",
+    sources: [
+      "https://www.ctas.tennessee.edu/eli/redemption",
+      "https://codes.findlaw.com/tn/title-67-taxes-and-licenses/tn-code-sect-67-5-2701/",
+      "https://law.justia.com/codes/tennessee/title-67/chapter-5/part-27/section-67-5-2701/",
+      "https://law.justia.com/codes/tennessee/title-67/chapter-5/part-8/section-67-5-801/",
+      "https://comptroller.tn.gov/content/dam/cot/pa/documents/tax-aggregate-reports/2025TaxAggregateReport.pdf",
+    ],
+    caveats: [
+      "THE REDEMPTION PERIOD DEPENDS ON THE ARREARS, AND THIS ROW ENCODES THE LONGEST. One year at five years' delinquency or less, 180 days above five, 90 days at eight or more, and 30 days for property shown vacant or abandoned (§ 67-5-2701(a)(1)). A deeply delinquent parcel therefore returns capital far sooner than modelled — favourable, but it also means a shorter window in which the 12% accrues.",
+      "THE CLOCK STARTS AT THE ORDER CONFIRMING THE SALE, NOT THE SALE. Tennessee sells through the Chancery Court's Clerk and Master, and the period runs from confirmation. Money is committed from the auction; the redemption period begins later. Budget the gap separately — it is in auctionToMarketableMonths and cannot be in maxDays.",
+      "Interest accrues on the ENTIRE purchase price, not a minimum bid and not capped (§ 67-5-2701(b)(1)), and it runs from payment until the redemption motion is filed rather than to the end of the period. A premium here earns, unlike Indiana or South Carolina.",
+      "Redemption also repays delinquent taxes, penalty, interest and court costs, and the court may award the purchaser amounts expended on the property (§ 67-5-2701(e), (f), (j)). Those are recoverable only on redemption, not if the buyer keeps the parcel.",
+      "Assessment is by class, not county. This row assumes residential at 25%; commercial and industrial sit at 40% and public utility at 55%. See the derived-ARV note — the commercial case overstates value by roughly 1.6x.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Tennessee max bid until they are set.",
+    ],
+  },
   TX: {
     state: "TX",
     saleType: "Redeemable Deed",

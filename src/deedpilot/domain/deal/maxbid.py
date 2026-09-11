@@ -35,7 +35,7 @@ from deedpilot.domain.models import (
     RedemptionOutlook,
 )
 
-from .statute import covered_states, floor_ratio_for, floor_ratios_as_of, statute_for
+from .statute import floor_ratio_for, floor_ratios_as_of, statute_for
 
 DEFAULT_TARGET_MARGIN = 0.30
 DEFAULT_SELLING_COST_RATE = 0.08
@@ -242,9 +242,13 @@ def compute_maxbid(inputs: DealInputs | dict[str, Any]) -> DealResult:
     arv = _derive_arv(inputs, statute)
 
     if not statute:
+        # The covered states are deliberately not enumerated -- see the matching
+        # note in lib/deal/maxbid.ts. Naming them made a bidder-facing string
+        # change whenever an unrelated state was researched, and broke four
+        # frozen golden cases on every addition.
         warnings.append(
-            f"{inputs.state} is outside the states with verified statutory parameters "
-            f"({', '.join(covered_states())}). Costs and redemption terms are not modelled — "
+            f"{inputs.state} is outside the states with verified statutory parameters. "
+            f"Costs and redemption terms are not modelled — "
             f"treat any figure here as unverified."
         )
 

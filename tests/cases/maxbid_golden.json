@@ -1857,7 +1857,7 @@
       "redemption": null,
       "statute": null,
       "warnings": [
-        "NM is outside the states with verified statutory parameters (AR, AZ, CA, FL, GA, IL, IN, KY, MI, PA, SC, TX). Costs and redemption terms are not modelled \u2014 treat any figure here as unverified."
+        "NM is outside the states with verified statutory parameters. Costs and redemption terms are not modelled \u2014 treat any figure here as unverified."
       ]
     }
   },
@@ -1885,7 +1885,7 @@
       "redemption": null,
       "statute": null,
       "warnings": [
-        "LA is outside the states with verified statutory parameters (AR, AZ, CA, FL, GA, IL, IN, KY, MI, PA, SC, TX). Costs and redemption terms are not modelled \u2014 treat any figure here as unverified.",
+        "LA is outside the states with verified statutory parameters. Costs and redemption terms are not modelled \u2014 treat any figure here as unverified.",
         "The county published no assessed value for this parcel, no property provider returned a market estimate, and no comparable-sales figure has been entered. Enter a comparable-sales estimate below and every figure on this page recalculates \u2014 the engine needs one number, not a full appraisal."
       ]
     }
@@ -1914,7 +1914,7 @@
       "redemption": null,
       "statute": null,
       "warnings": [
-        "NM is outside the states with verified statutory parameters (AR, AZ, CA, FL, GA, IL, IN, KY, MI, PA, SC, TX). Costs and redemption terms are not modelled \u2014 treat any figure here as unverified.",
+        "NM is outside the states with verified statutory parameters. Costs and redemption terms are not modelled \u2014 treat any figure here as unverified.",
         "This parcel has an assessed value, but NM has no verified assessment ratio in lib/deal/statute.ts, so it cannot be converted to a market value. Enter a comparable-sales estimate to price it. Enter a comparable-sales estimate below and every figure on this page recalculates \u2014 the engine needs one number, not a full appraisal."
       ]
     }
@@ -2461,7 +2461,7 @@
       "redemption": null,
       "statute": null,
       "warnings": [
-        "LA is outside the states with verified statutory parameters (AR, AZ, CA, FL, GA, IL, IN, KY, MI, PA, SC, TX). Costs and redemption terms are not modelled \u2014 treat any figure here as unverified."
+        "LA is outside the states with verified statutory parameters. Costs and redemption terms are not modelled \u2014 treat any figure here as unverified."
       ]
     }
   },

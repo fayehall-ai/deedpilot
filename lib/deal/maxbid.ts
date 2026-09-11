@@ -18,7 +18,7 @@
  */
 
 import type { SaleType } from "../atlas/types";
-import { coveredStateList, statuteFor, type StatuteParams } from "./statute";
+import { statuteFor, type StatuteParams } from "./statute";
 import { FLOOR_RATIOS, FLOOR_RATIOS_AS_OF } from "./floor-ratios";
 
 export interface DealInputs {
@@ -312,9 +312,18 @@ export function computeMaxBid(inputs: DealInputs): DealResult {
   const arv = deriveArv(inputs, statute);
 
   if (!statute) {
+    /*
+     * The covered states are deliberately NOT enumerated here.
+     *
+     * This sentence used to end with the full list, which made a string a
+     * bidder reads change every time an unrelated state was researched — and
+     * made it worthless as a frozen contract in `maxbid_golden.json`, where it
+     * broke four cases on every addition. A warning about New Mexico does not
+     * become more useful by naming thirteen other states, and the console's
+     * statute coverage panel shows the list properly.
+     */
     warnings.push(
-      `${inputs.state} is outside the states with verified statutory parameters ` +
-        `(${coveredStateList().join(", ")}). ` +
+      `${inputs.state} is outside the states with verified statutory parameters. ` +
         `Costs and redemption terms are not modelled — treat any figure here as unverified.`,
     );
   }
