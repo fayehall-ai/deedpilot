@@ -2,10 +2,16 @@
  * Structured statutory parameters for the deal maths.
  *
  * The atlas stores redemption rules as prose, which is right for reading and
- * useless for arithmetic. This module encodes the same rules as numbers for
- * the five covered states only — every entry carries its statute and a check
- * date, and states without an entry return null so the engine degrades to
- * "we can't compute this, here's the prose" instead of inventing a number.
+ * useless for arithmetic. This module encodes the same rules as numbers, for
+ * the covered states only — every entry carries its statute and a check date,
+ * and states without an entry return null so the engine degrades to "we can't
+ * compute this, here's the prose" instead of inventing a number.
+ *
+ * The count is deliberately not written down here. It was "five" for long
+ * enough to become false, and a number in a header comment is not something
+ * anyone updates. `npm run export:statute` prints the real one, and the admin
+ * console's statute panel shows which states they are and when each was last
+ * checked.
  *
  * These figures move with legislation. Re-verify against the cited statute
  * before trusting a computed max bid in a state whose `asOf` has gone stale.
@@ -139,8 +145,8 @@ export interface StatuteParams {
    * Georgia assesses at 40% of FMV and Michigan at 50%. Treating a Georgia
    * assessment as market value understates the property by 2.5x and makes
    * every parcel in the state look like a catastrophic overpay. Texas
-   * assesses at 100% by statute, so the same code with one ratio would be
-   * badly wrong in four of the five covered states.
+   * assesses at 100% by statute, and Louisiana at 10%, so a single hard-coded
+   * ratio would be badly wrong in nearly every state this file covers.
    */
   assessmentRatio: number;
   /** How that ratio is set, for the "where did this number come from" panel. */
@@ -450,6 +456,126 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "SURPLUS NOW GOES BACK TO THE FORMER OWNER. L 2024, ch 55, pt BB amended Article 11 after Tyler v. Hennepin County so excess proceeds are returned to the former owner and, where appropriate, to lienors. This does not change what a bidder pays, but it removes the county's old incentive to retain equity and is worth understanding before assuming how a district will run its sale.",
       "NOT EVERY NEW YORK TAX SALE IS AN ARTICLE 11 COUNTY AUCTION. New York City and several cities have run their own tax lien certificate programmes under separate authority, which are different instruments with different economics. Confirm the selling entity and the enabling law before applying this row.",
       "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed New York max bid until they are set.",
+    ],
+  },
+  /*
+   * Ohio runs two tax sale systems and this entry prices exactly one of them.
+   *
+   * The other is the tax certificate sale under R.C. 5721.30-.43, where the
+   * treasurer "begin[s] the bidding at eighteen per cent per year simple
+   * interest" and accepts "lower bids in even increments of one-fourth of one
+   * per cent" — all the way "to the rate of zero per cent". A rate that bids to
+   * zero with no floor is the New Jersey problem, and it is not encodable from
+   * the statute: the ceiling is 18% and the realised rate is whatever the
+   * institutional buyers left on the table, which we have not measured.
+   *
+   * We do not have to solve that, because we hold no certificate sales. All
+   * ninety-three announced Ohio parcels across seventeen counties are deed
+   * sales — sheriff's sales after a tax foreclosure under R.C. 5721.19, and
+   * auditor's sales of forfeited land under R.C. 5723.06. That is what is
+   * encoded below. If a certificate sale ever lands in the calendar, this entry
+   * will price it as a deed and be wrong, so the sale type is worth checking
+   * before trusting an Ohio number.
+   */
+  OH: {
+    state: "OH",
+    saleType: "Tax Deed",
+    /*
+     * No post-sale redemption. R.C. 5721.25 gives the owner until "the filing
+     * of an entry of confirmation of sale pursuant to the proceeding or before
+     * the expiration of the alternative redemption period as may apply under
+     * section 323.78" — both of which fall before the buyer holds anything.
+     * Once confirmation is entered the right is spent.
+     *
+     * R.C. 5721.19(F)(2) goes further than most deed states: "the title to such
+     * land or lots shall be incontestable in the purchaser and shall be free
+     * and clear of all liens and encumbrances, except a federal tax lien notice
+     * of which is properly filed", along with easements and covenants that
+     * predate the delinquency. That is a statutory clean-title provision, not a
+     * practice, which is why quietTitle below is not marked required.
+     */
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: false because R.C. 5721.19(F)(2) makes title incontestable at
+       * confirmation. The band is for the cases where one is still wanted: a
+       * forfeited-land parcel sold by the auditor after the judicial sale
+       * failed, or any parcel where an interested party was served by
+       * publication, where the constitutional notice question survives whatever
+       * the statute says about irregularity.
+       */
+      typicalLow: 1500,
+      typicalHigh: 4500,
+      typicalMonths: 4,
+      required: false,
+    },
+    /*
+     * Recorder's fee from the published schedule, not judgement: R.C.
+     * 317.32(A)(1) is "a base fee of seventeen dollars for the first two pages
+     * and a housing trust fund fee of seventeen dollars", then "four dollars
+     * and a housing trust fund fee of four dollars for each subsequent page" —
+     * $34 for a two-page deed, $50 for a four-page one. The rest is the
+     * conveyance fee, which is ad valorem and therefore an estimate at a
+     * typical parcel price; see the caveat.
+     */
+    closingCosts: 150,
+    /*
+     * The long figure, deliberately, and the operator should consider lowering
+     * it.
+     *
+     * Two statutes point opposite ways. R.C. 5721.19(F)(2) makes title
+     * incontestable at confirmation, which argues for about three months —
+     * confirmation, the deed recorded, done. R.C. 5723.13 says that for any
+     * sale under either chapter "no action shall be commenced, nor shall any
+     * defense be set up to question the validity of the title of the purchasers
+     * at such sale for any irregularity, informality, or omission in the
+     * proceedings relative to the foreclosure, forfeiture, or sale, unless such
+     * action is commenced or defense set up within one year after the deed to
+     * such property is filed for record" — which argues for waiting the year
+     * out, as Arkansas buyers do with their ninety days.
+     *
+     * Fourteen months is the second reading. It is the conservative one and it
+     * costs roughly eleven months of carry per parcel. An operator whose title
+     * company will insure at confirmation should set this to 3 and say so here.
+     */
+    auctionToMarketableMonths: 14,
+    /*
+     * 35% of true value, uniform statewide — no classification, no county
+     * variation. Note the ratio is set by the tax commissioner's rule under a
+     * statutory ceiling, not by the statute: R.C. 5715.01 says the taxable
+     * value "shall be that per cent of true value in money ... the commissioner
+     * by rule establishes, but it shall not exceed thirty-five per cent." The
+     * rule has sat at the ceiling for decades, so 0.35 is right — but it could
+     * move without anyone amending a statute, which is the kind of change an
+     * asOf sweep is unlikely to catch.
+     */
+    assessmentRatio: 0.35,
+    assessmentBasis:
+      "R.C. 5715.01: taxable value is the percentage of true value the tax commissioner sets by rule, capped at 35%. The rule has been at the 35% ceiling for decades and applies uniformly statewide, with no classification by property type and no county overrides.",
+    derivedArvCaveat:
+      "Farmland enrolled in Ohio's CAUV programme is assessed on its current agricultural use value rather than market value (R.C. 5713.31), and the two differ by an order of magnitude on development-fringe land. Dividing a CAUV assessment by 0.35 returns roughly the agricultural value, not what the parcel would sell for — it understates, which is the safe direction, but it makes a genuinely valuable parcel look worthless. Most of the Ohio inventory sits in rural counties where enrolment is common, so check the auditor's record for a CAUV flag before accepting a low derived ARV.",
+    statute:
+      "R.C. 5721.18-5721.20 (tax foreclosure and sheriff's sale), 5721.25 (redemption before confirmation), 5723.06 (auditor's sale of forfeited land), 5723.13 (one-year bar on contesting title), 5715.01 (assessment); tax certificates, not priced here, at 5721.30-5721.43",
+    asOf: "2026-09",
+    sources: [
+      "https://codes.ohio.gov/ohio-revised-code/section-5721.19",
+      "https://codes.ohio.gov/ohio-revised-code/section-5721.25",
+      "https://codes.ohio.gov/ohio-revised-code/section-5723.06",
+      "https://codes.ohio.gov/ohio-revised-code/section-5723.13",
+      "https://codes.ohio.gov/ohio-revised-code/section-5715.01",
+      "https://codes.ohio.gov/ohio-revised-code/section-5721.32",
+    ],
+    caveats: [
+      "THE FIRST SALE HAS A MARKET-VALUE FLOOR, WHICH IS WHY MOST OHIO PARCELS SHOW NO BID ROOM. R.C. 5721.19(A) lets the court order a parcel sold \"without appraisal, for not less than either of the following: (1) The fair market value of the parcel, as determined by the county auditor, plus the costs incurred in the foreclosure proceeding\" — or the total of the finding plus costs. Where the court picks the first, the minimum bid is market value and there is no discount to win. A max bid below the opening bid is the statute working, not a data error.",
+      "THE DISCOUNT LIVES IN THE SECOND OFFER. A parcel that fails at the judicial sale is forfeited to the state and offered by the auditor under R.C. 5723.06; if it fails there too, \"the auditor may offer such tract for sale forthwith, and sell it for the best price obtainable\" — no minimum at all. A listing described as a first offer, a forfeited land sale or an auditor's sale is a different economic proposition from a sheriff's sale, and the engine cannot tell them apart from the fields it has.",
+      "OHIO ALSO SELLS TAX CERTIFICATES AND THIS ENTRY DOES NOT PRICE THEM. Under R.C. 5721.32 bidding opens at 18% per year and steps down in quarter points \"to the rate of zero per cent\", with no floor — the New Jersey problem, and we have no observed clearing rate for Ohio. All current inventory is deed sales. Check the sale type before trusting an Ohio figure.",
+      "A federal tax lien properly filed before the foreclosure survives the sale, as do easements and covenants predating the delinquency (R.C. 5721.19(F)(2)). Everything else is extinguished at confirmation. Taxes levied but not yet due and payable are not part of the finding and stay with the parcel.",
+      "You cannot bid if you owe delinquent property tax anywhere in Ohio. R.C. 5721.19(J) requires the purchaser to furnish an affidavit that they have inquired of the county treasurers and own no Ohio property with delinquent taxes against it; the sheriff will not transfer title without it, and a false affidavit is falsification.",
+      "The conveyance fee is ad valorem and is not in closingCosts as a rate: $1 per $1,000 to the state under R.C. 319.54(G)(3), plus a permissive county fee of up to $3 per $1,000 under R.C. 322.02. On a $25,000 parcel that is $25 to $100. The flat figure here assumes a low-priced parcel; on an expensive one it understates.",
+      "The expedited land bank track under R.C. 323.65-323.79 transfers abandoned parcels to a land reutilization corporation by deed with no sale and no surplus, and the Sixth Circuit held in Hall v. Meisner, 51 F.4th 185 (6th Cir. 2022) that taking the owner's equity that way violates the Takings Clause. Ohio has not amended the statute in response — HB 375 of the 135th General Assembly would have let owners force a public sale and died in committee. This does not affect a buyer's title at a sale, but it removes inventory from the calendar before it is ever auctioned.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Ohio max bid until they are set.",
     ],
   },
   PA: {

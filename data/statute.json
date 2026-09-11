@@ -491,6 +491,42 @@
         "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed New York max bid until they are set."
       ]
     },
+    "OH": {
+      "state": "OH",
+      "saleType": "Tax Deed",
+      "redemption": null,
+      "quietTitle": {
+        "typicalLow": 1500,
+        "typicalHigh": 4500,
+        "typicalMonths": 4,
+        "required": false
+      },
+      "closingCosts": 150,
+      "auctionToMarketableMonths": 14,
+      "assessmentRatio": 0.35,
+      "assessmentBasis": "R.C. 5715.01: taxable value is the percentage of true value the tax commissioner sets by rule, capped at 35%. The rule has been at the 35% ceiling for decades and applies uniformly statewide, with no classification by property type and no county overrides.",
+      "derivedArvCaveat": "Farmland enrolled in Ohio's CAUV programme is assessed on its current agricultural use value rather than market value (R.C. 5713.31), and the two differ by an order of magnitude on development-fringe land. Dividing a CAUV assessment by 0.35 returns roughly the agricultural value, not what the parcel would sell for — it understates, which is the safe direction, but it makes a genuinely valuable parcel look worthless. Most of the Ohio inventory sits in rural counties where enrolment is common, so check the auditor's record for a CAUV flag before accepting a low derived ARV.",
+      "statute": "R.C. 5721.18-5721.20 (tax foreclosure and sheriff's sale), 5721.25 (redemption before confirmation), 5723.06 (auditor's sale of forfeited land), 5723.13 (one-year bar on contesting title), 5715.01 (assessment); tax certificates, not priced here, at 5721.30-5721.43",
+      "asOf": "2026-09",
+      "sources": [
+        "https://codes.ohio.gov/ohio-revised-code/section-5721.19",
+        "https://codes.ohio.gov/ohio-revised-code/section-5721.25",
+        "https://codes.ohio.gov/ohio-revised-code/section-5723.06",
+        "https://codes.ohio.gov/ohio-revised-code/section-5723.13",
+        "https://codes.ohio.gov/ohio-revised-code/section-5715.01",
+        "https://codes.ohio.gov/ohio-revised-code/section-5721.32"
+      ],
+      "caveats": [
+        "THE FIRST SALE HAS A MARKET-VALUE FLOOR, WHICH IS WHY MOST OHIO PARCELS SHOW NO BID ROOM. R.C. 5721.19(A) lets the court order a parcel sold \"without appraisal, for not less than either of the following: (1) The fair market value of the parcel, as determined by the county auditor, plus the costs incurred in the foreclosure proceeding\" — or the total of the finding plus costs. Where the court picks the first, the minimum bid is market value and there is no discount to win. A max bid below the opening bid is the statute working, not a data error.",
+        "THE DISCOUNT LIVES IN THE SECOND OFFER. A parcel that fails at the judicial sale is forfeited to the state and offered by the auditor under R.C. 5723.06; if it fails there too, \"the auditor may offer such tract for sale forthwith, and sell it for the best price obtainable\" — no minimum at all. A listing described as a first offer, a forfeited land sale or an auditor's sale is a different economic proposition from a sheriff's sale, and the engine cannot tell them apart from the fields it has.",
+        "OHIO ALSO SELLS TAX CERTIFICATES AND THIS ENTRY DOES NOT PRICE THEM. Under R.C. 5721.32 bidding opens at 18% per year and steps down in quarter points \"to the rate of zero per cent\", with no floor — the New Jersey problem, and we have no observed clearing rate for Ohio. All current inventory is deed sales. Check the sale type before trusting an Ohio figure.",
+        "A federal tax lien properly filed before the foreclosure survives the sale, as do easements and covenants predating the delinquency (R.C. 5721.19(F)(2)). Everything else is extinguished at confirmation. Taxes levied but not yet due and payable are not part of the finding and stay with the parcel.",
+        "You cannot bid if you owe delinquent property tax anywhere in Ohio. R.C. 5721.19(J) requires the purchaser to furnish an affidavit that they have inquired of the county treasurers and own no Ohio property with delinquent taxes against it; the sheriff will not transfer title without it, and a false affidavit is falsification.",
+        "The conveyance fee is ad valorem and is not in closingCosts as a rate: $1 per $1,000 to the state under R.C. 319.54(G)(3), plus a permissive county fee of up to $3 per $1,000 under R.C. 322.02. On a $25,000 parcel that is $25 to $100. The flat figure here assumes a low-priced parcel; on an expensive one it understates.",
+        "The expedited land bank track under R.C. 323.65-323.79 transfers abandoned parcels to a land reutilization corporation by deed with no sale and no surplus, and the Sixth Circuit held in Hall v. Meisner, 51 F.4th 185 (6th Cir. 2022) that taking the owner's equity that way violates the Takings Clause. Ohio has not amended the statute in response — HB 375 of the 135th General Assembly would have let owners force a public sale and died in committee. This does not affect a buyer's title at a sale, but it removes inventory from the calendar before it is ever auctioned.",
+        "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed Ohio max bid until they are set."
+      ]
+    },
     "PA": {
       "state": "PA",
       "saleType": "Tax Deed",
