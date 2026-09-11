@@ -7,7 +7,18 @@ import { TableSkeleton } from "@/components/skeleton";
 import { isAdmin } from "@/lib/admin/auth";
 import { getCountyDetail } from "@/lib/admin/county-detail";
 import { OVERRIDABLE } from "@/lib/admin/auction-override-fields";
+import { statuteFor } from "@/lib/deal/statute";
 import { clearAuctionOverrides, saveAuctionOverride } from "../../run-actions";
+
+
+/** A source URL as its host, because a full statute URL is unreadable inline. */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
 
 export const metadata: Metadata = {
   title: "County operations",
@@ -75,6 +86,8 @@ async function CountyOps({ params }: { params: Promise<{ fips: string }> }) {
   if (!detail) notFound();
 
   const { county, rule, schedule, upcomingWindows, sources, auctionRows, runs, totals } = detail;
+  /* Tier 3 — what the max-bid engine can actually run on for this state. */
+  const statute = statuteFor(county.state);
   const fields = Object.keys(OVERRIDABLE);
 
   return (
@@ -136,6 +149,69 @@ async function CountyOps({ params }: { params: Promise<{ fips: string }> }) {
                 <div>
                   <dt className="text-xs uppercase tracking-wide text-muted">Statute</dt>
                   <dd className="font-mono text-xs">{rule.statute || "—"}</dd>
+                </div>
+                {/*
+                  The research trail behind the four fields above.
+                  `rule.sources` is NOT the source registry rendered further
+                  down this page — that one answers "where do we crawl the sale
+                  list", these answer "where did this redemption period come
+                  from". Both were called sources and only the crawl one was
+                  ever shown, so a rule could not be re-verified from the
+                  console at all.
+                */}
+                {rule.sources?.length || rule.asOf ? (
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs uppercase tracking-wide text-muted">
+                      Researched{rule.asOf ? ` · checked ${rule.asOf}` : ""}
+                    </dt>
+                    <dd className="mt-1 flex flex-wrap gap-1">
+                      {(rule.sources ?? []).map((src) => (
+                        <a
+                          key={src}
+                          href={src}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded bg-surface-2 px-1.5 py-0.5 text-xs underline underline-offset-2 hover:text-accent"
+                        >
+                          {hostOf(src)}
+                        </a>
+                      ))}
+                      {rule.sources?.length ? null : (
+                        <span className="text-xs text-muted">no citations on file</span>
+                      )}
+                    </dd>
+                  </div>
+                ) : null}
+                {/*
+                  Whether this county can be priced at all. The four fields
+                  above are prose; the max-bid engine runs on STATUTE_PARAMS,
+                  and a state missing from it returns no price however complete
+                  the county rule looks. That gap was invisible here.
+                */}
+                <div className="sm:col-span-2">
+                  <dt className="text-xs uppercase tracking-wide text-muted">Max-bid parameters</dt>
+                  <dd className="text-sm">
+                    {statute ? (
+                      <>
+                        <span className="text-accent">present</span>
+                        <span className="text-muted">
+                          {" "}
+                          — {county.state} encoded, checked {statute.asOf}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-[var(--warn)]">none</span>
+                        <span className="text-muted">
+                          {" "}
+                          — no max bid can be computed for {county.state}.{" "}
+                          <a href="/admin#statutes" className="underline underline-offset-2">
+                            Statute coverage
+                          </a>
+                        </span>
+                      </>
+                    )}
+                  </dd>
                 </div>
               </dl>
             ) : (
