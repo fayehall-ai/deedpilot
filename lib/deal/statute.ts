@@ -2103,6 +2103,85 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
    * re-advertise and then "sell for any amount". Wisconsin has a statutory
    * clock pushing inventory out of the door and no floor under the second pass.
    */
+  /*
+   * Vermont is the shape everything else used to be: bid at the town's sale,
+   * wait a year, and either collect interest or keep the house.
+   *
+   * 32 V.S.A. § 5260 gives the owner one year from the sale to redeem by paying
+   * the purchase price plus one per cent per month from the date of sale; if
+   * they do not, § 5261 issues the collector's deed to the purchaser. The
+   * investor earns 12% a year on the whole amount paid, not merely on the tax
+   * debt, and keeps the entire property if nobody redeems.
+   *
+   * That second half is what Tyler v. Hennepin County was about, and Vermont
+   * has not changed it. Act 106 of 2024 looked at the question and commissioned
+   * a working group to consider "whether the State should change the law to
+   * allow a delinquent taxpayer whose property is transferred by a tax
+   * collector's deed ... to recoup all or part of the equity in the taxpayer's
+   * property in excess of the tax debt, fees, and interest" — a study, not a
+   * rule. Colorado and Minnesota have already made that change. Vermont is one
+   * legislative session away from the deed remainder here being worth much less
+   * than it looks, and the last caveat says so.
+   */
+  VT: {
+    state: "VT",
+    saleType: "Tax Lien",
+    redemption: {
+      // § 5260: one per cent per month from the date of sale, so 12% a year,
+      // running on the purchase price rather than on the tax debt alone.
+      interestKind: "annual",
+      tiers: [{ throughDays: 365, penalty: 0.12 }],
+      maxDays: 365,
+    },
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: true. A Vermont collector's deed issues administratively at
+       * the end of the redemption period with no court having looked at the
+       * notice, and Vermont's tax sale notice requirements have been litigated
+       * repeatedly. This is the Arkansas posture, not the Michigan one.
+       */
+      typicalLow: 2500,
+      typicalHigh: 6000,
+      typicalMonths: 5,
+      required: true,
+    },
+    closingCosts: 250,
+    /* The full year of redemption, then the deed, then the action to clear it. */
+    auctionToMarketableMonths: 18,
+    /*
+     * 1.0 as a deliberate floor, the New York and Wisconsin posture.
+     *
+     * Vermont law requires listing at 100% of fair market value, and the
+     * Department of Taxes measures how far each town has drifted with the
+     * Common Level of Appraisal, published annually. Towns fall below 100%
+     * between reappraisals, which makes 1.0 understate the property — the safe
+     * direction — and a town in its reappraisal year snaps back to 100%.
+     */
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "Vermont requires property to be listed at 100% of fair market value. The Department of Taxes publishes a Common Level of Appraisal for every town each year, measuring listed value against equalized fair market value, and a town's CLA is set to 100% in the year it reappraises. From FY26 a Statewide Adjustment — effectively the average level of appraisal for the whole state — is also applied to education tax rates.",
+    derivedArvCaveat:
+      "Vermont's real assessment ratio is the town's Common Level of Appraisal, not 1.0, and it is published per town rather than per county — Vermont has 246 towns and 14 counties, so it cannot be expressed in countyAssessmentRatios, which is keyed by county FIPS. Between reappraisals a town's listed values lag the market and the CLA falls below 100%, which makes a derived ARV at 1.0 conservative. The exception worth checking is a town that has just reappraised: its listed values jump to full market in a single year, and a parcel's assessment can rise sharply without the property changing at all.",
+    statute:
+      "32 V.S.A. §§ 5252 (extension of warrant), 5260 (redemption, one per cent per month), 5261 (collector's deed); Act 73 of 2025 (minimum $1,500 delinquency), Act 106 of 2024 (repayment plans, notice, surplus-equity working group), Act 182 (no sale while a VHAP application is pending)",
+    asOf: "2026-09",
+    sources: [
+      "https://legislature.vermont.gov/statutes/section/32/133/05260",
+      "https://legislature.vermont.gov/bill/status/2024/H.629",
+      "https://www.vlct.org/news/new-minimum-debt-threshold-holding-tax-sale",
+      "https://www.vlct.org/article/act-182-prohibits-tax-sale-while-vhap-application-pending",
+      "https://tax.vermont.gov/property/education-property-tax-rates/faqs",
+    ],
+    caveats: [
+      "THE DEED REMAINDER IS THE RETURN HERE, AND IT IS THE PART UNDER REVIEW. If nobody redeems, the purchaser keeps a property worth far more than the tax debt, with no obligation to pay the former owner the difference — the arrangement Tyler v. Hennepin County held unconstitutional when a government did it. Act 106 of 2024 commissioned a working group on exactly this and did not change the law. Colorado abolished its deed remainder in July 2024 and Minnesota rewrote its scheme in the same year. A Vermont position underwritten on keeping the equity is exposed to one bill.",
+      "TOWNS RUN THESE SALES, NOT COUNTIES. Vermont's 246 towns and cities each collect their own delinquent taxes and hold their own sales; the county in a Vermont listing is geography, not the taxing authority. Expect the collector, the notice practice and the sale terms to vary town by town.",
+      "SMALL DEBTS NO LONGER REACH SALE. Act 73 of 2025 bars a collector from extending a warrant to begin a tax sale unless the taxpayer owes at least $1,500 in back taxes, and Act 106 requires the town to offer a reasonable written repayment plan first. Act 182 additionally prohibits a sale on residential property while a Vermont Homeowner Assistance Program application is pending, with a separate notice sixty days ahead. Inventory here is filtered by all three before it appears.",
+      "The 12% runs on the purchase price, not on the tax debt, so unlike Colorado a Vermont bidder who pays above the debt still earns on the whole amount. The tier reflects that.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
+    ],
+  },
   WI: {
     state: "WI",
     saleType: "Tax Deed",
