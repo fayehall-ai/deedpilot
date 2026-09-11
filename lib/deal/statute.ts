@@ -395,6 +395,106 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "RETSL requires publication, posting and certified mail notice, and an owner-occupied property cannot be sold unless the owner was personally served at least ten days before the sale. Defective notice is the most common ground on which Pennsylvania tax sales are set aside, which is a risk to the purchaser's title rather than to the price.",
     ],
   },
+  /*
+   * South Carolina is the tidiest redemption schedule in this file, and the
+   * only one where bidding harder makes the instrument strictly worse.
+   *
+   * ## The schedule
+   *
+   * S.C. Code § 12-51-90: twelve months from the sale, with a flat penalty set
+   * by which quarter the redemption lands in — 3% in months 1-3, 6% in 4-6, 9%
+   * in 7-9, 12% in 10-12, computed on the bid. Flat, like Georgia and Texas,
+   * not annualised like Arizona or Kentucky.
+   *
+   * ## Why a premium is punished twice
+   *
+   * The same section caps it: "in every redemption, the amount of interest due
+   * must not exceed the amount of the bid on the property submitted on behalf
+   * of the forfeited land commission pursuant to Section 12-51-55" — the FLC
+   * bid being roughly taxes plus costs. So the penalty accrues on the bid but
+   * can never exceed the opening bid, and a purchase at several times the
+   * minimum collects the same capped sum a minimum bid would.
+   *
+   * And the premium itself is not the purchaser's to recover. Under
+   * § 12-51-130 the overage — everything above taxes, assessments, penalties
+   * and costs — belongs to the owner of record immediately before the
+   * redemption period ended, payable ninety days after the deed, escheating to
+   * the county only after five unclaimed years. South Carolina was therefore
+   * already doing what Tyler v. Hennepin County later required of other states.
+   *
+   * The practical reading: the modelled tier is a ceiling that only a bid at or
+   * near the minimum actually earns.
+   */
+  SC: {
+    state: "SC",
+    saleType: "Redeemable Deed",
+    redemption: {
+      /*
+       * Quarters, as the statute frames them. Day bounds are the quarter ends —
+       * 90/181/273/365 — because § 12-51-90 counts by month of redemption, not
+       * by day.
+       */
+      tiers: [
+        { throughDays: 90, penalty: 0.03 },
+        { throughDays: 181, penalty: 0.06 },
+        { throughDays: 273, penalty: 0.09 },
+        { throughDays: 365, penalty: 0.12 },
+      ],
+      maxDays: 365,
+    },
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as for PA, KY and IN.
+       *
+       * § 12-51-90 makes the tax deed incontestable on procedural or other
+       * grounds once the redemption year and a further twelve months have run,
+       * so time does much of the work a quiet title suit does elsewhere. Most
+       * title insurers still want the action before writing a policy, which is
+       * why `required` stays true.
+       */
+      typicalLow: 2000,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
+    },
+    closingCosts: 250,
+    /*
+     * Twelve months of redemption, then the further twelve after which the deed
+     * is incontestable. Capital is committed for the first year whatever
+     * happens, and marketable title realistically arrives after the second.
+     */
+    auctionToMarketableMonths: 24,
+    /*
+     * The "all other real property" rate. South Carolina assesses by CLASS, not
+     * by county, and 6% is both the statutory residual (§ 12-43-220(e)) and the
+     * conservative choice: deriving ARV at 6% from a parcel actually assessed
+     * at the 4% legal-residence rate understates the property, which is the
+     * safe direction to be wrong in.
+     */
+    assessmentRatio: 0.06,
+    assessmentBasis:
+      "S.C. Code § 12-43-220(e): all other real property not otherwise provided for is assessed at six percent of fair market value. South Carolina assesses by property class rather than by county — 4% legal residence (c), 4% agricultural held by individuals (d)(1)(A), 6% agricultural held by corporations (d)(1)(B), 10.5% manufacturing and utility (a)(1).",
+    derivedArvCaveat:
+      "South Carolina's ratio depends on the property's CLASS, and this entry uses the 6% residual. A parcel actually carrying the 4% legal-residence ratio will have its ARV understated by a third here, which is the safe direction. A manufacturing or utility parcel assessed at 10.5% is the dangerous one: dividing by 0.06 overstates its value by roughly 1.75x. Confirm the class on the assessor's record before bidding on anything that is not ordinary residential or commercial land.",
+    statute:
+      "S.C. Code Title 12, Ch. 51 (alternate procedure for collection of property taxes: §§ 12-51-55, 12-51-90, 12-51-130); § 12-43-220 (assessment ratios)",
+    asOf: "2026-09",
+    sources: [
+      "https://www.scstatehouse.gov/code/t12c051.php",
+      "https://www.scstatehouse.gov/code/t12c043.php",
+      "https://law.justia.com/codes/south-carolina/title-12/chapter-51/section-12-51-90/",
+      "https://law.justia.com/codes/south-carolina/title-12/chapter-51/section-12-51-130/",
+      "https://dor.sc.gov/property-tax-redemption-property",
+    ],
+    caveats: [
+      "THE PENALTY IS CAPPED AT THE OPENING BID. § 12-51-90 provides that interest due on redemption may not exceed the forfeited land commission's bid under § 12-51-55 — roughly taxes plus costs. The tiers above are therefore a ceiling reached only by a bid at or near the minimum; a purchase at several times the minimum collects the same capped sum, so the effective yield falls as the premium rises.",
+      "THE OVERAGE IS NOT YOURS. Under § 12-51-130 everything bid above taxes, assessments, penalties and costs belongs to the owner of record immediately before the redemption period ended, payable ninety days after the deed and escheating to the county only after five unclaimed years. A premium is not recoverable equity; South Carolina was already Tyler-compliant on this point.",
+      "Assessment is by class, not by county. This row uses the 6% residual under § 12-43-220(e); legal residences sit at 4% and manufacturing and utility property at 10.5%. See the derived-ARV note — the 10.5% case is the one that produces a dangerous overstatement.",
+      "The deed becomes incontestable on procedural or other grounds only after the twelve-month redemption period plus a further twelve months (§ 12-51-90). Before that, procedural defects in the sale remain a live attack on title.",
+      "Unsold parcels are bid in for the Forfeited Land Commission under § 12-51-55 rather than left unsold, which is also what sets the interest cap above. An FLC-held parcel is a different instrument from one bought at open auction.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed South Carolina max bid until they are set.",
+    ],
+  },
   TX: {
     state: "TX",
     saleType: "Redeemable Deed",
