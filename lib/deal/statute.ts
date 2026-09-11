@@ -293,6 +293,87 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
    * distinguishes them. Treating an upset purchase as clear title is the most
    * expensive mistake available in Pennsylvania.
    */
+  /*
+   * New York is the state where the assessed value tells you almost nothing,
+   * and everything else is unusually clean.
+   *
+   * ## What an auction buyer actually gets
+   *
+   * Counties enforce in rem under RPTL Article 11: the tax district forecloses,
+   * the owner's redemption period runs BEFORE the district takes title, and on
+   * a default judgment the owner is "barred and forever foreclosed of all
+   * right, title, interest, claim, lien or equity of redemption" (RPTL 1136(3),
+   * 1131). The county then resells at public auction. So the two-year period in
+   * RPTL 1110 has already expired by the time an investor bids, and the deed
+   * carries no redemption at all. `redemption` is null and that is the whole
+   * truth, unlike Pennsylvania where null is a 65-of-67 approximation.
+   *
+   * ## The ratio is the problem, and 1.0 is a floor rather than an estimate
+   *
+   * There is no statewide level of assessment. Each of more than 1,200
+   * assessing units sets its own, and ORPTS publishes an equalization rate and
+   * a residential assessment ratio for each one annually. Levels run from a few
+   * percent of market value to a full 100%, so a single number for New York
+   * could be wrong by more than an order of magnitude in either direction.
+   *
+   * 1.0 is chosen deliberately as the SAFE end of that range: it treats the
+   * assessment as if it were already full market value, which is exact in a
+   * town at 100% and understates everywhere else. A derived New York ARV is
+   * therefore a floor, and the max bid computed from it is a number that will
+   * not get anyone into trouble — it will simply be too low. Supply
+   * `arvOverride` from comparable sales to get a real one.
+   *
+   * The county-keyed `countyAssessmentRatios` cannot fix this: assessing units
+   * are towns and cities, and two towns in one county routinely differ.
+   */
+  NY: {
+    state: "NY",
+    saleType: "Tax Deed",
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder, as elsewhere.
+       *
+       * An Article 11 deed comes out of a court judgment that expressly bars
+       * the former owner, so it starts stronger than an administrative tax
+       * deed. Insurers still commonly want an action, particularly where
+       * service in the in rem proceeding is open to attack.
+       */
+      typicalLow: 2500,
+      typicalHigh: 6000,
+      typicalMonths: 6,
+      required: true,
+    },
+    closingCosts: 300,
+    /*
+     * Short, because the waiting happened before the auction. The redemption
+     * period expired while the county was foreclosing; the buyer's clock is
+     * deed, recording and any title work.
+     */
+    auctionToMarketableMonths: 8,
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "New York has no statewide level of assessment. Each of 1,200+ assessing units sets its own, and ORPTS publishes an equalization rate and residential assessment ratio per unit each year. 1.0 is used here as a deliberate floor — see the derived-ARV note — not as a claim that New York assesses at full value.",
+    derivedArvCaveat:
+      "DO NOT TRADE OFF A DERIVED ARV IN NEW YORK. Levels of assessment range from a few percent of market value to 100% across more than 1,200 assessing units, and this entry assumes 100% precisely because that is the end of the range that cannot cause an overbid. In a town assessing at 5%, a derived ARV understates the property twentyfold and the max bid will look absurdly low — that is the model refusing to guess, not the parcel being worthless. Look up the municipality's equalization rate or RAR, or supply arvOverride from comparable sales.",
+    statute:
+      "N.Y. Real Property Tax Law Article 11 (in rem tax foreclosure: §§ 1110 redemption, 1131 failure to redeem, 1136 judgment); L 2024, ch 55, pt BB (surplus proceeds)",
+    asOf: "2026-09",
+    sources: [
+      "https://www.nysenate.gov/legislation/laws/RPT/A11",
+      "https://www.tax.ny.gov/pdf/publications/orpts/legis/legsum24.pdf",
+      "https://www.tax.ny.gov/pdf/publications/orpts/under_eqrates.pdf",
+      "https://www.tax.ny.gov/research/property/equal/rar/index.htm",
+      "https://phillipslytle.com/a-review-of-new-yorks-response-to-tyler-v-hennepin-county/",
+    ],
+    caveats: [
+      "THE ASSESSED VALUE IS NOT COMPARABLE ACROSS MUNICIPALITIES. More than 1,200 assessing units each set their own level of assessment, published annually by ORPTS as an equalization rate and a residential assessment ratio. This row assumes 100% as a deliberate floor, so a derived ARV in a low-assessing town is far too low. That is the safe direction, and it makes the derived figure useless as a valuation — get the municipality's rate or supply arvOverride.",
+      "NO REDEMPTION FOR THE AUCTION BUYER, AND THIS TIME THAT IS UNQUALIFIED. RPTL 1110's period runs before the tax district takes title; RPTL 1131 and 1136(3) bar the former owner on judgment. By the time a parcel reaches the county auction the right is gone. The default period is two years from the lien date and a district may set a longer one, but either way it expires pre-auction.",
+      "SURPLUS NOW GOES BACK TO THE FORMER OWNER. L 2024, ch 55, pt BB amended Article 11 after Tyler v. Hennepin County so excess proceeds are returned to the former owner and, where appropriate, to lienors. This does not change what a bidder pays, but it removes the county's old incentive to retain equity and is worth understanding before assuming how a district will run its sale.",
+      "NOT EVERY NEW YORK TAX SALE IS AN ARTICLE 11 COUNTY AUCTION. New York City and several cities have run their own tax lien certificate programmes under separate authority, which are different instruments with different economics. Confirm the selling entity and the enabling law before applying this row.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed New York max bid until they are set.",
+    ],
+  },
   PA: {
     state: "PA",
     saleType: "Tax Deed",

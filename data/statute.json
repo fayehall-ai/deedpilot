@@ -350,6 +350,38 @@
         "Rand v. Rand / Hall-era excess-proceeds rules mean former owners may claim surplus; this does not affect the buyer's title."
       ]
     },
+    "NY": {
+      "state": "NY",
+      "saleType": "Tax Deed",
+      "redemption": null,
+      "quietTitle": {
+        "typicalLow": 2500,
+        "typicalHigh": 6000,
+        "typicalMonths": 6,
+        "required": true
+      },
+      "closingCosts": 300,
+      "auctionToMarketableMonths": 8,
+      "assessmentRatio": 1,
+      "assessmentBasis": "New York has no statewide level of assessment. Each of 1,200+ assessing units sets its own, and ORPTS publishes an equalization rate and residential assessment ratio per unit each year. 1.0 is used here as a deliberate floor — see the derived-ARV note — not as a claim that New York assesses at full value.",
+      "derivedArvCaveat": "DO NOT TRADE OFF A DERIVED ARV IN NEW YORK. Levels of assessment range from a few percent of market value to 100% across more than 1,200 assessing units, and this entry assumes 100% precisely because that is the end of the range that cannot cause an overbid. In a town assessing at 5%, a derived ARV understates the property twentyfold and the max bid will look absurdly low — that is the model refusing to guess, not the parcel being worthless. Look up the municipality's equalization rate or RAR, or supply arvOverride from comparable sales.",
+      "statute": "N.Y. Real Property Tax Law Article 11 (in rem tax foreclosure: §§ 1110 redemption, 1131 failure to redeem, 1136 judgment); L 2024, ch 55, pt BB (surplus proceeds)",
+      "asOf": "2026-09",
+      "sources": [
+        "https://www.nysenate.gov/legislation/laws/RPT/A11",
+        "https://www.tax.ny.gov/pdf/publications/orpts/legis/legsum24.pdf",
+        "https://www.tax.ny.gov/pdf/publications/orpts/under_eqrates.pdf",
+        "https://www.tax.ny.gov/research/property/equal/rar/index.htm",
+        "https://phillipslytle.com/a-review-of-new-yorks-response-to-tyler-v-hennepin-county/"
+      ],
+      "caveats": [
+        "THE ASSESSED VALUE IS NOT COMPARABLE ACROSS MUNICIPALITIES. More than 1,200 assessing units each set their own level of assessment, published annually by ORPTS as an equalization rate and a residential assessment ratio. This row assumes 100% as a deliberate floor, so a derived ARV in a low-assessing town is far too low. That is the safe direction, and it makes the derived figure useless as a valuation — get the municipality's rate or supply arvOverride.",
+        "NO REDEMPTION FOR THE AUCTION BUYER, AND THIS TIME THAT IS UNQUALIFIED. RPTL 1110's period runs before the tax district takes title; RPTL 1131 and 1136(3) bar the former owner on judgment. By the time a parcel reaches the county auction the right is gone. The default period is two years from the lien date and a district may set a longer one, but either way it expires pre-auction.",
+        "SURPLUS NOW GOES BACK TO THE FORMER OWNER. L 2024, ch 55, pt BB amended Article 11 after Tyler v. Hennepin County so excess proceeds are returned to the former owner and, where appropriate, to lienors. This does not change what a bidder pays, but it removes the county's old incentive to retain equity and is worth understanding before assuming how a district will run its sale.",
+        "NOT EVERY NEW YORK TAX SALE IS AN ARTICLE 11 COUNTY AUCTION. New York City and several cities have run their own tax lien certificate programmes under separate authority, which are different instruments with different economics. Confirm the selling entity and the enabling law before applying this row.",
+        "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed New York max bid until they are set."
+      ]
+    },
     "PA": {
       "state": "PA",
       "saleType": "Tax Deed",
