@@ -39,7 +39,10 @@
 
 import { and, isNotNull, like, sql } from "drizzle-orm";
 import { db } from "../db";
-import { auctions } from "../db/schema";
+import { auctions, capeProductions } from "../db/schema";
+import { buildPackage, capeInputsHash } from "../cape/components";
+import { capePackageInputs } from "../cape/inputs";
+import { generateCapeScript } from "../cape/script";
 import { IMPORT_ID_SQL_PATTERN } from "../import/provenance";
 import { enrichLotsMissingAssessed } from "../property/enrich";
 import { configuredSignalSources, enrichLotIntel } from "../property/signals";
@@ -242,11 +245,203 @@ const enrichLots: OpsTask = {
   },
 };
 
+
+// ---------------------------------------------------------------------------
+// Package
+// ---------------------------------------------------------------------------
+
+/*
+ * These two import `lib/cape/script.ts` directly and never `lib/cape/produce.ts`.
+ *
+ * That is deliberate and load-bearing. `produce.ts` imports slides, voice and
+ * video at module scope, which drags `sharp` and a child process that shells
+ * out to ffmpeg into whatever bundle imports it. Neither belongs in a Server
+ * Function, and importing the orchestrator to use only its first step would put
+ * both there. The script stage is reachable without them because it writes
+ * nothing but Postgres rows.
+ */
+
+/** Rank upcoming packages the way Component Eight does: by production deadline. */
+async function rankedPackages() {
+  const inputs = await capePackageInputs();
+  return inputs
+    .map((input) => ({ input, pkg: buildPackage(input) }))
+    .sort((a, b) => a.pkg.deadline.dueDate.localeCompare(b.pkg.deadline.dueDate));
+}
+
+/** A package needs a script when none exists, or the facts have moved under it. */
+function needsScript(r: { input: Awaited<ReturnType<typeof rankedPackages>>[number]["input"] }) {
+  const p = r.input.production;
+  return !p || !p.hasScript || p.inputsHash !== capeInputsHash(r.input);
+}
+
+/**
+ * What a production run would do, without doing any of it.
+ *
+ * The terminal equivalent is `npm run cape:plan`, and it is on the console for
+ * the same reason the plan exists at all: the decision to spend on 152
+ * narrations should be made while looking at the number, not after.
+ */
+const capePlan: OpsTask = {
+  key: "cape-plan",
+  label: "Plan CAPE production",
+  stage: "Package",
+  blurb:
+    "Counts upcoming county packages, how many are current, and which are due soonest by " +
+    "production deadline. Reads only — no model calls, no speech, no spend.",
+  script: "npm run cape:plan",
+  paid: false,
+  defaultLimit: 10,
+  async run({ limit }) {
+    const ranked = await rankedPackages();
+    if (ranked.length === 0) {
+      return out("No upcoming sales, so there is nothing to package.", { packages: 0 });
+    }
+
+    const stale = ranked.filter(needsScript);
+    const noVideo = ranked.filter((r) => !r.input.production?.hasVideo);
+    const held = ranked.filter((r) => (r.input.production?.unsupportedFigures ?? []).length > 0);
+    const releasable = ranked.filter((r) => r.pkg.releasable).length;
+    const overdue = ranked.filter((r) => r.pkg.deadline.overdue).length;
+
+    const next = ranked.slice(0, Math.max(1, limit)).map((r) => ({
+      due: r.pkg.deadline.dueDate,
+      county: r.input.countyName,
+      state: r.input.state,
+      saleDate: r.input.saleDate,
+      lots: r.input.lotCount,
+      score: Math.round(r.pkg.score * 100),
+      blockedBy: r.pkg.blockedBy,
+    }));
+
+    return out(
+      `${ranked.length} upcoming package${ranked.length === 1 ? "" : "s"}: ` +
+        `${releasable} releasable, ${stale.length} need a script, ` +
+        `${noVideo.length} have no video` +
+        (held.length > 0 ? `, ${held.length} held on unsupported figures` : "") +
+        (overdue > 0 ? `. ${overdue} past their production deadline.` : "."),
+      { packages: ranked.length, releasable, needScript: stale.length, noVideo: noVideo.length, held: held.length, overdue, next },
+    );
+  },
+};
+
+/**
+ * Draft narration scripts, and nothing else.
+ *
+ * Metered: one model call per package. It stops there on purpose — the rest of
+ * Component Seven needs ffmpeg and a writable disk, so it stays in the terminal
+ * (see TERMINAL_ONLY). Drafting alone is still worth a button, because the
+ * script stage is where the quality signal appears: `verifyNarration` rejects
+ * any figure the model spoke that is not in the computed facts, and Component
+ * Nine reads the result. Finding out which packages invent numbers should not
+ * require buying speech for them first.
+ */
+const capeScripts: OpsTask = {
+  key: "cape-scripts",
+  label: "Draft CAPE narration scripts",
+  stage: "Package",
+  blurb:
+    "Writes the narration script and slide plan for packages that have none or whose facts have " +
+    "changed, checking every spoken figure against the computed package. No speech, no video.",
+  script: "npm run cape:produce -- --script-only",
+  paid: true,
+  defaultLimit: 3,
+  async run({ limit, deadline }) {
+    const ranked = await rankedPackages();
+    const pending = ranked.filter(needsScript).slice(0, limit);
+    if (pending.length === 0) {
+      return out("Every upcoming package has a current script.", { drafted: 0 });
+    }
+
+    let drafted = 0;
+    let held = 0;
+    let failed = 0;
+    const holds: { county: string | null; figures: string[] }[] = [];
+
+    for (const { input, pkg } of pending) {
+      /*
+       * Checked before the call, not after: a model call that starts at 24s
+       * finishes well outside the budget and its result is lost anyway.
+       */
+      if (Date.now() > deadline) break;
+
+      try {
+        const generated = await generateCapeScript(pkg, {
+          countyName: input.countyName,
+          state: input.state,
+          saleDate: input.saleDate,
+          saleDateConfirmed: input.saleDateConfirmed,
+          saleType: input.saleType,
+          platform: input.platform,
+        });
+
+        const inputsHash = capeInputsHash(input);
+        await db
+          .insert(capeProductions)
+          .values({
+            auctionId: input.auctionId,
+            inputsHash,
+            script: generated.script as unknown as Record<string, unknown>,
+            scriptModel: generated.model,
+            unsupportedFigures: generated.unsupportedFigures,
+            slidePlanCount: generated.script.sections.length + 1,
+            stage: "script",
+            error: null,
+          })
+          .onConflictDoUpdate({
+            target: capeProductions.auctionId,
+            set: {
+              inputsHash,
+              script: generated.script as unknown as Record<string, unknown>,
+              scriptModel: generated.model,
+              unsupportedFigures: generated.unsupportedFigures,
+              slidePlanCount: generated.script.sections.length + 1,
+              stage: "script",
+              error: null,
+              updatedAt: new Date(),
+            },
+          });
+
+        if (generated.unsupportedFigures.length > 0) {
+          held++;
+          holds.push({ county: input.countyName, figures: generated.unsupportedFigures });
+        } else {
+          drafted++;
+        }
+      } catch (e) {
+        failed++;
+        const message = e instanceof Error ? e.message : String(e);
+        await db
+          .insert(capeProductions)
+          .values({ auctionId: input.auctionId, inputsHash: capeInputsHash(input), stage: "failed", error: message })
+          .onConflictDoUpdate({
+            target: capeProductions.auctionId,
+            set: { stage: "failed", error: message, updatedAt: new Date() },
+          });
+      }
+    }
+
+    const attempted = drafted + held + failed;
+    const left = ranked.filter(needsScript).length - attempted;
+    return out(
+      `${drafted} script${drafted === 1 ? "" : "s"} drafted` +
+        (held > 0
+          ? `, ${held} HELD on figures the facts do not support (${holds
+              .map((h) => `${h.county}: ${h.figures.join(", ")}`)
+              .join("; ")})`
+          : "") +
+        (failed > 0 ? `, ${failed} failed` : "") +
+        (left > 0 ? `. ${left} still without a current script — press again.` : "."),
+      { drafted, held, failed, holds, notReached: Math.max(0, left) },
+    );
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Registry
 // ---------------------------------------------------------------------------
 
-export const OPS_TASKS: OpsTask[] = [repairDelisting, intelPass, enrichLots];
+export const OPS_TASKS: OpsTask[] = [repairDelisting, intelPass, enrichLots, capePlan, capeScripts];
 
 export const opsTask = (key: string): OpsTask | undefined =>
   OPS_TASKS.find((t) => t.key === key);
@@ -270,4 +465,9 @@ export const TERMINAL_ONLY: { script: string; label: string; blocker: string }[]
   { script: "npm run scan:html", label: "Scan HTML lot pages", blocker: "reads registry file" },
   { script: "npm run ingest:found", label: "Ingest found lists", blocker: "registry file" },
   { script: "npm run flywheel:coverage", label: "Coverage cycle", blocker: "writes scoreboard file" },
+  {
+    script: "npm run cape:produce",
+    label: "CAPE slides, narration and encode",
+    blocker: "sharp + ffmpeg + writes MP4/MP3/PNG",
+  },
 ];

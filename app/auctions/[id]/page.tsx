@@ -17,6 +17,7 @@ import { DetailSkeleton } from "@/components/skeleton";
 import { resolveCountyRule, STATE_NAMES } from "@/lib/atlas";
 import type { LinkRef } from "@/lib/atlas/types";
 import { statuteFor } from "@/lib/deal/statute";
+import { MIN_POPULATION as PROPSTREAM_MIN_POPULATION } from "@/lib/cape/propstream";
 import { isImported, readAnnouncedDetail } from "@/lib/import/announced-detail";
 import { parcelsShown, platformLabel } from "@/lib/format";
 
@@ -310,12 +311,33 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
         </details>
       ) : null}
 
-      <h2 className="mb-3 text-lg font-semibold">
-        Parcels{" "}
-        <span className="text-sm font-normal text-muted">
-          — ranked by assessed value over opening bid
-        </span>
-      </h2>
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 className="text-lg font-semibold">
+          Parcels{" "}
+          <span className="text-sm font-normal text-muted">
+            — ranked by assessed value over opening bid
+          </span>
+        </h2>
+        {/*
+          * CAPE Component Ten, which existed as a working endpoint that nothing
+          * linked to. The export collapses four manual steps from the TDC
+          * workflow — find a qualifying county, download its spreadsheet,
+          * convert the PDF when there is not one, reshape it to the template —
+          * and reaching it required knowing the route and pasting a UUID.
+          *
+          * Shown only above the population threshold the workflow itself sets.
+          * The route enforces the same rule with a 422, so a link that appeared
+          * regardless would offer a download that answers back with an error.
+          */}
+        {lots.length > 0 && (rule?.county.population ?? 0) >= PROPSTREAM_MIN_POPULATION ? (
+          <a
+            href={`/api/cape/${auction.id}/propstream`}
+            className="text-sm text-accent hover:underline"
+          >
+            Download PropStream list ({num(lots.length)} parcels, CSV)
+          </a>
+        ) : null}
+      </div>
 
       {lots.length === 0 ? (
         <EmptyState title="No parcels published yet">
