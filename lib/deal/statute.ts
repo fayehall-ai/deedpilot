@@ -428,6 +428,84 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
    * window rather than a redemption: the purchaser earns nothing for waiting it
    * out, so it is pure carry and `auctionToMarketableMonths` says so.
    */
+  /*
+   * Minnesota is the state Tyler v. Hennepin County was about, and the law it
+   * describes no longer exists.
+   *
+   * Geraldine Tyler's condominium was forfeited over roughly $15,000 and sold
+   * for $40,000, and Hennepin County kept the difference. The Supreme Court
+   * held in 2023 that keeping it was a taking. Minnesota settled the resulting
+   * class actions for $109 million and rewrote the statutes in Laws 2024,
+   * ch. 127, art. 70, which created Minn. Stat. § 282.005 — the section this
+   * entry is mostly built on. Anything written about Minnesota forfeiture
+   * before 2024 describes the system that lost in court.
+   *
+   * The mechanism is forfeiture, not a lien or a deed sale. Taxes go
+   * delinquent, the parcel is sold to the state at a tax judgment sale, and
+   * three years later "absolute title to such parcel, if not theretofore
+   * redeemed, shall vest in the state" (§ 281.18). What the county then
+   * auctions is state-owned land, so the buyer takes no redemption risk and
+   * earns no redemption penalty — the same shape as Oregon.
+   */
+  MN: {
+    state: "MN",
+    saleType: "Tax Deed",
+    // § 281.18: absolute title vests in the state when the redemption period
+    // runs, which is before the parcel is ever offered for sale.
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: false. Absolute title vested in the state under § 281.18 and
+       * the buyer takes by state deed, which is the Oregon and Michigan
+       * situation rather than the Arkansas one. The band is for the parcels
+       * where something survives anyway.
+       */
+      typicalLow: 1500,
+      typicalHigh: 3500,
+      typicalMonths: 3,
+      required: false,
+    },
+    closingCosts: 250,
+    /* No redemption window and no live challenge window; the hold is the deed. */
+    auctionToMarketableMonths: 3,
+    /*
+     * 1.0, and here that is straightforwardly true rather than true-but-stale.
+     *
+     * § 273.11 subd. 1: "all property shall be valued at its market value."
+     * Minnesota's class rates are applied after valuation to compute tax
+     * capacity, so they never touch the assessed figure — unlike Georgia's 40%
+     * or Ohio's 35%, there is no ratio between the assessment and market value
+     * to undo. It is also the number the sale itself runs on: § 282.005 defines
+     * the initial price as "equal to the estimated market value, as determined
+     * by the most recent assessment."
+     */
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "Minn. Stat. § 273.11 subd. 1: \"all property shall be valued at its market value.\" Class rates under § 273.13 are applied afterwards to compute tax capacity and do not reduce the assessed value. The estimated market value is also what § 282.005 uses to set the opening price at a tax-forfeited sale.",
+    derivedArvCaveat:
+      "The ratio is 1.0 because the assessor's estimated market value is already a market figure, so a derived Minnesota ARV is only as good as the last assessment. It is the same number the county opened the auction at, which means a parcel that failed to sell at its EMV has been rejected by the market at exactly the value this ARV asserts — read a no-sale as evidence about the number, not just about the parcel.",
+    statute:
+      "Minn. Stat. §§ 281.17 (redemption period), 281.18 (absolute title vests in the state), 282.005 (initial sale of tax-forfeited land, excess proceeds), 282.01 (classification and sale), 273.11 (valuation at market value), 429.071 subd. 4 (reassessment of cancelled special assessments); Laws 2024, ch. 127, art. 70",
+    asOf: "2026-09",
+    sources: [
+      "https://www.revisor.mn.gov/statutes/cite/282.005",
+      "https://www.revisor.mn.gov/statutes/cite/281.17",
+      "https://www.revisor.mn.gov/statutes/cite/281.18",
+      "https://www.revisor.mn.gov/statutes/cite/273.11",
+      "https://www.revisor.mn.gov/statutes/cite/429.071",
+      "https://www.revenue.state.mn.us/delinquent-real-property-tax-and-tax-forfeiture-manual",
+    ],
+    caveats: [
+      "THE SAME PARCEL HAS TWO PRICES THIRTY DAYS APART, AND THE SECOND IS THE TAX BILL. Under § 282.005 the initial price is \"equal to the estimated market value, as determined by the most recent assessment\", and \"the property must not be sold for less than the initial price for 30 days after it is initially made available at auction\". Then: \"if no buyer is willing to pay the initial price, the price for the property must be reduced to the minimum bid\" — the sum of delinquent taxes, special assessments, penalties, interest and costs. A Minnesota listing is worth almost nothing at market value and potentially a great deal at the tax debt, and the engine cannot tell which stage an opening bid represents. Establish that before treating a Minnesota figure as real.",
+      "CANCELLED SPECIAL ASSESSMENTS CAN COME BACK ON THE BUYER. § 429.071 subd. 4: \"When a parcel of tax-forfeited land is returned to private ownership and the parcel is benefited by an improvement for which special assessments were canceled because of the forfeiture, the municipality that made the improvement may ... make a reassessment or a new assessment as to the parcel in an amount equal to the amount remaining unpaid on the original assessment.\" Forfeiture wipes the assessment and the sale can revive it. This is parcel-specific, can run to thousands on improved land, and is not in closingCosts.",
+      "Redemption runs three years from the tax judgment sale to the state (§ 281.17), but one year for non-homesteaded land in a targeted community and for qualified waste disposal facilities. All of it expires before the parcel reaches auction, so it affects when inventory appears, not what a buyer earns.",
+      "Surplus above the minimum bid belongs to the former owner and other interested parties, not the county — the point of the 2024 rewrite. The auditor notifies within 60 days and claimants have six months to file. This does not affect the buyer's title or price, but it means a Minnesota county has no revenue reason to push the price above the tax debt.",
+      "If nobody pays even the minimum bid, \"the state is deemed to have purchased the property through a credit bid\" and the parcel is disposed of under the rest of chapter 282. A parcel can therefore leave the auction calendar without a private sale having happened.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
+    ],
+  },
   NM: {
     state: "NM",
     saleType: "Tax Deed",
