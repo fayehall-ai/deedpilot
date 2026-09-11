@@ -506,6 +506,128 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
     ],
   },
 
+  /*
+   * Kentucky sells a debt, not a property, and almost everything about the
+   * maths follows from that.
+   *
+   * ## What is actually bought
+   *
+   * County clerks sell "certificates of delinquency" — tax lien certificates —
+   * at annual sales running mid-July into late October, most of them between
+   * mid-July and the end of August (KRS 134.128; 103 KAR 5:180). The
+   * certificate accrues simple interest at 12% per annum on the amount paid to
+   * the clerk, from the date of purchase until it is satisfied, plus
+   * prelitigation attorneys' fees (KRS 134.125; 134.452; the notice a purchaser
+   * must send states the rate as 1% per month, KRS 134.490).
+   *
+   * The expected outcome is being paid, not taking the land. Taking the land
+   * requires a judicial foreclosure in circuit court, and that is what the
+   * `quietTitle` figures below actually represent — see the note there.
+   *
+   * ## The one-year tolling period is why the carry is long
+   *
+   * Taxes fall due 31 December and are delinquent 1 January (KRS 134.015;
+   * 134.119). KRS 134.546 bars any action on a certificate until one year from
+   * the date the taxes became delinquent, so a certificate bought in July
+   * cannot be sued on until 1 January following — roughly six further months of
+   * holding before the clock on foreclosure even starts. The same section bars
+   * an action more than eleven years after delinquency, which is where
+   * `maxDays` comes from.
+   *
+   * ## Two redemptions at two different rates, and only one fits here
+   *
+   * The 12% above is what a taxpayer pays to satisfy the certificate at any
+   * point, and it is modelled as the tier. If the holder forecloses and the
+   * property sells at the judicial sale for LESS than two-thirds of its
+   * appraised value, a second and quite separate right appears: KRS 426.530
+   * lets the defendant redeem within six months of the sale at the purchase
+   * money plus 10% per annum.
+   *
+   * Six months, not a year. The statute was amended effective 15 July 2016 and
+   * the pre-2016 text said a year; secondary summaries and older case law still
+   * quote the old figure, so this was read off the current statute text rather
+   * than a digest. It is a conditional, second-stage redemption at a lower
+   * rate, which `RedemptionTier` cannot express — tiers are sequential windows
+   * of one redemption — so it is a caveat.
+   */
+  KY: {
+    state: "KY",
+    saleType: "Tax Lien",
+    redemption: {
+      /*
+       * 12% per annum simple, modelled as an annual rate rather than a flat
+       * penalty — the same treatment as Arizona, and the opposite of Georgia
+       * and Texas, where 20% and 25% are flat whenever the owner redeems.
+       *
+       * `throughDays` is the eleven-year limit in KRS 134.546, measured from
+       * DELINQUENCY (1 January), not from purchase. A July purchaser has
+       * roughly ten years and five months of it left. There is no shorter
+       * window: the taxpayer may satisfy the certificate at any point inside
+       * it, so a KY lien has no natural maturity the way a deed state's
+       * redemption period does.
+       */
+      tiers: [{ throughDays: 4015, penalty: 0.12 }],
+      maxDays: 4015,
+    },
+    quietTitle: {
+      /*
+       * NOT A QUIET TITLE ACTION, and NOT YET REVIEWED BY THE OPERATOR.
+       *
+       * Kentucky gives no deed to quiet. The route to ownership is a judicial
+       * foreclosure in circuit court under KRS 134.546 — complaint, service,
+       * master commissioner appraisal, sale — and these figures stand in for
+       * that, because it occupies the same place in the arithmetic: the money
+       * and months between winning at auction and owning something saleable.
+       * The costs are a placeholder pending operator review, like PA.
+       */
+      typicalLow: 3000,
+      typicalHigh: 7000,
+      typicalMonths: 9,
+      required: true,
+    },
+    /*
+     * Clerk's fees on purchase and assignment. The certificate's face amount
+     * already carries a 10% penalty, the sheriff's commission and 10% add-on,
+     * and the clerk's 10% (KRS 134.119; 134.126) — those are inside what is
+     * paid, not on top of it, and the 12% accrues on the whole sum.
+     */
+    closingCosts: 200,
+    /*
+     * Purchase, then the remainder of the tolling year, then the foreclosure,
+     * then the conditional six-month redemption if the sale clears below
+     * two-thirds of appraisal. Roughly 6 + 9 + 6. Long, and the reason a
+     * Kentucky certificate is a patient instrument rather than a flip.
+     */
+    auctionToMarketableMonths: 21,
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "Section 172 of the Kentucky Constitution requires all non-exempt property to be assessed at 100% of fair cash value — the price it would bring at a fair voluntary sale — as of 1 January (see also KRS 132.190).",
+    derivedArvCaveat:
+      "Kentucky assesses at 100% of fair cash value, so the ratio is honestly 1.0 — but that is the PVA's opinion of value as of 1 January of the assessment year, not an appraisal of this parcel today. Treat a derived ARV as a starting point and get comparable sales before bidding.",
+    statute:
+      "KRS Chapter 134 (certificates of delinquency: §§ 134.015, 134.119, 134.125-134.131, 134.420, 134.452, 134.490, 134.546); KRS 426.530 (post-sale redemption)",
+    asOf: "2026-09",
+    sources: [
+      "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45200",
+      "https://codes.findlaw.com/ky/title-xi-revenue-and-taxation/ky-rev-st-sect-134-546/",
+      "https://revenue.ky.gov/DOR%20Training%20Materials/103%20KAR%205.180.%20Procedures%20for%20sale%20of%20certificates%20of%20delinquincy%20by%20county%20clerks.pdf",
+      "https://revenue.ky.gov/Property/Pages/Delinquent-Property-Tax.aspx",
+      "https://www.lawserver.com/law/state/kentucky/ky-statutes/kentucky_statutes_134-452",
+      "https://revenue.ky.gov/Forms/62F003914.pdf",
+    ],
+    caveats: [
+      "Kentucky sells LIENS, not deeds. The expected outcome is the taxpayer satisfying the certificate at 12% per annum, not acquiring the property. Ownership requires a separate judicial foreclosure at additional legal cost, and the maths above treats that cost as if it were quiet title.",
+      "THE ADVERTISED PARCEL COUNT OVERSTATES WHAT IS BUYABLE. A third-party purchaser already holding a prior-year certificate on a parcel has first priority, submits a priority list up to ten days before the sale, and every certificate allocated that way is REMOVED from the annual sale (KRS 134.128). On a large county roll a material share of the advertised certificates never reaches open bidding, so an announced count is an upper bound on availability, not inventory.",
+      "SECOND REDEMPTION THIS ROW CANNOT EXPRESS. If a foreclosure sale brings less than two-thirds of the appraised value, KRS 426.530 gives the defendant six months from the day of sale to redeem at the purchase money plus 10% per annum plus the purchaser's reasonable post-sale costs. Six months is the current text, amended effective 2016-07-15; older summaries say a year. Bidding above two-thirds of appraisal is what extinguishes this right.",
+      "ONE-YEAR TOLLING PERIOD. No action may be brought on a certificate until one year after the taxes became delinquent (1 January), and none at all after eleven years (KRS 134.546). A July purchase therefore sits roughly six months before enforcement can even begin.",
+      "Premium-bid sale. The opening figure is taxes, penalties, interest and administrative costs, and bidders bid the price UP; the 12% accrues on the amount paid to the clerk, so a premium is not dead money, but it does lower the effective yield against the certificate's face.",
+      "You cannot cherry-pick. Certificates are sold in lots whose size is set by the size of the county's roll — up to 5 for rolls under 500, rising to 50 for rolls of 2,500-7,500, and 2% of the roll per round beyond that — with selection order set by a random drawing at the start of the sale (103 KAR 5:180).",
+      "Registration is mandatory and volume triggers obligations. Participants register with the county clerk at least a week ahead; anyone paying more than five certificates statewide, more than three in one county, or more than $10,000 statewide in a calendar year must also register with the Department of Revenue and must offer delinquent taxpayers a monthly installment plan (KRS 134.128; 134.129; 134.490).",
+      "Notice duties are continuing, not one-off. Within 50 days of delivery the purchaser must notify the taxpayer by first-class mail with proof of mailing, must repeat that notice at least annually until an action is instituted, and must give 45 days' notice before instituting one (KRS 134.490). These are carrying costs and a source of title risk if missed.",
+      "Home-rule cities can differ. Kentucky grants broad home rule under KRS 82.082, and first-class city procedure sits in KRS Chapter 91 rather than Chapter 134. Confirm the selling entity in Louisville and Lexington before assuming county clerk procedure.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator, and they stand for a judicial foreclosure rather than a quiet title suit. Do not rely on a computed Kentucky max bid until they are set.",
+    ],
+  },
   MI: {
     state: "MI",
     saleType: "Tax Deed",
