@@ -754,6 +754,95 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
     ],
   },
+  /*
+   * Mississippi was the largest gap in this file and the hardest to notice.
+   *
+   * Its sale is annual — the last Monday in August in most counties, the first
+   * Monday in April in the rest — and the August 2026 round carried 74 sales
+   * and 123,409 announced parcels, more than every upcoming sale in every other
+   * state put together. Eleven days later the console showed Mississippi
+   * nowhere, because the coverage query only looked forward and every row we
+   * hold for the state is in the past. The state was not missing from the
+   * research queue because it was small. It was missing because it had just
+   * finished selling.
+   *
+   * The instrument is a premium-bid lien: bidders bid up from the face amount,
+   * and the excess is where most of the risk lives. See the caveats.
+   */
+  MS: {
+    state: "MS",
+    saleType: "Tax Lien",
+    redemption: {
+      /*
+       * § 27-45-3 lets the owner redeem "at any time within two (2) years after
+       * the day of sale" by paying the taxes and costs, "five percent (5%)
+       * damages", and interest at "one and one-half percent (1-1/2 %) per
+       * month, or any fractional part thereof".
+       *
+       * 1.5% a month is 18% a year, and it is an annual rate, so interestKind
+       * says so — annualising it across the two-year window would report 9%.
+       * The 5% damages are a separate flat charge the single tier cannot hold;
+       * they are in the caveats, as Louisiana's 5% penalty is.
+       *
+       * Both run on the taxes and costs. Neither runs on the overbid.
+       */
+      interestKind: "annual",
+      tiers: [{ throughDays: 730, penalty: 0.18 }],
+      maxDays: 730,
+    },
+    quietTitle: {
+      /*
+       * REVIEWED 2026-09 AGAINST MARKET SOURCES, NOT YET AGAINST THE OPERATOR'S
+       * OWN QUOTES — the national baseline, as elsewhere.
+       *
+       * required: true. A Mississippi chancery clerk's tax deed issues
+       * administratively at the end of the redemption period, and the state's
+       * notice regime is litigated constantly, so an examiner's question is
+       * whether § 27-43-3 was complied with rather than what the deed says.
+       */
+      typicalLow: 1800,
+      typicalHigh: 5000,
+      typicalMonths: 5,
+      required: true,
+    },
+    closingCosts: 250,
+    /*
+     * Two full years of redemption before a deed exists at all, then the action
+     * to make it insurable. Capital is committed from the day of the sale.
+     */
+    auctionToMarketableMonths: 29,
+    /*
+     * 0.15 — Class II, which is all real property that is not a single-family
+     * owner-occupied home. Miss. Const. art. 4, § 112 assesses Class I at 10%
+     * and Class II at 15%, and tax-sale inventory skews heavily to the second.
+     * Choosing the higher ratio is also the safe direction: on a parcel that
+     * turns out to be Class I, dividing by 0.15 understates it.
+     */
+    assessmentRatio: 0.15,
+    assessmentBasis:
+      "Miss. Const. art. 4, § 112: Class I, single-family owner-occupied residential, is assessed at 10% of true value; Class II, all other real property, at 15%; Class III at 15% and Class IV public utility property at 30%. This entry uses the Class II rate.",
+    derivedArvCaveat:
+      "Section 112 also requires that \"in arriving at the true value of Class I and Class II property, the appraisal shall be made according to current use, regardless of location\". Mississippi does not assess real property at its highest and best use — it assesses what is there now, so a vacant or derelict parcel on valuable ground is carried at the value of the vacancy. A derived Mississippi ARV therefore understates redevelopment potential by design rather than by lag, and no amount of recency in the assessment will fix it. Class also matters: at 0.15 an owner-occupied Class I parcel is understated by a third, which is the safe direction but will make a house look like a lot.",
+    statute:
+      "Miss. Code Ann. §§ 27-41-55 and 27-41-59 (annual sale, conduct and online bidding), 27-41-77 (disposition of excess bid), 27-43-3 (notice before expiry of redemption; sale void for failure), 27-45-3 (redemption, 5% damages, 1.5% per month), 27-45-23 (chancery clerk's conveyance); Miss. Const. art. 4, § 112 (classes and assessment rates)",
+    asOf: "2026-09",
+    sources: [
+      "https://codes.findlaw.com/ms/title-27-taxation-and-finance/ms-code-sect-27-45-3/",
+      "https://codes.findlaw.com/ms/title-27-taxation-and-finance/ms-code-sect-27-43-3/",
+      "https://codes.findlaw.com/ms/mississippi-constitution/ms-const-art-4-sect-112/",
+      "https://law.justia.com/codes/mississippi/title-27/chapter-41/general-provisions/section-27-41-77/",
+      "https://govease.helpscoutdocs.com/article/130-mississippi-tax-sale-overview",
+    ],
+    caveats: [
+      "A COUNTY CLERK'S MISTAKE VOIDS THE SALE, AND THE CLERK IS NOT LIABLE. § 27-43-3 requires the chancery clerk to notify the owner at least forty-five days before the redemption period expires, by personal service or service at the abode, by registered or certified mail, and by publication. Then: \"Should the clerk inadvertently fail to send notice as prescribed in this section, then the sale shall be void and the clerk shall not be liable to the purchaser or owner upon refund of all purchase money paid.\" The purchase money comes back; the position, the two years of accrued interest and the deal do not, and nothing the investor does can prevent it. Mississippi tax sales are voided on this ground routinely.",
+      "THE OVERBID IS A DEAD LOSS AND EARNS NOTHING. Mississippi bids up from the face amount, and the 5% damages and 1.5% monthly interest under § 27-45-3 run on \"all such taxes and costs\" — not on the premium. If the owner redeems, § 27-41-77 keeps the excess with the county rather than returning it. So a bidder who pays a 40% premium has turned an 18% instrument into roughly 13% and forfeited the premium outright. The tier is the statutory rate on the face amount, not the yield on the money spent.",
+      "A FLAT 5% SITS ON TOP OF THE 18%. § 27-45-3 adds \"five percent (5%) damages\" on the amount of taxes, separately from the monthly interest. The tier holds one number and cannot carry both, so the 5% is not in the computed return.",
+      "TWO YEARS IS A LONG TIME TO BE RIGHT ABOUT. Redemption runs the full two years from the day of sale before any deed exists, and auctionToMarketableMonths reflects that plus the action to clear title. Mississippi is the slowest lien in this file after Wyoming.",
+      "COUNTIES SELL ON TWO DIFFERENT DATES. Most hold the sale on the last Monday in August; the rest on the first Monday in April. A state-level calendar that assumes one date will miss half the inventory, and the state disappears from any forward-looking view for most of the year.",
+      "Excess bid goes to the former owner on request once redemption expires, and to the county if unclaimed after two more years (§ 27-41-77), so Mississippi is not exposed on the Tyler v. Hennepin question.",
+      "quietTitle costs here are the national baseline and have not been reviewed against the operator's own quotes.",
+    ],
+  },
   NC: {
     state: "NC",
     saleType: "Tax Deed",
