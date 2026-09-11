@@ -180,6 +180,75 @@ export interface StatuteParams {
   caveats: string[];
 }
 
+/**
+ * States researched and deliberately left uncovered, with what would unblock
+ * each.
+ *
+ * ## Why this exists
+ *
+ * Three comments in this file refer to "the New Jersey problem" as though the
+ * reader knows what it is. Nothing in the repository said. The decision not to
+ * encode New Jersey was made carefully, against 7,427 announced parcels — the
+ * largest single gap we have — and it lived only in a conversation, which means
+ * the next person to look at New Jersey starts the research from nothing and
+ * may well reach a different answer.
+ *
+ * An uncovered state is also indistinguishable on the console from a state
+ * nobody has got to yet. Those are opposite situations: one is a queue item and
+ * one is a closed question. Ranked by parcels, the closed questions sit at the
+ * top of the research list forever.
+ *
+ * ## What belongs here
+ *
+ * A state goes here only after the research is done and the conclusion is that
+ * the parameters cannot be encoded honestly. "Not looked at yet" is not a
+ * blocker, and an entry without an `unblockedBy` is not finished thinking.
+ */
+export interface NotEncodedState {
+  state: string;
+  /** The mechanism, in one line. */
+  summary: string;
+  /** Why the type cannot hold it, or why the number would be a guess. */
+  blocker: string;
+  /** What would have to change — data, schema, or law. */
+  unblockedBy: string;
+  statute: string;
+  asOf: string;
+  sources: string[];
+}
+
+export const NOT_ENCODED: Record<string, NotEncodedState> = {
+  NJ: {
+    state: "NJ",
+    summary:
+      "Tax lien certificates bid down from 18% to 0%, then bid up by premium — the winner pays a cash premium over the lien to take a 0% certificate.",
+    blocker:
+      "The rate has no statutory floor, unlike Louisiana's 0.7% per month, and we have no observed clearing data, unlike Illinois. Encoding the 18% ceiling would overstate the return by roughly an order of magnitude — the Illinois catalogue showed 81.4% of those liens clearing at zero. Two further problems compound it: assessment ratios are set per municipality by the Director's Ratio across 565 municipalities, and `countyAssessmentRatios` is keyed by county FIPS, so the ratios cannot be expressed; and P.L. 2024 c.39 rewrote the surplus-equity rules after Tyler v. Hennepin, which changes the deed-remainder case the premium bidders are actually buying.",
+    unblockedBy:
+      "Observed clearing rates and premiums from a New Jersey sale corpus, plus a subdivision-keyed assessment ratio field. The law is settled enough; the data and the schema are not.",
+    statute: "N.J.S.A. 54:5-1 et seq.; P.L. 2024 c.39",
+    asOf: "2026-09",
+    sources: ["https://law.justia.com/codes/new-jersey/title-54/section-54-5-32/"],
+  },
+  RI: {
+    state: "RI",
+    summary:
+      "The price is fixed at the tax bill and bidders compete by accepting a smaller undivided ownership share of the land, from 100% down to 1%.",
+    blocker:
+      "What is bid down is the asset, not the yield, and no field in StatuteParams can hold it. § 44-9-8 directs the collector to sell \"the smallest undivided part of the land which will bring the amount, but not less than one percent (1%), or the whole for the amount if no person offers to take an undivided part\" — so a winning bidder may own one per cent of the parcel while the engine, which has no concept of a fractional interest, would price the whole of it. That is an overstatement of up to a hundredfold, in the unsafe direction, and no caveat can correct a headline number that wrong. BidDownPenalty describes a penalty rate and cannot be repurposed: a 1% ownership share is not a 1% return.\n\nNote that the redemption side is not the problem and is fully encodable — § 44-9-19 sets a penalty of \"ten percent (10%) of the purchase price if redeemed within six (6) months after the date of the collector's sale, and an additional one percent (1%) of the purchase price for each succeeding month\", running until a petition to foreclose is filed. Rhode Island fails on the asset, not the return.",
+    unblockedBy:
+      "An ownership-fraction field carried from the sale through to ARV and max bid, plus observed clearing fractions from Rhode Island sales. Louisiana abolished exactly this mechanism on 2026-01-01; if Rhode Island follows, the entry becomes ordinary.",
+    statute: "R.I. Gen. Laws §§ 44-9-8 (sale of undivided part), 44-9-19 and 44-9-21 (redemption), 44-9-25 (foreclosure of redemption)",
+    asOf: "2026-09",
+    sources: [
+      "https://webserver.rilegislature.gov/Statutes/TITLE44/44-9/44-9-8.HTM",
+      "https://webserver.rilegislature.gov/Statutes/TITLE44/44-9/44-9-19.HTM",
+      "https://webserver.rilegislature.gov/Statutes/TITLE44/44-9/44-9-21.HTM",
+      "https://www.ritca.org/Certification-StudyGuide.pdf",
+    ],
+  },
+};
+
 export const STATUTE_PARAMS: Record<string, StatuteParams> = {
   AR: {
     state: "AR",

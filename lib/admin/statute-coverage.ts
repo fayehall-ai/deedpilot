@@ -34,7 +34,7 @@
 import { gte, sql } from "drizzle-orm";
 import { db } from "../db";
 import { auctions, counties } from "../db/schema";
-import { STATUTE_PARAMS, type StatuteParams } from "../deal/statute";
+import { NOT_ENCODED, STATUTE_PARAMS, type StatuteParams } from "../deal/statute";
 import { STATE_NAMES } from "../atlas/state-names";
 
 /**
@@ -70,6 +70,15 @@ export interface UncoveredState {
   sales: number;
   parcels: number;
   soonest: string | null;
+  /**
+   * Set when the state was researched and deliberately left uncovered.
+   *
+   * Without this the console cannot tell a closed question from a queue item,
+   * and since the list ranks by parcels, the closed ones sit at the top of the
+   * research queue permanently — New Jersey's 7,427 parcels above every state
+   * anyone could actually act on.
+   */
+  deliberate?: { summary: string; blocker: string; unblockedBy: string };
 }
 
 export interface StatuteCoverage {
@@ -145,14 +154,32 @@ export async function getStatuteCoverage(): Promise<StatuteCoverage> {
 
   const uncovered: UncoveredState[] = rows
     .filter((r) => !(r.state in STATUTE_PARAMS))
-    .map((r) => ({
-      state: r.state,
-      name: STATE_NAMES[r.state] ?? r.state,
-      sales: r.sales,
-      parcels: r.parcels,
-      soonest: r.soonest ?? null,
-    }))
-    .sort((a, b) => b.parcels - a.parcels || b.sales - a.sales || a.state.localeCompare(b.state));
+    .map((r) => {
+      const closed = NOT_ENCODED[r.state];
+      return {
+        state: r.state,
+        name: STATE_NAMES[r.state] ?? r.state,
+        sales: r.sales,
+        parcels: r.parcels,
+        soonest: r.soonest ?? null,
+        deliberate: closed
+          ? { summary: closed.summary, blocker: closed.blocker, unblockedBy: closed.unblockedBy }
+          : undefined,
+      };
+    })
+    /*
+     * Researchable states first, then the closed ones — within each group, by
+     * exposure. Ranking purely on parcels would answer "where is the most
+     * money" when the question the list is actually asked is "what should I do
+     * next", and those differ exactly where a state has been ruled out.
+     */
+    .sort(
+      (a, b) =>
+        Number(Boolean(a.deliberate)) - Number(Boolean(b.deliberate)) ||
+        b.parcels - a.parcels ||
+        b.sales - a.sales ||
+        a.state.localeCompare(b.state),
+    );
 
   return {
     covered,

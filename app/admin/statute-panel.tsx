@@ -133,7 +133,8 @@ export async function StatutePanel() {
         <p className="mt-1 text-sm text-muted">
           {unpriceableParcels.toLocaleString()} announced parcels no max bid can be computed for.
           Ranked by what is at stake, so the next state to research is the top row — that is how
-          Pennsylvania was chosen.
+          Pennsylvania was chosen. States already researched and ruled out sort to the bottom with
+          the reason, because they are a closed question rather than a queue item.
         </p>
       </div>
 
@@ -155,9 +156,20 @@ export async function StatutePanel() {
               </thead>
               <tbody>
                 {uncovered.map((u) => (
-                  <tr key={u.state} className="border-b border-border/50 last:border-0">
-                    <td className="py-1.5 pr-3 whitespace-nowrap font-medium">
-                      {u.state} <span className="text-xs font-normal text-muted">{u.name}</span>
+                  <tr key={u.state} className="border-b border-border/50 align-top last:border-0">
+                    <td className="py-1.5 pr-3 font-medium">
+                      <span className="whitespace-nowrap">
+                        {u.state} <span className="text-xs font-normal text-muted">{u.name}</span>
+                      </span>
+                      {u.deliberate ? (
+                        <div className="mt-1 max-w-[34rem] text-xs font-normal leading-snug text-muted">
+                          <span className="mr-1.5 rounded bg-surface-2 px-1.5 py-0.5 uppercase tracking-wide">
+                            ruled out
+                          </span>
+                          {u.deliberate.summary}
+                          <div className="mt-0.5">Unblocked by: {u.deliberate.unblockedBy}</div>
+                        </div>
+                      ) : null}
                     </td>
                     <td className="tnum py-1.5 pr-3 text-right">{u.parcels.toLocaleString()}</td>
                     <td className="tnum py-1.5 pr-3 text-right text-muted">{u.sales}</td>
