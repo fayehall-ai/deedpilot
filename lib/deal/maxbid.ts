@@ -92,9 +92,10 @@ export interface RedemptionOutlook {
    * actually pays.
    *
    * `flatPenalty` above is the legal ceiling. In Illinois that ceiling is 18%
-   * per six-month period and the observed clearing rate across 64,526 recorded
-   * Cook County liens is a 0% median. Quoting the ceiling as the expected
-   * return overstates it by roughly an order of magnitude.
+   * per six-month period, and across the 64,526 Cook County liens carrying a
+   * rate in the county's own data catalogue the clearing rate is a 0% median.
+   * Quoting the ceiling as the expected return overstates it by roughly an
+   * order of magnitude.
    */
   marketPenalty?: {
     observedMedian: number;

@@ -25,12 +25,37 @@ assert(covered.includes("IL") && covered.includes("CA"), "IL and CA are now pric
 assert(covered.length === Object.keys(STATUTE_PARAMS).length, "covered list must be derived from the table");
 assert(new Set(covered).size === covered.length, "covered list has duplicates");
 
-// The warning for an uncovered state must be derived, not a stale hardcoded list.
-const wy = computeMaxBid({ state: "WY", saleType: "Tax Deed", assessedValue: 50_000 });
-assert(wy.recommendation === "insufficient-data", "uncovered state cannot be priced");
+/*
+ * An uncovered state cannot be priced, and says so without naming the covered ones.
+ *
+ * The subject is chosen at runtime rather than hardcoded. This block used to
+ * test "WY", which stopped being uncovered the moment Wyoming was researched —
+ * the same failure mode the comment above describes for `covered.length === 7`,
+ * and it duly broke. Picking the first two-letter code that is genuinely absent
+ * from the table means this keeps testing what it means to test however many
+ * states are added.
+ */
+const ALL_CODES = [
+  "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA",
+  "ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK",
+  "OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY",
+];
+const uncoveredState = ALL_CODES.find((c) => !(c in STATUTE_PARAMS));
+assert(uncoveredState !== undefined, "every state is covered — retire this block");
+const un = computeMaxBid({ state: uncoveredState!, saleType: "Tax Deed", assessedValue: 50_000 });
+assert(un.recommendation === "insufficient-data", `${uncoveredState} is uncovered and cannot be priced`);
+const notice = un.warnings.find((w) => w.includes("verified statutory parameters"));
+assert(notice !== undefined, "an uncovered state must be warned about");
+assert(notice!.includes(uncoveredState!), "the warning must name the state being priced");
+/*
+ * And must NOT enumerate the covered states. That list used to be inlined here,
+ * which made a sentence a bidder reads change every time an unrelated state was
+ * researched, and broke four frozen golden cases on every addition. The console's
+ * statute coverage panel is where the list belongs.
+ */
 assert(
-  wy.warnings.some((w) => w.includes("IL") && w.includes("CA")),
-  "the uncovered-state warning must list the states we actually cover",
+  !/verified statutory parameters \(/.test(notice!),
+  "the uncovered-state warning must not list the covered states",
 );
 
 // --- every entry is internally coherent --------------------------------------

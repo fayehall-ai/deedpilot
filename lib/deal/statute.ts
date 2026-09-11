@@ -33,9 +33,15 @@ export interface RedemptionTier {
  *
  * Illinois is the case that forced this to exist. Statute caps the penalty at
  * 18% per six-month period, and a naive reading makes an Illinois lien look like
- * a 36%/year instrument. In the 64,526 recorded Cook County sales we hold, the
- * rate actually cleared at a **median of 0% and a mean of 1.88%** — 81% of liens
- * were bid all the way down to zero. Institutional buyers take these for the
+ * a 36%/year instrument. Across 64,526 Cook County sales carrying a
+ * `winning_bid_percent` in the county's own data catalogue — see
+ * `observedSource` on the IL entry — the rate actually cleared at a
+ * **median of 0% and a mean of 1.88%**, with 81.4% bid all the way to zero.
+ *
+ * That catalogue is the source of the RATE. It is not the same set as the
+ * 70,109 Cook rows in our own historical corpus, which carry outcomes but no
+ * rate field at all; conflating the two would claim we measured something we
+ * only cited. Institutional buyers take these for the
  * deed remainder, not the interest.
  *
  * So the statutory cap is the best case and the observed median is the base
@@ -697,8 +703,14 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       interestKind: "annual",
       // A.R.S. § 42-18152. Three years from the sale before the certificate
       // holder may bring a judicial foreclosure. Interest is bid down from
-      // 16% and accrues annually, so it is modelled as an annual rate rather
-      // than a flat penalty (see `annualInterest` handling in maxbid.ts).
+      // 16% and accrues annually, so it is an annual rate rather than a flat
+      // penalty — see `interestKind` above.
+      //
+      // This comment used to cite `annualInterest` handling in maxbid.ts. No
+      // such handling existed, and the engine annualised the 16% by dividing
+      // it across the three-year window and reporting 5.33%. The comment
+      // described an intention; the arithmetic did the opposite for as long as
+      // the entry existed.
       tiers: [{ throughDays: 1095, penalty: 0.16 }],
       maxDays: 1095,
       extendedFor: "interest is bid down at auction from a 16% statutory maximum",
@@ -782,7 +794,8 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
    * shape of error as reading Illinois' 18% cap as its yield.
    *
    * The tiers below are the statute. The divergence is the first caveat, and
-   * the fix is a `penaltyBase` on the type rather than a fudged number here.
+   * the fix is a penalty-base field on the type — which does not exist yet —
+   * rather than a fudged number here.
    *
    * ## Three redemption regimes, one row
    *
