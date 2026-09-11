@@ -250,6 +250,73 @@ export const NOT_ENCODED: Record<string, NotEncodedState> = {
 };
 
 export const STATUTE_PARAMS: Record<string, StatuteParams> = {
+  /*
+   * Alaska is a municipal-resale state where the former owner has a decade to
+   * change their mind.
+   *
+   * AS 29.45.400: "Properties transferred to the municipality are held by the
+   * municipality for at least one year", redeemable during that period. Then
+   * the property is deeded to the borough or city (AS 29.45.450). But the right
+   * to get it back does not end there — AS 29.45.470(a) lets the record owner
+   * at the time of foreclosure, or their assigns, "within 10 years and before
+   * the sale or contract of sale of the tax-foreclosed property by the
+   * municipality, repurchase the property", paying the judgment amount plus
+   * interest, accrued taxes, and the municipality's costs of foreclosure and of
+   * maintaining the property.
+   *
+   * "Before the sale" is what saves the buyer: a completed purchase cuts the
+   * right off. What it does not save is the pipeline. A parcel can sit on a
+   * municipal list for years and be reclaimed the week before the auction.
+   */
+  AK: {
+    state: "AK",
+    saleType: "Tax Deed",
+    /*
+     * No post-sale redemption. The one-year hold under AS 29.45.400 and the
+     * ten-year repurchase right under AS 29.45.470 both run against the
+     * municipality and both close at the sale, so neither pays a buyer anything
+     * for waiting.
+     */
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: false. The buyer takes from a municipality that holds by
+       * judgment and deed after a year of redemption, and two separate
+       * ordinances must be adopted before the sale can happen at all. The
+       * Oregon and Minnesota posture.
+       */
+      typicalLow: 2000,
+      typicalHigh: 5000,
+      typicalMonths: 4,
+      required: false,
+    },
+    closingCosts: 250,
+    auctionToMarketableMonths: 4,
+    /*
+     * 1.0, on a definition of value that is explicitly a market price rather
+     * than a formula — closer to Washington than to Nevada.
+     */
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "AS 29.45.110(a): the assessor assesses property at full and true value as of 1 January, which the statute defines as \"the estimated price that the property would bring in an open market and under the then prevailing market conditions in a sale between a willing seller and a willing buyer both conversant with the property and with prevailing general price levels\". No ratio or classification is applied.",
+    derivedArvCaveat:
+      "The definition is a market price and the ratio is 1.0, so the derivation is sound in principle. The practical limit is thinness: most of Alaska is served by small assessment offices and much of it has few arm's-length sales to calibrate against, so an assessment in a remote borough is a considered estimate rather than a measurement. Access is the other unmodelled factor — a parcel off the road system is worth a fraction of an equivalent one on it, and nothing in an assessed value or a max bid captures that.",
+    statute:
+      "AS §§ 29.45.400 (redemption period, one-year hold), 29.45.440 (expiration), 29.45.450 (deed to borough or city), 29.45.460 (disposition and sale; ordinances required), 29.45.470 (repurchase by record owner within 10 years), 29.45.480 (proceeds of tax sale); AS 29.45.110 (full and true value)",
+    asOf: "2026-09",
+    sources: [
+      "https://www.commerce.alaska.gov/web/portals/4/pub/title_29.pdf",
+      "https://law.justia.com/codes/alaska/title-29/chapter-45/article-2/",
+    ],
+    caveats: [
+      "THE FORMER OWNER HAS TEN YEARS TO TAKE IT BACK, UP UNTIL THE SALE. AS 29.45.470(a) lets the record owner at foreclosure or their assigns repurchase \"within 10 years and before the sale or contract of sale\", paying the judgment amount plus interest not exceeding 15% a year, accrued taxes, and the municipality's costs of foreclosure, maintenance, insurance and management. A completed sale ends the right, so a buyer's title is safe — but an Alaska listing is reclaimable until the moment it is sold, and due diligence spent on one can evaporate.",
+      "TWO ORDINANCES STAND BETWEEN A FORECLOSED PARCEL AND A SALE. Under AS 29.45.460 the municipality must first determine by ordinance whether to retain the property for a public purpose, and if it is held for one, must determine by a further ordinance that no public need exists before it may be sold, with certified mail notice to the former record owner. Adoption of a retention ordinance also extinguishes the repurchase right. Alaska inventory moves at the pace of an assembly agenda.",
+      "MOST OF ALASKA HAS NO PROPERTY TAX AT ALL. Only organised boroughs and cities levy one, so the unorganised borough — the majority of the state's area — generates no tax foreclosures and will never appear in this pipeline. Alaska inventory is a handful of municipalities, not a state-wide market.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
+    ],
+  },
   AR: {
     state: "AR",
     saleType: "Tax Deed",
@@ -525,6 +592,90 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
    * auction with no fixed end. That is not a caveat about title or cost; it
    * changes what a max bid means. See the first caveat.
    */
+  /*
+   * Missouri is the state where the paperwork can cost you the whole position.
+   *
+   * RSMo 140.405 requires a certificate purchaser, "at least ninety days prior
+   * to the date when a purchaser is authorized to acquire the deed", to obtain
+   * "a title search report from a licensed attorney or licensed title company
+   * detailing the ownership and encumbrances on the property" and to notify the
+   * owner and every recorded lienholder of their redemption rights, by first
+   * class AND certified mail, then file an affidavit with the collector
+   * evidencing all of it. And then: "Failure of the purchaser to comply with
+   * this section shall result in such purchaser's loss of all interest in the
+   * real estate."
+   *
+   * Not a defect in the deed. Not a delay. Loss of all interest — the purchase
+   * price and the lien, gone. No other state in this file forfeits the
+   * investment for a procedural error, and it is the single most important
+   * thing to know about Missouri.
+   */
+  MO: {
+    state: "MO",
+    saleType: "Tax Lien",
+    redemption: {
+      /*
+       * RSMo 140.340: the owner has "the absolute right to redeem the same at
+       * any time during the one year next ensuing", paying "interest at the
+       * rate specified in such certificate, not to exceed ten percent
+       * annually". Ten is the statutory ceiling and what certificates normally
+       * specify, so it is the best case rather than a guarantee — the same
+       * distinction the Illinois entry draws, with the difference that
+       * Missouri's floor is whatever the certificate says rather than an open
+       * auction.
+       */
+      interestKind: "annual",
+      tiers: [{ throughDays: 365, penalty: 0.1 }],
+      maxDays: 365,
+    },
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: true. A Missouri collector's deed is widely regarded as
+       * uninsurable without an action, and the notice regime above means the
+       * question a title examiner asks is not what the deed says but whether
+       * § 140.405 was complied with to the letter.
+       */
+      typicalLow: 2500,
+      typicalHigh: 6000,
+      typicalMonths: 5,
+      required: true,
+    },
+    closingCosts: 250,
+    /*
+     * A year of redemption, the ninety-day notice window inside its tail, then
+     * the deed and the action to clear it.
+     */
+    auctionToMarketableMonths: 20,
+    /*
+     * 0.19 — the residential subclass. RSMo 137.115(5)(1) sets residential at
+     * nineteen per cent of true value in money, agricultural and horticultural
+     * at twelve, and utility, industrial, commercial and all other at
+     * thirty-two. Residential is chosen as the common case; see the caveat for
+     * what that costs on the other two.
+     */
+    assessmentRatio: 0.19,
+    assessmentBasis:
+      "RSMo 137.115(5)(1) assesses real property by subclass as a percentage of true value in money: residential 19%, agricultural and horticultural 12%, and utility, industrial, commercial and all other 32%. This entry uses the residential rate.",
+    derivedArvCaveat:
+      "Missouri's three subclasses span 12% to 32%, so the classification matters more than the number. Dividing a commercial assessment by the residential 0.19 overstates the property by about 1.7x, the dangerous direction. Dividing an agricultural assessment by 0.19 understates it by about a third — safe, but it will make farmland look worthless. Confirm the subclass on the assessor's record before accepting a derived Missouri value.",
+    statute:
+      "RSMo §§ 140.150 et seq. (Jones-Munger tax certificate sales), 140.340 (redemption within one year, up to 10%), 140.405 (title search, ninety-day notice to owner and lienholders, forfeiture for non-compliance), 140.250 (subsequent offerings); § 137.115 (assessment subclasses). Chapter 141 governs St. Louis City and Jackson County separately.",
+    asOf: "2026-09",
+    sources: [
+      "https://revisor.mo.gov/main/OneSection.aspx?section=140.340",
+      "https://revisor.mo.gov/main/OneSection.aspx?section=140.405",
+      "https://revisor.mo.gov/main/OneSection.aspx?section=137.115",
+    ],
+    caveats: [
+      "A NOTICE FAILURE FORFEITS THE ENTIRE INVESTMENT, NOT JUST THE DEED. RSMo 140.405: \"Failure of the purchaser to comply with this section shall result in such purchaser's loss of all interest in the real estate.\" Compliance means a title search report from a licensed attorney or title company, notice to the owner and every recorded lienholder at least ninety days before the deed may be taken, sent by both first class and certified mail, and an affidavit filed with the collector. Budget the title search and the mailings as certain costs of every Missouri position, and treat the ninety-day deadline as the hardest date in this file.",
+      "THE 10% IS A CEILING SET BY THE CERTIFICATE. § 140.340 pays \"interest at the rate specified in such certificate, not to exceed ten percent annually\", plus eight per cent on subsequent taxes the holder pays. The tier is the ceiling; read the certificate before assuming it.",
+      "SUBSEQUENT OFFERINGS ARE A DIFFERENT INSTRUMENT. A parcel unsold at its first offering is offered again, and the terms — price, redemption and the deed timetable — change with the offering number under § 140.250. Nothing in a listing necessarily says which offering it is, and this entry models a first-offering certificate.",
+      "ST. LOUIS CITY AND JACKSON COUNTY DO NOT USE THIS CHAPTER. They operate under chapter 141, the land tax collection act, which is a court-supervised process with different timing and a different deed. A parcel in either is not priced by this entry.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
+    ],
+  },
   NC: {
     state: "NC",
     saleType: "Tax Deed",
@@ -639,6 +790,67 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "THE STATE SELLS, NOT THE COUNTY. Sales are conducted by the Property Tax Division of the Taxation and Revenue Department under § 7-38-65, which may sell at any time after three years from the first delinquency date. Procedure, notice and catalogue are the Division's, not each county's.",
       "Residential valuations are capped at 3% growth a year (§ 7-36-21.2) and the cap lifts on a change of ownership, so assessed value understates market on long-held homes and tracks it on recently transferred ones. Two parcels of identical worth can carry very different assessments.",
       "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed New Mexico max bid until they are set.",
+    ],
+  },
+  /*
+   * Another county-resale state, with an extra window on the end.
+   *
+   * The treasurer holds the certificate as trustee "for the period of 2 years
+   * after the first Monday in June" — one year where the property has been
+   * determined abandoned under NRS 361.567 — and if nobody redeems, takes a
+   * deed in trust under NRS 361.585. Even then the former owner is not quite
+   * finished: they may have the property reconveyed during the 90-day period in
+   * NRS 361.603, or "not later than 5 p.m. on the third business day before the
+   * day of the sale by a county treasurer". Both windows close before the
+   * county's auction, so a buyer there takes free of either.
+   *
+   * What is distinctive about Nevada is not the sale. It is that the assessed
+   * value is 35% of a "taxable value" that is not market value at all.
+   */
+  NV: {
+    state: "NV",
+    saleType: "Tax Deed",
+    // Two years of redemption and then a reconveyance window, both spent before
+    // the county sells. Nothing pays the buyer for waiting.
+    redemption: null,
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder.
+       *
+       * required: false. The buyer takes from the county after a statutory
+       * trustee process with two separate windows for the owner to act, which
+       * is the Oregon and Minnesota posture rather than the Arkansas one.
+       */
+      typicalLow: 1500,
+      typicalHigh: 4000,
+      typicalMonths: 4,
+      required: false,
+    },
+    closingCosts: 250,
+    auctionToMarketableMonths: 4,
+    /*
+     * 0.35 of taxable value — and taxable value is the problem, not the ratio.
+     * See derivedArvCaveat.
+     */
+    assessmentRatio: 0.35,
+    assessmentBasis:
+      "NRS 361.225 fixes the assessment ratio at 35% of taxable value for all property. NRS 361.227 determines taxable value as the full cash value of the land plus the replacement cost of improvements less depreciation, where depreciation runs at 1.5% of replacement cost for each year of adjusted actual age up to a maximum of 50 years.",
+    derivedArvCaveat:
+      "Nevada's 35% is applied to taxable value, which for improved property is not market value and is not trying to be. Improvements are valued at replacement cost less 1.5% a year of depreciation up to fifty years, so a fifty-year-old building is carried at a quarter of what it would cost to rebuild, regardless of what it would sell for. Dividing an assessment on an older improved parcel by 0.35 therefore returns something well below market — the safe direction, but wrong enough to make a sound deal look impossible. The distortion grows with the age of the structure and is absent on bare land, where taxable value is full cash value.",
+    statute:
+      "NRS §§ 361.567 and 361.570 (trustee's certificate; two-year period, one year if abandoned), 361.585 (deed in trust to the county treasurer; reconveyance), 361.595 (conveyance to purchasers), 361.603 (90-day reconveyance period), 361.610 (disposition of proceeds); NRS 361.225 (rate of assessment), 361.227 (determination of taxable value)",
+    asOf: "2026-09",
+    sources: [
+      "https://nevada.public.law/statutes/nrs_361.570",
+      "https://nevada.public.law/statutes/nrs_361.585",
+      "https://law.justia.com/codes/nevada/chapter-361/statute-361-227/",
+      "https://www.leg.state.nv.us/nrs/nrs-361.html",
+    ],
+    caveats: [
+      "THE ASSESSMENT IS NOT A FRACTION OF MARKET VALUE. Nevada's 35% applies to taxable value, and NRS 361.227 builds taxable value for improvements from replacement cost less 1.5% per year of age, capped at fifty years. On an older house that is a construction-cost figure with three-quarters written off, not a sale price. Treat a derived Nevada ARV on improved property as a floor and override it with comparable sales; on vacant land, where taxable value is full cash value, the derivation is sound.",
+      "ABANDONED PROPERTY MOVES TWICE AS FAST. Where a property is determined abandoned under NRS 361.567 the treasurer holds it for one year rather than two, so Nevada inventory can reach sale in half the usual time — and an abandoned determination is also a statement about the condition of what is being sold.",
+      "The former owner gets one more chance than in most states. After the treasurer's deed in trust, reconveyance remains available for the 90-day period in NRS 361.603 and until 5 p.m. on the third business day before the sale. A listed Nevada parcel can be withdrawn within days of the auction.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator.",
     ],
   },
   NY: {
@@ -1834,6 +2046,95 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
       "Redemption is three years from recordation, or eighteen months for blighted or abandoned property. The shorter period began as a New Orleans rule and was extended by constitutional amendment; confirm it applies in the parish in question. The period is peremptive but can be extended where required notice was not given, so a defective notice keeps the owner's right alive.",
       "Louisiana has parishes, not counties, and Orleans has historically run its own procedure. Confirm the collector and the local rules before assuming a statewide process.",
       "quietTitle costs here are a placeholder and have not been reviewed by the operator, and they price a suit under a statute the courts have not yet interpreted. Do not rely on a computed Louisiana max bid until they are set.",
+    ],
+  },
+  /*
+   * Massachusetts changed both halves of the deal in 2024, and both moved
+   * against the investor.
+   *
+   * The rate was cut from 16% to 8%. M.G.L. c. 60, § 62 now reads "interest at
+   * 8 per cent upon the original sum for which the land was taken or sold, from
+   * the date of sale". Every Massachusetts return figure written before 2024 is
+   * exactly twice what the instrument now pays.
+   *
+   * And the equity is no longer the prize. New § 64A requires the judgment
+   * holder, within thirty days of a final foreclosure judgment, to elect to
+   * retain or sell, and to pay the former owner the "excess equity" — the sale
+   * proceeds less the tax title balance and the documented costs of sale, held
+   * meanwhile in a segregated interest-bearing account. § 64 now says that a
+   * Land Court judgment "shall not impair or limit the right of the owner of
+   * the land at the time of foreclosure ... to receive any excess equity".
+   *
+   * So Massachusetts is an 8% instrument and nothing more, the same conclusion
+   * as Colorado by a different route. What is bought here is a tax title
+   * assigned by the municipality, not a deed, and it only becomes ownership
+   * through the Land Court.
+   */
+  MA: {
+    state: "MA",
+    saleType: "Tax Lien",
+    redemption: {
+      interestKind: "annual",
+      tiers: [{ throughDays: 1095, penalty: 0.08 }],
+      /*
+       * There is no statutory outer limit — the right of redemption lasts until
+       * the Land Court forecloses it, and § 65 lets the holder petition only
+       * "after 12 months from the sale or taking". Three years is a modelling
+       * assumption for a typical cycle, not a deadline in the statute. See the
+       * caveat.
+       */
+      maxDays: 1095,
+    },
+    quietTitle: {
+      /*
+       * NOT YET REVIEWED BY THE OPERATOR — placeholder, and in this state the
+       * field means something different from everywhere else.
+       *
+       * required: true because in Massachusetts this is not the optional
+       * clean-up action it is elsewhere. A tax title is not ownership. The Land
+       * Court foreclosure of the right of redemption is the only way it becomes
+       * ownership, it cannot be started for twelve months, and its cost is a
+       * cost of the deal rather than a contingency. typicalMonths is the length
+       * of that case.
+       */
+      typicalLow: 3000,
+      typicalHigh: 7000,
+      typicalMonths: 12,
+      required: true,
+    },
+    closingCosts: 250,
+    /*
+     * Twelve months before a petition may be brought under § 65, then the Land
+     * Court case. Capital is committed from the assignment.
+     */
+    auctionToMarketableMonths: 30,
+    /*
+     * 1.0 — Massachusetts assesses at full and fair cash value under M.G.L.
+     * c. 59, § 38, with the Department of Revenue certifying values on a
+     * five-year cycle and interim-year adjustments in between. Closer to
+     * Washington than to North Carolina, but not annual.
+     */
+    assessmentRatio: 1.0,
+    assessmentBasis:
+      "M.G.L. c. 59, § 38 requires assessment at full and fair cash valuation, with no classification ratio applied to the assessed value. The Department of Revenue certifies each municipality's values on a five-year cycle, with interim-year adjustments between certifications.",
+    derivedArvCaveat:
+      "The ratio is 1.0 and the assessment is reasonably current, so a derived Massachusetts ARV is sound as a market figure. What it does not describe is what the investor gets. Since § 64A the excess equity above the tax title balance belongs to the former owner, so the ARV is not the upside — it is the number that determines how much of somebody else's money passes through the holder's escrow account. Use it to judge whether the position will be redeemed, not what it is worth if it is not.",
+    statute:
+      "M.G.L. c. 60, §§ 52-54 (taking and assignment of tax title), 62 (redemption at 8%), 64 (Land Court jurisdiction; excess equity preserved), 64A (election to retain or sell, sale procedure, excess equity), 65 (petition to foreclose after 12 months); c. 59, § 38 (full and fair cash valuation)",
+    asOf: "2026-09",
+    sources: [
+      "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleIX/Chapter60/Section62",
+      "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleIX/Chapter60/Section65",
+      "https://www.mass.gov/info-details/mass-general-laws-c60-ss-64a",
+      "https://www.mass.gov/info-details/ask-dls-tax-title-reform-part-2",
+      "https://www.mma.org/wp-content/uploads/2026/01/MMLA-MMA-Tax-Title-Update-1.15.26-Connect351.pdf",
+    ],
+    caveats: [
+      "THE RATE WAS HALVED IN 2024. M.G.L. c. 60, § 62 now pays \"interest at 8 per cent\" where it paid 16%. Every Massachusetts yield figure in circulation predates the change and is double the truth. Municipalities may also waive interest entirely and offer repayment plans of five to ten years, so even 8% is a ceiling on what a given position collects.",
+      "THE EQUITY IS NOT THE INVESTOR'S ANY MORE. Under § 64A the judgment holder must elect within thirty days of final judgment to retain or sell, follow a prescribed appraisal and auction procedure, and pay the former owner the excess equity — gross proceeds less the tax title balance at judgment and the documented costs of sale — holding it meanwhile in a segregated interest-bearing account. § 64 preserves that right expressly against the foreclosure judgment. Massachusetts is an 8% instrument; do not underwrite it on taking the property.",
+      "THE REDEMPTION WINDOW HAS NO END, AND THE HOLDER CANNOT START THE CLOCK FOR A YEAR. § 65 permits a petition to foreclose only \"after 12 months from the sale or taking\" — earlier only where a municipality faces abandoned buildings or costs exceeding value — and nothing terminates the right of redemption until the Land Court does. The 1095 days in the tier is a modelling assumption for a typical cycle, not a statutory cap. A position can run considerably longer, earning 8% throughout.",
+      "WHAT IS BOUGHT IS A TAX TITLE, NOT A DEED. Massachusetts municipalities take title for unpaid taxes and may assign the tax title; the assignee holds a lien interest that becomes ownership only through the Land Court, which has exclusive jurisdiction. The quietTitle field here holds the cost of that foreclosure, which is mandatory rather than optional.",
+      "quietTitle costs here are a placeholder and have not been reviewed by the operator, and in this state they are a core cost of every deal rather than a contingency.",
     ],
   },
   MI: {
