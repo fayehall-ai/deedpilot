@@ -13,7 +13,7 @@ import { revalidatePath } from "next/cache";
 import { currentActor, isAdmin } from "@/lib/admin/auth";
 import { audit, inFlightFor } from "@/lib/admin/queue";
 import { enqueueScoutReport, scoutAdapter } from "@/lib/admin/scout-jobs";
-import { SCAN_STATES } from "@/lib/ai/scout-report";
+import { scanStateCodes } from "@/lib/ai/scan-states";
 import { backlogStates, buildPlan } from "@/lib/admin/plan-jobs";
 import { SCOUT_PROMPT_ID, resetScoutPrompt, saveScoutPrompt } from "@/lib/admin/scout-prompt";
 
@@ -39,7 +39,11 @@ export async function generateScoutReport(formData: FormData): Promise<void> {
   } else if (only && only !== "ALL") {
     wanted = [only];
   } else {
-    wanted = [...SCAN_STATES];
+    /*
+     * Resolved from the calendar rather than a constant, so an import that adds
+     * a state adds it to the next sweep. See `resolveScanStates`.
+     */
+    wanted = await scanStateCodes();
   }
 
   /*

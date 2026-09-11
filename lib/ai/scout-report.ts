@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { runSearched, type Citation } from "./providers";
+import { PRIORITY_STATES, STATE_HUBS } from "./scan-states";
 
 /**
  * The Auction Scout report — one state's upcoming sales, read off the live web.
@@ -35,66 +36,9 @@ export const SALE_KINDS = [
   "county tax auction",
 ] as const;
 
-/**
- * States scanned by default, priority order.
- *
- * The first five are scanned county by county rather than by exception —
- * they are where the volume is, and a missed Georgia sale costs more than a
- * missed one anywhere else on this list.
- */
-export const PRIORITY_STATES = ["GA", "TX", "CA", "FL", "OH"] as const;
-export const SCAN_STATES = [
-  ...PRIORITY_STATES,
-  "PA", "CT", "NC", "AR", "CO", "MN", "MO", "OK", "AK", "KS", "WI",
-  /*
-   * MI and NY are here because their hubs were already written and were being
-   * sent nowhere: `STATE_HUBS` had 18 keys against 16 scanned states, so the
-   * tax-sale.info entry covering seventy-plus Michigan counties and the
-   * AAR/NYSAuctions entry were dead weight. Both states publish upcoming county
-   * auctions, which is the standing test for inclusion.
-   */
-  "MI", "NY",
-] as const;
 
-/**
- * Where a state's sales are published in bulk.
- *
- * This is the difference between a report worth sending and a thin one, and it
- * was learned by taking the previous edition apart: its 79 rows rest on about
- * twenty sources, and the volume is almost all hubs. Forty-six Arkansas rows
- * came from ONE page — the Commissioner of State Lands catalog. Michigan's came
- * from a single site covering seventy-plus counties. Texas from a law firm that
- * posts every county's monthly sale on one page.
- *
- * A county-at-a-time crawl cannot compete with that. A Connecticut run spent
- * thirty-seven searches to find six sales, because it went looking for counties
- * instead of looking for the list. So the model is pointed at the hub first and
- * told to enumerate it, and only then to fill gaps county by county.
- *
- * Deliberately entry points, not answers: the model still has to open them and
- * read what is posted today. A hub that has gone stale should produce nothing,
- * not a remembered row.
- */
-const STATE_HUBS: Record<string, string> = {
-  AR: "Arkansas Commissioner of State Lands (cosl.org) publishes the statewide catalog of tax-delinquent land auctions county by county, with sale dates, venues and redemption cut-offs. Start there and enumerate every county sale it lists in the window.",
-  MI: "tax-sale.info runs the land auctions for most Michigan counties and lists dates by county group.",
-  NY: "aarauctions.com and nysauctions.com carry county tax-foreclosure auctions with closing dates across many counties.",
-  TX: "Texas sales are on the first Tuesday monthly. mvbalaw.com, lgbs.com (Linebarger) and pbfcm.com (Perdue Brandon) each post many counties' sale notices on one page; county sheriff and tax-assessor pages carry the rest.",
-  GA: "Georgia sales are on the first Tuesday monthly, run by county tax commissioners and sheriffs (levy sales). County tax commissioner sites and consolidated Georgia tax-sale listing pages carry many counties at once.",
-  FL: "Florida tax deed sales run on county clerk RealTaxDeed / RealAuction sites — commonly <county>.realtaxdeed.com or the clerk's own calendar. Each carries its county's full upcoming schedule.",
-  CA: "California county treasurer-tax collectors sell through Bid4Assets and GrantStreet DeedAuction; both list several counties' upcoming sales together.",
-  OH: "Ohio county sheriff sales run largely on RealAuction (sheriffsaleauction.ohio.gov subdomains) and county sheriff sites, each with a full upcoming calendar.",
-  PA: "Pennsylvania county Tax Claim Bureaus run upset and judicial sales; several counties sell through Bid4Assets.",
-  CT: "Connecticut sales are MUNICIPAL, not county — town and city tax collectors under CGS 12-157. Work the town tax collector pages.",
-  NC: "North Carolina tax foreclosures are run by county tax offices and their law firms — zacchaeuslegal.com and kaniaLaw.com post many counties' upcoming sales together.",
-  CO: "Colorado county treasurers run annual tax lien sales, many through zeusauction.com and realauction.",
-  MN: "Minnesota county auditor-treasurers publish tax-forfeited land sales.",
-  MO: "Missouri county collectors hold annual August tax sales; collector pages carry the lists.",
-  OK: "Oklahoma county treasurers hold June resales and publish lists on treasurer pages.",
-  AK: "Alaska boroughs and municipalities publish tax foreclosure land sales.",
-  KS: "Kansas county treasurers and county counselors publish tax foreclosure sale notices.",
-  WI: "Wisconsin counties sell tax-deeded land through county treasurer and land records pages.",
-};
+
+
 
 /**
  * Sources the report will not read.

@@ -17,6 +17,7 @@
  * too, so a CLI plan run matches what the dispatcher will do.
  */
 
+import { MAX_SCAN_STATES } from "@/lib/ai/scan-states";
 import { eq } from "drizzle-orm";
 
 export interface PipelineConfig {
@@ -58,8 +59,14 @@ export const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as con
 export const LIMITS = {
   /** One tick cannot drain more than a few hundred counties at any cadence. */
   crawlMaxTasks: { min: 1, max: 1000 },
-  /** 18 states are scannable; more is a typo. Each is a paid 1-2 minute call. */
-  researchStates: { min: 1, max: 18 },
+  /**
+   * Bounded by the scan set's own ceiling rather than a copy of it. This read
+   * 18 because the scan list was eighteen hand-written states; the list is now
+   * derived from the calendar and can grow, and a limit that silently disagreed
+   * with it would refuse a legitimate setting. Each state is a paid 1-2 minute
+   * call, which is what the ceiling is really about.
+   */
+  researchStates: { min: 1, max: MAX_SCAN_STATES },
   /** Under a day cannot guard a daily tick; over a fortnight is not "weekly". */
   researchCooldownDays: { min: 1, max: 14 },
 } as const;

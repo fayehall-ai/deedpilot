@@ -1,6 +1,6 @@
 import { Card, Callout, Stat } from "@/components/ui";
 import { getScoutReport } from "@/lib/admin/scout-jobs";
-import { SCAN_STATES } from "@/lib/ai/scout-report";
+import { resolveScanStates } from "@/lib/ai/scan-states";
 import { getScoutPrompt } from "@/lib/admin/scout-prompt";
 import { generateScoutReport, saveScoutPromptAction } from "./scout-actions";
 import { SubmitButton } from "@/components/submit-button";
@@ -31,7 +31,11 @@ const STATUS_TONE: Record<string, string> = {
  * must never look the same on screen.
  */
 export async function ScoutPanel() {
-  const [report, prompt] = await Promise.all([getScoutReport(), getScoutPrompt()]);
+  const [report, prompt, scan] = await Promise.all([
+    getScoutReport(),
+    getScoutPrompt(),
+    resolveScanStates(),
+  ]);
   const { totals, window } = report;
   const done = report.states.filter((s) => s.status === "done").length;
 
@@ -41,17 +45,32 @@ export async function ScoutPanel() {
         <h2 className="text-lg font-semibold">Auction Scout report</h2>
         <form action={generateScoutReport} className="flex items-center gap-2">
           <select name="state" className={input} defaultValue="ALL">
-            <option value="ALL">All {SCAN_STATES.length} states</option>
+            <option value="ALL">All {scan.length} states</option>
             <option value="BACKLOG">Backlog — states with a sale coming and no source</option>
-            {SCAN_STATES.map((s) => (
-              <option key={s} value={s}>
-                {s} only
+            {scan.map((c) => (
+              <option key={c.state} value={c.state}>
+                {c.state} only —{" "}
+                {c.reason === "priority"
+                  ? "priority"
+                  : c.reason === "researched"
+                    ? "researched, nothing held"
+                    : `${c.sales} sale${c.sales === 1 ? "" : "s"}, ${c.parcels.toLocaleString()} parcels`}
+                {c.hasHub ? "" : " · no hub"}
               </option>
             ))}
           </select>
           <SubmitButton pendingLabel="Queueing research…">Generate Auction Scout Report</SubmitButton>
         </form>
       </div>
+
+      <p className="text-sm text-muted">
+        The {scan.length} states are chosen from the calendar, not a fixed list: the five priority
+        states always, then whichever states hold the most upcoming inventory, then states whose
+        publication point has been researched even if we currently hold nothing from them — a
+        state must not fall out of the sweep because we cannot see it. An import changes the set
+        the same day. States with no researched hub are marked; they still scan, via a generic
+        &ldquo;find the statewide catalog&rdquo; instruction, but cost more per call.
+      </p>
 
       <p className="text-sm text-muted">
         Queues one live-web research pass per state, scanning{" "}

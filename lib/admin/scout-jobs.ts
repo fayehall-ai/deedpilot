@@ -5,8 +5,8 @@ import { runJobs, type RunJob } from "@/lib/db/schema";
 import { enqueue } from "./queue";
 import { cooldownSince, deskWeekday, isResearchDay } from "./research-day";
 import { getPipelineConfig } from "./pipeline-settings";
+import { scanStateCodes } from "@/lib/ai/scan-states";
 import {
-  SCAN_STATES,
   dedupe,
   scanWindow,
   urgentRows,
@@ -59,10 +59,11 @@ export const SCOUT_RESEARCH_PRIORITY = 5;
  * Queue a full scan.
  */
 export async function enqueueScoutReport(
-  states: readonly string[] = SCAN_STATES,
+  /** Omit to scan whatever the calendar currently justifies. */
+  states?: readonly string[],
   requestedBy = "admin",
 ): Promise<{ queued: number; states: string[] }> {
-  const wanted = states.map((s) => s.toUpperCase());
+  const wanted = (states ?? (await scanStateCodes())).map((s) => s.toUpperCase());
   const queued: string[] = [];
   for (const state of wanted) {
     await enqueue({ adapter: scoutAdapter(state), priority: SCOUT_RESEARCH_PRIORITY, requestedBy });
@@ -111,7 +112,14 @@ export interface ScoutReportView {
  * Georgia lands, with the rest still marked queued.
  */
 export async function getScoutReport(): Promise<ScoutReportView> {
-  const adapters = SCAN_STATES.map(scoutAdapter);
+  /*
+   * The scan set is resolved from the calendar, so it moves. A state that has
+   * dropped out still has its last report in `run_jobs`; it simply stops being
+   * listed as outstanding, which is correct — it is no longer work we intend
+   * to do.
+   */
+  const scanStates = await scanStateCodes();
+  const adapters = scanStates.map(scoutAdapter);
   const jobs = await db
     .select()
     .from(runJobs)
@@ -140,7 +148,7 @@ export async function getScoutReport(): Promise<ScoutReportView> {
    * run is the most important row on the table, because it is the one holding
    * a gap nobody can see.
    */
-  for (const state of SCAN_STATES.filter((s) => !latest.has(scoutAdapter(s)))) {
+  for (const state of scanStates.filter((s) => !latest.has(scoutAdapter(s)))) {
     states.push({
       state,
       status: "not run",
