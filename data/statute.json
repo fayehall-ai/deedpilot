@@ -383,6 +383,38 @@
         "Rand v. Rand / Hall-era excess-proceeds rules mean former owners may claim surplus; this does not affect the buyer's title."
       ]
     },
+    "NM": {
+      "state": "NM",
+      "saleType": "Tax Deed",
+      "redemption": null,
+      "quietTitle": {
+        "typicalLow": 2000,
+        "typicalHigh": 5000,
+        "typicalMonths": 5,
+        "required": true
+      },
+      "closingCosts": 250,
+      "auctionToMarketableMonths": 26,
+      "assessmentRatio": 0.3333,
+      "assessmentBasis": "NMSA 1978, § 7-37-3: taxable value is one third (33⅓%) of the net taxable value of the property. New Mexico applies this uniformly statewide rather than by class or county.",
+      "derivedArvCaveat": "The ratio is honest, but NMSA 1978, § 7-36-21.2 caps annual increases in the valuation of residential property at 3%, so a long-held home's assessed value can sit well below market — the California Proposition 13 problem under a different statute. The cap is removed when the property changes ownership, so a recently transferred parcel tracks market far more closely than one held for decades. Get comparable sales before treating a ratio-derived ARV as a valuation.",
+      "statute": "NMSA 1978, §§ 7-38-65 (sale of real property for delinquent taxes), 7-38-70 (deeds; effect; two-year limitation on challenge); § 7-37-3 (taxable value); § 7-36-21.2 (residential valuation cap)",
+      "asOf": "2026-09",
+      "sources": [
+        "https://law.justia.com/codes/new-mexico/chapter-7/article-38/section-7-38-65/",
+        "https://law.justia.com/codes/new-mexico/chapter-7/article-38/section-7-38-70/",
+        "https://law.justia.com/codes/new-mexico/chapter-7/article-36/section-7-36-21-2/",
+        "https://codes.findlaw.com/nm/chapter-7-taxation/nm-st-sect-7-38-70/",
+        "https://www.nmlegis.gov/handouts/RSTP%20092324%20Item%203%20Property%20Tax%20Overview%20and%20Technology.pdf"
+      ],
+      "caveats": [
+        "THE DEED IS SUBJECT TO EARLIER PERFECTED INTERESTS. § 7-38-70 conveys the former owner's interest as of the date the tax lien arose, 'subject only to perfected interests in the real property existing before' that date. A mortgage or judgment perfected before the lien arose survives the sale. Establish the lien date and search back from it before treating survivingLiens as zero.",
+        "TWO YEARS OF CHALLENGE RISK THAT PAYS NOTHING. The former owner, or anyone claiming through them, is barred from challenging the conveyance only after two years from the date of sale. That is a defect window rather than a redemption — no penalty accrues to the purchaser for waiting it out, so it is pure carry.",
+        "THE STATE SELLS, NOT THE COUNTY. Sales are conducted by the Property Tax Division of the Taxation and Revenue Department under § 7-38-65, which may sell at any time after three years from the first delinquency date. Procedure, notice and catalogue are the Division's, not each county's.",
+        "Residential valuations are capped at 3% growth a year (§ 7-36-21.2) and the cap lifts on a change of ownership, so assessed value understates market on long-held homes and tracks it on recently transferred ones. Two parcels of identical worth can carry very different assessments.",
+        "quietTitle costs here are a placeholder and have not been reviewed by the operator. Do not rely on a computed New Mexico max bid until they are set."
+      ]
+    },
     "NY": {
       "state": "NY",
       "saleType": "Tax Deed",

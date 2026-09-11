@@ -14,7 +14,7 @@
       "confidence": "medium",
       "arv": {
         "value": 200000,
-        "basis": "Assessed $200,000 \u00f7 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
+        "basis": "Assessed $200,000 ÷ 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
         "derived": true,
         "countyOverride": false
       },
@@ -22,7 +22,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 16000,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -34,7 +34,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500\u2013$6,000, ~4 months).",
+          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
           "assumed": true
         },
         {
@@ -52,7 +52,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -65,7 +65,7 @@
         "penaltyAtMaxBid": 24387.5,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
-        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "TX",
@@ -92,21 +92,21 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year."
+        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year."
       ]
     }
   },
@@ -123,7 +123,7 @@
       "confidence": "medium",
       "arv": {
         "value": 200000,
-        "basis": "Assessed $200,000 \u00f7 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
+        "basis": "Assessed $200,000 ÷ 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
         "derived": true,
         "countyOverride": false
       },
@@ -131,19 +131,19 @@
         {
           "label": "Selling costs on exit",
           "amount": 16000,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
           "label": "Rehab",
           "amount": 0,
-          "note": "No rehab budget entered \u2014 assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
+          "note": "No rehab budget entered — assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
           "assumed": true
         },
         {
           "label": "Quiet title (required)",
           "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500\u2013$6,000, ~4 months).",
+          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
           "assumed": true
         },
         {
@@ -161,7 +161,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -174,7 +174,7 @@
         "penaltyAtMaxBid": 29387.5,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
-        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "TX",
@@ -201,22 +201,22 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "Rehab is assumed to be $0. You cannot inspect these properties before bidding \u2014 budget for the worst plausible condition.",
-        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year."
+        "Rehab is assumed to be $0. You cannot inspect these properties before bidding — budget for the worst plausible condition.",
+        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year."
       ]
     }
   },
@@ -243,7 +243,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 24800,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -255,7 +255,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500\u2013$6,000, ~4 months).",
+          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
           "assumed": true
         },
         {
@@ -273,7 +273,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -286,7 +286,7 @@
         "penaltyAtMaxBid": 34940,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
-        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "TX",
@@ -313,21 +313,21 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year."
+        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year."
       ]
     }
   },
@@ -346,7 +346,7 @@
       "confidence": "medium",
       "arv": {
         "value": 60000,
-        "basis": "Assessed $60,000 \u00f7 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
+        "basis": "Assessed $60,000 ÷ 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
         "derived": true,
         "countyOverride": false
       },
@@ -354,7 +354,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 4800,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -366,7 +366,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500\u2013$6,000, ~4 months).",
+          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
           "assumed": true
         },
         {
@@ -384,7 +384,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -397,7 +397,7 @@
         "penaltyAtMaxBid": 5502.5,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
-        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "TX",
@@ -424,21 +424,21 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
         "The opening bid of $55,000 is already above your ceiling of $22,010."
       ]
     }
@@ -458,7 +458,7 @@
       "confidence": "medium",
       "arv": {
         "value": 270027.00270027004,
-        "basis": "Assessed $90,000 \u00f7 0.3333 assessment ratio. 35 ILCS 200/9-145: property outside Cook County is assessed at 33\u2153% of fair cash value.",
+        "basis": "Assessed $90,000 ÷ 0.3333 assessment ratio. 35 ILCS 200/9-145: property outside Cook County is assessed at 33⅓% of fair cash value.",
         "derived": true,
         "countyOverride": false
       },
@@ -466,7 +466,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 21602.16,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -478,7 +478,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 3750,
-          "note": "Midpoint of the typical IL range ($2,000\u2013$5,500, ~6 months).",
+          "note": "Midpoint of the typical IL range ($2,000–$5,500, ~6 months).",
           "assumed": true
         },
         {
@@ -496,7 +496,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -508,7 +508,7 @@
         "flatPenalty": 0.18,
         "penaltyAtMaxBid": 26113.76,
         "annualisedBestCase": 0.36,
-        "extendedFor": "owner-occupied principal residence of 1\u20136 dwelling units (30 months); most other property redeems at 24 months",
+        "extendedFor": "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
         "note": "IL sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after 912 days.",
         "marketPenalty": {
           "observedMedian": 0,
@@ -546,7 +546,7 @@
             }
           ],
           "maxDays": 912,
-          "extendedFor": "owner-occupied principal residence of 1\u20136 dwelling units (30 months); most other property redeems at 24 months",
+          "extendedFor": "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
           "bidDown": {
             "statutoryMax": 0.18,
             "observedMedian": 0,
@@ -564,11 +564,11 @@
         },
         "closingCosts": 350,
         "assessmentRatio": 0.3333,
-        "assessmentBasis": "35 ILCS 200/9-145: property outside Cook County is assessed at 33\u2153% of fair cash value.",
+        "assessmentBasis": "35 ILCS 200/9-145: property outside Cook County is assessed at 33⅓% of fair cash value.",
         "countyAssessmentRatios": {
           "17031": {
             "ratio": 0.1,
-            "basis": "Cook County Classification Ordinance: Class 2 residential is assessed at 10% of market value, not the statutory 33\u2153%."
+            "basis": "Cook County Classification Ordinance: Class 2 residential is assessed at 10% of market value, not the statutory 33⅓%."
           }
         },
         "statute": "35 ILCS 200, Art. 21 (sale and redemption); Art. 22 (tax deed)",
@@ -580,16 +580,16 @@
           "https://datacatalog.cookcountyil.gov/resource/55ju-2fs9.json"
         ],
         "caveats": [
-          "The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens \u2014 price an Illinois lien on the acquisition thesis, not the interest.",
-          "Cook County assesses residential at ~10% of market value, not the statutory 33\u2153%. The county override above handles this; parcels in other Illinois counties use the statutory ratio.",
+          "The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens — price an Illinois lien on the acquisition thesis, not the interest.",
+          "Cook County assesses residential at ~10% of market value, not the statutory 33⅓%. The county override above handles this; parcels in other Illinois counties use the statutory ratio.",
           "Title is perfected by petition for tax deed under Art. 22 rather than a classic quiet-title action. The cost and duration here are market practice for that proceeding plus any curative work an insurer requires, and are not fixed by statute.",
-          "Redemption runs 24 months for most property and 30 months only for an owner-occupied principal residence of 1\u20136 units. Commercial, industrial and vacant non-residential stay at 24.",
+          "Redemption runs 24 months for most property and 30 months only for an owner-occupied principal residence of 1–6 units. Commercial, industrial and vacant non-residential stay at 24.",
           "Cook also runs a scavenger sale for long-delinquent parcels under different minimum-bid rules (35 ILCS 200/21-145 et seq.) that this entry does not model."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens \u2014 price an Illinois lien on the acquisition thesis, not the interest.",
-        "IL has 1 county on a different assessment ratio (17031). No FIPS was supplied, so the statewide ratio was used \u2014 pass `fips` if this parcel is in one of them.",
+        "Surviving liens assumed $0. The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens — price an Illinois lien on the acquisition thesis, not the interest.",
+        "IL has 1 county on a different assessment ratio (17031). No FIPS was supplied, so the statewide ratio was used — pass `fips` if this parcel is in one of them.",
         "IL bids the penalty DOWN from 18%. Across 64,526 recorded sales the rate cleared at a 0% median (1.88% mean). Do not underwrite this on the statutory rate."
       ]
     }
@@ -609,7 +609,7 @@
       "confidence": "medium",
       "arv": {
         "value": 900000,
-        "basis": "Assessed $90,000 \u00f7 0.1 assessment ratio. Cook County Classification Ordinance: Class 2 residential is assessed at 10% of market value, not the statutory 33\u2153%.",
+        "basis": "Assessed $90,000 ÷ 0.1 assessment ratio. Cook County Classification Ordinance: Class 2 residential is assessed at 10% of market value, not the statutory 33⅓%.",
         "derived": true,
         "countyOverride": true
       },
@@ -617,19 +617,19 @@
         {
           "label": "Selling costs on exit",
           "amount": 72000,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
           "label": "Rehab",
           "amount": 0,
-          "note": "No rehab budget entered \u2014 assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
+          "note": "No rehab budget entered — assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
           "assumed": true
         },
         {
           "label": "Quiet title (required)",
           "amount": 3750,
-          "note": "Midpoint of the typical IL range ($2,000\u2013$5,500, ~6 months).",
+          "note": "Midpoint of the typical IL range ($2,000–$5,500, ~6 months).",
           "assumed": true
         },
         {
@@ -647,7 +647,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -659,7 +659,7 @@
         "flatPenalty": 0.18,
         "penaltyAtMaxBid": 97758,
         "annualisedBestCase": 0.36,
-        "extendedFor": "owner-occupied principal residence of 1\u20136 dwelling units (30 months); most other property redeems at 24 months",
+        "extendedFor": "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
         "note": "IL sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after 912 days.",
         "marketPenalty": {
           "observedMedian": 0,
@@ -697,7 +697,7 @@
             }
           ],
           "maxDays": 912,
-          "extendedFor": "owner-occupied principal residence of 1\u20136 dwelling units (30 months); most other property redeems at 24 months",
+          "extendedFor": "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
           "bidDown": {
             "statutoryMax": 0.18,
             "observedMedian": 0,
@@ -715,11 +715,11 @@
         },
         "closingCosts": 350,
         "assessmentRatio": 0.3333,
-        "assessmentBasis": "35 ILCS 200/9-145: property outside Cook County is assessed at 33\u2153% of fair cash value.",
+        "assessmentBasis": "35 ILCS 200/9-145: property outside Cook County is assessed at 33⅓% of fair cash value.",
         "countyAssessmentRatios": {
           "17031": {
             "ratio": 0.1,
-            "basis": "Cook County Classification Ordinance: Class 2 residential is assessed at 10% of market value, not the statutory 33\u2153%."
+            "basis": "Cook County Classification Ordinance: Class 2 residential is assessed at 10% of market value, not the statutory 33⅓%."
           }
         },
         "statute": "35 ILCS 200, Art. 21 (sale and redemption); Art. 22 (tax deed)",
@@ -731,16 +731,16 @@
           "https://datacatalog.cookcountyil.gov/resource/55ju-2fs9.json"
         ],
         "caveats": [
-          "The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens \u2014 price an Illinois lien on the acquisition thesis, not the interest.",
-          "Cook County assesses residential at ~10% of market value, not the statutory 33\u2153%. The county override above handles this; parcels in other Illinois counties use the statutory ratio.",
+          "The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens — price an Illinois lien on the acquisition thesis, not the interest.",
+          "Cook County assesses residential at ~10% of market value, not the statutory 33⅓%. The county override above handles this; parcels in other Illinois counties use the statutory ratio.",
           "Title is perfected by petition for tax deed under Art. 22 rather than a classic quiet-title action. The cost and duration here are market practice for that proceeding plus any curative work an insurer requires, and are not fixed by statute.",
-          "Redemption runs 24 months for most property and 30 months only for an owner-occupied principal residence of 1\u20136 units. Commercial, industrial and vacant non-residential stay at 24.",
+          "Redemption runs 24 months for most property and 30 months only for an owner-occupied principal residence of 1–6 units. Commercial, industrial and vacant non-residential stay at 24.",
           "Cook also runs a scavenger sale for long-delinquent parcels under different minimum-bid rules (35 ILCS 200/21-145 et seq.) that this entry does not model."
         ]
       },
       "warnings": [
-        "Rehab is assumed to be $0. You cannot inspect these properties before bidding \u2014 budget for the worst plausible condition.",
-        "Surviving liens assumed $0. The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens \u2014 price an Illinois lien on the acquisition thesis, not the interest.",
+        "Rehab is assumed to be $0. You cannot inspect these properties before bidding — budget for the worst plausible condition.",
+        "Surviving liens assumed $0. The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens — price an Illinois lien on the acquisition thesis, not the interest.",
         "IL bids the penalty DOWN from 18%. Across 64,526 recorded sales the rate cleared at a 0% median (1.88% mean). Do not underwrite this on the statutory rate."
       ]
     }
@@ -758,7 +758,7 @@
       "confidence": "medium",
       "arv": {
         "value": 270027.00270027004,
-        "basis": "Assessed $90,000 \u00f7 0.3333 assessment ratio. 35 ILCS 200/9-145: property outside Cook County is assessed at 33\u2153% of fair cash value.",
+        "basis": "Assessed $90,000 ÷ 0.3333 assessment ratio. 35 ILCS 200/9-145: property outside Cook County is assessed at 33⅓% of fair cash value.",
         "derived": true,
         "countyOverride": false
       },
@@ -766,19 +766,19 @@
         {
           "label": "Selling costs on exit",
           "amount": 21602.16,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
           "label": "Rehab",
           "amount": 0,
-          "note": "No rehab budget entered \u2014 assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
+          "note": "No rehab budget entered — assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
           "assumed": true
         },
         {
           "label": "Quiet title (required)",
           "amount": 3750,
-          "note": "Midpoint of the typical IL range ($2,000\u2013$5,500, ~6 months).",
+          "note": "Midpoint of the typical IL range ($2,000–$5,500, ~6 months).",
           "assumed": true
         },
         {
@@ -796,7 +796,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -808,7 +808,7 @@
         "flatPenalty": 0.18,
         "penaltyAtMaxBid": 28813.76,
         "annualisedBestCase": 0.36,
-        "extendedFor": "owner-occupied principal residence of 1\u20136 dwelling units (30 months); most other property redeems at 24 months",
+        "extendedFor": "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
         "note": "IL sells liens: the expected outcome is redemption with interest, not ownership. Taking title needs a separate foreclosure after 912 days.",
         "marketPenalty": {
           "observedMedian": 0,
@@ -846,7 +846,7 @@
             }
           ],
           "maxDays": 912,
-          "extendedFor": "owner-occupied principal residence of 1\u20136 dwelling units (30 months); most other property redeems at 24 months",
+          "extendedFor": "owner-occupied principal residence of 1–6 dwelling units (30 months); most other property redeems at 24 months",
           "bidDown": {
             "statutoryMax": 0.18,
             "observedMedian": 0,
@@ -864,11 +864,11 @@
         },
         "closingCosts": 350,
         "assessmentRatio": 0.3333,
-        "assessmentBasis": "35 ILCS 200/9-145: property outside Cook County is assessed at 33\u2153% of fair cash value.",
+        "assessmentBasis": "35 ILCS 200/9-145: property outside Cook County is assessed at 33⅓% of fair cash value.",
         "countyAssessmentRatios": {
           "17031": {
             "ratio": 0.1,
-            "basis": "Cook County Classification Ordinance: Class 2 residential is assessed at 10% of market value, not the statutory 33\u2153%."
+            "basis": "Cook County Classification Ordinance: Class 2 residential is assessed at 10% of market value, not the statutory 33⅓%."
           }
         },
         "statute": "35 ILCS 200, Art. 21 (sale and redemption); Art. 22 (tax deed)",
@@ -880,17 +880,17 @@
           "https://datacatalog.cookcountyil.gov/resource/55ju-2fs9.json"
         ],
         "caveats": [
-          "The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens \u2014 price an Illinois lien on the acquisition thesis, not the interest.",
-          "Cook County assesses residential at ~10% of market value, not the statutory 33\u2153%. The county override above handles this; parcels in other Illinois counties use the statutory ratio.",
+          "The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens — price an Illinois lien on the acquisition thesis, not the interest.",
+          "Cook County assesses residential at ~10% of market value, not the statutory 33⅓%. The county override above handles this; parcels in other Illinois counties use the statutory ratio.",
           "Title is perfected by petition for tax deed under Art. 22 rather than a classic quiet-title action. The cost and duration here are market practice for that proceeding plus any curative work an insurer requires, and are not fixed by statute.",
-          "Redemption runs 24 months for most property and 30 months only for an owner-occupied principal residence of 1\u20136 units. Commercial, industrial and vacant non-residential stay at 24.",
+          "Redemption runs 24 months for most property and 30 months only for an owner-occupied principal residence of 1–6 units. Commercial, industrial and vacant non-residential stay at 24.",
           "Cook also runs a scavenger sale for long-delinquent parcels under different minimum-bid rules (35 ILCS 200/21-145 et seq.) that this entry does not model."
         ]
       },
       "warnings": [
-        "Rehab is assumed to be $0. You cannot inspect these properties before bidding \u2014 budget for the worst plausible condition.",
-        "Surviving liens assumed $0. The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens \u2014 price an Illinois lien on the acquisition thesis, not the interest.",
-        "IL has 1 county on a different assessment ratio (17031). No FIPS was supplied, so the statewide ratio was used \u2014 pass `fips` if this parcel is in one of them.",
+        "Rehab is assumed to be $0. You cannot inspect these properties before bidding — budget for the worst plausible condition.",
+        "Surviving liens assumed $0. The penalty is bid DOWN from an 18% ceiling, so the tiers above are a best case, not an expectation. Recorded Cook sales cleared at a 0% median and a 1.88% mean across 64,526 liens — price an Illinois lien on the acquisition thesis, not the interest.",
+        "IL has 1 county on a different assessment ratio (17031). No FIPS was supplied, so the statewide ratio was used — pass `fips` if this parcel is in one of them.",
         "IL bids the penalty DOWN from 18%. Across 64,526 recorded sales the rate cleared at a 0% median (1.88% mean). Do not underwrite this on the statutory rate."
       ]
     }
@@ -910,7 +910,7 @@
       "confidence": "medium",
       "arv": {
         "value": 150000,
-        "basis": "Assessed $150,000 \u00f7 1 assessment ratio. Cal. Rev. & Tax. Code \u00a7 401: property is assessed at full cash value, so the statutory ratio is 1.0.",
+        "basis": "Assessed $150,000 ÷ 1 assessment ratio. Cal. Rev. & Tax. Code § 401: property is assessed at full cash value, so the statutory ratio is 1.0.",
         "derived": true,
         "countyOverride": false
       },
@@ -918,7 +918,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 12000,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -930,7 +930,7 @@
         {
           "label": "Quiet title (often unnecessary)",
           "amount": 4250,
-          "note": "Midpoint of the typical CA range ($2,500\u2013$6,000, ~6 months).",
+          "note": "Midpoint of the typical CA range ($2,500–$6,000, ~6 months).",
           "assumed": true
         },
         {
@@ -948,7 +948,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -968,9 +968,9 @@
         },
         "closingCosts": 250,
         "assessmentRatio": 1,
-        "assessmentBasis": "Cal. Rev. & Tax. Code \u00a7 401: property is assessed at full cash value, so the statutory ratio is 1.0.",
-        "derivedArvCaveat": "California assesses at full cash value, but Proposition 13 fixes the base year and factors it forward at up to 2%/yr. On a long-held parcel the assessed value can sit far below market, so an ARV derived from it understates the property \u2014 get comparable sales before bidding.",
-        "statute": "Cal. Rev. & Tax. Code \u00a7\u00a7 3691\u20133731 (tax-defaulted property sales)",
+        "assessmentBasis": "Cal. Rev. & Tax. Code § 401: property is assessed at full cash value, so the statutory ratio is 1.0.",
+        "derivedArvCaveat": "California assesses at full cash value, but Proposition 13 fixes the base year and factors it forward at up to 2%/yr. On a long-held parcel the assessed value can sit far below market, so an ARV derived from it understates the property — get comparable sales before bidding.",
+        "statute": "Cal. Rev. & Tax. Code §§ 3691–3731 (tax-defaulted property sales)",
         "asOf": "2026-07",
         "sources": [
           "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=RTC&sectionNum=401",
@@ -981,14 +981,14 @@
         "caveats": [
           "No post-sale redemption. The owner's right ends at 5pm on the last business day before the sale, so the deed conveys without that overhang.",
           "Proposition 13 means assessed value systematically understates market value on long-held parcels. Do not treat a ratio-derived ARV as an appraisal in California.",
-          "RTC \u00a7 3711 makes the tax deed presumptively valid, so quiet title is optional rather than required \u2014 but most title insurers still want it before writing a policy.",
-          "Some non-residential commercial property reaches power-to-sell after 3 years of default rather than the usual 5 (RTC \u00a7 3691).",
+          "RTC § 3711 makes the tax deed presumptively valid, so quiet title is optional rather than required — but most title insurers still want it before writing a policy.",
+          "Some non-residential commercial property reaches power-to-sell after 3 years of default rather than the usual 5 (RTC § 3691).",
           "Recorded San Diego sale lists mark pre-sale cures as 'REDEEMED'. That is the owner paying before the auction, not a post-sale redemption, and it is quarantined in the copilot's label rules."
         ]
       },
       "warnings": [
         "Surviving liens assumed $0. No post-sale redemption. The owner's right ends at 5pm on the last business day before the sale, so the deed conveys without that overhang.",
-        "California assesses at full cash value, but Proposition 13 fixes the base year and factors it forward at up to 2%/yr. On a long-held parcel the assessed value can sit far below market, so an ARV derived from it understates the property \u2014 get comparable sales before bidding."
+        "California assesses at full cash value, but Proposition 13 fixes the base year and factors it forward at up to 2%/yr. On a long-held parcel the assessed value can sit far below market, so an ARV derived from it understates the property — get comparable sales before bidding."
       ]
     }
   },
@@ -1007,7 +1007,7 @@
       "confidence": "medium",
       "arv": {
         "value": 450000,
-        "basis": "Assessed $180,000 \u00f7 0.4 assessment ratio. Georgia assesses at 40% of fair market value (O.C.G.A. \u00a7 48-5-7).",
+        "basis": "Assessed $180,000 ÷ 0.4 assessment ratio. Georgia assesses at 40% of fair market value (O.C.G.A. § 48-5-7).",
         "derived": true,
         "countyOverride": false
       },
@@ -1015,7 +1015,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 36000,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -1027,7 +1027,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 5250,
-          "note": "Midpoint of the typical GA range ($3,000\u2013$7,500, ~6 months).",
+          "note": "Midpoint of the typical GA range ($3,000–$7,500, ~6 months).",
           "assumed": true
         },
         {
@@ -1045,7 +1045,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -1058,7 +1058,7 @@
         "penaltyAtMaxBid": 48600,
         "annualisedBestCase": 0.2,
         "extendedFor": "redemption stays open indefinitely until the purchaser forecloses it by statutory notice (barment)",
-        "note": "A 20% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 20% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "GA",
@@ -1089,20 +1089,20 @@
         },
         "closingCosts": 350,
         "assessmentRatio": 0.4,
-        "assessmentBasis": "Georgia assesses at 40% of fair market value (O.C.G.A. \u00a7 48-5-7).",
-        "statute": "O.C.G.A. \u00a7 48-4-40 through \u00a7 48-4-48 (redemption and barment)",
+        "assessmentBasis": "Georgia assesses at 40% of fair market value (O.C.G.A. § 48-5-7).",
+        "statute": "O.C.G.A. § 48-4-40 through § 48-4-48 (redemption and barment)",
         "asOf": "2026-07",
         "sources": [
           "https://law.justia.com/codes/georgia/title-48/chapter-4/article-3/",
           "https://www.accgov.com/1717/Right-of-Redemption"
         ],
         "caveats": [
-          "The 12-month period is a minimum, not an expiry \u2014 the redemption right persists until you serve barment notice, so budget for that process.",
+          "The 12-month period is a minimum, not an expiry — the redemption right persists until you serve barment notice, so budget for that process.",
           "A redeemable deed conveys no right of possession during the redemption period."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. The 12-month period is a minimum, not an expiry \u2014 the redemption right persists until you serve barment notice, so budget for that process."
+        "Surviving liens assumed $0. The 12-month period is a minimum, not an expiry — the redemption right persists until you serve barment notice, so budget for that process."
       ]
     }
   },
@@ -1120,7 +1120,7 @@
       "confidence": "medium",
       "arv": {
         "value": 141176.4705882353,
-        "basis": "Assessed $120,000 \u00f7 0.85 assessment ratio. Arizona uses Limited Property Value, which lags full cash value and is capped at 5% annual growth (A.R.S. \u00a7 42-13301).",
+        "basis": "Assessed $120,000 ÷ 0.85 assessment ratio. Arizona uses Limited Property Value, which lags full cash value and is capped at 5% annual growth (A.R.S. § 42-13301).",
         "derived": true,
         "countyOverride": false
       },
@@ -1128,19 +1128,19 @@
         {
           "label": "Selling costs on exit",
           "amount": 11294.12,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
           "label": "Rehab",
           "amount": 0,
-          "note": "No rehab budget entered \u2014 assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
+          "note": "No rehab budget entered — assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
           "assumed": true
         },
         {
           "label": "Quiet title (required)",
           "amount": 3500,
-          "note": "Midpoint of the typical AZ range ($2,000\u2013$5,000, ~5 months).",
+          "note": "Midpoint of the typical AZ range ($2,000–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -1158,7 +1158,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -1194,21 +1194,21 @@
         },
         "closingCosts": 300,
         "assessmentRatio": 0.85,
-        "assessmentBasis": "Arizona uses Limited Property Value, which lags full cash value and is capped at 5% annual growth (A.R.S. \u00a7 42-13301).",
+        "assessmentBasis": "Arizona uses Limited Property Value, which lags full cash value and is capped at 5% annual growth (A.R.S. § 42-13301).",
         "statute": "A.R.S. Title 42, ch. 18 (tax liens and foreclosure)",
         "asOf": "2026-07",
         "sources": [
           "https://www.azleg.gov/arsDetail/?title=42"
         ],
         "caveats": [
-          "Arizona sells liens, not deeds \u2014 the usual outcome is redemption with interest, not property ownership.",
+          "Arizona sells liens, not deeds — the usual outcome is redemption with interest, not property ownership.",
           "Taking title requires a separate judicial foreclosure after 3 years, at additional legal cost.",
           "16% is the maximum; competitive auctions routinely bid the rate into low single digits."
         ]
       },
       "warnings": [
-        "Rehab is assumed to be $0. You cannot inspect these properties before bidding \u2014 budget for the worst plausible condition.",
-        "Surviving liens assumed $0. Arizona sells liens, not deeds \u2014 the usual outcome is redemption with interest, not property ownership."
+        "Rehab is assumed to be $0. You cannot inspect these properties before bidding — budget for the worst plausible condition.",
+        "Surviving liens assumed $0. Arizona sells liens, not deeds — the usual outcome is redemption with interest, not property ownership."
       ]
     }
   },
@@ -1227,7 +1227,7 @@
       "confidence": "medium",
       "arv": {
         "value": 282352.9411764706,
-        "basis": "Assessed $240,000 \u00f7 0.85 assessment ratio. Florida assesses at just value, but Save Our Homes / Amendment 1 caps compress assessed below market on long-held homesteads.",
+        "basis": "Assessed $240,000 ÷ 0.85 assessment ratio. Florida assesses at just value, but Save Our Homes / Amendment 1 caps compress assessed below market on long-held homesteads.",
         "derived": true,
         "countyOverride": false
       },
@@ -1235,7 +1235,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 22588.24,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -1247,7 +1247,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 4000,
-          "note": "Midpoint of the typical FL range ($2,500\u2013$5,500, ~4 months).",
+          "note": "Midpoint of the typical FL range ($2,500–$5,500, ~4 months).",
           "assumed": true
         },
         {
@@ -1265,7 +1265,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -1292,13 +1292,13 @@
           "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0100-0199/0197/0197.html"
         ],
         "caveats": [
-          "Governmental liens (municipal code enforcement, some special assessments) can survive a Florida tax deed \u2014 check the specific municipality.",
+          "Governmental liens (municipal code enforcement, some special assessments) can survive a Florida tax deed — check the specific municipality.",
           "Federal tax liens survive with a 120-day IRS right of redemption after the sale.",
           "Most title insurers will not insure until a quiet title action completes, and many not until a year after recording."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. Governmental liens (municipal code enforcement, some special assessments) can survive a Florida tax deed \u2014 check the specific municipality."
+        "Surviving liens assumed $0. Governmental liens (municipal code enforcement, some special assessments) can survive a Florida tax deed — check the specific municipality."
       ]
     }
   },
@@ -1318,14 +1318,14 @@
       "arv": {
         "value": 140000,
         "fromMarket": true,
-        "basis": "Provider market estimate of $140,000. This is an as-is valuation, not an after-repair one \u2014 enter your own comparable-sales figure if the property needs work.",
+        "basis": "Provider market estimate of $140,000. This is an as-is valuation, not an after-repair one — enter your own comparable-sales figure if the property needs work.",
         "derived": true
       },
       "costs": [
         {
           "label": "Selling costs on exit",
           "amount": 11200,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -1337,7 +1337,7 @@
         {
           "label": "Quiet title (often unnecessary)",
           "amount": 2750,
-          "note": "Midpoint of the typical MI range ($1,500\u2013$4,000, ~3 months).",
+          "note": "Midpoint of the typical MI range ($1,500–$4,000, ~3 months).",
           "assumed": true
         },
         {
@@ -1355,7 +1355,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -1375,20 +1375,20 @@
         },
         "closingCosts": 300,
         "assessmentRatio": 0.5,
-        "assessmentBasis": "Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, \u00a7 3); taxable value may be lower still. The SEV published with these auction listings is taken from the delinquent tax year that was foreclosed upon, so it is typically several years stale \u2014 in a rising market it understates current value, and in a falling one it overstates it.",
+        "assessmentBasis": "Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, § 3); taxable value may be lower still. The SEV published with these auction listings is taken from the delinquent tax year that was foreclosed upon, so it is typically several years stale — in a rising market it understates current value, and in a falling one it overstates it.",
         "statute": "MCL 211.78 et seq. (general property tax act, foreclosure)",
         "asOf": "2026-07",
         "sources": [
           "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-211-78K"
         ],
         "caveats": [
-          "Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean \u2014 quiet title is often unnecessary.",
+          "Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean — quiet title is often unnecessary.",
           "Valuations here derive from a stale SEV, not comps. Treat the computed ARV as a starting point and override it with real comparable sales before bidding at the ceiling.",
           "Rand v. Rand / Hall-era excess-proceeds rules mean former owners may claim surplus; this does not affect the buyer's title."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean \u2014 quiet title is often unnecessary."
+        "Surviving liens assumed $0. Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean — quiet title is often unnecessary."
       ]
     }
   },
@@ -1405,7 +1405,7 @@
       "confidence": "low",
       "arv": {
         "value": 10080.000000000002,
-        "basis": "Assumed floor, not a valuation of this parcel. No assessed value, provider estimate or comps were available, so this is the opening bid of $4,500 times 2.24 \u2014 the conservative quartile of the value-to-opening-bid ratio across 2,189 MI parcels where both figures are known (measured 2026-08-11). The middle half of those parcels ran 2.24x to 11.51x, so the true figure could plausibly be $51,795. Treat this as a starting magnitude for research, never as a reason to bid \u2014 enter real comps before you do.",
+        "basis": "Assumed floor, not a valuation of this parcel. No assessed value, provider estimate or comps were available, so this is the opening bid of $4,500 times 2.24 — the conservative quartile of the value-to-opening-bid ratio across 2,189 MI parcels where both figures are known (measured 2026-08-11). The middle half of those parcels ran 2.24x to 11.51x, so the true figure could plausibly be $51,795. Treat this as a starting magnitude for research, never as a reason to bid — enter real comps before you do.",
         "derived": true,
         "assumed": true
       },
@@ -1413,19 +1413,19 @@
         {
           "label": "Selling costs on exit",
           "amount": 806.4,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
           "label": "Rehab",
           "amount": 0,
-          "note": "No rehab budget entered \u2014 assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
+          "note": "No rehab budget entered — assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
           "assumed": true
         },
         {
           "label": "Quiet title (often unnecessary)",
           "amount": 2750,
-          "note": "Midpoint of the typical MI range ($1,500\u2013$4,000, ~3 months).",
+          "note": "Midpoint of the typical MI range ($1,500–$4,000, ~3 months).",
           "assumed": true
         },
         {
@@ -1443,7 +1443,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -1463,21 +1463,21 @@
         },
         "closingCosts": 300,
         "assessmentRatio": 0.5,
-        "assessmentBasis": "Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, \u00a7 3); taxable value may be lower still. The SEV published with these auction listings is taken from the delinquent tax year that was foreclosed upon, so it is typically several years stale \u2014 in a rising market it understates current value, and in a falling one it overstates it.",
+        "assessmentBasis": "Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, § 3); taxable value may be lower still. The SEV published with these auction listings is taken from the delinquent tax year that was foreclosed upon, so it is typically several years stale — in a rising market it understates current value, and in a falling one it overstates it.",
         "statute": "MCL 211.78 et seq. (general property tax act, foreclosure)",
         "asOf": "2026-07",
         "sources": [
           "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-211-78K"
         ],
         "caveats": [
-          "Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean \u2014 quiet title is often unnecessary.",
+          "Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean — quiet title is often unnecessary.",
           "Valuations here derive from a stale SEV, not comps. Treat the computed ARV as a starting point and override it with real comparable sales before bidding at the ceiling.",
           "Rand v. Rand / Hall-era excess-proceeds rules mean former owners may claim surplus; this does not affect the buyer's title."
         ]
       },
       "warnings": [
-        "Rehab is assumed to be $0. You cannot inspect these properties before bidding \u2014 budget for the worst plausible condition.",
-        "Surviving liens assumed $0. Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean \u2014 quiet title is often unnecessary.",
+        "Rehab is assumed to be $0. You cannot inspect these properties before bidding — budget for the worst plausible condition.",
+        "Surviving liens assumed $0. Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean — quiet title is often unnecessary.",
         "The opening bid of $4,500 is already above your ceiling of $2,824.6."
       ]
     }
@@ -1495,7 +1495,7 @@
       "confidence": "low",
       "arv": {
         "value": 12468,
-        "basis": "Assumed floor, not a valuation of this parcel. No assessed value, provider estimate or comps were available, so this is the opening bid of $1,200 times 10.39 \u2014 the conservative quartile of the value-to-opening-bid ratio across 1,669 AR parcels where both figures are known (measured 2026-08-11). The middle half of those parcels ran 10.39x to 21.59x, so the true figure could plausibly be $25,908. Treat this as a starting magnitude for research, never as a reason to bid \u2014 enter real comps before you do.",
+        "basis": "Assumed floor, not a valuation of this parcel. No assessed value, provider estimate or comps were available, so this is the opening bid of $1,200 times 10.39 — the conservative quartile of the value-to-opening-bid ratio across 1,669 AR parcels where both figures are known (measured 2026-08-11). The middle half of those parcels ran 10.39x to 21.59x, so the true figure could plausibly be $25,908. Treat this as a starting magnitude for research, never as a reason to bid — enter real comps before you do.",
         "derived": true,
         "assumed": true
       },
@@ -1503,19 +1503,19 @@
         {
           "label": "Selling costs on exit",
           "amount": 997.44,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
           "label": "Rehab",
           "amount": 0,
-          "note": "No rehab budget entered \u2014 assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
+          "note": "No rehab budget entered — assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
           "assumed": true
         },
         {
           "label": "Quiet title (required)",
           "amount": 3750,
-          "note": "Midpoint of the typical AR range ($2,500\u2013$5,000, ~5 months).",
+          "note": "Midpoint of the typical AR range ($2,500–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -1527,7 +1527,7 @@
         {
           "label": "Closing contingency",
           "amount": 500,
-          "note": "Publication, service and filing incidentals. Not a lien allowance \u2014 surviving assessments are parcel-specific and are not covered by this.",
+          "note": "Publication, service and filing incidentals. Not a lien allowance — surviving assessments are parcel-specific and are not covered by this.",
           "assumed": true
         },
         {
@@ -1539,7 +1539,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -1561,8 +1561,8 @@
         "extraClosingBuffer": 500,
         "auctionToMarketableMonths": 18,
         "assessmentRatio": 0.2,
-        "assessmentBasis": "Arkansas assesses real property at 20% of true, actual or market value (A.C.A. \u00a7 26-26-303(c)); \u00a7 26-26-304 fails a county whose ratio study falls outside 18\u201322% of full fair market value. Measured across 1,669 Arkansas parcels carrying both figures, assessed/market was exactly 0.2000 on every one.",
-        "statute": "A.C.A. \u00a7 26-37-202(e) (redemption ends 4:00 p.m. CST the last business day before sale); \u00a7 26-37-203 (limited warranty deed; 90-day contest bar); Act 241 of 2023 (removed post-sale redemption); \u00a7 26-26-303(c) (20% assessment ratio); \u00a7 18-12-609 (challenge period)",
+        "assessmentBasis": "Arkansas assesses real property at 20% of true, actual or market value (A.C.A. § 26-26-303(c)); § 26-26-304 fails a county whose ratio study falls outside 18–22% of full fair market value. Measured across 1,669 Arkansas parcels carrying both figures, assessed/market was exactly 0.2000 on every one.",
+        "statute": "A.C.A. § 26-37-202(e) (redemption ends 4:00 p.m. CST the last business day before sale); § 26-37-203 (limited warranty deed; 90-day contest bar); Act 241 of 2023 (removed post-sale redemption); § 26-26-303(c) (20% assessment ratio); § 18-12-609 (challenge period)",
         "asOf": "2026-08",
         "sources": [
           "https://law.justia.com/codes/arkansas/title-26/subtitle-3/chapter-26/subchapter-3/section-26-26-303/",
@@ -1573,19 +1573,19 @@
         ],
         "caveats": [
           "COSL conveys by limited warranty deed and warrants nothing about title. A quiet title or confirmation action is needed for marketability, and title insurance being unavailable is expressly not grounds to cancel the sale.",
-          "The 90-day window to contest the conveyance (\u00a7 26-37-203) is a title risk, not a redemption right, and extends to two years after removal of disability for minors, the incapacitated, and wartime service members.",
+          "The 90-day window to contest the conveyance (§ 26-37-203) is a title risk, not a redemption right, and extends to two years after removal of disability for minors, the incapacitated, and wartime service members.",
           "HISTORICAL OUTCOMES BEFORE MID-2023 ARE A DIFFERENT REGIME. Act 241 of 2023 removed post-sale redemption; Arkansas results recorded under the prior rules describe a redeemable position and must not be pooled with post-Act sales when fitting a redemption rate. Current inventory is entirely post-Act.",
-          "Quiet-title cost is market practice, not statute \u2014 no Arkansas bar fee survey publishes one. The range is an operator estimate; a contested action or curative work costs materially more.",
-          "SURVIVING LIENS ARE NOT PRICED HERE. Municipal code-enforcement and clean-up liens (\u00a7 14-54-903) and special improvement district assessments can survive and are parcel-specific \u2014 'HARDING DRAIN IMP DISTRICT' appears on Jefferson County parcels in our own data. IRS liens turn on notice and keep a 120-day redemption right if notice was defective. Mortgages, state tax liens and judgment liens are generally extinguished where COSL gave proper statutory notice. Check each parcel; the closing contingency does not cover these.",
-          "The published opening bid is taxes, penalties, interest and costs \u2014 the statutory minimum bid under \u00a7 26-37-202, never an assessed or market value.",
-          "The 90-day contest bar is not absolute. \u00a7 26-37-203(d) preserves a taxpayer's right to contest the deed on the ground that the taxes were actually paid, with no 90-day limit stated \u2014 a residual challenge route that outlives the window and is the reason to check payment history rather than only the notice trail. \u00a7 26-37-203(b)(2) tolls the bar for two years after removal of disability for minors, the mentally incapacitated, and those serving in the armed forces in time of war.",
-          "\u00a7 26-37-203(c) cuts the other way and favours the purchaser: a deed issued after 1 January 1987 is not void or voidable merely because the county failed to strictly comply with the tax-delinquent land laws."
+          "Quiet-title cost is market practice, not statute — no Arkansas bar fee survey publishes one. The range is an operator estimate; a contested action or curative work costs materially more.",
+          "SURVIVING LIENS ARE NOT PRICED HERE. Municipal code-enforcement and clean-up liens (§ 14-54-903) and special improvement district assessments can survive and are parcel-specific — 'HARDING DRAIN IMP DISTRICT' appears on Jefferson County parcels in our own data. IRS liens turn on notice and keep a 120-day redemption right if notice was defective. Mortgages, state tax liens and judgment liens are generally extinguished where COSL gave proper statutory notice. Check each parcel; the closing contingency does not cover these.",
+          "The published opening bid is taxes, penalties, interest and costs — the statutory minimum bid under § 26-37-202, never an assessed or market value.",
+          "The 90-day contest bar is not absolute. § 26-37-203(d) preserves a taxpayer's right to contest the deed on the ground that the taxes were actually paid, with no 90-day limit stated — a residual challenge route that outlives the window and is the reason to check payment history rather than only the notice trail. § 26-37-203(b)(2) tolls the bar for two years after removal of disability for minors, the mentally incapacitated, and those serving in the armed forces in time of war.",
+          "§ 26-37-203(c) cuts the other way and favours the purchaser: a deed issued after 1 January 1987 is not void or voidable merely because the county failed to strictly comply with the tax-delinquent land laws."
         ]
       },
       "warnings": [
-        "Rehab is assumed to be $0. You cannot inspect these properties before bidding \u2014 budget for the worst plausible condition.",
+        "Rehab is assumed to be $0. You cannot inspect these properties before bidding — budget for the worst plausible condition.",
         "Surviving liens assumed $0. COSL conveys by limited warranty deed and warrants nothing about title. A quiet title or confirmation action is needed for marketability, and title insurance being unavailable is expressly not grounds to cancel the sale.",
-        "This ceiling rests on an assumed floor, not a valuation of this parcel. It is a research starting point, not a green light \u2014 get comps or an assessor figure before bidding."
+        "This ceiling rests on an assumed floor, not a valuation of this parcel. It is a research starting point, not a green light — get comps or an assessor figure before bidding."
       ]
     }
   },
@@ -1602,7 +1602,7 @@
       "confidence": "low",
       "arv": {
         "value": 23130,
-        "basis": "Assumed floor, not a valuation of this parcel. No assessed value, provider estimate or comps were available, so this is the opening bid of $9,000 times 2.57 \u2014 the conservative quartile of the value-to-opening-bid ratio across 669 TX parcels where both figures are known (measured 2026-08-11). The middle half of those parcels ran 2.57x to 10.99x, so the true figure could plausibly be $98,910. Treat this as a starting magnitude for research, never as a reason to bid \u2014 enter real comps before you do.",
+        "basis": "Assumed floor, not a valuation of this parcel. No assessed value, provider estimate or comps were available, so this is the opening bid of $9,000 times 2.57 — the conservative quartile of the value-to-opening-bid ratio across 669 TX parcels where both figures are known (measured 2026-08-11). The middle half of those parcels ran 2.57x to 10.99x, so the true figure could plausibly be $98,910. Treat this as a starting magnitude for research, never as a reason to bid — enter real comps before you do.",
         "derived": true,
         "assumed": true
       },
@@ -1610,19 +1610,19 @@
         {
           "label": "Selling costs on exit",
           "amount": 1850.4,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
           "label": "Rehab",
           "amount": 0,
-          "note": "No rehab budget entered \u2014 assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
+          "note": "No rehab budget entered — assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
           "assumed": true
         },
         {
           "label": "Quiet title (required)",
           "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500\u2013$6,000, ~4 months).",
+          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
           "assumed": true
         },
         {
@@ -1640,7 +1640,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -1653,7 +1653,7 @@
         "penaltyAtMaxBid": 2310.15,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
-        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "TX",
@@ -1680,23 +1680,23 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "Rehab is assumed to be $0. You cannot inspect these properties before bidding \u2014 budget for the worst plausible condition.",
-        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
-        "This ceiling rests on an assumed floor, not a valuation of this parcel. It is a research starting point, not a green light \u2014 get comps or an assessor figure before bidding."
+        "Rehab is assumed to be $0. You cannot inspect these properties before bidding — budget for the worst plausible condition.",
+        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
+        "This ceiling rests on an assumed floor, not a valuation of this parcel. It is a research starting point, not a green light — get comps or an assessor figure before bidding."
       ]
     }
   },
@@ -1714,7 +1714,7 @@
       "confidence": "medium",
       "arv": {
         "value": 275000,
-        "basis": "Assessed $55,000 \u00f7 0.2 assessment ratio. Arkansas assesses real property at 20% of true, actual or market value (A.C.A. \u00a7 26-26-303(c)); \u00a7 26-26-304 fails a county whose ratio study falls outside 18\u201322% of full fair market value. Measured across 1,669 Arkansas parcels carrying both figures, assessed/market was exactly 0.2000 on every one.",
+        "basis": "Assessed $55,000 ÷ 0.2 assessment ratio. Arkansas assesses real property at 20% of true, actual or market value (A.C.A. § 26-26-303(c)); § 26-26-304 fails a county whose ratio study falls outside 18–22% of full fair market value. Measured across 1,669 Arkansas parcels carrying both figures, assessed/market was exactly 0.2000 on every one.",
         "derived": true,
         "countyOverride": false
       },
@@ -1722,19 +1722,19 @@
         {
           "label": "Selling costs on exit",
           "amount": 22000,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
           "label": "Rehab",
           "amount": 0,
-          "note": "No rehab budget entered \u2014 assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
+          "note": "No rehab budget entered — assumed $0. Tax-sale parcels are sold unseen and un-inspected; this is rarely correct.",
           "assumed": true
         },
         {
           "label": "Quiet title (required)",
           "amount": 3750,
-          "note": "Midpoint of the typical AR range ($2,500\u2013$5,000, ~5 months).",
+          "note": "Midpoint of the typical AR range ($2,500–$5,000, ~5 months).",
           "assumed": true
         },
         {
@@ -1746,7 +1746,7 @@
         {
           "label": "Closing contingency",
           "amount": 500,
-          "note": "Publication, service and filing incidentals. Not a lien allowance \u2014 surviving assessments are parcel-specific and are not covered by this.",
+          "note": "Publication, service and filing incidentals. Not a lien allowance — surviving assessments are parcel-specific and are not covered by this.",
           "assumed": true
         },
         {
@@ -1758,7 +1758,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -1780,8 +1780,8 @@
         "extraClosingBuffer": 500,
         "auctionToMarketableMonths": 18,
         "assessmentRatio": 0.2,
-        "assessmentBasis": "Arkansas assesses real property at 20% of true, actual or market value (A.C.A. \u00a7 26-26-303(c)); \u00a7 26-26-304 fails a county whose ratio study falls outside 18\u201322% of full fair market value. Measured across 1,669 Arkansas parcels carrying both figures, assessed/market was exactly 0.2000 on every one.",
-        "statute": "A.C.A. \u00a7 26-37-202(e) (redemption ends 4:00 p.m. CST the last business day before sale); \u00a7 26-37-203 (limited warranty deed; 90-day contest bar); Act 241 of 2023 (removed post-sale redemption); \u00a7 26-26-303(c) (20% assessment ratio); \u00a7 18-12-609 (challenge period)",
+        "assessmentBasis": "Arkansas assesses real property at 20% of true, actual or market value (A.C.A. § 26-26-303(c)); § 26-26-304 fails a county whose ratio study falls outside 18–22% of full fair market value. Measured across 1,669 Arkansas parcels carrying both figures, assessed/market was exactly 0.2000 on every one.",
+        "statute": "A.C.A. § 26-37-202(e) (redemption ends 4:00 p.m. CST the last business day before sale); § 26-37-203 (limited warranty deed; 90-day contest bar); Act 241 of 2023 (removed post-sale redemption); § 26-26-303(c) (20% assessment ratio); § 18-12-609 (challenge period)",
         "asOf": "2026-08",
         "sources": [
           "https://law.justia.com/codes/arkansas/title-26/subtitle-3/chapter-26/subchapter-3/section-26-26-303/",
@@ -1792,17 +1792,17 @@
         ],
         "caveats": [
           "COSL conveys by limited warranty deed and warrants nothing about title. A quiet title or confirmation action is needed for marketability, and title insurance being unavailable is expressly not grounds to cancel the sale.",
-          "The 90-day window to contest the conveyance (\u00a7 26-37-203) is a title risk, not a redemption right, and extends to two years after removal of disability for minors, the incapacitated, and wartime service members.",
+          "The 90-day window to contest the conveyance (§ 26-37-203) is a title risk, not a redemption right, and extends to two years after removal of disability for minors, the incapacitated, and wartime service members.",
           "HISTORICAL OUTCOMES BEFORE MID-2023 ARE A DIFFERENT REGIME. Act 241 of 2023 removed post-sale redemption; Arkansas results recorded under the prior rules describe a redeemable position and must not be pooled with post-Act sales when fitting a redemption rate. Current inventory is entirely post-Act.",
-          "Quiet-title cost is market practice, not statute \u2014 no Arkansas bar fee survey publishes one. The range is an operator estimate; a contested action or curative work costs materially more.",
-          "SURVIVING LIENS ARE NOT PRICED HERE. Municipal code-enforcement and clean-up liens (\u00a7 14-54-903) and special improvement district assessments can survive and are parcel-specific \u2014 'HARDING DRAIN IMP DISTRICT' appears on Jefferson County parcels in our own data. IRS liens turn on notice and keep a 120-day redemption right if notice was defective. Mortgages, state tax liens and judgment liens are generally extinguished where COSL gave proper statutory notice. Check each parcel; the closing contingency does not cover these.",
-          "The published opening bid is taxes, penalties, interest and costs \u2014 the statutory minimum bid under \u00a7 26-37-202, never an assessed or market value.",
-          "The 90-day contest bar is not absolute. \u00a7 26-37-203(d) preserves a taxpayer's right to contest the deed on the ground that the taxes were actually paid, with no 90-day limit stated \u2014 a residual challenge route that outlives the window and is the reason to check payment history rather than only the notice trail. \u00a7 26-37-203(b)(2) tolls the bar for two years after removal of disability for minors, the mentally incapacitated, and those serving in the armed forces in time of war.",
-          "\u00a7 26-37-203(c) cuts the other way and favours the purchaser: a deed issued after 1 January 1987 is not void or voidable merely because the county failed to strictly comply with the tax-delinquent land laws."
+          "Quiet-title cost is market practice, not statute — no Arkansas bar fee survey publishes one. The range is an operator estimate; a contested action or curative work costs materially more.",
+          "SURVIVING LIENS ARE NOT PRICED HERE. Municipal code-enforcement and clean-up liens (§ 14-54-903) and special improvement district assessments can survive and are parcel-specific — 'HARDING DRAIN IMP DISTRICT' appears on Jefferson County parcels in our own data. IRS liens turn on notice and keep a 120-day redemption right if notice was defective. Mortgages, state tax liens and judgment liens are generally extinguished where COSL gave proper statutory notice. Check each parcel; the closing contingency does not cover these.",
+          "The published opening bid is taxes, penalties, interest and costs — the statutory minimum bid under § 26-37-202, never an assessed or market value.",
+          "The 90-day contest bar is not absolute. § 26-37-203(d) preserves a taxpayer's right to contest the deed on the ground that the taxes were actually paid, with no 90-day limit stated — a residual challenge route that outlives the window and is the reason to check payment history rather than only the notice trail. § 26-37-203(b)(2) tolls the bar for two years after removal of disability for minors, the mentally incapacitated, and those serving in the armed forces in time of war.",
+          "§ 26-37-203(c) cuts the other way and favours the purchaser: a deed issued after 1 January 1987 is not void or voidable merely because the county failed to strictly comply with the tax-delinquent land laws."
         ]
       },
       "warnings": [
-        "Rehab is assumed to be $0. You cannot inspect these properties before bidding \u2014 budget for the worst plausible condition.",
+        "Rehab is assumed to be $0. You cannot inspect these properties before bidding — budget for the worst plausible condition.",
         "Surviving liens assumed $0. COSL conveys by limited warranty deed and warrants nothing about title. A quiet title or confirmation action is needed for marketability, and title insurance being unavailable is expressly not grounds to cancel the sale."
       ]
     }
@@ -1810,7 +1810,7 @@
   {
     "name": "uncovered state with comps still prices",
     "inputs": {
-      "state": "NM",
+      "state": "ZZ",
       "saleType": "Tax Deed",
       "arvOverride": 95000,
       "rehabCost": 18000,
@@ -1829,7 +1829,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 7600,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -1847,7 +1847,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -1857,14 +1857,14 @@
       "redemption": null,
       "statute": null,
       "warnings": [
-        "NM is outside the states with verified statutory parameters. Costs and redemption terms are not modelled \u2014 treat any figure here as unverified."
+        "ZZ is outside the states with verified statutory parameters. Costs and redemption terms are not modelled — treat any figure here as unverified."
       ]
     }
   },
   {
     "name": "uncovered state with nothing",
     "inputs": {
-      "state": "LA",
+      "state": "ZZ",
       "saleType": "Tax Lien",
       "openingBid": 2200
     },
@@ -1885,15 +1885,15 @@
       "redemption": null,
       "statute": null,
       "warnings": [
-        "LA is outside the states with verified statutory parameters. Costs and redemption terms are not modelled \u2014 treat any figure here as unverified.",
-        "The county published no assessed value for this parcel, no property provider returned a market estimate, and no comparable-sales figure has been entered. Enter a comparable-sales estimate below and every figure on this page recalculates \u2014 the engine needs one number, not a full appraisal."
+        "ZZ is outside the states with verified statutory parameters. Costs and redemption terms are not modelled — treat any figure here as unverified.",
+        "The county published no assessed value for this parcel, no property provider returned a market estimate, and no comparable-sales figure has been entered. Enter a comparable-sales estimate below and every figure on this page recalculates — the engine needs one number, not a full appraisal."
       ]
     }
   },
   {
     "name": "uncovered state assessed only, no floor",
     "inputs": {
-      "state": "NM",
+      "state": "ZZ",
       "saleType": "Tax Deed",
       "assessedValue": 70000
     },
@@ -1903,7 +1903,7 @@
       "confidence": "low",
       "arv": {
         "value": null,
-        "basis": "This parcel has an assessed value, but NM has no verified assessment ratio in lib/deal/statute.ts, so it cannot be converted to a market value. Enter a comparable-sales estimate to price it.",
+        "basis": "This parcel has an assessed value, but ZZ has no verified assessment ratio in lib/deal/statute.ts, so it cannot be converted to a market value. Enter a comparable-sales estimate to price it.",
         "derived": true,
         "assumed": false
       },
@@ -1914,8 +1914,8 @@
       "redemption": null,
       "statute": null,
       "warnings": [
-        "NM is outside the states with verified statutory parameters. Costs and redemption terms are not modelled \u2014 treat any figure here as unverified.",
-        "This parcel has an assessed value, but NM has no verified assessment ratio in lib/deal/statute.ts, so it cannot be converted to a market value. Enter a comparable-sales estimate to price it. Enter a comparable-sales estimate below and every figure on this page recalculates \u2014 the engine needs one number, not a full appraisal."
+        "ZZ is outside the states with verified statutory parameters. Costs and redemption terms are not modelled — treat any figure here as unverified.",
+        "This parcel has an assessed value, but ZZ has no verified assessment ratio in lib/deal/statute.ts, so it cannot be converted to a market value. Enter a comparable-sales estimate to price it. Enter a comparable-sales estimate below and every figure on this page recalculates — the engine needs one number, not a full appraisal."
       ]
     }
   },
@@ -1965,21 +1965,21 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "The county published no assessed value for this parcel, no property provider returned a market estimate, and no comparable-sales figure has been entered. Enter a comparable-sales estimate below and every figure on this page recalculates \u2014 the engine needs one number, not a full appraisal."
+        "The county published no assessed value for this parcel, no property provider returned a market estimate, and no comparable-sales figure has been entered. Enter a comparable-sales estimate below and every figure on this page recalculates — the engine needs one number, not a full appraisal."
       ]
     }
   },
@@ -1997,7 +1997,7 @@
       "confidence": "medium",
       "arv": {
         "value": 30000,
-        "basis": "Assessed $30,000 \u00f7 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
+        "basis": "Assessed $30,000 ÷ 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
         "derived": true,
         "countyOverride": false
       },
@@ -2005,7 +2005,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 2400,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -2017,7 +2017,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500\u2013$6,000, ~4 months).",
+          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
           "assumed": true
         },
         {
@@ -2035,7 +2035,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -2048,7 +2048,7 @@
         "penaltyAtMaxBid": 0,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
-        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "TX",
@@ -2075,21 +2075,21 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
         "Costs exceed what the property can support at your target margin. There is no bid at which this clears."
       ]
     }
@@ -2110,7 +2110,7 @@
       "confidence": "medium",
       "arv": {
         "value": 200000,
-        "basis": "Assessed $200,000 \u00f7 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
+        "basis": "Assessed $200,000 ÷ 1 assessment ratio. Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
         "derived": true,
         "countyOverride": false
       },
@@ -2118,7 +2118,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 12000,
-          "note": "6.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "6.0% of ARV — agent commission plus seller-side closing.",
           "assumed": false
         },
         {
@@ -2130,7 +2130,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500\u2013$6,000, ~4 months).",
+          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
           "assumed": true
         },
         {
@@ -2148,7 +2148,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -2161,7 +2161,7 @@
         "penaltyAtMaxBid": 32887.5,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
-        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "TX",
@@ -2188,21 +2188,21 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year."
+        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year."
       ]
     }
   },
@@ -2223,7 +2223,7 @@
       "confidence": "medium",
       "arv": {
         "value": 450000,
-        "basis": "Assessed $180,000 \u00f7 0.4 assessment ratio. Georgia assesses at 40% of fair market value (O.C.G.A. \u00a7 48-5-7).",
+        "basis": "Assessed $180,000 ÷ 0.4 assessment ratio. Georgia assesses at 40% of fair market value (O.C.G.A. § 48-5-7).",
         "derived": true,
         "countyOverride": false
       },
@@ -2231,7 +2231,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 36000,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -2243,7 +2243,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 5250,
-          "note": "Midpoint of the typical GA range ($3,000\u2013$7,500, ~6 months).",
+          "note": "Midpoint of the typical GA range ($3,000–$7,500, ~6 months).",
           "assumed": true
         },
         {
@@ -2274,7 +2274,7 @@
         "penaltyAtMaxBid": 45040,
         "annualisedBestCase": 0.2,
         "extendedFor": "redemption stays open indefinitely until the purchaser forecloses it by statutory notice (barment)",
-        "note": "A 20% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 20% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "GA",
@@ -2305,15 +2305,15 @@
         },
         "closingCosts": 350,
         "assessmentRatio": 0.4,
-        "assessmentBasis": "Georgia assesses at 40% of fair market value (O.C.G.A. \u00a7 48-5-7).",
-        "statute": "O.C.G.A. \u00a7 48-4-40 through \u00a7 48-4-48 (redemption and barment)",
+        "assessmentBasis": "Georgia assesses at 40% of fair market value (O.C.G.A. § 48-5-7).",
+        "statute": "O.C.G.A. § 48-4-40 through § 48-4-48 (redemption and barment)",
         "asOf": "2026-07",
         "sources": [
           "https://law.justia.com/codes/georgia/title-48/chapter-4/article-3/",
           "https://www.accgov.com/1717/Right-of-Redemption"
         ],
         "caveats": [
-          "The 12-month period is a minimum, not an expiry \u2014 the redemption right persists until you serve barment notice, so budget for that process.",
+          "The 12-month period is a minimum, not an expiry — the redemption right persists until you serve barment notice, so budget for that process.",
           "A redeemable deed conveys no right of possession during the redemption period."
         ]
       },
@@ -2335,7 +2335,7 @@
       "confidence": "medium",
       "arv": {
         "value": 117647.05882352941,
-        "basis": "Assessed $100,000 \u00f7 0.85 assessment ratio. Florida assesses at just value, but Save Our Homes / Amendment 1 caps compress assessed below market on long-held homesteads.",
+        "basis": "Assessed $100,000 ÷ 0.85 assessment ratio. Florida assesses at just value, but Save Our Homes / Amendment 1 caps compress assessed below market on long-held homesteads.",
         "derived": true,
         "countyOverride": false
       },
@@ -2343,7 +2343,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 9411.76,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -2355,7 +2355,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 4000,
-          "note": "Midpoint of the typical FL range ($2,500\u2013$5,500, ~4 months).",
+          "note": "Midpoint of the typical FL range ($2,500–$5,500, ~4 months).",
           "assumed": true
         },
         {
@@ -2373,7 +2373,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -2400,20 +2400,20 @@
           "http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0100-0199/0197/0197.html"
         ],
         "caveats": [
-          "Governmental liens (municipal code enforcement, some special assessments) can survive a Florida tax deed \u2014 check the specific municipality.",
+          "Governmental liens (municipal code enforcement, some special assessments) can survive a Florida tax deed — check the specific municipality.",
           "Federal tax liens survive with a 120-day IRS right of redemption after the sale.",
           "Most title insurers will not insure until a quiet title action completes, and many not until a year after recording."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. Governmental liens (municipal code enforcement, some special assessments) can survive a Florida tax deed \u2014 check the specific municipality."
+        "Surviving liens assumed $0. Governmental liens (municipal code enforcement, some special assessments) can survive a Florida tax deed — check the specific municipality."
       ]
     }
   },
   {
     "name": "market value in uncovered state",
     "inputs": {
-      "state": "LA",
+      "state": "ZZ",
       "saleType": "Tax Lien",
       "marketValue": 88000,
       "rehabCost": 12000,
@@ -2426,14 +2426,14 @@
       "arv": {
         "value": 88000,
         "fromMarket": true,
-        "basis": "Provider market estimate of $88,000. This is an as-is valuation, not an after-repair one \u2014 enter your own comparable-sales figure if the property needs work.",
+        "basis": "Provider market estimate of $88,000. This is an as-is valuation, not an after-repair one — enter your own comparable-sales figure if the property needs work.",
         "derived": true
       },
       "costs": [
         {
           "label": "Selling costs on exit",
           "amount": 7040,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -2451,7 +2451,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -2461,7 +2461,7 @@
       "redemption": null,
       "statute": null,
       "warnings": [
-        "LA is outside the states with verified statutory parameters. Costs and redemption terms are not modelled \u2014 treat any figure here as unverified."
+        "ZZ is outside the states with verified statutory parameters. Costs and redemption terms are not modelled — treat any figure here as unverified."
       ]
     }
   },
@@ -2481,14 +2481,14 @@
       "arv": {
         "value": 265000,
         "fromMarket": true,
-        "basis": "Provider market estimate of $265,000. This is an as-is valuation, not an after-repair one \u2014 enter your own comparable-sales figure if the property needs work.",
+        "basis": "Provider market estimate of $265,000. This is an as-is valuation, not an after-repair one — enter your own comparable-sales figure if the property needs work.",
         "derived": true
       },
       "costs": [
         {
           "label": "Selling costs on exit",
           "amount": 21200,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -2500,7 +2500,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500\u2013$6,000, ~4 months).",
+          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
           "assumed": true
         },
         {
@@ -2518,7 +2518,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -2531,7 +2531,7 @@
         "penaltyAtMaxBid": 35566.25,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
-        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "TX",
@@ -2558,21 +2558,21 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year."
+        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year."
       ]
     }
   },
@@ -2597,7 +2597,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 1600,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -2609,7 +2609,7 @@
         {
           "label": "Quiet title (required)",
           "amount": 4250,
-          "note": "Midpoint of the typical TX range ($2,500\u2013$6,000, ~4 months).",
+          "note": "Midpoint of the typical TX range ($2,500–$6,000, ~4 months).",
           "assumed": true
         },
         {
@@ -2627,7 +2627,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -2640,7 +2640,7 @@
         "penaltyAtMaxBid": 1575,
         "annualisedBestCase": 0.51,
         "extendedFor": "homestead and agricultural-use property (2 years); all other property is 180 days",
-        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest \u2014 the rate does not change with how early they redeem."
+        "note": "A 25% flat penalty applies if the owner redeems. It is a penalty, not annual interest — the rate does not change with how early they redeem."
       },
       "statute": {
         "state": "TX",
@@ -2667,21 +2667,21 @@
         },
         "closingCosts": 400,
         "assessmentRatio": 1,
-        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code \u00a7 23.01).",
-        "statute": "Tex. Tax Code \u00a7 34.21 (right of redemption)",
+        "assessmentBasis": "Texas requires appraisal at 100% of market value as of Jan 1 (Tex. Tax Code § 23.01).",
+        "statute": "Tex. Tax Code § 34.21 (right of redemption)",
         "asOf": "2026-07",
         "sources": [
           "https://statutes.capitol.texas.gov/Docs/TX/htm/TX.34.htm",
           "https://liensuite.com/tax-deed/texas"
         ],
         "caveats": [
-          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year.",
+          "The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year.",
           "Purchaser takes subject to the redemption right; you cannot deliver insurable title until it expires.",
           "The 25% is a flat penalty, not annual interest."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state \u2014 treat any homestead-looking residential parcel as potentially 2-year."
+        "Surviving liens assumed $0. The 180-day vs 2-year window turns on the property's use at the time of sale, which the sale list does not state — treat any homestead-looking residential parcel as potentially 2-year."
       ]
     }
   },
@@ -2700,7 +2700,7 @@
       "confidence": "medium",
       "arv": {
         "value": 120000,
-        "basis": "Assessed $60,000 \u00f7 0.5 assessment ratio. Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, \u00a7 3); taxable value may be lower still. The SEV published with these auction listings is taken from the delinquent tax year that was foreclosed upon, so it is typically several years stale \u2014 in a rising market it understates current value, and in a falling one it overstates it.",
+        "basis": "Assessed $60,000 ÷ 0.5 assessment ratio. Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, § 3); taxable value may be lower still. The SEV published with these auction listings is taken from the delinquent tax year that was foreclosed upon, so it is typically several years stale — in a rising market it understates current value, and in a falling one it overstates it.",
         "derived": true,
         "countyOverride": false
       },
@@ -2708,7 +2708,7 @@
         {
           "label": "Selling costs on exit",
           "amount": 9600,
-          "note": "8.0% of ARV \u2014 agent commission plus seller-side closing.",
+          "note": "8.0% of ARV — agent commission plus seller-side closing.",
           "assumed": true
         },
         {
@@ -2720,7 +2720,7 @@
         {
           "label": "Quiet title (often unnecessary)",
           "amount": 2750,
-          "note": "Midpoint of the typical MI range ($1,500\u2013$4,000, ~3 months).",
+          "note": "Midpoint of the typical MI range ($1,500–$4,000, ~3 months).",
           "assumed": true
         },
         {
@@ -2738,7 +2738,7 @@
         {
           "label": "Surviving liens",
           "amount": 0,
-          "note": "Assumed $0 \u2014 not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
+          "note": "Assumed $0 — not verified. Municipal code-enforcement liens, special assessments, and federal tax liens can survive the sale.",
           "assumed": true
         }
       ],
@@ -2758,20 +2758,20 @@
         },
         "closingCosts": 300,
         "assessmentRatio": 0.5,
-        "assessmentBasis": "Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, \u00a7 3); taxable value may be lower still. The SEV published with these auction listings is taken from the delinquent tax year that was foreclosed upon, so it is typically several years stale \u2014 in a rising market it understates current value, and in a falling one it overstates it.",
+        "assessmentBasis": "Michigan state equalized value is 50% of true cash value by constitution (Mich. Const. art. IX, § 3); taxable value may be lower still. The SEV published with these auction listings is taken from the delinquent tax year that was foreclosed upon, so it is typically several years stale — in a rising market it understates current value, and in a falling one it overstates it.",
         "statute": "MCL 211.78 et seq. (general property tax act, foreclosure)",
         "asOf": "2026-07",
         "sources": [
           "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-211-78K"
         ],
         "caveats": [
-          "Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean \u2014 quiet title is often unnecessary.",
+          "Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean — quiet title is often unnecessary.",
           "Valuations here derive from a stale SEV, not comps. Treat the computed ARV as a starting point and override it with real comparable sales before bidding at the ceiling.",
           "Rand v. Rand / Hall-era excess-proceeds rules mean former owners may claim surplus; this does not affect the buyer's title."
         ]
       },
       "warnings": [
-        "Surviving liens assumed $0. Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean \u2014 quiet title is often unnecessary."
+        "Surviving liens assumed $0. Michigan's foreclosure judgment cuts off prior liens and the owner's interest, so title is comparatively clean — quiet title is often unnecessary."
       ]
     }
   }
