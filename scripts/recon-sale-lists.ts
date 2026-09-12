@@ -1,13 +1,19 @@
 /**
- * Find and sample each Pennsylvania county's Tax Claim sale list.
+ * Find and sample the sale list a county publishes for itself.
  *
- *   npx tsx scripts/recon-pa-taxclaim.ts --out /tmp/pa
- *   npx tsx scripts/recon-pa-taxclaim.ts --fips 42049 --out /tmp/pa
+ *   npx tsx scripts/recon-sale-lists.ts --state KY --out artifacts/recon
+ *   npx tsx scripts/recon-sale-lists.ts --state PA --out artifacts/recon
+ *   npx tsx scripts/recon-sale-lists.ts --fips 42049 --out artifacts/recon
  *
- * Reconnaissance only — writes nothing to the database. For every Pennsylvania
- * sale that has no parcels and no profile in `lib/ingest/pa-taxclaim.ts`, it
- * tries the pages we already know about, finds the likeliest sale-list PDF, and
- * saves the first lines of its extracted text.
+ * Reconnaissance only — writes nothing to the database. For every sale in the
+ * state that has no parcels, it tries the pages we already know about, finds
+ * the likeliest sale-list PDF, and saves the first lines of its extracted text.
+ *
+ * Written for Pennsylvania and then generalised, because nothing in it was
+ * actually about Pennsylvania: every state has counties that publish a list, a
+ * directory entry pointing at roughly the right page, and a PDF that has to be
+ * read before anyone can write a parser for it. Kentucky is the next test —
+ * 27 upcoming sales, 28,864 announced parcels and not one of them held.
  *
  * ## Why a separate pass
  *
@@ -102,8 +108,10 @@ function candidatePages(fips: string, sourceUrl: string | null): string[] {
 }
 
 async function main() {
-  const outDir = arg("out") ?? join(process.cwd(), "artifacts", "pa-recon");
+  const outDir = arg("out") ?? join(process.cwd(), "artifacts", "recon");
   const only = arg("fips");
+  /* A --fips implies its state; otherwise say which one. */
+  const state = (arg("state") ?? (only ? "" : "PA")).toUpperCase();
   await mkdir(outDir, { recursive: true });
 
   const today = new Date().toISOString().slice(0, 10);
@@ -119,7 +127,7 @@ async function main() {
     .innerJoin(counties, eq(counties.fips, auctions.countyFips))
     .where(
       and(
-        eq(counties.state, "PA"),
+        state ? eq(counties.state, state) : sql`true`,
         gte(auctions.saleDate, today),
         isNull(auctions.delistedAt),
         sql`not exists (select 1 from ${lots} l where l.auction_id = ${auctions.id})`,
@@ -130,12 +138,13 @@ async function main() {
   const byCounty = new Map<string, (typeof rows)[number]>();
   for (const r of rows) {
     if (only && r.fips !== only) continue;
-    if (profileFor(r.fips)) continue;
+    /* PA profiles are the only ones that exist; elsewhere nothing is done yet. */
+    if (state === "PA" && profileFor(r.fips)) continue;
     const prev = byCounty.get(r.fips);
     if (!prev || (r.announced ?? 0) > (prev.announced ?? 0)) byCounty.set(r.fips, r);
   }
 
-  console.log(`${byCounty.size} Pennsylvania county/counties to survey\n`);
+  console.log(`${byCounty.size} ${state || "selected"} county/counties to survey\n`);
 
   const found: string[] = [];
   const noPdf: string[] = [];
