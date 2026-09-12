@@ -27,6 +27,7 @@
     "enrich:mi": "tsx scripts/coverage-cycle.ts --enrich-mi",
     "purge:skeletons": "tsx scripts/coverage-cycle.ts --purge-skeletons",
     "scan:html": "tsx scripts/scan-html-lots.ts",
+    "ingest:pa": "tsx scripts/ingest-pa-taxclaim.ts",
     "ingest:found": "tsx scripts/ingest-found-lists.ts",
     "ingest:fl": "tsx scripts/ingest.ts -- --adapter fl-clerks",
     "enrich:lots": "tsx scripts/enrich-lots.ts",
