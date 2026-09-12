@@ -2861,6 +2861,83 @@
       }
     ]
   },
+  "13029": {
+    "fips": "13029",
+    "state": "GA",
+    "county": "Bryan",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/GA_Bryan.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://qpublic.schneidercorp.com/Application.aspx?App=BryanCountyGA&Layer=Parcels&PageType=Search",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.bryancountyga.org/government/departments-h-z/tax-assessor",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Registrar of Deeds Records",
+        "url": "https://www.bryancountyga.org/government/courts/clerk-of-court/real-estate-division",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Foreclosures and Delinquent Taxes",
+        "url": "https://www.bryancountyga.org/government/departments-h-z/tax-commissioner",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.bryancountyga.org/government/departments-a-g/gis-mapping/interactive-maps",
+        "gov": false
+      }
+    ]
+  },
+  "13063": {
+    "fips": "13063",
+    "state": "GA",
+    "county": "Clayton",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/GA_Clayton.htm",
+    "links": []
+  },
+  "13089": {
+    "fips": "13089",
+    "state": "GA",
+    "county": "DeKalb",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/GA_DeKalb.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.dekalbcountyga.gov/property-appraisal/welcome",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Registrar of Deeds Records",
+        "url": "https://www.dksuperiorclerk.com/",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://taxcommissioner.dekalbcountyga.gov/TaxCommissioner/TCSearch.asp",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Foreclosures and Delinquent Taxes",
+        "url": "https://dekalbtax.org/",
+        "gov": false
+      }
+    ]
+  },
   "13105": {
     "fips": "13105",
     "state": "GA",
@@ -2883,6 +2960,38 @@
         "kind": "tax_portal",
         "label": "Property Tax Search",
         "url": "https://www.elbertcountytax.com/taxes.html#/",
+        "gov": false
+      }
+    ]
+  },
+  "13139": {
+    "fips": "13139",
+    "state": "GA",
+    "county": "Hall",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/GA_Hall.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://qpublic.net/ga/hall/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.hallcounty.org/239/Tax-Assessors",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Registrar of Deeds Records",
+        "url": "https://www.hallcounty.org/432/Real-Estate-Division",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Foreclosures and Delinquent Taxes",
+        "url": "https://hallcountytax.org/#/",
         "gov": false
       }
     ]
@@ -2931,6 +3040,32 @@
     "county": "Lumpkin",
     "sourceUrl": "https://www.publicrecords.onlinesearches.com/GA_Lumpkin.htm",
     "links": []
+  },
+  "13193": {
+    "fips": "13193",
+    "state": "GA",
+    "county": "Macon",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/GA_Macon.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://qpublic.net/ga/macon/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Registrar of Deeds Records",
+        "url": "https://www.maconcountyga.gov/clerk-of-superior-court.cfm",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Foreclosures and Delinquent Taxes",
+        "url": "https://www.maconcountyga.gov/tax-commissioner.cfm",
+        "gov": true
+      }
+    ]
   },
   "13199": {
     "fips": "13199",
@@ -3006,6 +3141,20 @@
         "kind": "assessor",
         "label": "Assessor Records",
         "url": "https://www.qpublic.net/ga/oconee/",
+        "gov": false
+      }
+    ]
+  },
+  "13269": {
+    "fips": "13269",
+    "state": "GA",
+    "county": "Taylor",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/GA_Taylor.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.qpublic.net/ga/taylor/",
         "gov": false
       }
     ]
@@ -3128,6 +3277,568 @@
       }
     ]
   },
+  "18003": {
+    "fips": "18003",
+    "state": "IN",
+    "county": "Allen",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Allen.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.allencounty.us/assessors-office-home",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.allencountyrecorder.us/Resources/Downloads.aspx",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.acimap.us/portal/",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sale",
+        "url": "https://www.allencounty.us/tax-sale",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.allencounty.us/government/tax-a-property/treasurers-office",
+        "gov": true
+      }
+    ]
+  },
+  "18007": {
+    "fips": "18007",
+    "state": "IN",
+    "county": "Benton",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Benton.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://benton.in.wthgis.com/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.bentoncounty.in.gov/assessor",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.bentoncounty.in.gov/recorder",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.bentoncounty.in.gov/treasurer",
+        "gov": true
+      }
+    ]
+  },
+  "18009": {
+    "fips": "18009",
+    "state": "IN",
+    "county": "Blackford",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Blackford.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=BlackfordCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.blackfordcounty.com/assessor/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/common/ViewCountyDetails?countyId=18009",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.blackfordcounty.com/recorder/",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.blackfordcounty.com/treasurer/",
+        "gov": false
+      }
+    ]
+  },
+  "18011": {
+    "fips": "18011",
+    "state": "IN",
+    "county": "Boone",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Boone.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://boonecounty.in.gov/Offices/Recorder/Records-Lookup",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://50.73.115.85/boone/map.phtml",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.sriservices.com/auctions/indiana/",
+        "gov": false
+      }
+    ]
+  },
+  "18013": {
+    "fips": "18013",
+    "state": "IN",
+    "county": "Brown",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Brown.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.doxpop.com/prod/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://legacy.sri-taxsale.com/Foreclosure/PropertyListing.aspx?county=BROWN&county=BROWN",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://www.invoicecloud.com/portal/(S(x0lwt2455pmbnsvsjft3rxa0))/Site.aspx?G=ae6cebce-0a42-4bde-aeb9-61b1c82463b9",
+        "gov": false
+      }
+    ]
+  },
+  "18015": {
+    "fips": "18015",
+    "state": "IN",
+    "county": "Carroll",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Carroll.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=CarrollCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.carrollcountygovernment.org/assessors-office.html",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/recorder/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.carrollcountygovernment.org/recorders-office.html",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.sriservices.com/auctions/indiana/",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.carrollcountygovernment.org/treasurers-office.html",
+        "gov": false
+      }
+    ]
+  },
+  "18017": {
+    "fips": "18017",
+    "state": "IN",
+    "county": "Cass",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Cass.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://cassin.elevatemaps.io/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.co.cass.in.us/departments/a-d/assessor",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/Search.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.co.cass.in.us/departments/r-z/recorder",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.sriservices.com/?page_id=294",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.co.cass.in.us/departments/r-z/treasurer",
+        "gov": true
+      }
+    ]
+  },
+  "18021": {
+    "fips": "18021",
+    "state": "IN",
+    "county": "Clay",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Clay.htm",
+    "links": [
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "http://www.claytax.net/(S(mbbtmdmnr3u0s545wtw1ab55))/content/Default.aspx?cid=23",
+        "gov": false
+      }
+    ]
+  },
+  "18023": {
+    "fips": "18023",
+    "state": "IN",
+    "county": "Clinton",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Clinton.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=ClintonCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.clintoncountysheriff.com/resources/sheriff-sales/",
+        "gov": false
+      }
+    ]
+  },
+  "18027": {
+    "fips": "18027",
+    "state": "IN",
+    "county": "Daviess",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Daviess.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.daviess.org/department/index.php?structureid=24",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.daviess.org/topic/index.php?topicid=92&structureid=25",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.daviess.org/department/index.php?structureid=25",
+        "gov": false
+      }
+    ]
+  },
+  "18029": {
+    "fips": "18029",
+    "state": "IN",
+    "county": "Dearborn",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Dearborn.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.dearborncounty.org/department/index.php?structureid=14",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/recorder/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.dearborncounty.org/department/index.php?structureid=28",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.dearborncountysheriff.org/sheriff-sales/",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=DearbornCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.dearborncounty.org/topic/index.php?topicid=29&structureid=35",
+        "gov": false
+      }
+    ]
+  },
+  "18031": {
+    "fips": "18031",
+    "state": "IN",
+    "county": "Decatur",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Decatur.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=DecaturCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.decaturcounty.in.gov/assessor/assessor.htm",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/recorder/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.decaturcounty.in.gov/recorder/recorder.htm",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.decaturcountysheriff.com/auctions.html",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.decaturcounty.in.gov/treasurer/treasurer.htm",
+        "gov": true
+      }
+    ]
+  },
+  "18033": {
+    "fips": "18033",
+    "state": "IN",
+    "county": "DeKalb",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_DeKalb.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.co.dekalb.in.us/department/?fDD=4-0",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.co.dekalb.in.us/department/?fDD=30-0",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.co.dekalb.in.us/department/?fDD=30-0",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sale",
+        "url": "https://www.co.dekalb.in.us/department/division.php?structureid=103",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps and Parcel Search",
+        "url": "https://beacon.schneidercorp.com/Application.aspx?AppID=385&LayerID=6053&PageTypeID=2&PageID=3292",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.co.dekalb.in.us/department/division.php?structureid=53",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.co.dekalb.in.us/department/?fDD=37-0",
+        "gov": true
+      }
+    ]
+  },
+  "18035": {
+    "fips": "18035",
+    "state": "IN",
+    "county": "Delaware",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Delaware.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=DelawareCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.co.delaware.in.us/department/?fDD=29-0",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.co.delaware.in.us/egov/apps/document/center.egov?eGov_searchDepartment=25&eGov_searchType=88",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.co.delaware.in.us/department/index.php?structureid=25",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps and Parcel Search",
+        "url": "https://www.co.delaware.in.us/department/division.php?fDD=25-67",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.co.delaware.in.us/department/division.php?structureid=197",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.co.delaware.in.us/department/?fDD=13-0",
+        "gov": true
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://www.co.delaware.in.us/egov/apps/bill/pay.egov?view=search&itemid=100",
+        "gov": true
+      }
+    ]
+  },
+  "18037": {
+    "fips": "18037",
+    "state": "IN",
+    "county": "Dubois",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Dubois.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.doxpop.com/prod/recorder/",
+        "gov": false
+      }
+    ]
+  },
+  "18041": {
+    "fips": "18041",
+    "state": "IN",
+    "county": "Fayette",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Fayette.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://fayette.in.wthgis.com/",
+        "gov": false
+      }
+    ]
+  },
+  "18045": {
+    "fips": "18045",
+    "state": "IN",
+    "county": "Fountain",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Fountain.htm",
+    "links": [
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff and Sheriff Sales",
+        "url": "https://www.fountaincounty.net/files/Navigation_Menus_Pages/Judicial/Sheriff.html",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.fountaincounty.net/files/Navigation_Menus_Pages/CourthouseOffices/Assessor.html",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.doxpop.com/prod/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://legacy.sri-taxsale.com/Foreclosure/PropertyListing.aspx?county=FOUNTAIN&county=FOUNTAIN",
+        "gov": false
+      }
+    ]
+  },
   "18049": {
     "fips": "18049",
     "state": "IN",
@@ -3172,6 +3883,292 @@
       }
     ]
   },
+  "18051": {
+    "fips": "18051",
+    "state": "IN",
+    "county": "Gibson",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Gibson.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=GibsonCountyIN",
+        "gov": false
+      }
+    ]
+  },
+  "18055": {
+    "fips": "18055",
+    "state": "IN",
+    "county": "Greene",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Greene.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.co.greene.in.us/department/index.php?structureid=11",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.co.greene.in.us/topic/index.php?topicid=55&structureid=14",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.co.greene.in.us/department/index.php?structureid=14",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.co.greene.in.us/department/index.php?structureid=17",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.sriservices.com/auctions/indiana/",
+        "gov": false
+      }
+    ]
+  },
+  "18057": {
+    "fips": "18057",
+    "state": "IN",
+    "county": "Hamilton",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Hamilton.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.hamiltoncounty.in.gov/404/Assessors-Office",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.hamiltoncounty.in.gov/520/Recorders-Office",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.hamiltoncounty.in.gov/598/Sheriffs-Sale",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.hamiltoncounty.in.gov/442/GIS-and-Maps",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.hamiltoncounty.in.gov/452/Real-Property-Tax-Sale",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.hamiltoncounty.in.gov/670/Treasurers-Office",
+        "gov": true
+      }
+    ]
+  },
+  "18059": {
+    "fips": "18059",
+    "state": "IN",
+    "county": "Hancock",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Hancock.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=HancockCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://hancockcoingov.org/hancock-county-government-departments/assessor",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.doxpop.com/prod/recorder/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://hancockcoingov.org/hancock-county-government-departments/hancock-county-indiana-recorder",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://hancockcoingov.org/hancock-county-indiana-tax-sale",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://hancockcoingov.org/hancock-county-government-departments/hancock-county-indiana-treasurers-office",
+        "gov": false
+      }
+    ]
+  },
+  "18063": {
+    "fips": "18063",
+    "state": "IN",
+    "county": "Hendricks",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Hendricks.htm",
+    "links": [
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff, Jail and Sheriff Sales",
+        "url": "https://www.co.hendricks.in.us/department/index.php?structureid=59",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.co.hendricks.in.us/department/index.php?structureid=20",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.co.hendricks.in.us/department/index.php?structureid=12",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.co.hendricks.in.us/department/index.php?structureid=22",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps and Parcel Search",
+        "url": "https://beacon.schneidercorp.com/Application.aspx?AppID=327",
+        "gov": false
+      }
+    ]
+  },
+  "18065": {
+    "fips": "18065",
+    "state": "IN",
+    "county": "Henry",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Henry.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Parcel Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=HenryCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/recorder/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sale Properties",
+        "url": "https://www.sriservices.com/auctions/indiana/",
+        "gov": false
+      }
+    ]
+  },
+  "18069": {
+    "fips": "18069",
+    "state": "IN",
+    "county": "Huntington",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Huntington.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=HuntingtonCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.huntington.in.us/county/department/?fDD=33-0",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/Search.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.huntington.in.us/county/department/?fDD=41-0",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sale Properties",
+        "url": "https://www.sriservices.com/auctions/indiana/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sale Properties",
+        "url": "https://www.huntington.in.us/county/department/division.php?fDD=18-52",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.huntington.in.us/county/department/?fDD=45-0",
+        "gov": true
+      }
+    ]
+  },
+  "18071": {
+    "fips": "18071",
+    "state": "IN",
+    "county": "Jackson",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Jackson.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://thinkopengis.jackson.in.wthtechnology.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/Default.aspx",
+        "gov": false
+      }
+    ]
+  },
   "18075": {
     "fips": "18075",
     "state": "IN",
@@ -3192,6 +4189,20 @@
       }
     ]
   },
+  "18077": {
+    "fips": "18077",
+    "state": "IN",
+    "county": "Jefferson",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Jefferson.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://jeffersonin.wthgis.com/",
+        "gov": false
+      }
+    ]
+  },
   "18079": {
     "fips": "18079",
     "state": "IN",
@@ -3208,6 +4219,218 @@
         "kind": "recorder",
         "label": "Recorded Document Search",
         "url": "http://www.doxpop.com/prod/common/ViewCountyDetails?countyId=18079",
+        "gov": false
+      }
+    ]
+  },
+  "18081": {
+    "fips": "18081",
+    "state": "IN",
+    "county": "Johnson",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Johnson.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://co.johnson.in.us/government/taxpropertyfinance/recorders-office/",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=JohnsonCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://co.johnson.in.us/government/taxpropertyfinance/assessor/",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://johnsoncountysheriff.com/sheriffs-sales/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://co.johnson.in.us/tax-sale-information/",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://co.johnson.in.us/government/taxpropertyfinance/treasurers-office/",
+        "gov": true
+      }
+    ]
+  },
+  "18083": {
+    "fips": "18083",
+    "state": "IN",
+    "county": "Knox",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Knox.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://knox.in.wthgis.com/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://knoxcounty.in.gov/assessor",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://knoxcounty.in.gov/recorder",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://knoxcounty.in.gov/treasurer",
+        "gov": true
+      }
+    ]
+  },
+  "18091": {
+    "fips": "18091",
+    "state": "IN",
+    "county": "LaPorte",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_LaPorte.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=LaPorteCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.laportecounty.org/Finance/Assessor/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.laportecounty.org/Recorder/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.laportecounty.org/Recorder/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.laportecounty.org/Finance/Treasurer/RealEstateTaxSale/",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.laportecounty.org/Finance/Treasurer/",
+        "gov": false
+      }
+    ]
+  },
+  "18093": {
+    "fips": "18093",
+    "state": "IN",
+    "county": "Lawrence",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Lawrence.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://lawrencein.elevatemaps.io/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://legacy.sri-taxsale.com/Foreclosure/PropertyListing.aspx?county=LAWRENCE&county=LAWRENCE",
+        "gov": false
+      }
+    ]
+  },
+  "18097": {
+    "fips": "18097",
+    "state": "IN",
+    "county": "Marion",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Marion.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.indy.gov/agency/marion-county-assessors-office",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://in3laredo.fidlar.com/INMarion/DirectSearch/#!/search#%2Fsearch",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.indy.gov/agency/marion-county-recorders-office",
+        "gov": true
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://www2.invoicecloud.com/portal/(S(iqohqe0gt0g3wks3mxtgz51o))/2/Site.aspx?G=f92bbd52-0986-4971-8f81-6e44801f28d6",
+        "gov": false
+      }
+    ]
+  },
+  "18099": {
+    "fips": "18099",
+    "state": "IN",
+    "county": "Marshall",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Marshall.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=MarshallCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/Search.aspx",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sale Properties",
+        "url": "https://www.sriservices.com/auctions/indiana/#",
+        "gov": false
+      }
+    ]
+  },
+  "18101": {
+    "fips": "18101",
+    "state": "IN",
+    "county": "Martin",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Martin.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://martinin.egis.39dn.com/#",
         "gov": false
       }
     ]
@@ -3234,6 +4457,174 @@
         "kind": "foreclosure",
         "label": "Tax Sales",
         "url": "https://www.sriservices.com/auctions/indiana/",
+        "gov": false
+      }
+    ]
+  },
+  "18107": {
+    "fips": "18107",
+    "state": "IN",
+    "county": "Montgomery",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Montgomery.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=MontgomeryCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.montgomerycounty.in.gov/department/index.php?structureid=9",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.doxpop.com/prod/recorder/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.montgomerycounty.in.gov/department/index.php?structureid=12",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.montgomerycounty.in.gov/department/division.php?structureid=110",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.montgomerycounty.in.gov/egov/apps/services/index.egov?view=detail;id=58",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.montgomerycounty.in.gov/department/index.php?structureid=15",
+        "gov": true
+      }
+    ]
+  },
+  "18111": {
+    "fips": "18111",
+    "state": "IN",
+    "county": "Newton",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Newton.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/Application.aspx?AppID=295&LayerID=3320&PageTypeID=1&PageID=2029",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.newtoncounty.in.gov/department/index.php?structureid=14",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder and Business Licenses",
+        "url": "https://www.newtoncounty.in.gov/department/index.php?structureid=17",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://beacon.schneidercorp.com/Application.aspx?AppID=295&LayerID=3320&PageTypeID=1&PageID=2029#",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.newtoncounty.in.gov/department/index.php?structureid=19",
+        "gov": true
+      }
+    ]
+  },
+  "18113": {
+    "fips": "18113",
+    "state": "IN",
+    "county": "Noble",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Noble.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.noblecountyrecorder.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.noblecountyrecorder.com/",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=NobleCountyIN",
+        "gov": false
+      }
+    ]
+  },
+  "18115": {
+    "fips": "18115",
+    "state": "IN",
+    "county": "Ohio",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Ohio.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/recorder/",
+        "gov": false
+      }
+    ]
+  },
+  "18117": {
+    "fips": "18117",
+    "state": "IN",
+    "county": "Orange",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Orange.htm",
+    "links": [
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.sriservices.com/auctions/indiana/",
+        "gov": false
+      }
+    ]
+  },
+  "18119": {
+    "fips": "18119",
+    "state": "IN",
+    "county": "Owen",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Owen.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/Search.aspx",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.sriservices.com/auctions/indiana/",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Parcel Search and GIS Maps",
+        "url": "https://owenin.elevatemaps.io/",
         "gov": false
       }
     ]
@@ -3268,6 +4659,20 @@
         "kind": "recorder",
         "label": "Recorded Document Search",
         "url": "http://brandihess-001-site4.ctempurl.com/departments/recorder/search-records-online/",
+        "gov": false
+      }
+    ]
+  },
+  "18125": {
+    "fips": "18125",
+    "state": "IN",
+    "county": "Pike",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Pike.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://pike.in.wthgis.com/",
         "gov": false
       }
     ]
@@ -3310,6 +4715,120 @@
       }
     ]
   },
+  "18131": {
+    "fips": "18131",
+    "state": "IN",
+    "county": "Pulaski",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Pulaski.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://pulaski.in.wthgis.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/",
+        "gov": false
+      }
+    ]
+  },
+  "18135": {
+    "fips": "18135",
+    "state": "IN",
+    "county": "Randolph",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Randolph.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://randolph.in.wthgis.com/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.randolphcounty.us/departments/assessor",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/recorder/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://randolphcounty.us/departments/recorder",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://randolphcounty.us/services/review-sheriff-sale-listings",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.randolphcounty.us/departments/treasurer",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://randolphcounty.us/services/tax-sales-real-estate",
+        "gov": true
+      }
+    ]
+  },
+  "18139": {
+    "fips": "18139",
+    "state": "IN",
+    "county": "Rush",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Rush.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=RushCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://rushcounty.in.gov/assessor/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.doxpop.com/prod/recorder/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://rushcounty.in.gov/recorder/",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sale Properties",
+        "url": "https://rushcounty.in.gov/sheriff-sales/",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://rushcounty.in.gov/treasurer/",
+        "gov": true
+      }
+    ]
+  },
   "18143": {
     "fips": "18143",
     "state": "IN",
@@ -3336,6 +4855,306 @@
       }
     ]
   },
+  "18145": {
+    "fips": "18145",
+    "state": "IN",
+    "county": "Shelby",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Shelby.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/common/ViewCountyDetails?countyId=18145",
+        "gov": false
+      }
+    ]
+  },
+  "18147": {
+    "fips": "18147",
+    "state": "IN",
+    "county": "Spencer",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Spencer.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://spencerin.wthgis.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/Search.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "18149": {
+    "fips": "18149",
+    "state": "IN",
+    "county": "Starke",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Starke.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://thinkopengis.starke.in.wthtechnology.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/Default.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "18151": {
+    "fips": "18151",
+    "state": "IN",
+    "county": "Steuben",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Steuben.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=SteubenCountyIN",
+        "gov": false
+      }
+    ]
+  },
+  "18153": {
+    "fips": "18153",
+    "state": "IN",
+    "county": "Sullivan",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Sullivan.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/common/ViewCountyDetails?countyId=18153",
+        "gov": false
+      }
+    ]
+  },
+  "18155": {
+    "fips": "18155",
+    "state": "IN",
+    "county": "Switzerland",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Switzerland.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://switzerland.in.wthgis.com/",
+        "gov": false
+      }
+    ]
+  },
+  "18157": {
+    "fips": "18157",
+    "state": "IN",
+    "county": "Tippecanoe",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Tippecanoe.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.tippecanoe.in.gov/150/Assessor",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.tippecanoe.in.gov/343/Recorder",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.tippecanoe.in.gov/479/Sheriff-Sales",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.tippecanoe.in.gov/561/GIS-Maps",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Map",
+        "url": "https://www.tippecanoe.in.gov/172/Township-Information",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sale Properties",
+        "url": "https://www.tippecanoe.in.gov/186/Commissioners-Sale",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.tippecanoe.in.gov/503/Treasurer",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.tippecanoe.in.gov/199/Tax-Sale",
+        "gov": true
+      }
+    ]
+  },
+  "18159": {
+    "fips": "18159",
+    "state": "IN",
+    "county": "Tipton",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Tipton.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=TiptonCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.tiptongov.com/county/department/index.php?structureid=26",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.tiptongov.com/county/department/index.php?structureid=40",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.tiptongov.com/county/department/index.php?structureid=44",
+        "gov": false
+      }
+    ]
+  },
+  "18161": {
+    "fips": "18161",
+    "state": "IN",
+    "county": "Union",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Union.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Parcel Search and GIS Maps",
+        "url": "https://unionin.wthgis.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/recorder/",
+        "gov": false
+      }
+    ]
+  },
+  "18163": {
+    "fips": "18163",
+    "state": "IN",
+    "county": "Vanderburgh",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Vanderburgh.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.vanderburghassessor.org/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://in-vanderburgh-treasurer.governmax.com/svc/default.asp?sid=FAB72769F37B4BE4AB3FE8EFA4AF7ECE",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://dev.evansvilleapc.com/gis.html",
+        "gov": false
+      }
+    ]
+  },
+  "18165": {
+    "fips": "18165",
+    "state": "IN",
+    "county": "Vermillion",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Vermillion.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://thinkopengis.vermillion.in.wthtechnology.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.doxpop.com/prod/recorder/",
+        "gov": false
+      }
+    ]
+  },
+  "18167": {
+    "fips": "18167",
+    "state": "IN",
+    "county": "Vigo",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Vigo.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=VigoCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.vigocounty.in.gov/department/index.php?structureid=1",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.doxpop.com/prod/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.vigocounty.in.gov/department/index.php?structureid=10",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.vigocounty.in.gov/department/index.php?structureid=13",
+        "gov": true
+      }
+    ]
+  },
   "18169": {
     "fips": "18169",
     "state": "IN",
@@ -3346,6 +5165,168 @@
         "kind": "recorder",
         "label": "Recorded Document Search",
         "url": "http://recorder.wabashcounty85.us/",
+        "gov": true
+      }
+    ]
+  },
+  "18171": {
+    "fips": "18171",
+    "state": "IN",
+    "county": "Warren",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Warren.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://warren.in.wthgis.com/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.warrencounty.in.gov/assessor",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.warrencounty.in.gov/recorder",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.warrencounty.in.gov/treasurer",
+        "gov": true
+      }
+    ]
+  },
+  "18175": {
+    "fips": "18175",
+    "state": "IN",
+    "county": "Washington",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Washington.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://washingtonin.wthgis.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.washingtoncounty.in.gov/government/land_and_property/washington_county_recorder.php",
+        "gov": true
+      }
+    ]
+  },
+  "18183": {
+    "fips": "18183",
+    "state": "IN",
+    "county": "Whitley",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/IN_Whitley.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=WhitleyCountyIN",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/Search.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "20019": {
+    "fips": "20019",
+    "state": "KS",
+    "county": "Chautauqua",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/KS_Chautauqua.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Parcel Search and GIS Maps",
+        "url": "http://jade.kgs.ku.edu/orka2/CoSelect.aspx?co=",
+        "gov": false
+      }
+    ]
+  },
+  "20087": {
+    "fips": "20087",
+    "state": "KS",
+    "county": "Jefferson",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/KS_Jefferson.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://www.jfcountyks.com/index.aspx?NID=101",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor, Appraiser",
+        "url": "https://www.jfcountyks.com/index.aspx?nid=99",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.jfcountyks.com/index.aspx?NID=367",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Register of Deeds",
+        "url": "https://www.jfcountyks.com/index.aspx?nid=352",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.jfcountyks.com/index.aspx?nid=158",
+        "gov": false
+      }
+    ]
+  },
+  "20177": {
+    "fips": "20177",
+    "state": "KS",
+    "county": "Shawnee",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/KS_Shawnee.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Appraiser",
+        "url": "https://www.snco.us/ap/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/Search.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Register of Deeds",
+        "url": "https://www.snco.us/rd/",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.snco.us/treasurer/",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://gis.snco.us/PublicGIS/",
         "gov": true
       }
     ]
@@ -3795,6 +5776,13 @@
       }
     ]
   },
+  "21129": {
+    "fips": "21129",
+    "state": "KY",
+    "county": "Lee",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/KY_Lee.htm",
+    "links": []
+  },
   "21131": {
     "fips": "21131",
     "state": "KY",
@@ -3833,6 +5821,26 @@
         "kind": "recorder",
         "label": "Recorded Document Search",
         "url": "https://www.ecclix.com/",
+        "gov": false
+      }
+    ]
+  },
+  "21147": {
+    "fips": "21147",
+    "state": "KY",
+    "county": "McCreary",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/KY_McCreary.htm",
+    "links": [
+      {
+        "kind": "delinquent",
+        "label": "Sheriff, Jail and Delinquent Taxes",
+        "url": "https://www.mccrearysheriff.com/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://qpublic.net/ky/mccreary/",
         "gov": false
       }
     ]
@@ -4029,6 +6037,26 @@
       }
     ]
   },
+  "21183": {
+    "fips": "21183",
+    "state": "KY",
+    "county": "Ohio",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/KY_Ohio.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.ohiopva.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.ecclix.com/ECCLIX.aspx",
+        "gov": false
+      }
+    ]
+  },
   "21189": {
     "fips": "21189",
     "state": "KY",
@@ -4059,6 +6087,26 @@
         "kind": "assessor",
         "label": "Assessor Records",
         "url": "https://www.qpublic.net/ky/perry/",
+        "gov": false
+      }
+    ]
+  },
+  "21195": {
+    "fips": "21195",
+    "state": "KY",
+    "county": "Pike",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/KY_Pike.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.kycountyrecords.com/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://qpublic.net/ky/pike/",
         "gov": false
       }
     ]
@@ -4184,6 +6232,26 @@
         "kind": "delinquent",
         "label": "Delinquent Tax Listing",
         "url": "https://www.unioncountyky.org/county-clerk",
+        "gov": false
+      }
+    ]
+  },
+  "21231": {
+    "fips": "21231",
+    "state": "KY",
+    "county": "Wayne",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/KY_Wayne.htm",
+    "links": [
+      {
+        "kind": "delinquent",
+        "label": "Sheriff, Jail and Delinquent Taxes",
+        "url": "https://waynecounty.ky.gov/eo/Pages/so.aspx",
+        "gov": true
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search",
+        "url": "https://taxbills.g-uts.com/default.aspx?siteid=20&taxbill=1",
         "gov": false
       }
     ]
@@ -9175,6 +11243,202 @@
       }
     ]
   },
+  "27019": {
+    "fips": "27019",
+    "state": "MN",
+    "county": "Carver",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/MN_Carver.htm",
+    "links": [
+      {
+        "kind": "tax_portal",
+        "label": "Property Search, GIS Maps and Pay Property Taxes",
+        "url": "https://gis.co.carver.mn.us/publicparcel/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.co.carver.mn.us/departments/property-financial-services/property-records/land-records-research-information",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Mortgage Foreclosure Prevention",
+        "url": "https://carvercda.org/",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search",
+        "url": "https://mn-carver.manatron.com/Tabs/TaxSearch.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "27033": {
+    "fips": "27033",
+    "state": "MN",
+    "county": "Cottonwood",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/MN_Cottonwood.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=CottonwoodCountyMN",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.co.cottonwood.mn.us/county-departments/assessor/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://tapestry.fidlar.com/Tapestry2/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.co.cottonwood.mn.us/county-departments/recorder/",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.co.cottonwood.mn.us/county-departments/auditortreasurer/",
+        "gov": true
+      }
+    ]
+  },
+  "27049": {
+    "fips": "27049",
+    "state": "MN",
+    "county": "Goodhue",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/MN_Goodhue.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.co.goodhue.mn.us/649/Finance-Taxpayer-Services",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.co.goodhue.mn.us/377/LandShark",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Marriage Licenses, Birth, Death and Marriage Records",
+        "url": "https://www.co.goodhue.mn.us/370/Recorders-Office",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.co.goodhue.mn.us/260/Civil-Division",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Land Sale",
+        "url": "https://www.co.goodhue.mn.us/719/Tax-Forfeited-Land",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Land Sale Properties",
+        "url": "https://mn-goodhuecounty.civicplus.com/DocumentCenter/View/143",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Plats and Surveys",
+        "url": "https://www.co.goodhue.mn.us/364/Plats-Maps",
+        "gov": true
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search",
+        "url": "https://www.co.goodhue.mn.us/149/Property-Tax-Information",
+        "gov": true
+      }
+    ]
+  },
+  "27053": {
+    "fips": "27053",
+    "state": "MN",
+    "county": "Hennepin",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/MN_Hennepin.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://gis.hennepin.us/Property/Map/Default.aspx",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.hennepin.us/residents#property",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.hennepin.us/business/property/record-ease",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.hennepin.us/residents/property/real-estate-recording-information",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Land Sale",
+        "url": "https://www.hennepin.us/residents/property/tax-forfeited-land",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.hennepin.us/foreclosures",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.hennepin.us/residents/property/property-tax-payment-options",
+        "gov": true
+      }
+    ]
+  },
+  "27083": {
+    "fips": "27083",
+    "state": "MN",
+    "county": "Lyon",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/MN_Lyon.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Parcel Search and GIS Maps",
+        "url": "http://gis.lyonco.org/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.lyonco.org/land-records",
+        "gov": false
+      }
+    ]
+  },
   "27097": {
     "fips": "27097",
     "state": "MN",
@@ -9210,6 +11474,70 @@
         "label": "Land Sale",
         "url": "https://www.co.morrison.mn.us/index.asp?Type=B_BASIC&SEC={033FF75B-EC95-4AE3-810E-0A8F0043A170}&DE={BFD6CE71-4801-4C74-883E-9FD4700D0576}",
         "gov": true
+      }
+    ]
+  },
+  "27143": {
+    "fips": "27143",
+    "state": "MN",
+    "county": "Sibley",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/MN_Sibley.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.co.sibley.mn.us/government/departments/recorder/landshark_property_search.php",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.co.sibley.mn.us/government/departments/treasurer/index.php",
+        "gov": true
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://www.co.sibley.mn.us/government/departments/treasurer/property__tax__information.php",
+        "gov": true
+      }
+    ]
+  },
+  "27171": {
+    "fips": "27171",
+    "state": "MN",
+    "county": "Wright",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/MN_Wright.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.co.wright.mn.us/134/Assessor",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://landshark.co.wright.mn.us/LandShark/about.jsp?aboutKey=LandShark",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.co.wright.mn.us/195/Recorder",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.co.wright.mn.us/170/Auditor-Treasurer",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://beacon.schneidercorp.com/?site=WrightCountyMN",
+        "gov": false
       }
     ]
   },
@@ -12113,6 +14441,422 @@
       }
     ]
   },
+  "34003": {
+    "fips": "34003",
+    "state": "NJ",
+    "county": "Bergen",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Bergen.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://bergensearch.co.bergen.nj.us/countyweb/login.do?countyname=BergenRegistry",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Current Sheriff Sales",
+        "url": "https://www.bcsd.us/civil-process/foreclosures-sales",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sold Foreclosure Properties",
+        "url": "https://salesweb.civilview.com/Home/Index?aspxerrorpath=/SalesListing.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "34005": {
+    "fips": "34005",
+    "state": "NJ",
+    "county": "Burlington",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Burlington.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://press.co.burlington.nj.us/press/clerk/ClerkHome.aspx?op=basic",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk and Elections",
+        "url": "https://www.co.burlington.nj.us/192/County-Clerk",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor, Tax Administrator",
+        "url": "https://www.co.burlington.nj.us/323/Taxation-Board",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Data Files",
+        "url": "https://www.co.burlington.nj.us/1209/GIS-Data-Downloads",
+        "gov": true
+      }
+    ]
+  },
+  "34007": {
+    "fips": "34007",
+    "state": "NJ",
+    "county": "Camden",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Camden.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Tax Administrator",
+        "url": "https://www.camdencounty.com/service/board-of-taxation/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk and Elections",
+        "url": "https://www.camdencounty.com/service/county-clerk/",
+        "gov": false
+      }
+    ]
+  },
+  "34009": {
+    "fips": "34009",
+    "state": "NJ",
+    "county": "Cape May",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_CapeMay.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://clerk.capemaycountynj.gov/landrecords/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk and Elections",
+        "url": "https://capemaycountynj.gov/189/County-Clerk",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor, Tax Administrator",
+        "url": "https://capemaycountynj.gov/630/Board-of-Taxation",
+        "gov": true
+      }
+    ]
+  },
+  "34011": {
+    "fips": "34011",
+    "state": "NJ",
+    "county": "Cumberland",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Cumberland.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk and Elections",
+        "url": "https://ccclerknj.com/",
+        "gov": false
+      }
+    ]
+  },
+  "34013": {
+    "fips": "34013",
+    "state": "NJ",
+    "county": "Essex",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Essex.htm",
+    "links": []
+  },
+  "34015": {
+    "fips": "34015",
+    "state": "NJ",
+    "county": "Gloucester",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Gloucester.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://i2e.uslandrecords.com/NJ/Gloucester/D/Default.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "34017": {
+    "fips": "34017",
+    "state": "NJ",
+    "county": "Hudson",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Hudson.htm",
+    "links": []
+  },
+  "34019": {
+    "fips": "34019",
+    "state": "NJ",
+    "county": "Hunterdon",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Hunterdon.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Tax Administrator",
+        "url": "https://www.co.hunterdon.nj.us/taxboard.htm",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk, Marriage Licenses and Elections",
+        "url": "https://www.co.hunterdon.nj.us/countyclerk.htm",
+        "gov": true
+      }
+    ]
+  },
+  "34021": {
+    "fips": "34021",
+    "state": "NJ",
+    "county": "Mercer",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Mercer.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://records.mercercounty.org/RecordsNG_Search/",
+        "gov": false
+      }
+    ]
+  },
+  "34023": {
+    "fips": "34023",
+    "state": "NJ",
+    "county": "Middlesex",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Middlesex.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.middlesexcountynj.gov/Government/Departments/CS/Pages/County%20Clerk/How-to-Search-Land-Records.aspx",
+        "gov": true
+      }
+    ]
+  },
+  "34025": {
+    "fips": "34025",
+    "state": "NJ",
+    "county": "Monmouth",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Monmouth.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://oprs.co.monmouth.nj.us/oprs/clerk/ClerkHome.aspx?op=basic",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk and Elections",
+        "url": "https://www.visitmonmouth.com/page.aspx?ID=125",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor, Tax Administrator",
+        "url": "https://www.visitmonmouth.com/page.aspx?ID=134",
+        "gov": false
+      }
+    ]
+  },
+  "34027": {
+    "fips": "34027",
+    "state": "NJ",
+    "county": "Morris",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Morris.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Tax Administrator",
+        "url": "https://mcweb1.co.morris.nj.us/MCTaxBoard/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://mcclerksng.co.morris.nj.us/recordsng_web/default.aspx",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk, Marriage Licenses and Elections",
+        "url": "https://morriscountyclerk.org/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Foreclosure Assistance",
+        "url": "https://www.state.nj.us/dca/hmfa/foreclosure/",
+        "gov": true
+      }
+    ]
+  },
+  "34029": {
+    "fips": "34029",
+    "state": "NJ",
+    "county": "Ocean",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Ocean.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://sng.co.ocean.nj.us/searchapplication/",
+        "gov": true
+      }
+    ]
+  },
+  "34031": {
+    "fips": "34031",
+    "state": "NJ",
+    "county": "Passaic",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Passaic.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://records.passaiccountynj.org/press/indexPassaic.aspx",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff's Foreclosure List",
+        "url": "https://pcsheriff.org/civil/sheriff-sales.pdf",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales Search",
+        "url": "https://salesweb.civilview.com/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff's Foreclosure Sales",
+        "url": "https://salesweb.civilview.com/Home/Index?aspxerrorpath=/SalesListing.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "34033": {
+    "fips": "34033",
+    "state": "NJ",
+    "county": "Salem",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Salem.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk and Elections",
+        "url": "https://salemcountyclerk.org/",
+        "gov": false
+      }
+    ]
+  },
+  "34035": {
+    "fips": "34035",
+    "state": "NJ",
+    "county": "Somerset",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Somerset.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://ccsearch.co.somerset.nj.us/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk and Elections",
+        "url": "https://www.co.somerset.nj.us/government/elected-officials/county-clerk",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor,Tax Administrator",
+        "url": "https://www.co.somerset.nj.us/government/affiliated-agencies/tax-board",
+        "gov": true
+      }
+    ]
+  },
+  "34037": {
+    "fips": "34037",
+    "state": "NJ",
+    "county": "Sussex",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Sussex.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://sussex.landrecordsonline.com/sussex/search.do",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk and Elections",
+        "url": "https://sussexcountyclerk.org/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor, Tax Administrator",
+        "url": "https://www.sussex.nj.us/Cit-e-Access/webpage.cfm?TID=7&TPID=862",
+        "gov": true
+      }
+    ]
+  },
+  "34039": {
+    "fips": "34039",
+    "state": "NJ",
+    "county": "Union",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Union.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://clerk.ucnj.org/UCPA/DocIndex",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk and Election Information",
+        "url": "https://ucnj.org/county-clerk/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor, Tax Administrator",
+        "url": "https://ucnj.org/taxation-board/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Mortgage Foreclosure Assistance",
+        "url": "https://ucnj.org/foreclosures/",
+        "gov": false
+      }
+    ]
+  },
+  "34041": {
+    "fips": "34041",
+    "state": "NJ",
+    "county": "Warren",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NJ_Warren.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.co.warren.nj.us/CountyClerk/public_land_records.html",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff's Foreclosure Sales",
+        "url": "https://wcsheriffnjus.ipower.com/foreclosures/index.shtml",
+        "gov": false
+      }
+    ]
+  },
   "35001": {
     "fips": "35001",
     "state": "NM",
@@ -12797,6 +15541,111 @@
       }
     ]
   },
+  "36011": {
+    "fips": "36011",
+    "state": "NY",
+    "county": "Cayuga",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NY_Cayuga.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Real Property Tax Services",
+        "url": "https://www.cayugacounty.us/459/Real-Property-Services",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.cayugacounty.us/350/Search-Land-Records",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Clerk",
+        "url": "https://www.cayugacounty.us/154/County-Clerk",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Mapping",
+        "url": "https://gis.cayugacounty.us/flexviewers/CCrpv/",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Foreclosure Auctions",
+        "url": "https://www.cayugacounty.us/309/Treasurer",
+        "gov": true
+      }
+    ]
+  },
+  "36053": {
+    "fips": "36053",
+    "state": "NY",
+    "county": "Madison",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NY_Madison.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://property.madisoncounty.ny.gov/imateweb/index.aspx",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.searchiqs.com/NYMAD/Login.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "36063": {
+    "fips": "36063",
+    "state": "NY",
+    "county": "Niagara",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NY_Niagara.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://www.btmaps.com/niagara/parcels/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.searchiqs.com/NYNIA/Login.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "36089": {
+    "fips": "36089",
+    "state": "NY",
+    "county": "St. Lawrence",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NY_St.Lawrence.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.searchiqs.com/NYSTL/Login.aspx",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Property Tax Search and Delinquent Tax Payments",
+        "url": "https://www.taxlookup.net/index.aspx?county=stlawrence",
+        "gov": false
+      }
+    ]
+  },
+  "36105": {
+    "fips": "36105",
+    "state": "NY",
+    "county": "Sullivan",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NY_Sullivan.htm",
+    "links": []
+  },
   "37007": {
     "fips": "37007",
     "state": "NC",
@@ -12817,6 +15666,208 @@
       }
     ]
   },
+  "37021": {
+    "fips": "37021",
+    "state": "NC",
+    "county": "Buncombe",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Buncombe.htm",
+    "links": [
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://tax.buncombecounty.org/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://registerofdeeds.buncombecounty.org/External/LandRecords/protected/v4/SrchName.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "37023": {
+    "fips": "37023",
+    "state": "NC",
+    "county": "Burke",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Burke.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://gis.burkenc.org/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Tax Assessor and Delinquent Taxes",
+        "url": "https://burkenctax.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://72.15.246.181/BurkeNC/",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://burkenctax.com/TaxSearch/",
+        "gov": false
+      }
+    ]
+  },
+  "37031": {
+    "fips": "37031",
+    "state": "NC",
+    "county": "Carteret",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Carteret.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Collector, Delinquent Taxes and Tax Sales",
+        "url": "https://carteretcountytax.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://deeds.carteretcounty.com/",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://carteretcountytax.com/taxes",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps and Parcel Search",
+        "url": "https://carteret2.connectgis.com/Map.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "37037": {
+    "fips": "37037",
+    "state": "NC",
+    "county": "Chatham",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Chatham.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://www.chathamnc.org/government/departments-programs/tax-office/tax-records-search",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Tax Assessor and Delinquent Taxes",
+        "url": "https://www.chathamnc.org/government/departments-programs/tax-office",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.chathamncrod.org/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Foreclosure Sales",
+        "url": "https://www.chathamnc.org/government/departments-programs/tax-office/foreclosure-sales",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://www.ustaxdata.com/nc/chatham/taxsearch.cfm",
+        "gov": false
+      }
+    ]
+  },
+  "37041": {
+    "fips": "37041",
+    "state": "NC",
+    "county": "Chowan",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Chowan.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://72.15.246.183/ChowanNC/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Tax Assessor and Delinquent Taxes",
+        "url": "https://www.chowancounty-nc.gov/index.asp?Type=B_BASIC&SEC={54ECABE3-F317-4AC5-A88F-AD7767DCB8F7}",
+        "gov": true
+      }
+    ]
+  },
+  "37045": {
+    "fips": "37045",
+    "state": "NC",
+    "county": "Cleveland",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Cleveland.htm",
+    "links": [
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://www.clevelandcountytaxes.com/default.aspx?pageID=113#/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Tax Assessor and Delinquent Taxes",
+        "url": "https://www.clevelandcountytaxes.com/#/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.clevelandcounty.com/main/departments/register_of_deeds/find_available_land_records.php",
+        "gov": false
+      }
+    ]
+  },
+  "37085": {
+    "fips": "37085",
+    "state": "NC",
+    "county": "Harnett",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Harnett.htm",
+    "links": [
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search",
+        "url": "http://cama.harnett.org/BasicSearch.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://rod.harnett.org/",
+        "gov": false
+      }
+    ]
+  },
+  "37087": {
+    "fips": "37087",
+    "state": "NC",
+    "county": "Haywood",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Haywood.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://search.haywooddeeds.com/",
+        "gov": false
+      }
+    ]
+  },
   "37115": {
     "fips": "37115",
     "state": "NC",
@@ -12827,6 +15878,26 @@
         "kind": "recorder",
         "label": "Recorded Document Search",
         "url": "http://216.27.81.171/madisonnc/disclaimer.asp",
+        "gov": false
+      }
+    ]
+  },
+  "37119": {
+    "fips": "37119",
+    "state": "NC",
+    "county": "Mecklenburg",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Mecklenburg.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://meckrod.manatron.com/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Foreclosure Sales",
+        "url": "https://www.rbcwblaw.com/tax-foreclosure-information/tax-foreclosure-process/",
         "gov": false
       }
     ]
@@ -12865,6 +15936,26 @@
       }
     ]
   },
+  "37151": {
+    "fips": "37151",
+    "state": "NC",
+    "county": "Randolph",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Randolph.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://gis.randolphcountync.gov/randolphjs/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.randrod.com/realestaterecords.html",
+        "gov": false
+      }
+    ]
+  },
   "37153": {
     "fips": "37153",
     "state": "NC",
@@ -12881,6 +15972,502 @@
         "kind": "recorder",
         "label": "Recorded Document Search",
         "url": "http://216.27.81.171/richmondnc/disclaimer.asp",
+        "gov": false
+      }
+    ]
+  },
+  "37159": {
+    "fips": "37159",
+    "state": "NC",
+    "county": "Rowan",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Rowan.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://rowan.ustaxdata.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://rod.rowancountync.gov/external/User/Login.aspx?ReturnUrl=%2fexternal%2findex.aspx",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.rowancountync.gov/885/Tax-Map-GIS",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.rowancountync.gov/201/Tax-Collector",
+        "gov": true
+      }
+    ]
+  },
+  "37161": {
+    "fips": "37161",
+    "state": "NC",
+    "county": "Rutherford",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Rutherford.htm",
+    "links": [
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://www.rutherfordcountync.gov/tax_search/index.php#/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search and Birth, Death and Marriage Records Search",
+        "url": "http://208.90.175.25/External/LandRecords/protected/v4/SrchName.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "37165": {
+    "fips": "37165",
+    "state": "NC",
+    "county": "Scotland",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Scotland.htm",
+    "links": [
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://www.scotlandcountytaxes.com/#/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.scotlandcounty.org/380/Property-Records-Search",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://laurinburg.connectgis.com/Disclaimer.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "37191": {
+    "fips": "37191",
+    "state": "NC",
+    "county": "Wayne",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/NC_Wayne.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Tax Assessor and Delinquent Taxes",
+        "url": "https://www.waynegov.com/463/Tax",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.waynegov.com/FormCenter/Register-of-Deeds-6/Online-Search-45",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps and Parcel Search",
+        "url": "https://www.waynegov.com/236/GIS-Maps",
+        "gov": false
+      }
+    ]
+  },
+  "39025": {
+    "fips": "39025",
+    "state": "OH",
+    "county": "Clermont",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Clermont.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Auditor",
+        "url": "https://www.clermontauditor.org/_dnn/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.uslandrecords.com/ohlr3/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://recorder.clermontcountyohio.gov/",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.clermonttreasurer.org/foreclosures.aspx",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Mapping",
+        "url": "https://gis.clermontcountyohio.gov/interactive-maps/",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Lien Sales",
+        "url": "https://www.clermonttreasurer.org/",
+        "gov": false
+      }
+    ]
+  },
+  "39029": {
+    "fips": "39029",
+    "state": "OH",
+    "county": "Columbiana",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Columbiana.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Auditor",
+        "url": "https://oh-columbiana-auditor.publicaccessnow.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://96.11.126.101/external/LandRecords/protected/SrchQuickName.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "39047": {
+    "fips": "39047",
+    "state": "OH",
+    "county": "Fayette",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Fayette.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.uslandrecords.com/ohlr3/",
+        "gov": false
+      }
+    ]
+  },
+  "39049": {
+    "fips": "39049",
+    "state": "OH",
+    "county": "Franklin",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Franklin.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://countyfusion5.kofiletech.us/countyweb/login.do?countyname=Franklin",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and Mapping",
+        "url": "http://property.franklincountyauditor.com/_web/search/commonsearch.aspx?mode=owner",
+        "gov": false
+      }
+    ]
+  },
+  "39077": {
+    "fips": "39077",
+    "state": "OH",
+    "county": "Huron",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Huron.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and Mapping",
+        "url": "http://www.huroncountyauditor.org/Disclaimer.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://50.54.28.19/PAXWorld/",
+        "gov": false
+      }
+    ]
+  },
+  "39083": {
+    "fips": "39083",
+    "state": "OH",
+    "county": "Knox",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Knox.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and Mapping",
+        "url": "http://www.knoxcountyauditor.org/Disclaimer.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://cotthosting.com/OHKnoxLANExternal/User/Login.aspx?ReturnUrl=%2fOHKnoxLANExternal%2f",
+        "gov": false
+      }
+    ]
+  },
+  "39085": {
+    "fips": "39085",
+    "state": "OH",
+    "county": "Lake",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Lake.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Auditor",
+        "url": "https://www.lakecountyohio.gov/auditor/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://oh2laredo.fidlar.com/OHLake/AvaWeb/#!/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.lakecountyohiorecorder.com/",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Mapping",
+        "url": "https://www.lakecountyohio.gov/lakegis",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Lien Sales",
+        "url": "https://www.lakecountyohio.gov/treasurer/",
+        "gov": true
+      }
+    ]
+  },
+  "39087": {
+    "fips": "39087",
+    "state": "OH",
+    "county": "Lawrence",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Lawrence.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and Mapping",
+        "url": "http://www.lawrencecountyauditor.org/Disclaimer.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://cotthosting.com/OHLawrenceExternal/LandRecords/protected/v4/SrchName.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.lawrencecountyohiorecorder.org/",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Lien Sales",
+        "url": "https://lawrencecountytreasurer.org/",
+        "gov": false
+      }
+    ]
+  },
+  "39095": {
+    "fips": "39095",
+    "state": "OH",
+    "county": "Lucas",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Lucas.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and Mapping",
+        "url": "http://www.co.lucas.oh.us/index.aspx?NID=377",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor, Auditor",
+        "url": "https://www.co.lucas.oh.us/index.aspx?nid=331",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://apps.co.lucas.oh.us/rec/logon.asp",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.co.lucas.oh.us/index.aspx?nid=675",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Lien Sales",
+        "url": "https://co.lucas.oh.us/index.aspx?NID=466",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://oh-lucascounty.civicplus.com/index.aspx?NID=1316",
+        "gov": false
+      }
+    ]
+  },
+  "39103": {
+    "fips": "39103",
+    "state": "OH",
+    "county": "Medina",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Medina.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Auditor",
+        "url": "https://www.medinacountyauditor.org/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Documents Search",
+        "url": "http://recordersearch.co.medina.oh.us/OHMedina/AVAWeb/#!/search",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://recordersearch.co.medina.oh.us/OHMedina/AVAWeb/#!/search",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.medinasheriff.com/Sheriff%20Sales.htm",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://www.medinacountytax.com/taxes.html#/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Foreclosure Prevention Information",
+        "url": "https://www.medinacountyauditor.org/foreclosure.htm",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.medinacountytax.com/#/",
+        "gov": false
+      }
+    ]
+  },
+  "39109": {
+    "fips": "39109",
+    "state": "OH",
+    "county": "Miami",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Miami.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.co.miami.oh.us/Index.aspx?NID=171",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://co.miami.oh.us/index.aspx?NID=191",
+        "gov": true
+      }
+    ]
+  },
+  "39113": {
+    "fips": "39113",
+    "state": "OH",
+    "county": "Montgomery",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Montgomery.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Auditor",
+        "url": "https://www.mcohio.org/government/elected_officials/auditor/index.php",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://public.mcrecorder.org/External/User/Login.aspx?ReturnUrl=%2fexternal%2findex.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.mcohio.org/government/elected_officials/recorder/index.php",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.mcohio.org/sheriff/sflistauction.cfm",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.mcohio.org/government/elected_officials/engineer/gis.php",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.mcohio.org/government/elected_officials/treasurer/index.php",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Foreclosures and Tax Lien Sales",
+        "url": "https://www.mcohio.org/government/elected_officials/treasurer/foreclosure_sales.php",
+        "gov": false
+      }
+    ]
+  },
+  "39123": {
+    "fips": "39123",
+    "state": "OH",
+    "county": "Ottawa",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Ottawa.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://www.ottawacountyauditor.org/Disclaimer.aspx?Redirect=%2fSearch.aspx&CheckForCookies=Yes",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder",
+        "url": "https://www.ohiorecorders.com/ottawa/",
         "gov": false
       }
     ]
@@ -12923,6 +16510,346 @@
       }
     ]
   },
+  "39153": {
+    "fips": "39153",
+    "state": "OH",
+    "county": "Summit",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OH_Summit.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Auditor",
+        "url": "https://fiscaloffice.summitoh.net/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://fiscaloffice.summitoh.net/index.php/recorded-documents",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://co.summitoh.net/sheriff/index.php/information/sheriff-sales",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://fiscaloffice.summitoh.net/index.php/delinquent-tax-payment-plan",
+        "gov": false
+      }
+    ]
+  },
+  "41039": {
+    "fips": "41039",
+    "state": "OR",
+    "county": "Lane",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/OR_Lane.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and Mapping",
+        "url": "https://www.rlid.org/custom/lc/at/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor, Delinquent Taxes, Tax Foreclosures",
+        "url": "https://www.lanecounty.org/government/county_departments/assessment___taxation",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.rlid.org/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Clerk, Recorder, Marriage Licenses and Election Information",
+        "url": "https://www.lanecounty.org/government/county_departments/county_administration/operations/county_clerk/",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.lanecounty.org/cms/One.aspx?portalId=3585881&pageId=4196390",
+        "gov": false
+      }
+    ]
+  },
+  "42001": {
+    "fips": "42001",
+    "state": "PA",
+    "county": "Adams",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Adams.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and Mapping",
+        "url": "http://www.adamscounty.us/Dept/Planning/Pages/Interactive-Mapping.aspx",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://landrecordspa.adamscounty.us/external/User/Login.aspx?ReturnUrl=%2fexternal%2fIndex.aspx",
+        "gov": true
+      }
+    ]
+  },
+  "42009": {
+    "fips": "42009",
+    "state": "PA",
+    "county": "Bedford",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Bedford.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.bedfordcountypa.org/departments/register_and_recorder.php",
+        "gov": false
+      }
+    ]
+  },
+  "42011": {
+    "fips": "42011",
+    "state": "PA",
+    "county": "Berks",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Berks.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.co.berks.pa.us/Dept/Deeds/Pages/OnlineRecordsSearchInstructions.aspx",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://www.co.berks.pa.us/Dept/Mapping/Pages/ParcelSearchDisclaimer.aspx",
+        "gov": true
+      }
+    ]
+  },
+  "42013": {
+    "fips": "42013",
+    "state": "PA",
+    "county": "Blair",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Blair.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/land-records-access.asp",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.blairco.org/Dept/RR/Pages/default.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "42015": {
+    "fips": "42015",
+    "state": "PA",
+    "county": "Bradford",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Bradford.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/land-records-access.asp",
+        "gov": false
+      }
+    ]
+  },
+  "42017": {
+    "fips": "42017",
+    "state": "PA",
+    "county": "Bucks",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Bucks.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/land-records-access.asp",
+        "gov": false
+      }
+    ]
+  },
+  "42019": {
+    "fips": "42019",
+    "state": "PA",
+    "county": "Butler",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Butler.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.co.butler.pa.us/recorder-of-deeds-access-deeds",
+        "gov": true
+      }
+    ]
+  },
+  "42021": {
+    "fips": "42021",
+    "state": "PA",
+    "county": "Cambria",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Cambria.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.cambriacountypa.gov/tax-assessment.aspx",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.cambriacountypa.gov/recorder-of-deeds.aspx",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.cambriacountypa.gov/tax-claim.aspx",
+        "gov": true
+      }
+    ]
+  },
+  "42023": {
+    "fips": "42023",
+    "state": "PA",
+    "county": "Cameron",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Cameron.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds, Marriage Licenses and Birth, Death and Marriage Records",
+        "url": "https://www.cameroncountypa.com/?page_id=4134",
+        "gov": false
+      }
+    ]
+  },
+  "42025": {
+    "fips": "42025",
+    "state": "PA",
+    "county": "Carbon",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Carbon.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/",
+        "gov": false
+      }
+    ]
+  },
+  "42027": {
+    "fips": "42027",
+    "state": "PA",
+    "county": "Centre",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Centre.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://centrecountypa.gov/index.aspx?NID=814",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://centrecountypa.gov/index.aspx?nid=423",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://centrecountypa.gov/Index.aspx?NID=684",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://centrecountypa.gov/index.aspx?NID=418",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://centrecountypa.gov/index.aspx?NID=427",
+        "gov": true
+      }
+    ]
+  },
+  "42029": {
+    "fips": "42029",
+    "state": "PA",
+    "county": "Chester",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Chester.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.chesco.org/431/Records-Search",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.chesco.org/169/Recorder-of-Deeds",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://www.chesco.org/2198/ChescoViews",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.chesco.org/199/Assessment",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.chesco.org/3262/Sheriff-Sales",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.chesco.org/162/Tax-Claim-Bureau",
+        "gov": false
+      }
+    ]
+  },
   "42031": {
     "fips": "42031",
     "state": "PA",
@@ -12933,6 +16860,248 @@
         "kind": "recorder",
         "label": "Recorded Document Search",
         "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      }
+    ]
+  },
+  "42033": {
+    "fips": "42033",
+    "state": "PA",
+    "county": "Clearfield",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Clearfield.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records, Delinquent Taxes and Tax Sales",
+        "url": "https://www.clearfieldco.org/assessment-tax-claim/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/land-records-access.asp",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.clearfieldco.org/register-recorder/",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.clearfieldco.org/online-map-viewer/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.clearfieldco.org/county-tax-sale/",
+        "gov": false
+      }
+    ]
+  },
+  "42035": {
+    "fips": "42035",
+    "state": "PA",
+    "county": "Clinton",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Clinton.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://clintonpamapping.maps.arcgis.com/apps/webappviewer/index.html?id=8e9d01e6230243558c95f62751a07ffd",
+        "gov": false
+      }
+    ]
+  },
+  "42037": {
+    "fips": "42037",
+    "state": "PA",
+    "county": "Columbia",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Columbia.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://gis.columbiapa.org/mapsonline/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.columbiapa.org/registerrecorder/online.php",
+        "gov": false
+      }
+    ]
+  },
+  "42039": {
+    "fips": "42039",
+    "state": "PA",
+    "county": "Crawford",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Crawford.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://pa.uslandrecords.com/palr2/PalrApp/index.jsp",
+        "gov": false
+      }
+    ]
+  },
+  "42041": {
+    "fips": "42041",
+    "state": "PA",
+    "county": "Cumberland",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Cumberland.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.ccpa.net/2268/Property-Assessment",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/land-records-access.asp",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.ccpa.net/123/Recorder-of-Deeds",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.ccpa.net/2230/Sheriffs-Real-Estate-Sales",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://www.ccpa.net/2284/Tax-Sale-Databases",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Tax List Search",
+        "url": "https://www.ccpa.net/2279/Delinquent-Real-Estate-Tax-Database",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.ccpa.net/2295/Web-Mapping",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.ccpa.net/2277/Tax-Claims-Bureau",
+        "gov": false
+      }
+    ]
+  },
+  "42043": {
+    "fips": "42043",
+    "state": "PA",
+    "county": "Dauphin",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Dauphin.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.dauphincounty.org/government/publicly_elected_officials/recorder_of_deeds/index.php",
+        "gov": false
+      }
+    ]
+  },
+  "42045": {
+    "fips": "42045",
+    "state": "PA",
+    "county": "Delaware",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Delaware.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://rodpublicaccess.co.delaware.pa.us/delcopa_net/publicaccessrodframe.html",
+        "gov": true
+      }
+    ]
+  },
+  "42047": {
+    "fips": "42047",
+    "state": "PA",
+    "county": "Elk",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Elk.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://countyfusion3.kofiletech.us/countyweb/login.do?countyname=Elk",
+        "gov": true
+      }
+    ]
+  },
+  "42049": {
+    "fips": "42049",
+    "state": "PA",
+    "county": "Erie",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Erie.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.eriecountypa.gov/property-tax-records.aspx",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.eriecountypa.gov/county-services/safety-law/sheriff/sheriffs-sale.aspx",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes, Tax Sales, Judicial Sales and Repository Sales",
+        "url": "https://www.eriecountypa.gov/property-tax-records/tax-claim-office.aspx",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.eriecountypa.gov/county-services/county-offices/planning-department/gis/gis-resources.aspx",
+        "gov": true
+      }
+    ]
+  },
+  "42051": {
+    "fips": "42051",
+    "state": "PA",
+    "county": "Fayette",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Fayette.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://pa.uslandrecords.com/palr2/PalrApp/index.jsp",
         "gov": false
       }
     ]
@@ -12948,6 +17117,44 @@
         "label": "Recorded Document Search",
         "url": "http://www.infoconcountyaccess.com/",
         "gov": false
+      }
+    ]
+  },
+  "42055": {
+    "fips": "42055",
+    "state": "PA",
+    "county": "Franklin",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Franklin.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://franklincountypa.gov/index.php?section=taxes_taxassessment",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds and Marriage Licenses",
+        "url": "https://franklincountypa.gov/index.php?section=government_register-record-office",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://franklincountypa.gov/index.php?section=sheriff_real-estate-sales",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://franklincountypa.gov/index.php?section=taxes_taxclaim",
+        "gov": true
       }
     ]
   },
@@ -13017,6 +17224,46 @@
       }
     ]
   },
+  "42063": {
+    "fips": "42063",
+    "state": "PA",
+    "county": "Indiana",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Indiana.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://regrec.countyofindiana.org/countyweb/login.do?countyname=Indiana",
+        "gov": false
+      }
+    ]
+  },
+  "42065": {
+    "fips": "42065",
+    "state": "PA",
+    "county": "Jefferson",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Jefferson.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Collector, Delinquent Taxes and Tax Sales",
+        "url": "https://www.jeffersoncountypa.com/assessmenttax-claim/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds, Marriage Licenses and Marriage Records",
+        "url": "https://www.jeffersoncountypa.com/register-recorder/",
+        "gov": false
+      }
+    ]
+  },
   "42067": {
     "fips": "42067",
     "state": "PA",
@@ -13027,6 +17274,174 @@
         "kind": "gis",
         "label": "Property Search and GIS Maps",
         "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      }
+    ]
+  },
+  "42069": {
+    "fips": "42069",
+    "state": "PA",
+    "county": "Lackawanna",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Lackawanna.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.searchiqs.com/PALAC/Login.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.lackawannacounty.org/index.php/departmentsagencies/county-government/recorder-of-deeds",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.lackawannacounty.org/index.php/departmentsagencies/assessment-and-taxes/assessors-office",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.lackawannacounty.org/index.php/departmentsagencies/public-safty/sheriffs-office/sheriff-sales",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes, Tax Sales, Judicial Sales and Repository Sales",
+        "url": "https://www.lackawannacounty.org/index.php/departmentsagencies/assessment-and-taxes/tax-claim-bureau",
+        "gov": false
+      }
+    ]
+  },
+  "42071": {
+    "fips": "42071",
+    "state": "PA",
+    "county": "Lancaster",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Lancaster.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://co.lancaster.pa.us/154/Property-Assessment",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://searchdocs.lancasterdeeds.com/countyweb/login.do?countyname=Lancaster",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.lancasterdeeds.com/",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps and Parcel Search",
+        "url": "https://co.lancaster.pa.us/143/GIS-Division",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://sheriff.co.lancaster.pa.us/sheriff.salelisting/",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://co.lancaster.pa.us/162/Treasurer",
+        "gov": true
+      }
+    ]
+  },
+  "42073": {
+    "fips": "42073",
+    "state": "PA",
+    "county": "Lawrence",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Lawrence.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://co.lawrence.pa.us/gov/register-of-wills-and-recorder-of-deeds/register-recorders-online-services/",
+        "gov": true
+      }
+    ]
+  },
+  "42075": {
+    "fips": "42075",
+    "state": "PA",
+    "county": "Lebanon",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Lebanon.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.landex.com/remote/",
+        "gov": false
+      }
+    ]
+  },
+  "42079": {
+    "fips": "42079",
+    "state": "PA",
+    "county": "Luzerne",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Luzerne.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.luzernecounty.org/151/Assessor",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.luzernecounty.org/864/Document-Search",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.luzernecounty.org/607/Recorder-of-Deeds",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales and Tax Sales",
+        "url": "https://www.luzernecounty.org/544/Sheriff-Sales",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://luzernecountytaxclaim.com/",
+        "gov": false
+      }
+    ]
+  },
+  "42081": {
+    "fips": "42081",
+    "state": "PA",
+    "county": "Lycoming",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Lycoming.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://pa.uslandrecords.com/palr2/PalrApp/index.jsp",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps and Parcel Search",
+        "url": "https://lycomap.lyco.org/parcelviewer/",
         "gov": false
       }
     ]
@@ -13051,6 +17466,264 @@
       }
     ]
   },
+  "42089": {
+    "fips": "42089",
+    "state": "PA",
+    "county": "Monroe",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Monroe.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/land-records-access.asp",
+        "gov": false
+      }
+    ]
+  },
+  "42091": {
+    "fips": "42091",
+    "state": "PA",
+    "county": "Montgomery",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Montgomery.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://rodviewer.montcopa.org/countyweb/login.do?countyname=Montgomery",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.montcopa.org/353/Recorder-of-Deeds",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://propertyrecords.montcopa.org/pt/forms/htmlframe.aspx?mode=content/home.htm",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.montcopa.org/464/Board-of-Assessment-Appeals",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes, Tax Sales, Judicial Sales and Repository Sales",
+        "url": "https://www.montcopa.org/569/Tax-Claim-Bureau",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sale",
+        "url": "https://www.montcopa.org/413/Real-Estate-Sheriff-Sales",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search",
+        "url": "https://nerevenue.rba.com/taxes/montgomery/tri.asp",
+        "gov": false
+      }
+    ]
+  },
+  "42093": {
+    "fips": "42093",
+    "state": "PA",
+    "county": "Montour",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Montour.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      }
+    ]
+  },
+  "42097": {
+    "fips": "42097",
+    "state": "PA",
+    "county": "Northumberland",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Northumberland.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://pasheriffsales.com/calendar.cfm?county=14",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.norrycopa.net/index.php/geographic-information-systems/",
+        "gov": false
+      }
+    ]
+  },
+  "42099": {
+    "fips": "42099",
+    "state": "PA",
+    "county": "Perry",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Perry.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.courthouseonline.com/AssessHome.asp?State=PA&County=Perry&Abbrev=PR&Office=AO&caller=x",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/",
+        "gov": false
+      }
+    ]
+  },
+  "42101": {
+    "fips": "42101",
+    "state": "PA",
+    "county": "Philadelphia",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Philadelphia.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.phila.gov/Records/DocumentRecording/OnlineAccess.html",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Mortgage Foreclosure Prevention",
+        "url": "https://www.officeofphiladelphiasheriff.com/en/avoid-losing-your-home/tips-to-avoid-foreclosure",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.officeofphiladelphiasheriff.com/en/real-estate/recorded-deeds",
+        "gov": false
+      }
+    ]
+  },
+  "42103": {
+    "fips": "42103",
+    "state": "PA",
+    "county": "Pike",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Pike.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://gis.pikepa.org/myiDVViewer/Map/6fa0db243f2226d2/Pike-County-Parcel-Viewer",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.infoconcountyaccess.com/",
+        "gov": false
+      }
+    ]
+  },
+  "42105": {
+    "fips": "42105",
+    "state": "PA",
+    "county": "Potter",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Potter.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.pottercountypa.net/post.php?pid=10",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.pottercountypa.net/post.php?pid=19",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.pottercountypa.net/post.php?pid=6",
+        "gov": false
+      }
+    ]
+  },
+  "42107": {
+    "fips": "42107",
+    "state": "PA",
+    "county": "Schuylkill",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Schuylkill.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://gis.co.schuylkill.pa.us/mapviewer/",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.co.schuylkill.pa.us/Offices/Assessment/Assessment.asp",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://pa.uslandrecords.com/palr2/PalrApp/index.jsp",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.co.schuylkill.pa.us/Offices/RecorderOfDeeds/RecorderOfDeeds.asp",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://www.co.schuylkill.pa.us/Offices/Sheriff/index.asp",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes, Tax Sales, Judicial Sales and Repository Sales",
+        "url": "https://www.co.schuylkill.pa.us/Offices/TaxClaim/index.asp",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Tax Search",
+        "url": "https://www.co.schuylkill.pa.us/info/Offices/TaxClaim/Lookup.csp",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://www.co.schuylkill.pa.us/Offices/GIS/index.asp#ViewerMaps",
+        "gov": true
+      }
+    ]
+  },
   "42109": {
     "fips": "42109",
     "state": "PA",
@@ -13063,6 +17736,20 @@
         "url": "http://www.unionco.org/GISviewer/",
         "gov": false
       },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/",
+        "gov": false
+      }
+    ]
+  },
+  "42111": {
+    "fips": "42111",
+    "state": "PA",
+    "county": "Somerset",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Somerset.htm",
+    "links": [
       {
         "kind": "recorder",
         "label": "Recorded Document Search",
@@ -13103,6 +17790,20 @@
       }
     ]
   },
+  "42115": {
+    "fips": "42115",
+    "state": "PA",
+    "county": "Susquehanna",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Susquehanna.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/",
+        "gov": false
+      }
+    ]
+  },
   "42117": {
     "fips": "42117",
     "state": "PA",
@@ -13123,6 +17824,50 @@
       }
     ]
   },
+  "42119": {
+    "fips": "42119",
+    "state": "PA",
+    "county": "Union",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Union.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://www.unionco.org/unionbase/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.unioncountypa.org/departments/assessment/assessment/page.aspx?id=1311",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://pa.uslandrecords.com/palr2/PalrApp/index.jsp",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.unioncountypa.org/departments/recorder-of-deeds/recorder-of-deeds/page.aspx?id=1403",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps",
+        "url": "https://unioncogis.org/",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.unioncountypa.org/departments/treasurer/tax-claim-bureau/tax-claim-bureau/page.aspx?id=1417",
+        "gov": false
+      }
+    ]
+  },
   "42121": {
     "fips": "42121",
     "state": "PA",
@@ -13134,6 +17879,364 @@
         "label": "Property Search and GIS Maps",
         "url": "http://gis.venangopa.us/parcelviewer/default.aspx",
         "gov": true
+      }
+    ]
+  },
+  "42123": {
+    "fips": "42123",
+    "state": "PA",
+    "county": "Warren",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Warren.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://gis.vgsi.com/warrenpa/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://warrencountypa.net/assessment/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds, Marriage Licenses and Birth, Death and Marriage Records",
+        "url": "https://warrencountypa.net/register-recorder/",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://warrencountypa.net/tax-claim/",
+        "gov": false
+      }
+    ]
+  },
+  "42125": {
+    "fips": "42125",
+    "state": "PA",
+    "county": "Washington",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Washington.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/land-records-access.asp",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.co.washington.pa.us/205/Recorder-of-Deeds",
+        "gov": true
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.co.washington.pa.us/220/Assessments",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.co.washington.pa.us/224/Treasurer",
+        "gov": true
+      }
+    ]
+  },
+  "42127": {
+    "fips": "42127",
+    "state": "PA",
+    "county": "Wayne",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Wayne.htm",
+    "links": []
+  },
+  "42129": {
+    "fips": "42129",
+    "state": "PA",
+    "county": "Westmoreland",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Westmoreland.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.co.westmoreland.pa.us/154/Tax-Assessment",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.wcdeeds.us/dts/default.asp?deedsNav=|",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://www.co.westmoreland.pa.us/146/Recorder-of-Deeds",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Maps and Parcel Search",
+        "url": "https://www.co.westmoreland.pa.us/1980/Tax-Mapping-Site-Disclaimer",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes, Tax Sales, Judicial Sales and Repository Sales",
+        "url": "https://www.co.westmoreland.pa.us/164/Tax-Claims-Bureau",
+        "gov": true
+      }
+    ]
+  },
+  "42131": {
+    "fips": "42131",
+    "state": "PA",
+    "county": "Wyoming",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_Wyoming.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://countyfusion1.kofiletech.us/countyweb/login.do?countyname=Wyoming",
+        "gov": true
+      }
+    ]
+  },
+  "42133": {
+    "fips": "42133",
+    "state": "PA",
+    "county": "York",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/PA_York.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.landex.com/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds",
+        "url": "https://yorkcountypa.gov/property-taxes/recorder-of-deeds.html",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://gis.york-county.org/Disclaimer.aspx",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records and Delinquent Taxes",
+        "url": "https://yorkcountypa.gov/property-taxes/assessment-and-tax-claim-office.html",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Sheriff Sales",
+        "url": "https://yorkcountypa.gov/courts-criminal-justice/court-courtrelated-offices/sherifs-office/sheriff-s-sales.html",
+        "gov": true
+      }
+    ]
+  },
+  "44003": {
+    "fips": "44003",
+    "state": "RI",
+    "county": "Kent",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/RI_Kent.htm",
+    "links": []
+  },
+  "44005": {
+    "fips": "44005",
+    "state": "RI",
+    "county": "Newport",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/RI_Newport.htm",
+    "links": []
+  },
+  "44007": {
+    "fips": "44007",
+    "state": "RI",
+    "county": "Providence",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/RI_Providence.htm",
+    "links": []
+  },
+  "45013": {
+    "fips": "45013",
+    "state": "SC",
+    "county": "Beaufort",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/SC_Beaufort.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Documents",
+        "url": "http://rodweb.bcgov.net/searchng/",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sale",
+        "url": "https://www.beaufortcountytreasurer.com/general-information",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.beaufortcountytreasurer.com/home",
+        "gov": false
+      }
+    ]
+  },
+  "45041": {
+    "fips": "45041",
+    "state": "SC",
+    "county": "Florence",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/SC_Florence.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://web.florenceco.org/cgi-bin/coc/coc.cgi",
+        "gov": false
+      }
+    ]
+  },
+  "47051": {
+    "fips": "47051",
+    "state": "TN",
+    "county": "Franklin",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/TN_Franklin.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.titlesearcher.com/countyInfo.php?cnum=T42",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Register of Deeds",
+        "url": "https://www.franklincountyregister.com/",
+        "gov": false
+      }
+    ]
+  },
+  "47099": {
+    "fips": "47099",
+    "state": "TN",
+    "county": "Lawrence",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/TN_Lawrence.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://lawrencecountytn.gov/government/departments/assessor-of-property",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.titlesearcher.com/countyInfo.php?cnum=65",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Register of Deeds",
+        "url": "https://lawrencecountytn.gov/government/departments/register-of-deeds",
+        "gov": true
+      }
+    ]
+  },
+  "47113": {
+    "fips": "47113",
+    "state": "TN",
+    "county": "Madison",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/TN_Madison.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.titlesearcher.com/countyInfo.php?cnum=18",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://madison-tn.mygovonline.com/mod.php?mod=propertytax&mode=public_lookup",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Crime Mapping",
+        "url": "https://www.crimereports.com/city/Jackson%2C%20TN#!/",
+        "gov": false
+      }
+    ]
+  },
+  "47125": {
+    "fips": "47125",
+    "state": "TN",
+    "county": "Montgomery",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/TN_Montgomery.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://mcgtn.org/assessor",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://ustitlesearch.net/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Register of Deeds",
+        "url": "https://mcgtn.org/deeds",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://mcgtn.org/trustee",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Tax Sale",
+        "url": "https://mcgtn.org/trustee/delinquent-taxes",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://montgomery-tn.mygovonline.com/mod.php?mod=propertytax&mode=public_lookup",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Parcel Search and Parcel Maps",
+        "url": "https://mcgtn.org:8081/County/assessor/webpro/search.aspx",
+        "gov": false
+      }
+    ]
+  },
+  "47183": {
+    "fips": "47183",
+    "state": "TN",
+    "county": "Weakley",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/TN_Weakley.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.titlesearcher.com/countyInfo.php?cnum=32",
+        "gov": false
       }
     ]
   },
@@ -17662,6 +22765,79 @@
       }
     ]
   },
+  "50003": {
+    "fips": "50003",
+    "state": "VT",
+    "county": "Bennington",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/VT_Bennington.htm",
+    "links": []
+  },
+  "50005": {
+    "fips": "50005",
+    "state": "VT",
+    "county": "Caledonia",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/VT_Caledonia.htm",
+    "links": []
+  },
+  "50025": {
+    "fips": "50025",
+    "state": "VT",
+    "county": "Windham",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/VT_Windham.htm",
+    "links": []
+  },
+  "51035": {
+    "fips": "51035",
+    "state": "VA",
+    "county": "Carroll",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/VA_Carroll.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://carrollcova.mapgeo.io/?latlng=36.744807%2C-80.748064&modal=disclaimer&zoom=10",
+        "gov": false
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://epayments.carrollcountyva.org/Applications/trapps/default.htm",
+        "gov": false
+      }
+    ]
+  },
+  "51083": {
+    "fips": "51083",
+    "state": "VA",
+    "county": "Halifax",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/VA_Halifax.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://www.webgis.net/va/halifax/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.halifaxcountyva.gov/index.asp?Type=B_DIR&SEC={61A9A2E9-179D-474B-96C0-8DEFB7672A7E}",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds, Marriage Licenses and Marriage Records",
+        "url": "https://www.halifaxcountyva.gov/index.asp?Type=B_DIR&SEC={33C270ED-4D14-4363-B1FA-1A2F164C67EB}",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.halifaxcountyva.gov/index.asp?Type=B_DIR&SEC={BF427476-2868-4CD3-8683-9AC514C85ECD}",
+        "gov": true
+      }
+    ]
+  },
   "51137": {
     "fips": "51137",
     "state": "VA",
@@ -17694,6 +22870,83 @@
       }
     ]
   },
+  "51171": {
+    "fips": "51171",
+    "state": "VA",
+    "county": "Shenandoah",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/VA_Shenandoah.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "http://www.shenandoahgis.org/",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor Records",
+        "url": "https://www.shenandoahcountyva.us/revenue/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds, Marriage Licenses and Marriage Records",
+        "url": "https://shenandoahcountyva.us/courts/",
+        "gov": true
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://eservices.shenandoahcountyva.us/applications/trapps/index.htm",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://shenandoahcountyva.us/treasurer/",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sales",
+        "url": "https://shenandoahcountyva.us/treasurer/land-sales/",
+        "gov": true
+      }
+    ]
+  },
+  "51175": {
+    "fips": "51175",
+    "state": "VA",
+    "county": "Southampton",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/VA_Southampton.htm",
+    "links": []
+  },
+  "51187": {
+    "fips": "51187",
+    "state": "VA",
+    "county": "Warren",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/VA_Warren.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and GIS Maps",
+        "url": "https://www.warrengis.org/#/",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.courts.state.va.us/rmsweb/",
+        "gov": true
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search and Pay Property Taxes",
+        "url": "https://eservices.warrencountyva.net/applications/trapps/index.htm",
+        "gov": false
+      }
+    ]
+  },
   "51195": {
     "fips": "51195",
     "state": "VA",
@@ -17710,6 +22963,102 @@
         "kind": "recorder",
         "label": "Recorder of Deeds, Marriage Licenses and Marriage Records",
         "url": "https://www.courtbar.org/",
+        "gov": false
+      }
+    ]
+  },
+  "53027": {
+    "fips": "53027",
+    "state": "WA",
+    "county": "Grays Harbor",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/WA_GraysHarbor.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds, Marriage Licenses, and Elections",
+        "url": "https://wei.sos.wa.gov/county/graysharbor/en/Pages/AuditorHome.aspx",
+        "gov": true
+      }
+    ]
+  },
+  "55031": {
+    "fips": "55031",
+    "state": "WI",
+    "county": "Douglas",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/WI_Douglas.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor, Property Lister",
+        "url": "https://www.douglascountywi.org/163/Real-Property-Lister",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://www.douglascountywi.org/382/Real-Estate-Records",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Register of Deeds, Birth, Death and Marriage Records",
+        "url": "https://www.douglascountywi.org/379/Register-of-Deeds",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Deed Sales",
+        "url": "https://www.douglascountywi.org/153/Purchase-of-County-Land",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.douglascountywi.org/155/County-Treasurer",
+        "gov": false
+      }
+    ]
+  },
+  "55101": {
+    "fips": "55101",
+    "state": "WI",
+    "county": "Racine",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/WI_Racine.htm",
+    "links": [
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search",
+        "url": "http://racinecounty.com/government/register-of-deeds/tax-inquiry",
+        "gov": false
+      },
+      {
+        "kind": "assessor",
+        "label": "Assessor, Property Lister",
+        "url": "https://racinecounty.com/government/register-of-deeds/real-property-listing",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "https://landshark.racinecounty.com/LandShark/login",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder, Register of Deeds, Birth, Death and Marriage Records",
+        "url": "https://racinecounty.com/government/register-of-deeds",
+        "gov": false
+      },
+      {
+        "kind": "foreclosure",
+        "label": "County Land Sale Properties",
+        "url": "https://racinecounty.com/government/county-treasurer/public-sale-of-properties-taken-in-tax-foreclosure",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://racinecounty.com/government/county-treasurer",
         "gov": false
       }
     ]
@@ -21584,6 +26933,146 @@
         "kind": "recorder",
         "label": "Recorded Document Search",
         "url": "http://www.thecountyrecorder.com/Disclaimer.aspx?jsEnabled=1",
+        "gov": false
+      }
+    ]
+  },
+  "06019": {
+    "fips": "06019",
+    "state": "CA",
+    "county": "Fresno",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/CA_Fresno.htm",
+    "links": [
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://www.criis.com/fresno.html",
+        "gov": false
+      }
+    ]
+  },
+  "06029": {
+    "fips": "06029",
+    "state": "CA",
+    "county": "Kern",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/CA_Kern.htm",
+    "links": [
+      {
+        "kind": "gis",
+        "label": "Property Search and Mapping",
+        "url": "http://assessor.co.kern.ca.us/prop_search.php",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://recorder.co.kern.ca.us/recorder_doc.php",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Tax Sale",
+        "url": "https://www.kcttc.co.kern.ca.us/index.cfm?fuseaction=kcttcinternet.showGeneralTaxSaleInfo",
+        "gov": true
+      },
+      {
+        "kind": "tax_portal",
+        "label": "Property Tax Search",
+        "url": "https://www.kcttc.co.kern.ca.us/payment/mainsearch.aspx",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes and Tax Sales",
+        "url": "https://www.kcttc.co.kern.ca.us/",
+        "gov": true
+      }
+    ]
+  },
+  "06047": {
+    "fips": "06047",
+    "state": "CA",
+    "county": "Merced",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/CA_Merced.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.co.merced.ca.us/59/Assessor",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Document Search",
+        "url": "http://web2.co.merced.ca.us/RecorderWorksInternet/",
+        "gov": true
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorder of Deeds, Birth, Death and Marriage Records",
+        "url": "https://www.co.merced.ca.us/239/Recorder",
+        "gov": true
+      },
+      {
+        "kind": "gis",
+        "label": "Parcel Map Search",
+        "url": "https://www.co.merced.ca.us/1586/Online-GIS-Information",
+        "gov": true
+      }
+    ]
+  },
+  "02020": {
+    "fips": "02020",
+    "state": "AK",
+    "county": "Anchorage",
+    "sourceUrl": "https://www.publicrecords.onlinesearches.com/AK_Anchorage.htm",
+    "links": [
+      {
+        "kind": "assessor",
+        "label": "Assessor",
+        "url": "https://www.muni.org/departments/finance/property_appraisal/pages/default.aspx",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "GIS Mapping",
+        "url": "https://www.muni.org/departments/it/gis2/pages/default.aspx",
+        "gov": false
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Taxes",
+        "url": "https://www.muni.org/departments/finance/treasury/pages/default.aspx",
+        "gov": false
+      },
+      {
+        "kind": "recorder",
+        "label": "Recorded Documents",
+        "url": "http://dnr.alaska.gov/ssd/recoff/search",
+        "gov": true
+      },
+      {
+        "kind": "foreclosure",
+        "label": "Land Sales",
+        "url": "https://dnr.alaska.gov/mlw/landsale/",
+        "gov": true
+      },
+      {
+        "kind": "delinquent",
+        "label": "Delinquent Fines Search",
+        "url": "https://www.muni.org/Departments/finance/treasury/DCF/Pages/DCFSearch.aspx",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Crime Mapping",
+        "url": "https://www.muni.org/Departments/police/stats/Pages/Crimemaps.aspx",
+        "gov": false
+      },
+      {
+        "kind": "gis",
+        "label": "Zoning and Platting Cases",
+        "url": "https://www.muni.org/CityViewPortal/Planning/Locator",
         "gov": false
       }
     ]
