@@ -64,6 +64,9 @@ data/govease-capture/
 # SRI browser captures (working artifacts, not source)
 data/sri-capture/
 
+# Bid4Assets browser captures (working artifacts, not source)
+data/bid4assets-capture/
+
 # Results-crawl output. Regenerable with `npm run crawl:results`, and
 # deliberately outside the corpus until each source has a rule in labels.py —
 # a 3,724-row candidate batch sitting in git reads as data, and it is not yet.

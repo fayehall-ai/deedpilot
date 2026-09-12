@@ -12,6 +12,7 @@ import { taxSaleInfoAdapter } from "./taxsaleinfo";
 import { floridaAdapter, floridaClerksAdapter } from "./florida";
 import { clarkNvAdapter } from "./clark-nv";
 import { zeusAdapter } from "./zeus";
+import { bid4assetsAdapter } from "./bid4assets";
 
 /**
  * Order is precedence. Bespoke first, generic last.
@@ -29,6 +30,7 @@ export const ADAPTERS: SourceAdapter[] = [
   sriAdapter,
   clarkNvAdapter,
   zeusAdapter,
+  bid4assetsAdapter,
   genericAdapter,
 ];
 

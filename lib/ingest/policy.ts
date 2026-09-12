@@ -75,12 +75,14 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
       "it is: permitted to us, on the strength of a specific agreement, and not to anyone else " +
       "reading this file. Same stance as RealAuction for everybody without one. " +
       "40 counties across CA, FL, LA, NV, PA, WA. " +
-      "Correcting the record on the original basis: this entry said the host returned 403 on " +
-      "robots.txt, verified 2026-08-05, so the crawl posture could not be read without defeating " +
-      "an edge control. Re-checked 2026-09-11 and it is a 404 — no robots file at all, which " +
-      "conventionally permits crawling. The 403 is gone. That does not by itself settle the " +
-      "posture, which was always about a commercial platform rather than only about robots, but a " +
-      "reason that cites evidence should cite evidence that is still true.",
+      "On the original basis, and read this before concluding the host is open: robots.txt now " +
+      "returns 404 rather than the 403 recorded on 2026-08-05, so there is no robots file and the " +
+      "obvious reading is that crawling is permitted. It is not. The edge control moved rather " +
+      "than lifted — /storefront/taxsales answers 200 to a browser user agent and 403 to ours, " +
+      "verified 2026-09-11, so the block is on who is asking. Getting past it would mean sending a " +
+      "user agent that is not ours. An agreement is a reason to be given access, not a reason to " +
+      "take it by looking like someone else, which is why the adapter reads browser captures and " +
+      "never fetches.",
   },
   {
     host: "tax-sale.info",
