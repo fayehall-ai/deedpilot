@@ -9,7 +9,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getIngestHealth, getPlatformStats } from "@/lib/queries";
-import { buildCoverageScoreboard } from "@/lib/coverage/scoreboard";
+import { cachedCoverageScoreboard } from "@/lib/coverage/scoreboard";
 import { num } from "@/lib/format";
 import { Callout, Card, EmptyState, StatusBadge } from "@/components/ui";
 import { StatsSkeleton } from "@/components/skeleton";
@@ -28,7 +28,7 @@ export async function CoverageReport({ compact = false }: { compact?: boolean })
       leadLots: 0,
       byState: [] as { state: string; counties: number; auctions: number; lots: number }[],
     })),
-    buildCoverageScoreboard().catch(() => null),
+    cachedCoverageScoreboard().catch(() => null),
   ]);
 
   // Latest run per county.

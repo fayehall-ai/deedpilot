@@ -379,7 +379,7 @@ function budgetFromPlan(items: WorkItem[]): CoverageScoreboard["budgetShares"] {
 /**
  * Build the live national scoreboard from Postgres + on-disk registry/corpus.
  */
-export async function buildCoverageScoreboard(): Promise<CoverageScoreboard> {
+export async function cachedCoverageScoreboard(): Promise<CoverageScoreboard | null> {
   /*
    * Cached, which under Cache Components is also what makes the clock read
    * inside it legal: a Server Component may not ask the time before it has
@@ -393,6 +393,42 @@ export async function buildCoverageScoreboard(): Promise<CoverageScoreboard> {
   "use cache";
   cacheLife("minutes");
 
+  /*
+   * The catch sits inside the cached function rather than at the call site,
+   * and that placement is the entire point.
+   *
+   * `components/coverage-report.tsx` already guards this call with
+   * `.catch(() => null)`. That guard is inert during a build: under Cache
+   * Components the prerender fills cache entries out of band, so a throw in
+   * here surfaces as "Error occurred prerendering page /coverage" and takes
+   * the export down before any caller's catch can run. On 13 September a
+   * database that was merely over its transfer quota therefore stopped the
+   * deploy outright — including the deploy of the gate meant to prevent a
+   * repeat.
+   *
+   * Returning null shifts that: the page ships with the scoreboard missing
+   * and refills within `cacheLife` once Postgres answers again. The trade is
+   * deliberate and worth naming — a coverage section that is briefly blank
+   * beats a site that cannot be deployed at all.
+   */
+  try {
+    return await buildCoverageScoreboard();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The scoreboard, computed. Throws if Postgres will not answer.
+ *
+ * Kept uncached and unguarded because its callers are the coverage cron and
+ * `scripts/coverage-cycle.ts`, both of which *write* the result to
+ * `data/coverage-scoreboard.json`. A degraded value is the one thing those
+ * must never receive: a zeroed scoreboard silently recorded as history is
+ * worse than a failed run, which at least announces itself. Pages read
+ * `cachedCoverageScoreboard` instead.
+ */
+export async function buildCoverageScoreboard(): Promise<CoverageScoreboard> {
   const today = todayIso();
   const statuteStates = coveredStateList();
   const missingStatutes = US_STATES.filter((s) => !hasStatuteParams(s));

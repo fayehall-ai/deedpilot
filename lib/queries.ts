@@ -407,20 +407,33 @@ export async function getCachedBrief(lotId: string, inputsHash: string) {
  * separately as `leads`, because presenting them together is the difference
  * between "9,598 lots" and the ~3,300 a subscriber can actually bid on.
  */
-export async function getPlatformStats() {
-  /*
-   * Cached, which under Cache Components is also what makes the clock read
-   * inside it legal: a Server Component may not ask the time before it has
-   * read uncached data, and `todayIso()` here runs before the first query.
-   *
-   * Minutes is the right window. Everything this aggregates moves on the
-   * nightly ingest cron, so a request-fresh count buys nothing a subscriber
-   * can perceive, and the page is one a person reloads repeatedly while
-   * working — which is precisely when a cache earns its keep.
-   */
-  "use cache";
-  cacheLife("minutes");
+export interface PlatformStats {
+  upcomingAuctions: number;
+  skeletonAuctions: number;
+  totalLots: number;
+  lotsWithAssessed: number;
+  /** Parcels held that are not confirmed bidding inventory. */
+  leadAuctions: number;
+  leadLots: number;
+  byState: { state: string; counties: number; auctions: number; lots: number }[];
+}
 
+/**
+ * What the landing page and the coverage report show when Postgres cannot be
+ * reached. Zeroes, not absence: every consumer already renders a count, and a
+ * zero reads as "nothing to report" where an undefined reads as a crash.
+ */
+export const EMPTY_PLATFORM_STATS: PlatformStats = {
+  upcomingAuctions: 0,
+  skeletonAuctions: 0,
+  totalLots: 0,
+  lotsWithAssessed: 0,
+  leadAuctions: 0,
+  leadLots: 0,
+  byState: [],
+};
+
+async function platformStats(): Promise<PlatformStats> {
   const upcoming = gte(auctions.saleDate, todayIso());
   const hasLots = sql`${auctions.lotCount} > 0`;
   const confirmed = isConfirmedInventory();
@@ -488,12 +501,7 @@ export async function getPlatformStats() {
   };
 }
 
-/**
- * Most recent ingest outcome per county — the honesty surface. A county that
- * silently stopped returning lots shows up here as a stale or failed run
- * rather than as an empty auction list.
- */
-export async function getIngestHealth() {
+export async function getPlatformStats(): Promise<PlatformStats> {
   /*
    * Cached, which under Cache Components is also what makes the clock read
    * inside it legal: a Server Component may not ask the time before it has
@@ -507,6 +515,25 @@ export async function getIngestHealth() {
   "use cache";
   cacheLife("minutes");
 
+  /*
+   * Guarded here rather than at the call site — see the note on
+   * `buildCoverageScoreboard`. Both callers already wrap this in `.catch()`
+   * with a zeroed fallback, and both of those are inert during a build,
+   * because a throw inside a cached function aborts the prerender out of band.
+   */
+  try {
+    return await platformStats();
+  } catch {
+    return EMPTY_PLATFORM_STATS;
+  }
+}
+
+/**
+ * Most recent ingest outcome per county — the honesty surface. A county that
+ * silently stopped returning lots shows up here as a stale or failed run
+ * rather than as an empty auction list.
+ */
+async function ingestHealthRows() {
   return db
     .select({
       adapter: ingestRuns.adapter,
@@ -525,6 +552,39 @@ export async function getIngestHealth() {
     .leftJoin(counties, eq(counties.fips, ingestRuns.countyFips))
     .orderBy(desc(ingestRuns.startedAt))
     .limit(200);
+}
+
+/** One row of the ingest-health surface, inferred from the query itself. */
+export type IngestHealthRow = Awaited<ReturnType<typeof ingestHealthRows>>[number];
+
+export async function getIngestHealth(): Promise<IngestHealthRow[]> {
+  /*
+   * Cached, which under Cache Components is also what makes the clock read
+   * inside it legal: a Server Component may not ask the time before it has
+   * read uncached data, and `todayIso()` here runs before the first query.
+   *
+   * Minutes is the right window. Everything this aggregates moves on the
+   * nightly ingest cron, so a request-fresh count buys nothing a subscriber
+   * can perceive, and the page is one a person reloads repeatedly while
+   * working — which is precisely when a cache earns its keep.
+   */
+  "use cache";
+  cacheLife("minutes");
+
+  /*
+   * Guarded here rather than at the call site — see the note on
+   * `buildCoverageScoreboard`. A throw inside a cached function aborts the
+   * build-time prerender before any caller's `.catch()` can run, so an
+   * unreachable database stops the deploy instead of degrading the page.
+   *
+   * An empty list reads, correctly, as "no ingest runs to report". The
+   * honesty surface is briefly silent rather than wrong.
+   */
+  try {
+    return await ingestHealthRows();
+  } catch {
+    return [];
+  }
 }
 
 // ---------------------------------------------------------------------------
