@@ -6,9 +6,9 @@ import {
   SITE_COOKIE,
   SITE_COOKIE_OPTIONS,
   UNLOCK_PATH,
-  safeNext,
   sitePasswordMatches,
 } from "@/lib/site-gate/token";
+import { safeNext } from "@/lib/safe-next";
 
 /**
  * Exchange the site password for a cookie.

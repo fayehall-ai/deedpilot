@@ -16,6 +16,8 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import type { Metadata } from "next";
 import { Breadcrumbs, Card } from "@/components/ui";
+import { AdminGate } from "@/components/admin-gate";
+import { isAdmin } from "@/lib/admin/auth";
 import { DetailSkeleton } from "@/components/skeleton";
 import { getCapeAuctions, getCapeParcelCoverage } from "@/lib/queries";
 import { buildPackage, type ItemState } from "@/lib/cape/components";
@@ -31,9 +33,10 @@ export const metadata: Metadata = {
   title: "CAPE — auction intake and source verification",
   description:
     "County Auction Production Engine: every upcoming tax sale against the CAPE intake checklist, with the source tier and what still needs verification.",
+  robots: { index: false, follow: false },
 };
 
-export default function CapePage() {
+export default function CapePage(props: PageProps<"/cape">) {
   return (
     <div className="shell py-band">
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "CAPE" }]} />
@@ -48,10 +51,36 @@ export default function CapePage() {
         </p>
       </header>
       <Suspense fallback={<DetailSkeleton />}>
-        <Board />
+        <Gate searchParams={props.searchParams} />
       </Suspense>
     </div>
   );
+}
+
+/**
+ * The same operations token as `/admin`, and deliberately not the site
+ * password.
+ *
+ * This board is an operations surface: it names which packages are blocked and
+ * on what, and it links the PropStream export, which carries owner names,
+ * assessed values and computed max bids for every parcel in a sale. That is a
+ * different class of thing from the public auction calendar, so it takes the
+ * credential that guards the console rather than the one that merely says a
+ * reader may look at the site.
+ *
+ * `connection()` before the cookie read, for the reason spelled out at length
+ * in `app/admin/page.tsx`: without it the gate resolves during prerendering,
+ * where there is no cookie, and Vercel serves the resulting sign-in form from
+ * its CDN to everyone — including operators who hold a valid one.
+ */
+async function Gate({ searchParams }: { searchParams: PageProps<"/cape">["searchParams"] }) {
+  await connection();
+  const { e } = await searchParams;
+
+  if (!(await isAdmin())) {
+    return <AdminGate next="/cape" failed={e === "1"} />;
+  }
+  return <Board />;
 }
 
 async function Board() {

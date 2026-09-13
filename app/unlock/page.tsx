@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Card } from "@/components/ui";
-import { safeNext, siteGateConfigured } from "@/lib/site-gate/token";
+import { siteGateConfigured } from "@/lib/site-gate/token";
+import { safeNext } from "@/lib/safe-next";
 import { unlock } from "./actions";
 
 export const metadata: Metadata = {

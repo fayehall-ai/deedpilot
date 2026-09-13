@@ -9,7 +9,8 @@
  * by whoever crafted the link, and a gate that will forward to any URL is an
  * open redirect wearing this domain's name.
  */
-import { safeNext, siteGateConfigured, sitePasswordMatches } from "./token";
+import { siteGateConfigured, sitePasswordMatches } from "./token";
+import { safeNext } from "../safe-next";
 
 let passed = 0;
 function assert(cond: unknown, msg: string) {

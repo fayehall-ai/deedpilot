@@ -14,6 +14,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { isAdmin } from "@/lib/admin/auth";
+import { tokenMatches } from "@/lib/admin/token";
 import { auctions, counties, lots } from "@/lib/db/schema";
 import { getCounty } from "@/lib/atlas";
 import { computeMaxBid } from "@/lib/deal/maxbid";
@@ -28,6 +30,28 @@ import {
 } from "@/lib/cape/propstream";
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  /*
+   * The same operations token as `/cape` and `/admin`, checked before anything
+   * else runs.
+   *
+   * This endpoint shipped with no authentication at all, which made the whole
+   * PropStream sheet — owner names, addresses, assessed values and the
+   * computed max bid for every parcel in a sale — available to anyone holding
+   * an auction id. The board that links it is now token-gated, and a gate on
+   * the page with none on the download is not a gate.
+   *
+   * Both credentials are accepted because both callers are real: the cookie
+   * for the operator clicking the link on the board, the bearer token for a
+   * script pulling the sheet, matching `/api/cron/dispatch`. The check runs
+   * first so an unauthorised request costs a comparison rather than a scan of
+   * 10,000 parcels and a valuation read on each.
+   */
+  const auth = req.headers.get("authorization") ?? "";
+  const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!tokenMatches(bearer) && !(await isAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await ctx.params;
 
   const [row] = await db

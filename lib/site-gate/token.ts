@@ -77,18 +77,3 @@ export function sitePasswordMatches(candidate: string | undefined | null): boole
   if (!configured) return false;
   return timingSafeEqual(digest(given), digest(configured));
 }
-
-/**
- * A redirect target that cannot leave the site.
- *
- * The unlock form carries where the reader was heading so the gate does not
- * dump everyone on the homepage. That parameter is attacker-controlled, so it
- * is validated rather than trusted: a value starting `//` or `https://` would
- * otherwise turn the gate into an open redirect that borrows this domain's
- * credibility to send people elsewhere.
- */
-export function safeNext(next: string | undefined | null): string {
-  const v = (next ?? "").trim();
-  if (!v.startsWith("/") || v.startsWith("//") || v.startsWith("/\\")) return "/";
-  return v;
-}
