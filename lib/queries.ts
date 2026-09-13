@@ -1,53 +1,15 @@
 import "server-only";
 import { cacheLife } from "next/cache";
-import { and, asc, desc, eq, gte, inArray, lte, or, sql, count } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, sql, count } from "drizzle-orm";
 import { db } from "./db";
 import { auctions, counties, lots, ingestRuns, dealAnalyses, lotValuations } from "./db/schema";
+import { hasParcels, isConfirmedInventory } from "./db/inventory";
 
 /** Today in UTC as YYYY-MM-DD — sale dates are stored as plain dates. */
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-/**
- * A sale whose county has stated a parcel count without publishing the parcels.
- *
- * Written by the CSV import. The count is the county's claim, not a number of
- * rows this database holds — see `announced_parcel_count` in the schema.
- */
-const hasAnnouncedCount = () => sql`coalesce(${auctions.announcedParcelCount}, 0) > 0`;
-
-/**
- * Not an empty calendar shell.
- *
- * Was `lot_count > 0` alone. An announced sale has no lots yet and is still
- * not a skeleton: a skeleton is a date with nothing known about it, whereas an
- * announced sale carries a published parcel count and a venue. Hiding those
- * would mean importing a calendar and then not seeing it.
- */
-const hasParcels = () => or(sql`${auctions.lotCount} > 0`, hasAnnouncedCount());
-
-/**
- * Inventory a bidder can act on: parcels from a county's published sale list,
- * or a sale the county has announced with a count.
- *
- * A delinquent roll parses identically to a sale list and is 10-50x larger, so
- * without this filter the honest counts are swamped by parcels that are not for
- * sale. Applied to every headline number and every default listing view; ops
- * surfaces opt out explicitly.
- *
- * The `listing_kind` half is now a disjunction because an imported sale's
- * `listing_kind` is `unknown` and must stay that way — nothing has read a
- * document for it, so claiming `sale_list` would be a lie about provenance.
- * What admits it instead is the announced count, which no delinquent roll has.
- * A projected date is still excluded by `sale_date_confirmed`, which is the
- * half that was actually keeping research leads off the calendar.
- */
-const isConfirmedInventory = () =>
-  and(
-    or(eq(auctions.listingKind, "sale_list"), hasAnnouncedCount()),
-    eq(auctions.saleDateConfirmed, true),
-  );
 
 export interface AuctionListRow {
   id: string;

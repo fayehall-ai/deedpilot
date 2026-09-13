@@ -9,6 +9,7 @@
 import { and, asc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { auctions, capeProductions, counties, lots } from "@/lib/db/schema";
+import { hasParcels, isConfirmedInventory } from "@/lib/db/inventory";
 import { getCounty, resolveCountyRule } from "@/lib/atlas";
 import { statuteFor } from "@/lib/deal/statute";
 import { pickLink, type CountyDirectory, type OfficeKind } from "@/lib/directory/onlinesearches";
@@ -29,9 +30,25 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
 > {
   const today = opts.today ?? new Date().toISOString().slice(0, 10);
 
+  /*
+   * The same definition of inventory the site uses, not a second one.
+   *
+   * This read `lot_count >= 0`, which admits every row ever written — a lot
+   * count is never negative. The producer therefore offered 848 upcoming
+   * packages where the site counted 488, and the 360-package difference was
+   * calendar shells and unconfirmed dates: sales with no parcels crawled, none
+   * announced, or a date this system projected rather than read. Ordered by
+   * production deadline, those sorted to the *front* of the queue, so the work
+   * a batch run would have picked up first was the work worth doing least.
+   *
+   * `hasParcels` keeps announced sales, which matters: a county that has
+   * stated 1,697 parcels without publishing the list is a real package with a
+   * real deadline, and Component Two exists precisely to say the list has not
+   * been read yet.
+   */
   const where = opts.auctionId
     ? eq(auctions.id, opts.auctionId)
-    : and(gte(auctions.saleDate, today), sql`${auctions.lotCount} >= 0`);
+    : and(gte(auctions.saleDate, today), hasParcels(), isConfirmedInventory());
 
   const rows = await db
     .select({
