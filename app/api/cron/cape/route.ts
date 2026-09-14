@@ -66,11 +66,27 @@ import { produceCapePackage } from "@/lib/cape/produce";
  * own. Being killed anyway is survivable — the lease lapses and a later tick
  * re-claims — but it should be the exception, not the design.
  */
-export const maxDuration = 600;
+export const maxDuration = 800;
 
-const BUDGET_MS = 420_000;
+/*
+ * Claim for the first minute only, then let the chain do the rest.
+ *
+ * The previous shape claimed for 220 seconds and reserved 170 for the job to
+ * finish in, which does not survive contact with a retry: two model calls, each
+ * allowed three attempts at 150 seconds, is 900 seconds of worst case behind a
+ * 600-second ceiling. The logs duly recorded it — `Vercel Runtime Timeout
+ * Error: Task timed out after 600 seconds`, with a job cut off mid-write.
+ *
+ * Long invocations are the wrong answer anyway once the work chains. A short
+ * claim window and a fresh successor is strictly better: the arithmetic is
+ * simple enough to check, a killed function stops being the normal case, and
+ * throughput comes from lanes rather than from any one function living longer.
+ *
+ * The bound now: last claim at 60s, worst-case job 600s, ceiling 800s.
+ */
+const BUDGET_MS = 300_000;
 /** Stop claiming with this much left, so a claimed job is not orphaned. */
-const RESERVE_MS = 170_000;
+const RESERVE_MS = 240_000;
 /**
  * The per-provider deadline for this path, well under the four-minute default.
  *
