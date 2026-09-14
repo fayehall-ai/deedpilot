@@ -191,10 +191,16 @@ const wrongCount = verifyNarration(script("The list shows sixty-three parcels.")
 check("a wrong compound count is still caught", wrongCount.includes("63"), JSON.stringify(wrongCount));
 
 // --- duration ---------------------------------------------------------------
-const long = script(Array(300).fill("word").join(" "));
+/*
+ * 180 wpm, measured against real ElevenLabs output rather than assumed — a
+ * 744-word Fulton script returned 247s, which is 180.7. The constant is what
+ * the prompt's length budget is sized against, so it is worth pinning: at the
+ * old 150 a five-minute brief was commissioned and four minutes arrived.
+ */
+const long = script(Array(900).fill("word").join(" "));
 check(
-  "300 words is about two minutes at 150 wpm",
-  Math.abs(estimateDurationSec(long) - 120) <= 2,
+  "900 words is about five minutes at 180 wpm",
+  Math.abs(estimateDurationSec(long) - 300) <= 2,
   String(estimateDurationSec(long)),
 );
 check("an empty narration is zero seconds", estimateDurationSec(script("")) === 0, String(estimateDurationSec(script(""))));
