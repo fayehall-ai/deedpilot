@@ -248,10 +248,31 @@ export function spokenToDigits(text: string): string {
   };
 
   return text.replace(
-    // A run of number words, allowing hyphens and spaces between them.
-    new RegExp(`(${NUMBER_WORD.source})(?:[\\s-]+(${NUMBER_WORD.source}))*`, "g"),
+    /*
+     * A run of number words, allowing hyphens and spaces between them — and
+     * `point` / `dash`, which are not number words but which join one into an
+     * identifier. Matching them here is what lets the identifier be recognised
+     * as a whole instead of being silently split into two innocent cardinals.
+     */
+    new RegExp(
+      `(${NUMBER_WORD.source})(?:[\\s-]+(?:point|dash)?[\\s-]*(${NUMBER_WORD.source}))*`,
+      "g",
+    ),
     (run) => {
       const lower = run.toLowerCase();
+
+      /*
+       * `point` or `dash` inside a run means this is a citation, not a
+       * quantity: "chapter eighty-four point sixty-four" is RCW 84.64 and
+       * "forty-eight dash four dash forty" is O.C.G.A. 48-4-40. Left as words,
+       * so no figure is read from them at all.
+       *
+       * The trade, stated plainly: a spoken decimal quantity — "twenty point
+       * five percent" — is no longer verified either. These briefings speak
+       * percentages as whole numbers, and the alternative was flagging every
+       * statute this system cites as a fabricated number.
+       */
+      if (/\b(?:point|dash)\b/.test(lower)) return run;
       /*
        * Space-separated groups are kept distinct from hyphenated ones, because
        * the difference is what distinguishes a year from a count.
@@ -286,6 +307,41 @@ export function spokenToDigits(text: string): string {
           (a.value === 19 || a.value === 20) && b.value >= 10 && b.value <= 99;
         if (yearish) return String(a.value * 100 + b.value);
       }
+
+      /*
+       * A spoken cardinal descends. "twenty six" is 26 and "forty seven" is
+       * 47, because a unit may follow a ten — but nothing in English puts a
+       * ten after a ten, or repeats a unit, and means a single number by it.
+       * What does that is an identifier read out group by group.
+       *
+       * Without this the parser summed them into figures nobody said, and
+       * because those figures were absent from the facts the script was held
+       * as though the model had invented a number. Measured on the five held
+       * packages, every one:
+       *
+       *   "seven seven zero" (a phone number)        -> 14
+       *   "five two eight"                           -> 15
+       *   "twenty-six thirty-seven two hundred two"  -> 6502  (A.C.A. 26-37-202)
+       *   "one ninety-seven" (Fla. Stat. ch. 197)    -> 98
+       *
+       * Scales are what license a second group: in "two hundred twelve" the
+       * twelve follows `hundred`, so it is part of one cardinal and the check
+       * does not apply to it.
+       */
+      const descends = (vs: number[]) => vs.every((v, i) => i === 0 || v < vs[i - 1]);
+
+      let segment: number[] = [];
+      for (const g of groups) {
+        if (g.some((w) => w in SCALES)) {
+          // A scale closes the current stretch of bare groups and opens a new
+          // one — check what it closed before discarding it.
+          if (!descends(segment)) return run;
+          segment = [];
+          continue;
+        }
+        segment.push(cardinal(g).value);
+      }
+      if (!descends(segment)) return run;
 
       const { value, sawNumber } = cardinal(flat);
       return sawNumber ? String(value) : run;

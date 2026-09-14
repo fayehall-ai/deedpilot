@@ -198,6 +198,70 @@ check(
 );
 check("an empty narration is zero seconds", estimateDurationSec(script("")) === 0, String(estimateDurationSec(script(""))));
 
+// --- spoken identifiers are not quantities -----------------------------------
+/*
+ * Every one of these held a real, correct script back. The narration must
+ * speak a statute out loud because it is going to a speech engine, and the
+ * parser was summing the spoken citation into a figure nobody said — which,
+ * being absent from the facts, read as a fabricated number. Same for a phone
+ * number read out group by group.
+ *
+ * The far more important half of this block is the last three assertions. A
+ * check that stops flagging invented figures is worse than the bug it fixed,
+ * so an actual hallucinated quantity must still be caught.
+ */
+const factsFor = "Union County, Arkansas. 212 parcels. sale 2026-09-22. ratio 20 percent. redemption 1095 days.";
+const flagged = (narration: string) => JSON.stringify(verifyNarration(script(narration), factsFor));
+
+check(
+  "A.C.A. 26-37-202 spoken is a citation, not 6502",
+  flagged("under A.C.A. section twenty-six thirty-seven two hundred two.") === "[]",
+  flagged("under A.C.A. section twenty-six thirty-seven two hundred two."),
+);
+check(
+  "RCW 84.64 spoken is a citation, not 84 and 64",
+  flagged("under the Revised Code of Washington chapter eighty-four point sixty-four.") === "[]",
+  flagged("under the Revised Code of Washington chapter eighty-four point sixty-four."),
+);
+check(
+  "Fla. Stat. ch. 197 spoken is a citation, not 98",
+  flagged("Florida Statutes chapter one ninety-seven.") === "[]",
+  flagged("Florida Statutes chapter one ninety-seven."),
+);
+check(
+  "O.C.G.A. 48-4-40 spoken is a citation, not a sum",
+  flagged("O.C.G.A. sections forty-eight dash four dash forty through forty-eight dash four dash forty-eight.") === "[]",
+  flagged("O.C.G.A. sections forty-eight dash four dash forty through forty-eight dash four dash forty-eight."),
+);
+check(
+  "a phone number read out is not 14, 15 and 19",
+  flagged("Call the Levy Department at seven seven zero, five two eight, eight six two three.") === "[]",
+  flagged("Call the Levy Department at seven seven zero, five two eight, eight six two three."),
+);
+
+// Quantities that are in the facts still verify.
+check("'two hundred twelve parcels' verifies", flagged("The list shows two hundred twelve parcels.") === "[]");
+check("'twenty percent' verifies", flagged("The assessment ratio is twenty percent.") === "[]");
+check("'one thousand ninety-five days' verifies", flagged("Redemption is one thousand ninety-five days.") === "[]");
+
+// And a figure that is not in the facts is still caught. This is the assertion
+// that must never be relaxed to make the others pass.
+check(
+  "an invented count is still flagged",
+  flagged("The county expects four hundred sixty-three bidders.") === '["463"]',
+  flagged("The county expects four hundred sixty-three bidders."),
+);
+check(
+  "an invented dollar figure is still flagged",
+  flagged("Opening bids average nine thousand four hundred dollars.") === '["9400"]',
+  flagged("Opening bids average nine thousand four hundred dollars."),
+);
+check(
+  "a date the facts contradict is still flagged",
+  flagged("Do not treat September thirteenth as firm.") === '["13"]',
+  flagged("Do not treat September thirteenth as firm."),
+);
+
 if (failures) {
   console.error(`\n${failures} assertion(s) failed`);
   process.exit(1);
