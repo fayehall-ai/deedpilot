@@ -69,8 +69,8 @@ export const CapeScriptSchema = z.object({
   title: z.string().describe("Video title, e.g. 'Cobb County, Georgia — November 3 Tax Deed Sale'"),
   sections: z
     .array(SectionSchema)
-    .min(7)
-    .max(14)
+    .min(8)
+    .max(11)
     .describe(
       "Ordered. Opening, how the sale type works here, redemption and title, what the deed " +
         "conveys, before sale day, the inventory, one section per submarket on file, what " +
@@ -420,10 +420,12 @@ export async function generateCapeScript(
       `    sections in the briefing; do not compress several submarkets into one.\n` +
       `  - What still needs verifying with the county before anyone acts.\n` +
       `  - Close on the single most important point.\n\n` +
-      `LENGTH. The whole script must come to about NINE HUNDRED spoken words — five ` +
-      `minutes at the pace this is read. That is about SEVENTY-FIVE TO NINETY WORDS PER ` +
-      `SECTION across ten to twelve sections. Keep to it; a briefing that runs nine minutes ` +
-      `is not watched, and one that runs three is thin.\n\n` +
+      `LENGTH — A HARD BUDGET, NOT A TARGET. The finished script must total between 850 ` +
+      `and 950 spoken words. That is five minutes at the pace this is read. Use TEN ` +
+      `sections of EIGHTY TO NINETY WORDS each and no more. Before you answer, count the ` +
+      `words across every narration field; if the total is over 950, cut the least useful ` +
+      `sentences until it is not. A briefing that runs seven minutes is not watched, and ` +
+      `one that runs three is thin.\n\n` +
       `Within that budget, go deeper rather than wider: explain the mechanism behind each ` +
       `fact, what it means for a bidder's money and timeline, and what the consequence is ` +
       `of getting it wrong. A section that states a fact and stops is too short. Never pad ` +
