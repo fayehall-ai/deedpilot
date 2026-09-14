@@ -52,6 +52,26 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     reason: "Same RealAuction platform and robots policy as realtaxdeed.com.",
   },
   {
+    host: "realtaxlien.com",
+    decision: "requires_agreement",
+    minDelayMs: 5000,
+    reason:
+      "Same RealAuction platform as realtaxdeed.com and realforeclose.com. Measured 2026-09-14: " +
+      "403 to this project's user agent, 403 with no user agent, 200 to Chrome's — and 403 for " +
+      "robots.txt itself, so the file cannot even be read. The block is on who is asking.",
+  },
+  {
+    host: "sheriffsaleauctions.com",
+    decision: "requires_agreement",
+    minDelayMs: 5000,
+    reason:
+      "Answers a browser and refuses us, identically to the RealAuction hosts above — measured " +
+      "2026-09-14: 403 to our user agent, 403 to none, 200 to Chrome's, 403 for robots.txt. " +
+      "Several Texas counties have moved here from the LGBS pages we crawl, which is how it " +
+      "surfaced; the move does not make the new host fetchable. Getting in would mean claiming to " +
+      "be a browser, which `docs/bid4assets-capture.md` rules out.",
+  },
+  {
     host: "govease.com",
     decision: "requires_agreement",
     minDelayMs: 5000,

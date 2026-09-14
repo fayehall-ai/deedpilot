@@ -48,6 +48,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { and, eq, gte, sql as dsql } from "drizzle-orm";
 import { db } from "../lib/db";
 import { auctions, counties, ingestRuns, sourceOverrides } from "../lib/db/schema";
+import { policyFor } from "../lib/ingest/policy";
 
 const APPLY = process.argv.includes("--apply");
 const DIR = "downloads";
@@ -123,6 +124,8 @@ async function main() {
   /* Where the counties are actually publishing now, counted. */
   const targets = new Map<string, number>();
   const byAdapter = new Map<string, number>();
+  const blocked = new Map<string, number>();
+  let blockedByPolicy = 0;
 
   for (const r of rows) {
     const st = ABBR[r[1].trim()];
@@ -139,6 +142,14 @@ async function main() {
     if (/^https?:\/\//i.test(link) && host(link) && host(link) !== host(hit.sourceUrl ?? "")) {
       betterUrl++;
       targets.set(host(link), (targets.get(host(link)) ?? 0) + 1);
+
+      /* A link in a spreadsheet is not permission to fetch it. */
+      const policy = policyFor(host(link));
+      if (policy && policy.decision !== "allow") {
+        blockedByPolicy++;
+        blocked.set(host(link), (blocked.get(host(link)) ?? 0) + 1);
+        continue;
+      }
       const adapter = adapters.get(hit.fips);
       if (adapter) byAdapter.set(adapter, (byAdapter.get(adapter) ?? 0) + 1);
       if (!adapter) { noAdapter++; continue; }
@@ -175,12 +186,19 @@ async function main() {
   console.log(`matched to an upcoming sale        : ${matched}`);
   console.log(`  a better list URL than ours      : ${betterUrl}`);
   console.log(`    of those, no known adapter     : ${noAdapter}  (skipped — nothing to override)`);
+  console.log(`    of those, policy says no       : ${blockedByPolicy}  (capture-only or robots-denied)`);
   console.log(`  start times we were missing      : ${timeFilled}`);
   console.log(`  rows declaring no list exists    : ${declaredNoList}`);
   console.log(APPLY ? `\nwrote ${wroteOverride} source override(s)` : `\nreport only — pass --apply to write`);
   if (examples.length) {
     console.log("\nbetter URLs:");
     for (const e of examples) console.log("  " + e);
+  }
+  if (blocked.size) {
+    console.log("\nrefused on policy — a spreadsheet link is not permission:");
+    for (const [h, n] of [...blocked].sort((a, b) => b[1] - a[1])) {
+      console.log(`  ${String(n).padStart(3)}  ${h}  (${policyFor(h)?.decision})`);
+    }
   }
   if (targets.size) {
     /*
