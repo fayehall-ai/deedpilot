@@ -23,6 +23,7 @@
  * claim they exist when they do not.
  */
 import { createHash } from "node:crypto";
+import type { AuctionLogistics } from "@/lib/db/schema";
 import type { CountyRule } from "@/lib/atlas/types";
 import type { StatuteParams } from "@/lib/deal/statute";
 import { classifySource, type SourceClassification } from "./sources";
@@ -36,6 +37,29 @@ export interface ComponentItem {
   state: ItemState;
   /** What we hold, or why the item cannot be satisfied. */
   detail: string | null;
+  /**
+   * True when this item's only content is our own absence, so the narrator
+   * never sees it.
+   *
+   * `absent` was supposed to cover this and does not. An `absent` item is one no
+   * source was ever going to satisfy — code enforcement, IRS liens, probate —
+   * and `factSheet` already drops those. But a `verify` item can be just as
+   * empty: "Assessor records — No parcel in this sale has an assessor record"
+   * is a fact about this database, not about the sale.
+   *
+   * The Fulton recut is what this is for. The prompt has said "never list what
+   * this briefing does not cover" since the last pass, and the model wrote
+   * "Assessor records are not on file for parcels in this sale. No county GIS
+   * link and no coordinates appear on these parcels. Zoning data is absent."
+   * onto a slide reading "Assessor/GIS not in file" — because the FACTS it was
+   * handed were, line by line, an inventory of absence. An instruction cannot
+   * outvote the evidence beneath it. So the evidence goes.
+   *
+   * Scored exactly as before: `component()` counts these in its denominator,
+   * because the product genuinely lacks them and the operator board must show
+   * that. Only the narrator is spared.
+   */
+  silent?: boolean;
 }
 
 export interface Component {
@@ -71,6 +95,8 @@ export interface PackageInput {
   statute: StatuteParams | null;
   /** Directory office links for this county, by kind. */
   offices: Partial<Record<string, string>>;
+  /** Venue and named contact, where an operator source supplied them. */
+  logistics?: AuctionLogistics | null;
   /** Census population for the county, for Component Ten's threshold. */
   population: number | null;
   /** Parcel-level coverage across the sale, for Component Four. */
@@ -159,6 +185,7 @@ export function capeInputsHash(i: PackageInput): string {
     population: i.population,
     parcels: i.parcels,
     offices: i.offices,
+    logistics: i.logistics ?? null,
     rule: i.rule ?? null,
     statute: i.statute ?? null,
   };
@@ -166,10 +193,40 @@ export function capeInputsHash(i: PackageInput): string {
 }
 
 const have = (label: string, detail: string): ComponentItem => ({ label, state: "have", detail });
+/**
+ * An item nobody has confirmed — silent to the narrator by default.
+ *
+ * The default is the whole point. This constructor used to be audible and
+ * `blank` was the opt-out, which meant every new checklist item shipped
+ * narratable unless its author remembered otherwise; the Fulton recut spoke
+ * four absences in a row and put "Assessor/GIS not in file" on a slide because
+ * of it. Now the safe state is the one you get for free, and making a line
+ * audible is a deliberate act that costs you a sentence written for the viewer
+ * — see `advise`.
+ *
+ * `detail` here is written for the operator reading the board, so it may name a
+ * column or say "not researched". Nobody outside the company reads it.
+ */
 const verify = (label: string, detail: string): ComponentItem => ({
   label,
   state: "verify",
   detail,
+  silent: true,
+});
+
+/**
+ * An unconfirmed item the viewer should act on, in the words they should hear.
+ *
+ * Same state as `verify` and scored identically; the only difference is that
+ * this one reaches the narrator. The rule for `instruction` is that it
+ * describes the sale or what to do about it, never this system: "Confirm the
+ * start time on the county's current sale notice" earns its place, "No start
+ * time on the sale notice" does not — that tells a bidder about our file.
+ */
+const advise = (label: string, instruction: string): ComponentItem => ({
+  label,
+  state: "verify",
+  detail: instruction,
 });
 const absent = (label: string, detail: string): ComponentItem => ({
   label,
@@ -184,10 +241,41 @@ function text(v: unknown): string | null {
   return s || null;
 }
 
-/** `have` when present, otherwise `verify` with the reason. */
+/**
+ * `have` when present, otherwise a silent `verify` carrying the reason.
+ *
+ * Silence is not a judgement call here: every `missing`
+ * string passed to this helper is an internal note about why we lack the value
+ * — "No adapter writes registration_deadline", "No tax office link", "Not
+ * verified against the county notice". None of them is a sentence a bidder
+ * benefits from hearing. Where an absence *does* imply something the viewer
+ * should go and do, the call site writes that instruction with `advise`
+ * instead of reaching for this.
+ */
 function field(label: string, value: unknown, missing: string): ComponentItem {
   const v = text(value);
   return v ? have(label, v) : verify(label, missing);
+}
+
+/**
+ * "Official county contacts", counted from both sources that can satisfy it.
+ *
+ * The directory supplies office *links*; the operator's sale calendar supplies a
+ * *person* — a name, a line and an address for this specific sale. Either alone
+ * answers the item, and a county with neither is the only honest `verify`.
+ * Returns null so the caller states that case once, in its own words.
+ */
+function contactSummary(i: PackageInput): ComponentItem | null {
+  const offices = Object.keys(i.offices).length;
+  const c = i.logistics?.contact;
+  const named = Boolean(c?.name || c?.phone || c?.email);
+
+  const parts: string[] = [];
+  if (offices > 0) parts.push(`${offices} offices on file`);
+  // Named, not named — see the note at the call site on what may be spoken.
+  if (named) parts.push(`a named contact for this sale from ${i.logistics!.source}`);
+
+  return parts.length ? have("Official county contacts", parts.join(", plus ")) : null;
 }
 
 function tally(items: ComponentItem[]): Component["counts"] {
@@ -236,7 +324,7 @@ export function buildPackage(i: PackageInput): CapePackage {
     ),
     p.total > 0
       ? have("Parcel list", `${p.total} parcels`)
-      : verify("Parcel list", "Calendar shell with no parcels published yet"),
+      : advise("Parcel list", "The county has not published its parcel list for this sale yet"),
   ]);
 
   // --- Two: source verification -------------------------------------------
@@ -244,25 +332,68 @@ export function buildPackage(i: PackageInput): CapePackage {
     have("Source tier", `${source.tier} — ${source.basis}`),
     i.saleDateConfirmed
       ? have("Auction date confirmed", "Published by the county")
-      : verify("Auction date confirmed", "Date projected from the state's typical schedule"),
-    field("Auction time", i.startTime, "No start time on the sale notice"),
-    field("Location", r?.auctionFormat, "No venue or format in county research"),
+      : advise("Auction date confirmed", "Date projected from the state's typical schedule — confirm it with the county"),
+    /*
+     * The four items below are the exception `field` documents: an absence a
+     * bidder must act on. Phrased as the action, not as our gap — "Confirm the
+     * start time on the county's current sale notice", never "no start time on
+     * file". The first is useful to someone about to register; the second only
+     * tells them about us.
+     */
+    i.startTime
+      ? have("Auction time", i.startTime)
+      : advise("Auction time", "Confirm the start time on the county's current sale notice"),
+    /*
+     * A venue is `have` only when it is a category, never when it is a street
+     * address.
+     *
+     * "Online auction" is a claim about format that is either right or absurd,
+     * and 207 of the sale calendar's rows say exactly that. A physical address
+     * is different in kind: it was hand-typed — the calendar holds "Clevevland"
+     * and "Timiami Trail" — and the consequence of it being wrong is somebody
+     * driving to the wrong building on the one morning it matters. So the
+     * address is reported, with where it came from, as something to confirm.
+     *
+     * `verify` is not a lesser answer than `have` here. The fact sheet hands
+     * this detail to the narrator marked NEEDS VERIFICATION, and the prompt
+     * turns that into "the sale is held at X — confirm the location with the
+     * county", which is the sentence a bidder actually needs.
+     */
+    i.logistics?.venue?.kind === "online"
+      ? have("Location", "Online auction")
+      : i.logistics?.venue
+        ? advise(
+            "Location",
+            `${i.logistics.venue.text} — from ${i.logistics.source}; confirm against the county notice`,
+          )
+        : field("Location", r?.auctionFormat, "No venue or format in county research"),
     have("Platform", i.platform ?? "unrecorded"),
     field("Registration process", r?.auctionFormat, "Not verified against the county notice"),
-    field("Deposit requirements", i.depositDeadline ?? r?.depositRules, "Not verified"),
-    field("Payment deadlines", i.depositDeadline, "Not verified"),
+    i.depositDeadline ?? r?.depositRules
+      ? have("Deposit requirements", text(i.depositDeadline ?? r?.depositRules)!)
+      : advise("Deposit requirements", "Confirm the deposit and accepted funds with the county"),
+    i.depositDeadline
+      ? have("Payment deadlines", text(i.depositDeadline)!)
+      : advise("Payment deadlines", "Read the payment deadline off the county's sale notice"),
     field("Sale type", i.saleType, "Not verified"),
     i.listingKind === "sale_list"
       ? have("Parcel list source", "Published sale list")
-      : verify("Parcel list source", `Document is a ${i.listingKind} listing, not a sale list`),
+      : advise("Parcel list source", `The document behind this list is a ${i.listingKind} listing, not a published sale list`),
     i.statute?.redemption
       ? have("Redemption rules", `${i.statute.redemption.maxDays} day window`)
       : i.statute
         ? have("Redemption rules", "No post-sale redemption in this state")
         : verify("Redemption rules", `No verified statutory parameters for ${i.state}`),
-    Object.keys(i.offices).length > 0
-      ? have("Official county contacts", `${Object.keys(i.offices).length} offices on file`)
-      : verify("Official county contacts", "No directory entry for this county"),
+    /*
+     * The detail says a contact exists; it does not say who or on what number.
+     *
+     * Everything in this string is handed verbatim to the narrator and can be
+     * read aloud in a public video. An office's listed URL is already published
+     * for that purpose. A named county employee's direct line is not — it is
+     * held on `auctions.logistics` for the token-gated console, where an
+     * operator ringing the county is the whole point.
+     */
+    contactSummary(i) ?? verify("Official county contacts", "No directory entry for this county"),
   ]);
 
   // --- Three: county due diligence framework -------------------------------
@@ -284,7 +415,12 @@ export function buildPackage(i: PackageInput): CapePackage {
         ? have("Interest / penalty structure", "Not applicable — deed state")
         : verify("Interest / penalty structure", "Blocked on the statute entry"),
     field("Deed issued", r?.type, "Deed instrument not recorded in county research"),
-    verify("Possession limitations", "Not modelled — needs county research"),
+    /*
+     * Kept audible. Unlike the coverage items, this is not a gap in our file —
+     * no database anywhere records whether a parcel is occupied, and a bidder
+     * who assumes vacant possession loses money. The instruction is the point.
+     */
+    advise("Possession limitations", "Confirm occupancy and access on the ground before bidding"),
     i.statute
       ? have(
           "Quiet title / barment",
@@ -305,13 +441,35 @@ export function buildPackage(i: PackageInput): CapePackage {
   const four = component(4, "Property-level due diligence", [
     p.withParcelNumber === p.total && p.total > 0
       ? have("Parcel verification", `${pct(p.withParcelNumber)}% carry a parcel number`)
-      : verify("Parcel verification", `${pct(p.withParcelNumber)}% carry a parcel number`),
+      : advise("Parcel verification", `${pct(p.withParcelNumber)}% carry a parcel number`),
+    /*
+     * Four coverage items, silent when empty.
+     *
+     * Each of these is a count of rows in this database. At zero the only
+     * sentence available is "we do not hold it", which is what produced the
+     * Fulton slide reading "Assessor/GIS not in file" and a narration paragraph
+     * listing four absences in a row. A viewer cannot act on any of it, and the
+     * briefing sounds like an apology for itself.
+     *
+     * The corresponding instruction — go and pull the assessor record and the
+     * GIS layer — belongs in one place, not four, and Component Nine's
+     * "Independent verification required" already says it.
+     */
     p.withAssessed > 0
       ? have("Assessor records", `${pct(p.withAssessed)}% enriched`)
       : verify("Assessor records", "No parcel in this sale has an assessor record"),
-    i.offices.gis
-      ? have("GIS mapping", "County GIS link on file")
-      : verify("GIS mapping", "No county GIS link"),
+    /*
+     * Both sources, as Component Three has always read them.
+     *
+     * This read `i.offices.gis` alone — the directory crawler — while Component
+     * Three's "GIS department" reads the directory *or* the county research
+     * atlas. Fulton has no directory entry and a perfectly good atlas one, so
+     * the same package reported a GIS link on record in one component and
+     * missing in another. Two copies of one fact, disagreeing.
+     */
+    i.offices.gis ?? r?.gisMap?.label
+      ? have("GIS mapping", text(i.offices.gis ?? r?.gisMap?.label)!)
+      : verify("GIS mapping", "No county GIS link in the directory or the atlas"),
     p.withZoning > 0
       ? have("Zoning", `${pct(p.withZoning)}% carry a zoning code`)
       : verify("Zoning", "No zoning data on these parcels"),
@@ -320,11 +478,11 @@ export function buildPackage(i: PackageInput): CapePackage {
       : verify("Location / mapping", "No coordinates on these parcels"),
     verify("Legal access and road frontage", "ATTOM returns frontage on a minority of parcels"),
     verify("Occupancy", "Absentee flag available where enriched; occupancy not confirmed"),
-    verify("Physical condition", "Cannot be established without inspection"),
+    advise("Physical condition", "Condition cannot be established from records — inspect before bidding"),
     absent("Code enforcement / demolition orders", "No source for this"),
     r?.survivingLiens
       ? have("Municipal liens", "County research records what survives")
-      : verify("Municipal liens", "Lien survival not researched for this county"),
+      : advise("Municipal liens", "Ask the county which municipal liens survive a tax sale"),
     absent("IRS liens", "No source for this"),
     absent("HOA exposure", "No source for this"),
     absent("Probate / bankruptcy", "No source for this"),

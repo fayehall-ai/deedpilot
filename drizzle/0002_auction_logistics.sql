@@ -1,0 +1,19 @@
+-- Where a sale is held and who to ring about it.
+--
+-- No adapter reads a venue or a named contact off a county page, so these have
+-- nowhere to live today and the CAPE checklist reports "Location" and "Official
+-- county contacts" as unverified on every one of the 488 upcoming packages. The
+-- operator's sale calendar carries both for 455 sales.
+--
+-- One jsonb column rather than four text columns so the values travel with the
+-- provenance that qualifies them: a street address with no `source` beside it is
+-- something nobody downstream can weigh, and a venue and its attribution stored
+-- apart is one more pair of facts free to drift.
+--
+-- Deliberately absent from `upsertAuction`'s conflict `set`, which is what makes
+-- it survive the 02:00 crawl. The upsert writes only the columns an adapter
+-- supplies; a column no adapter supplies is never reverted.
+--
+-- Additive and nullable: existing rows keep NULL, which reads as "no source has
+-- stated where this sale is held" — not "held nowhere".
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS logistics jsonb;

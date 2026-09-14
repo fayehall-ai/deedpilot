@@ -63,6 +63,8 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
       platform: auctions.platform,
       listingKind: auctions.listingKind,
       lotCount: auctions.lotCount,
+      startTime: auctions.startTime,
+      logistics: auctions.logistics,
       registrationDeadline: auctions.registrationDeadline,
       depositDeadline: auctions.depositDeadline,
     })
@@ -104,7 +106,18 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
     saleType: r.saleType,
     sourceUrl: r.sourceUrl,
     platform: r.platform,
-    startTime: null,
+    /*
+     * Read, not hardcoded null.
+     *
+     * This said `startTime: null` from the first draft, so Component Two's
+     * "Auction time" reported "No start time on the sale notice" for every
+     * package in the system — including the sales whose `auctions.start_time`
+     * column held a time the county had published. A checklist that cannot
+     * report a fact the row beside it already holds is not measuring the sale,
+     * it is measuring itself.
+     */
+    startTime: r.startTime,
+    logistics: r.logistics ?? null,
     registrationDeadline: r.registrationDeadline,
     depositDeadline: r.depositDeadline,
     lotCount: r.lotCount,

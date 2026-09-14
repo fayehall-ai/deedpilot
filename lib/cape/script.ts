@@ -118,7 +118,18 @@ function factSheet(pkg: CapePackage, meta: CapeScriptMeta): string {
     `Sale type: ${meta.saleType ?? "unknown"}`,
     `Auction platform: ${meta.platform ?? "not recorded"}`,
     `Official source: ${pkg.source.tier} (${pkg.source.host || "no host"}) — ${pkg.source.basis}`,
-    `Package due: ${pkg.deadline.dueDate} (${pkg.deadline.mode} auction)`,
+    /*
+     * The mode, not the due date.
+     *
+     * `deadline.dueDate` is when TDC must have the package finished — a fact
+     * about this company's calendar and nothing to do with the sale. It reached
+     * the Fulton narration as "The package is due September twenty-ninth,
+     * twenty twenty-six, seven days before the sale" and onto a slide as
+     * "Package due Sept 29, 2026", which a bidder can only read as a deadline
+     * that applies to them. It does not. Whether the sale is live or online
+     * does apply to them, so that half stays.
+     */
+    `Auction mode: ${pkg.deadline.mode === "live" ? "live, in person" : "online"}`,
     /*
      * Population, because the narrator kept reaching for it and inventing it.
      * "About one million ninety thousand residents" was held on a Fulton script
@@ -133,29 +144,45 @@ function factSheet(pkg: CapePackage, meta: CapeScriptMeta): string {
   ];
 
   for (const c of pkg.components) {
-    // Seven describes this very deliverable; narrating its own absence is noise.
-    if (c.n === 7) continue;
     /*
-     * `absent` items never reach the narrator.
+     * One through Six are about the sale. Seven through Ten are about us.
      *
-     * An absent item is one there was never going to be a source for — code
-     * enforcement, IRS liens, HOA exposure, probate, environmental. Listing
-     * them produced narration that catalogued what the briefing does not
-     * cover, which tells a bidder nothing and makes the product sound thin.
-     * `component()` already excludes them from its own denominator for the
-     * same reason: they measure the product's scope, not this sale.
+     * Seven is this very deliverable, Eight is TDC's production calendar, Nine
+     * is the quality gate on the video being written, and Ten is the PropStream
+     * export and the downstream automations. Every one of those was being
+     * handed to the narrator as though it were a fact about the auction, which
+     * is how "Export format — PropStream CSV, headers pending the TDC template"
+     * came to sit in a fact sheet for a public briefing.
      *
-     * Component Ten made it worse than noise. Its items are TDC's own
-     * production steps — "Google Drive upload", "GHL course attachment",
-     * "Detailed PDF reports (Viktor / Slack)" — and as `absent` they were
-     * being handed to the narrator as though they were facts about the
-     * auction.
-     *
-     * `verify` items still go through. Those are different in kind: things a
-     * bidder must confirm with the county before acting, which is the most
-     * useful thing this system says.
+     * The board still shows all ten and the score still averages all ten. The
+     * cut is only about audience: a bidder is owed the sale, not our pipeline.
      */
-    const items = c.items.filter((i) => i.state !== "absent");
+    if (c.n >= 7) continue;
+    /*
+     * Within those six, two more kinds of line are dropped.
+     *
+     * `absent` is an item there was never going to be a source for — code
+     * enforcement, IRS liens, HOA exposure, probate, environmental. Listing
+     * them produced narration that catalogued what the briefing does not cover,
+     * which tells a bidder nothing and makes the product sound thin.
+     * `component()` already excludes them from its own denominator for the same
+     * reason: they measure the product's scope, not this sale.
+     *
+     * `silent` is the subtler one, and it is why the Fulton recut still said
+     * "Assessor records are not on file for parcels in this sale. No county GIS
+     * link and no coordinates appear on these parcels. Zoning data is absent."
+     * after the system prompt was told never to list what the briefing does not
+     * cover. Those lines were `verify`, not `absent`, so they came through —
+     * four consecutive statements about this database dressed as facts about a
+     * county. An instruction in the prompt cannot outvote the evidence beneath
+     * it. See `ComponentItem.silent`.
+     *
+     * What survives is the `verify` written as an instruction: confirm the
+     * start time, read the payment deadline off the notice, inspect before
+     * bidding. That is the most useful thing this system says, and it is the
+     * only reason the state reaches the narrator at all.
+     */
+    const items = c.items.filter((i) => i.state !== "absent" && !i.silent);
     if (items.length === 0) continue;
     lines.push(`\n${c.n}. ${c.title}`);
     for (const item of items) {
@@ -185,6 +212,8 @@ export interface GeneratedScript {
   usedFallback: boolean;
   /** Numbers the model spoke that were not in the facts. Empty is the pass. */
   unsupportedFigures: string[];
+  /** Slide bullets dropped by `stripAbsenceBullets`. Empty is the pass. */
+  droppedBullets: string[];
 }
 
 /*
@@ -422,6 +451,50 @@ export function verifyNarration(script: CapeScript, facts: string): string[] {
 }
 
 /**
+ * Phrases that turn a bullet into a statement about our file rather than the
+ * sale.
+ *
+ * Deliberately narrow. Each pattern needs a negation *and* a record-ish noun,
+ * because "No redemption after the sale" and "No deposit required" are facts
+ * about the county worth showing, while "No GIS link" and "Assessor not in
+ * file" are facts about us. A guard that caught every "no" would delete the
+ * true ones.
+ */
+const ABSENCE_BULLET = [
+  /\bnot (?:in|on) (?:file|record)\b/i,
+  /\b(?:no|not)\s+(?:\w+\s+){0,3}(?:data|records?|link|layer|coverage|coordinates?|source|entry|listing)\b/i,
+  /\b(?:unavailable|unverified|not verified|not researched|not collected|not modelled|not modeled)\b/i,
+  /\b(?:assessor|gis|zoning|coordinates?|parcel numbers?|addresses)\b[^.]{0,24}\b(?:absent|missing|unknown|none)\b/i,
+];
+
+/**
+ * Remove slide bullets that inventory what this system does not hold.
+ *
+ * The prompt has forbidden this since the last pass and the model did it
+ * anyway: the Fulton recut shipped a slide reading "Assessor/GIS not in file".
+ * `factSheet` no longer feeds the absences that produced it, which is the real
+ * fix — but the same argument applies here as to `verifyNarration`. An
+ * instruction in a prompt is a request; this is a guarantee, and the failure it
+ * guards is a sentence in a published video that cannot be taken back.
+ *
+ * Bullets are dropped rather than the script rejected. A slide carrying three
+ * bullets instead of four is a slide; a production that throws at the last step
+ * because of one line of copy is an outage. What was dropped is returned so it
+ * is visible rather than silent.
+ */
+export function stripAbsenceBullets(script: CapeScript): string[] {
+  const dropped: string[] = [];
+  for (const section of script.sections) {
+    section.slide.bullets = section.slide.bullets.filter((b) => {
+      if (!ABSENCE_BULLET.some((re) => re.test(b))) return true;
+      dropped.push(b);
+      return false;
+    });
+  }
+  return dropped;
+}
+
+/**
  * Write the script and slide plan for one auction package.
  *
  * Throws `NoProviderAvailableError` when neither Grok nor Claude is configured,
@@ -449,7 +522,9 @@ export async function generateCapeScript(
       `  - Redemption: how long, what it costs the redeemer, and when it ends.\n` +
       `  - What the deed conveys, and what curative work is still required after it.\n` +
       `  - Before sale day: registration, deposit, payment method and deadlines.\n` +
-      `  - The inventory in aggregate — how many parcels, and how well characterised they are.\n` +
+      `  - The inventory in aggregate — how many parcels, and what the list gives a\n` +
+      `    bidder to work from. Describe what is there. Do not account for what is not:\n` +
+      `    no sentence in this section may name a record, layer or field as missing.\n` +
       `  - One section for EACH submarket on file, if any. Name it, and say what kind of\n` +
       `    place it is and what that implies for a bidder. These are the most useful\n` +
       `    sections in the briefing; do not compress several submarkets into one.\n` +
@@ -469,11 +544,15 @@ export async function generateCapeScript(
       `FACTS\n=====\n${facts}\n`,
   });
 
+  /* Mutates `result.data` in place, before anything reads the slide plan. */
+  const droppedBullets = stripAbsenceBullets(result.data);
+
   return {
     script: result.data,
     model: result.model,
     usedFallback: result.usedFallback,
     unsupportedFigures: verifyNarration(result.data, facts),
+    droppedBullets,
   };
 }
 

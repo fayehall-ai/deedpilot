@@ -35,6 +35,33 @@
  * per-county URL in them to swap. Writing `auctions.source_url` directly would
  * bypass that and quietly change provenance on a row nobody edited.
  *
+ * ## Venue, contact and start time
+ *
+ * The other half of each row is logistics: a start time, the building the sale
+ * is held in, and a named person at the county with a line and an address. No
+ * adapter reads any of that off a county page, so before this ran the CAPE
+ * checklist reported "Location" and "Official county contacts" as unverified on
+ * every package in the system — and "Auction time" on every package too, for a
+ * different and dumber reason, which `lib/cape/inputs.ts` now records.
+ *
+ * Venue and contact land on `auctions.logistics`, a column no adapter writes
+ * and which `upsertAuction` therefore never overwrites. The start time is
+ * different: `auctions.start_time` *is* adapter-owned, and the first version of
+ * this script set it directly — which the 02:00 crawl then reverted, because
+ * the upsert writes `coalesce(operator_overrides->>'startTime', excluded.start_time)`
+ * and neither half held it any more. That is the exact failure
+ * `lib/admin/auction-overrides.ts` was built to prevent, so the time now goes
+ * through the override tier like any other correction, and only where the
+ * county has published nothing itself.
+ *
+ * ## What is deliberately not imported
+ *
+ * "Bid Procedures" reads "Bid Up or Premium" on all 455 rows. A column with one
+ * value across every county in nine states is not an observation, it is a
+ * default somebody typed once — and it is wrong wherever a state bids down the
+ * interest or allocates by rotation. Importing it would have put a confident
+ * false sentence about bidding mechanics into hundreds of briefings.
+ *
  * ## The rows with no link are not waste
  *
  * Two hundred and ten say "No public online list link available—verify with
@@ -48,7 +75,31 @@ import { readdirSync, readFileSync } from "node:fs";
 import { and, eq, gte, sql as dsql } from "drizzle-orm";
 import { db } from "../lib/db";
 import { auctions, counties, ingestRuns, sourceOverrides } from "../lib/db/schema";
+import type { AuctionLogistics } from "../lib/db/schema";
 import { policyFor } from "../lib/ingest/policy";
+import { validateOverrides } from "../lib/admin/auction-override-fields";
+
+/** Names this import wherever a value from it is shown or spoken. */
+const SOURCE = "the TDC sale calendar";
+
+/**
+ * Clean a spreadsheet cell.
+ *
+ * These were pasted out of county web pages, so a fair number carry `&nbsp;`
+ * and `&amp;nbsp;` as literal text and trail a run of empty comma-separated
+ * fields — "Online auction, &nbsp;, &nbsp;, &nbsp;". Typos in the addresses
+ * themselves ("Clevevland", "Timiami Trail") are left exactly as they are: they
+ * are what the source says, and a venue is shown to a bidder as something to
+ * confirm rather than as something we have checked.
+ */
+function cell(v: string | undefined): string | null {
+  const s = (v ?? "")
+    .replace(/&(amp;)?nbsp;?/gi, " ")
+    .replace(/\s+/g, " ")
+    .replace(/(?:\s*,\s*)+$/, "")
+    .trim();
+  return s || null;
+}
 
 const APPLY = process.argv.includes("--apply");
 const DIR = "downloads";
@@ -101,6 +152,8 @@ async function main() {
       state: counties.state,
       sourceUrl: auctions.sourceUrl,
       startTime: auctions.startTime,
+      overrides: auctions.operatorOverrides,
+      logistics: auctions.logistics,
       lotCount: auctions.lotCount,
     })
     .from(auctions)
@@ -120,11 +173,13 @@ async function main() {
 
   let matched = 0, betterUrl = 0, wroteOverride = 0, noAdapter = 0;
   let timeFilled = 0, declaredNoList = 0;
+  let venueOnline = 0, venuePhysical = 0, contactFilled = 0, logisticsWritten = 0;
   const examples: string[] = [];
   /* Where the counties are actually publishing now, counted. */
   const targets = new Map<string, number>();
   const byAdapter = new Map<string, number>();
   const blocked = new Map<string, number>();
+  const badTimes = new Map<string, number>();
   let blockedByPolicy = 0;
 
   for (const r of rows) {
@@ -175,10 +230,72 @@ async function main() {
       }
     }
 
-    if (!hit.startTime && startTime) {
-      timeFilled++;
+    /*
+     * Venue and contact, as one object with its provenance attached.
+     *
+     * Rewritten wholesale rather than merged: every key in it comes from this
+     * one spreadsheet row, so a merge could only ever splice a new venue onto a
+     * stale contact. `importedAt` makes a re-import visible instead of silent.
+     */
+    const venueText = cell(r[7]);
+    const contact = {
+      name: cell(r[8]) ?? undefined,
+      phone: cell(r[9]) ?? undefined,
+      fax: cell(r[10]) ?? undefined,
+      email: cell(r[11]) ?? undefined,
+    };
+    const hasContact = Boolean(contact.name || contact.phone || contact.email);
+
+    if (venueText || hasContact) {
+      const online = /^online\b/i.test(venueText ?? "");
+      if (venueText && online) venueOnline++;
+      else if (venueText) venuePhysical++;
+      if (hasContact) contactFilled++;
+      logisticsWritten++;
+
+      const logistics: AuctionLogistics = {
+        ...(venueText
+          ? { venue: { text: venueText, kind: online ? "online" : ("in_person" as const) } }
+          : {}),
+        ...(hasContact ? { contact } : {}),
+        source: SOURCE,
+        importedAt: new Date().toISOString().slice(0, 10),
+      };
       if (APPLY) {
-        await db.update(auctions).set({ startTime }).where(eq(auctions.id, hit.id));
+        await db.update(auctions).set({ logistics }).where(eq(auctions.id, hit.id));
+      }
+    }
+
+    /*
+     * The start time goes in as an operator correction, not as a column write.
+     *
+     * `upsertAuction` sets `start_time` from
+     * `coalesce(operator_overrides->>'startTime', excluded.start_time)` on every
+     * crawl. Writing the column directly looked like it worked and was gone by
+     * the next morning — the failure `lib/admin/auction-overrides.ts` exists to
+     * stop. Validated through the same allow-list the admin form uses, because
+     * an out-of-domain value here raises inside that upsert and would retire the
+     * auction from every future crawl.
+     *
+     * Only where the county has published nothing: a real sale notice outranks a
+     * spreadsheet, and where both exist the county is the one to believe.
+     */
+    if (!hit.startTime && startTime && !(hit.overrides ?? {}).startTime) {
+      const problems = validateOverrides({ startTime });
+      if (problems.length) {
+        badTimes.set(startTime, (badTimes.get(startTime) ?? 0) + 1);
+      } else {
+        timeFilled++;
+        if (APPLY) {
+          await db
+            .update(auctions)
+            .set({
+              operatorOverrides: { ...(hit.overrides ?? {}), startTime },
+              editedBy: "sale-calendar-import",
+              editedAt: new Date(),
+            })
+            .where(eq(auctions.id, hit.id));
+        }
       }
     }
   }
@@ -187,9 +304,23 @@ async function main() {
   console.log(`  a better list URL than ours      : ${betterUrl}`);
   console.log(`    of those, no known adapter     : ${noAdapter}  (skipped — nothing to override)`);
   console.log(`    of those, policy says no       : ${blockedByPolicy}  (capture-only or robots-denied)`);
-  console.log(`  start times we were missing      : ${timeFilled}`);
+  console.log(`  start times we were missing      : ${timeFilled}  (as operator overrides)`);
+  console.log(`  venue + contact to write         : ${logisticsWritten}`);
+  console.log(`    of those, an online sale       : ${venueOnline}`);
+  console.log(`    of those, a physical venue     : ${venuePhysical}`);
+  console.log(`    carrying a named contact       : ${contactFilled}`);
   console.log(`  rows declaring no list exists    : ${declaredNoList}`);
-  console.log(APPLY ? `\nwrote ${wroteOverride} source override(s)` : `\nreport only — pass --apply to write`);
+  console.log(
+    APPLY
+      ? `\nwrote ${wroteOverride} source override(s) and ${logisticsWritten} logistics row(s)`
+      : `\nreport only — pass --apply to write`,
+  );
+  if (badTimes.size) {
+    console.log("\nstart times the override validator refused:");
+    for (const [t, n] of [...badTimes].sort((a, b) => b[1] - a[1])) {
+      console.log(`  ${String(n).padStart(3)}  ${JSON.stringify(t)}`);
+    }
+  }
   if (examples.length) {
     console.log("\nbetter URLs:");
     for (const e of examples) console.log("  " + e);

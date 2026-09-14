@@ -179,6 +179,45 @@ export const counties = pgTable(
 // Auctions and lots
 // ---------------------------------------------------------------------------
 
+/**
+ * Where a sale is held and who to ring about it, from a source that is not an
+ * adapter.
+ *
+ * Every other fact on an auction arrives from the county through an adapter, so
+ * `upsertAuction` can treat the source as authoritative and overwrite. These do
+ * not: no adapter reads a venue or a named contact off a county page today, and
+ * the operator's sale calendar carries both for 455 sales. Kept in one object
+ * rather than four columns so the values and the provenance that qualifies them
+ * cannot drift apart — a venue without `source` is a street address nobody can
+ * weigh, and this codebase's recurring bug is two copies of one fact
+ * disagreeing.
+ *
+ * `venue.kind` is stored rather than re-derived from the text at each read.
+ * "Online auction" and "River Center Gym, 1800 Citizens Drive, Benton" are
+ * different claims with different consequences if wrong, and every consumer
+ * would otherwise have to rediscover which it is holding.
+ */
+export interface AuctionLogistics {
+  venue?: {
+    /** As written on the calendar, entity junk and trailing commas removed. */
+    text: string;
+    kind: "online" | "in_person";
+  };
+  /**
+   * The person the calendar names for this sale.
+   *
+   * A county employee's direct line and work address. Held for the operator
+   * console, which is token-gated; `lib/cape/components.ts` deliberately keeps
+   * the name and number out of the checklist detail, because that detail is
+   * handed verbatim to the narrator and ends up spoken in a public video.
+   */
+  contact?: { name?: string; phone?: string; fax?: string; email?: string };
+  /** What supplied all of the above. Not optional — an unattributed venue is noise. */
+  source: string;
+  /** ISO date of the import that wrote this. */
+  importedAt: string;
+}
+
 export const auctions = pgTable(
   "auctions",
   {
@@ -270,6 +309,17 @@ export const auctions = pgTable(
      * destroyed, so a correction is always reversible to the source of truth.
      */
     operatorOverrides: jsonb("operator_overrides").$type<Record<string, unknown>>(),
+    /**
+     * Venue and contact, from an operator source. See `AuctionLogistics`.
+     *
+     * Absent from `upsertAuction`'s `set` on purpose, which is what makes it
+     * survive: the upsert only writes the columns an adapter supplies, so a
+     * column no adapter supplies is never reverted by a crawl. If an adapter
+     * ever does read a venue off a county page, add it there with the same
+     * `coalesce(operator_overrides -> …, excluded.…)` shape as the rest — the
+     * county would then outrank the spreadsheet, which is the right order.
+     */
+    logistics: jsonb("logistics").$type<AuctionLogistics>(),
     editedBy: text("edited_by"),
     editedAt: timestamp("edited_at", { withTimezone: true }),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),

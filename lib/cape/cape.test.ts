@@ -10,6 +10,7 @@ import { assessIntake, INTAKE_KEYS, type IntakeInput } from "./intake";
 import { classifySource, TIER_RANK } from "./sources";
 import { productionDeadline } from "./deadline";
 import { buildPackage } from "./components";
+import { stripAbsenceBullets } from "./script";
 import {
   csvField,
   exportFilename,
@@ -405,3 +406,86 @@ assert(
 );
 
 console.log("cape propstream: all assertions passed");
+
+// ---------------------------------------------------------------------------
+// What the narrator is allowed to hear
+// ---------------------------------------------------------------------------
+/*
+ * Ed watched the Fulton recut and asked why a slide still read "Assessor/GIS
+ * not in file" after the prompt had been told never to list what the briefing
+ * does not cover. It read that way because the FACTS handed to the model were,
+ * line by line, an inventory of absence — `verify` items whose whole content
+ * was that this database holds nothing. An instruction in a prompt cannot
+ * outvote the evidence beneath it, so both halves are asserted here: the
+ * evidence no longer contains the absences, and a guard catches them anyway.
+ */
+
+/* The silent/audible split is structural, not a matter of wording. */
+const two = pkg.components.find((c) => c.n === 2)!;
+const four2 = pkg.components.find((c) => c.n === 4)!;
+
+const item = (c: (typeof pkg.components)[number], label: string) =>
+  c.items.find((i) => i.label === label)!;
+
+/* Coverage absences are counted against the score and never spoken. */
+for (const label of ["Assessor records", "GIS mapping", "Zoning", "Location / mapping"]) {
+  const it = item(four2, label);
+  if (it.state === "verify") {
+    assert(it.silent === true, `${label} is silent when empty`);
+  }
+}
+assert(
+  four2.counts.verify > 0 && four2.score < 1,
+  "silencing does not quietly improve the score",
+);
+
+/* Sale-day logistics are the exception: unconfirmed, but the viewer can act. */
+const time = item(two, "Auction time");
+if (time.state === "verify") {
+  assert(!time.silent, "an unconfirmed start time still reaches the narrator");
+  assert(
+    /confirm/i.test(time.detail ?? "") && !/^no\b/i.test(time.detail ?? ""),
+    `and does so as an instruction, got ${time.detail}`,
+  );
+}
+
+/* The guard, against the bullets that actually shipped and ones that must not
+   be swept up with them. "No post-sale redemption" is a fact about the county;
+   "No county GIS link" is a fact about us. */
+const slide = (b: string) =>
+  ({
+    title: "t",
+    keyTakeaway: "k",
+    sections: [
+      { heading: "h", narration: "n", slide: { headline: "H", bullets: [b], figure: null, figureLabel: null } },
+    ],
+  }) as never;
+
+for (const b of [
+  "Assessor/GIS not in file",
+  "No county GIS link",
+  "No coordinates on parcels",
+  "Zoning data absent",
+  "Payment deadlines unverified",
+  "Registration not verified",
+  "Lien survival not researched",
+  "Source unavailable",
+]) {
+  assert(stripAbsenceBullets(slide(b)).length === 1, `dropped: ${b}`);
+}
+
+for (const b of [
+  "No post-sale redemption",
+  "No clear title at hammer",
+  "No deposit required",
+  "No immediate control",
+  "No barment before 365 days",
+  "365 days + 20% first tier",
+  "100% have parcel numbers",
+  "Confirm start time",
+  "Online auction",
+]) {
+  assert(stripAbsenceBullets(slide(b)).length === 0, `kept: ${b}`);
+}
+
+console.log("cape narration scope: all assertions passed");
