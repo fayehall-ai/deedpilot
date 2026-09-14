@@ -69,9 +69,13 @@ export const CapeScriptSchema = z.object({
   title: z.string().describe("Video title, e.g. 'Cobb County, Georgia — November 3 Tax Deed Sale'"),
   sections: z
     .array(SectionSchema)
-    .min(4)
-    .max(9)
-    .describe("Ordered. Opening, the sale mechanics, the risks, the inventory, and a close."),
+    .min(7)
+    .max(14)
+    .describe(
+      "Ordered. Opening, how the sale type works here, redemption and title, what the deed " +
+        "conveys, before sale day, the inventory, one section per submarket on file, what " +
+        "still needs verifying, and a close.",
+    ),
   /** The one thing a viewer should remember. */
   keyTakeaway: z.string().describe("One sentence"),
 });
@@ -401,14 +405,29 @@ export async function generateCapeScript(
     system: SYSTEM,
     schema: CapeScriptSchema,
     schemaName: "CapeScript",
-    maxTokens: 4000,
+    maxTokens: 9000,
     prompt:
       `Write the narration script and slide plan for the county auction briefing video.\n\n` +
-      `Open by naming the county, the state and the sale date. Cover: how this sale type works ` +
-      `in this state, redemption and title exposure, what a bidder must do before sale day ` +
-      `(registration and deposit), what the inventory looks like, and what still needs ` +
-      `verifying. Close on the single most important point.\n\n` +
-      `Aim for four to nine sections and roughly two to four minutes of speech in total.\n\n` +
+      `Open by naming the county, the state and the sale date.\n\n` +
+      `Then work through, one section each and in this order:\n` +
+      `  - How this sale type works in this state, naming the governing statute.\n` +
+      `  - Redemption: how long, what it costs the redeemer, and when it ends.\n` +
+      `  - What the deed conveys, and what curative work is still required after it.\n` +
+      `  - Before sale day: registration, deposit, payment method and deadlines.\n` +
+      `  - The inventory in aggregate — how many parcels, and how well characterised they are.\n` +
+      `  - One section for EACH submarket on file, if any. Name it, and say what kind of\n` +
+      `    place it is and what that implies for a bidder. These are the most useful\n` +
+      `    sections in the briefing; do not compress several submarkets into one.\n` +
+      `  - What still needs verifying with the county before anyone acts.\n` +
+      `  - Close on the single most important point.\n\n` +
+      `LENGTH. The whole script must come to about NINE HUNDRED spoken words — five ` +
+      `minutes at the pace this is read. That is about SEVENTY-FIVE TO NINETY WORDS PER ` +
+      `SECTION across ten to twelve sections. Keep to it; a briefing that runs nine minutes ` +
+      `is not watched, and one that runs three is thin.\n\n` +
+      `Within that budget, go deeper rather than wider: explain the mechanism behind each ` +
+      `fact, what it means for a bidder's money and timeline, and what the consequence is ` +
+      `of getting it wrong. A section that states a fact and stops is too short. Never pad ` +
+      `by repeating a fact you have already given.\n\n` +
       `Every number you speak must appear in the FACTS below.\n\n` +
       `FACTS\n=====\n${facts}\n`,
   });
@@ -427,6 +446,12 @@ export function estimateDurationSec(script: CapeScript): number {
     (n, s) => n + s.narration.trim().split(/\s+/).filter(Boolean).length,
     0,
   );
-  // ~150 wpm is a calm narration pace; ElevenLabs lands near this by default.
-  return Math.round((words / 150) * 60);
+  /*
+   * 180 wpm, measured rather than assumed. This read 150 and the estimate ran
+   * consistently long: a Fulton script of 744 words was predicted at 298s and
+   * came back as 247s of ElevenLabs audio, which is 180.7 wpm. The constant
+   * matters because it is what the length instruction in the prompt is sized
+   * against — at 150 a five-minute brief was commissioned and four arrived.
+   */
+  return Math.round((words / 180) * 60);
 }

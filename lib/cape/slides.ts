@@ -134,35 +134,87 @@ export function wrapText(text: string, fontSize: number, maxWidth: number): stri
  * layout leaves clear — content headlines begin at y=260.
  */
 export const BRAND_NAME = "THE TAX DEED COLLECTIVE";
-export const BRAND_URLS = ["www.thetaxdeedcollective.com", "map.thetaxdeedcollective.com"];
+export const BRAND_URL = "www.thetaxdeedcollective.com";
 
-export function brandLockupSvg(theme: SlideTheme, logoDataUri?: string | null): string {
-  const hasLogo = Boolean(logoDataUri);
+/** Gold diamond, the bullet marker the reference briefings use. */
+function diamond(cx: number, cy: number, r: number, fill: string): string {
+  return `<path d="M ${cx} ${cy - r} L ${cx + r} ${cy} L ${cx} ${cy + r} L ${cx - r} ${cy} Z" fill="${fill}"/>`;
+}
+
+/**
+ * The frame every slide carries: mark, address, and the rule along the bottom.
+ *
+ * Placement follows the reference briefing — the mark rides the top right,
+ * clear of the text column, which alternates sides. The address sits centred on
+ * the bottom edge above a gold hairline, where it is legible without competing
+ * with the headline.
+ */
+export function chromeSvg(theme: SlideTheme, logoDataUri?: string | null): string {
+  const { width: W, height: H } = theme;
   const parts: string[] = [];
 
-  /*
-   * The artwork already carries the words "TAX DEED COLLECTIVE", so the text
-   * wordmark is drawn only when there is no logo to draw. Setting them both
-   * would say the name twice in the same two inches of screen.
-   */
-  if (hasLogo) {
+  if (logoDataUri) {
+    /*
+     * A plate under the mark, because the text column alternates sides and the
+     * mark does not: on a left-aligned slide it sits over the bright half of
+     * the photograph, and the logo's own gold lettering disappears into a sky.
+     * The reference deck avoids this by setting the brand as white type, which
+     * survives anything; artwork with its own colours needs the ground given
+     * to it.
+     */
+    const size = 116;
+    const px = 22;
     parts.push(
-      `<image href="${logoDataUri}" x="160" y="58" width="96" height="96" preserveAspectRatio="xMidYMid meet"/>`,
+      `<rect x="${W - 160 - size - px}" y="${52 - px / 2}" width="${size + px * 2}" height="${size + px}" rx="16" fill="${theme.background}" opacity="0.62"/>`,
+      `<image href="${logoDataUri}" x="${W - 160 - size}" y="52" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet"/>`,
     );
   } else {
     parts.push(
-      `<text x="160" y="104" font-family="${theme.fontFamily}" font-size="25" font-weight="700" letter-spacing="2.4" fill="${theme.accent}">${esc(BRAND_NAME)}</text>`,
+      diamond(W - 392, 92, 9, theme.accent),
+      `<text x="${W - 160}" y="101" text-anchor="end" font-family="${theme.fontFamily}" font-size="24" font-weight="600" letter-spacing="4.2" fill="${theme.text}">${esc(BRAND_NAME)}</text>`,
     );
   }
 
-  const x = hasLogo ? 276 : 160;
-  const firstY = hasLogo ? 106 : 140;
-  BRAND_URLS.forEach((url, i) => {
-    parts.push(
-      `<text x="${x}" y="${firstY + i * 32}" font-family="${theme.fontFamily}" font-size="23" letter-spacing="0.5" fill="${i === 0 ? theme.text : theme.muted}">${esc(url)}</text>`,
-    );
-  });
+  parts.push(
+    `<text x="${W / 2}" y="${H - 34}" text-anchor="middle" font-family="${theme.fontFamily}" font-size="26" letter-spacing="1.2" fill="${theme.text}" opacity="0.78">${esc(BRAND_URL)}</text>`,
+    `<rect x="0" y="${H - 6}" width="${W}" height="6" fill="${theme.accent}"/>`,
+  );
   return parts.join("\n  ");
+}
+
+/**
+ * Photograph behind, gradient over, text on top.
+ *
+ * The reference briefings never show a flat panel: every slide is a photograph
+ * with a directional scrim, and the text sits on whichever side the scrim is
+ * darkest. Alternating that side down the deck is what stops eleven sections
+ * reading as one long slab.
+ *
+ * With no photograph the gradient still runs, over the flat ground, so the
+ * composition holds rather than collapsing to a different-looking slide.
+ */
+function backdropSvg(
+  theme: SlideTheme,
+  id: string,
+  side: "left" | "right",
+  photo?: CountyPhoto | null,
+): string {
+  const { width: W, height: H } = theme;
+  const stops =
+    side === "left"
+      ? `<stop offset="0%" stop-color="${theme.background}" stop-opacity="0.94"/>
+      <stop offset="52%" stop-color="${theme.background}" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="${theme.background}" stop-opacity="0.14"/>`
+      : `<stop offset="0%" stop-color="${theme.background}" stop-opacity="0.14"/>
+      <stop offset="48%" stop-color="${theme.background}" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="${theme.background}" stop-opacity="0.94"/>`;
+
+  return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">
+      ${stops}
+    </linearGradient></defs>
+  <rect width="${W}" height="${H}" fill="${theme.background}"/>
+  ${photo ? `<image href="${photo.dataUri}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>` : ""}
+  <rect width="${W}" height="${H}" fill="url(#${id})"/>`;
 }
 
 /**
@@ -171,15 +223,13 @@ export function brandLockupSvg(theme: SlideTheme, logoDataUri?: string | null): 
  * The narration is spoken and the slide is read. The prompt's instruction to
  * "expand symbols and abbreviations" belongs only to the first, and it reached
  * both: 417 of 487 scripts put lines like "August seventeenth, two thousand
- * twenty-six" and "Three hundred sixty-five day window" on screen, where they
- * read as a transcription error rather than as design.
+ * twenty-six" and "Three hundred sixty-five day window" on screen.
  *
  * Three targeted rules, not a general conversion. Running `spokenToDigits`
  * across slide prose was the first attempt and it made the copy worse — it is
- * case-sensitive by design, because `verifyNarration` lowercases before
- * calling it, so "Three hundred sixty-five" became "Three 165"; and it reads
- * ordinals as quantities, so "first tier" became "1 tier". A slide is prose
- * with a few figures in it, and only those figures should change.
+ * case-sensitive by design, because `verifyNarration` lowercases before calling
+ * it, so "Three hundred sixty-five" became "Three 165"; and it reads ordinals
+ * as quantities, so "first tier" became "1 tier". Only figures may change.
  */
 const MONTHS =
   "January|February|March|April|May|June|July|August|September|October|November|December";
@@ -189,32 +239,37 @@ export function writtenForm(text: string): string {
   const num = (phrase: string) => spokenToDigits(phrase.toLowerCase()).trim();
   const WORDS = NUMBER_WORD.source;
 
-  return (
-    text
-      /*
-       * A section number, dictated. "forty-eight dash four dash forty" is
-       * O.C.G.A. § 48-4-40; nothing in ordinary prose is joined by `dash`.
-       */
-      .replace(
-        new RegExp(`(?:${WORDS})(?:[\\s-]+(?:${WORDS}))*(?:\\s+dash\\s+(?:${WORDS})(?:[\\s-]+(?:${WORDS}))*)+`, "gi"),
-        (run) => run.split(/\s+dash\s+/i).map(num).join("-"),
-      )
-      /* A date. The month is what marks the ordinal as a day rather than a rank. */
-      .replace(
-        new RegExp(`\\b(${MONTHS})\\s+((?:${WORDS})(?:[\\s-]+(?:${WORDS}))*)(,\\s*((?:${WORDS})(?:[\\s-]+(?:${WORDS}))*))?`, "gi"),
-        (_m, month: string, day: string, _c: string, year: string) =>
-          `${month} ${num(day)}${year ? `, ${num(year)}` : ""}`,
-      )
-      /* A span. Only when the run is followed by the unit it counts. */
-      .replace(
-        new RegExp(`\\b((?:${WORDS})(?:[\\s-]+(?:${WORDS}))*)\\s+(day|month|year|percent)\\b`, "gi"),
-        (_m, run: string, unit: string) => {
-          const n = num(run);
-          if (!/^\d+$/.test(n)) return _m;
-          return unit.toLowerCase() === "percent" ? `${n} percent` : `${n}-${unit.toLowerCase()}`;
-        },
-      )
-  );
+  return text
+    .replace(
+      new RegExp(`(?:${WORDS})(?:[\\s-]+(?:${WORDS}))*(?:\\s+dash\\s+(?:${WORDS})(?:[\\s-]+(?:${WORDS}))*)+`, "gi"),
+      (run) => run.split(/\s+dash\s+/i).map(num).join("-"),
+    )
+    .replace(
+      new RegExp(`\\b(${MONTHS})\\s+((?:${WORDS})(?:[\\s-]+(?:${WORDS}))*)(,\\s*((?:${WORDS})(?:[\\s-]+(?:${WORDS}))*))?`, "gi"),
+      (_m, month: string, day: string, _c: string, year: string) =>
+        `${month} ${num(day)}${year ? `, ${num(year)}` : ""}`,
+    )
+    .replace(
+      new RegExp(`\\b((?:${WORDS})(?:[\\s-]+(?:${WORDS}))*)\\s+(day|month|year|percent)\\b`, "gi"),
+      (_m, run: string, unit: string) => {
+        const n = num(run);
+        if (!/^\d+$/.test(n)) return _m;
+        return unit.toLowerCase() === "percent" ? `${n} percent` : `${n}-${unit.toLowerCase()}`;
+      },
+    );
+}
+
+export interface CountyPhoto {
+  dataUri: string;
+  caption: string;
+  credit: string;
+}
+
+/** A gold eyebrow over a short rule — the reference deck's section marker. */
+function eyebrowSvg(theme: SlideTheme, label: string, x: number, anchor: "start" | "end"): string {
+  const ruleX = anchor === "end" ? x - 116 : x;
+  return `<text x="${x}" y="188" text-anchor="${anchor}" font-family="${theme.fontFamily}" font-size="27" font-weight="600" letter-spacing="5.4" fill="${theme.accent}">${esc(label.toUpperCase())}</text>
+  <rect x="${ruleX}" y="212" width="116" height="5" fill="${theme.accent}" rx="2"/>`;
 }
 
 /** The title card. */
@@ -223,130 +278,70 @@ export function titleSlideSvg(
   subtitle: string,
   theme: SlideTheme = DEFAULT_THEME,
   logoDataUri?: string | null,
+  photo?: CountyPhoto | null,
 ): string {
   const { width: W, height: H } = theme;
-  const titleLines = wrapText(title, 86, W - 320).slice(0, 3);
-  const startY = H / 2 - (titleLines.length - 1) * 55 - 20;
+  const titleLines = wrapText(writtenForm(title), 82, W * 0.52).slice(0, 3);
+  let y = 470;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <rect width="${W}" height="${H}" fill="${theme.background}"/>
-  <rect x="0" y="0" width="14" height="${H}" fill="${theme.accent}"/>
-  ${brandLockupSvg(theme, logoDataUri)}
-  ${titleLines
-    .map(
-      (l, i) =>
-        `<text x="160" y="${startY + i * 110}" font-family="${theme.fontFamily}" font-size="86" font-weight="700" fill="${theme.text}">${esc(l)}</text>`,
-    )
-    .join("\n  ")}
-  <text x="160" y="${startY + titleLines.length * 110 + 40}" font-family="${theme.fontFamily}" font-size="38" fill="${theme.accent}">${esc(subtitle)}</text>
-  <text x="160" y="${H - 90}" font-family="${theme.fontFamily}" font-size="28" fill="${theme.muted}">County auction briefing</text>
-</svg>`;
+  const parts: string[] = [
+    backdropSvg(theme, "t", "left", photo),
+    eyebrowSvg(theme, "County auction briefing", 160, "start"),
+  ];
+  for (const line of titleLines) {
+    parts.push(
+      `<text x="160" y="${y}" font-family="${theme.fontFamily}" font-size="82" font-weight="700" fill="${theme.text}">${esc(line)}</text>`,
+    );
+    y += 100;
+  }
+  parts.push(
+    `<text x="160" y="${y + 26}" font-family="${theme.fontFamily}" font-size="34" fill="${theme.text}" opacity="0.85">${esc(writtenForm(subtitle))}</text>`,
+    chromeSvg(theme, logoDataUri),
+  );
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">\n  ${parts.join("\n  ")}\n</svg>`;
 }
 
-/**
- * The county photograph, on its own slide after the title.
- *
- * ## Why the attribution is part of the frame
- *
- * Every photograph here is used under a licence that asks for credit, and CC
- * BY asks for it as a condition rather than a courtesy. Rendering it into the
- * slide is the only placement that survives the thing being a video: there is
- * no caption field, no alt text and no page around it, so a credit that lives
- * anywhere else does not travel with the work. `data/county-photos.json`
- * carries the string; this draws it.
- *
- * ## Why full bleed behind a gradient
- *
- * Courthouse photographs are framed for a building, not for a 16:9 slide, so
- * they are cropped to fill rather than letterboxed into bars. The gradient is
- * what keeps the caption readable over a sky in one county and a dark stone
- * facade in the next.
- */
-export interface CountyPhoto {
-  dataUri: string;
-  caption: string;
-  credit: string;
-}
-
-export function photoSlideSvg(
-  photo: CountyPhoto,
-  theme: SlideTheme = DEFAULT_THEME,
-  logoDataUri?: string | null,
-): string {
-  const { width: W, height: H } = theme;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <defs>
-    <linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${theme.background}" stop-opacity="0"/>
-      <stop offset="55%" stop-color="${theme.background}" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="${theme.background}" stop-opacity="0.95"/>
-    </linearGradient>
-  </defs>
-  <rect width="${W}" height="${H}" fill="${theme.background}"/>
-  <image href="${photo.dataUri}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
-  <rect width="${W}" height="${H}" fill="url(#scrim)"/>
-  <rect x="0" y="0" width="14" height="${H}" fill="${theme.accent}"/>
-  ${brandLockupSvg(theme, logoDataUri)}
-  <text x="160" y="${H - 132}" font-family="${theme.fontFamily}" font-size="54" font-weight="700" fill="${theme.text}">${esc(photo.caption)}</text>
-  <text x="160" y="${H - 80}" font-family="${theme.fontFamily}" font-size="24" fill="${theme.muted}">${esc(photo.credit)}</text>
-</svg>`;
-}
-
-/** A content slide: headline, up to four bullets, and an optional large figure. */
+/** A content slide: eyebrow, headline, up to four bullets, over a photograph. */
 export function contentSlideSvg(
   slide: CapeSection["slide"],
   theme: SlideTheme = DEFAULT_THEME,
   logoDataUri?: string | null,
+  photo?: CountyPhoto | null,
+  side: "left" | "right" = "left",
+  eyebrow = "",
+  id = "c",
 ): string {
   const { width: W, height: H } = theme;
-  const hasFigure = Boolean(slide.figure);
-  // The figure occupies the right third, so text wraps into what is left.
-  const textWidth = hasFigure ? W - 760 : W - 320;
+  const col = W * 0.52;
+  const anchor = side === "left" ? "start" : "end";
+  const x = side === "left" ? 160 : W - 160;
 
-  const headlineLines = wrapText(writtenForm(slide.headline), 64, textWidth).slice(0, 2);
-  let y = 260;
+  const parts: string[] = [backdropSvg(theme, id, side, photo)];
+  if (eyebrow) parts.push(eyebrowSvg(theme, eyebrow, x, anchor));
 
-  const parts: string[] = [
-    `<rect width="${W}" height="${H}" fill="${theme.background}"/>`,
-    `<rect x="0" y="0" width="14" height="${H}" fill="${theme.accent}"/>`,
-    brandLockupSvg(theme, logoDataUri),
-  ];
-
-  for (const line of headlineLines) {
+  let y = 330;
+  for (const line of wrapText(writtenForm(slide.headline), 70, col).slice(0, 2)) {
     parts.push(
-      `<text x="160" y="${y}" font-family="${theme.fontFamily}" font-size="64" font-weight="700" fill="${theme.text}">${esc(line)}</text>`,
+      `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${theme.fontFamily}" font-size="70" font-weight="700" fill="${theme.text}">${esc(line)}</text>`,
     );
-    y += 84;
+    y += 90;
   }
 
-  parts.push(
-    `<rect x="160" y="${y - 20}" width="120" height="5" fill="${theme.accent}" rx="2"/>`,
-  );
-  y += 80;
-
+  y += 44;
   for (const bullet of slide.bullets.slice(0, 4)) {
-    const lines = wrapText(writtenForm(bullet), 38, textWidth - 60).slice(0, 2);
-    parts.push(`<circle cx="176" cy="${y - 12}" r="7" fill="${theme.accent}"/>`);
+    const lines = wrapText(writtenForm(bullet), 34, col - 70).slice(0, 2);
+    const markX = side === "left" ? x + 14 : x - 14;
+    parts.push(diamond(markX, y - 12, 10, theme.accent));
     for (const [i, line] of lines.entries()) {
+      const tx = side === "left" ? x + 54 : x - 54;
       parts.push(
-        `<text x="212" y="${y + i * 50}" font-family="${theme.fontFamily}" font-size="38" fill="${i === 0 ? theme.text : theme.muted}">${esc(line)}</text>`,
+        `<text x="${tx}" y="${y + i * 46}" text-anchor="${anchor}" font-family="${theme.fontFamily}" font-size="34" fill="${theme.text}" opacity="${i === 0 ? 1 : 0.82}">${esc(line)}</text>`,
       );
     }
-    y += lines.length * 50 + 34;
+    y += lines.length * 46 + 30;
   }
 
-  if (slide.figure) {
-    const figureLines = wrapText(writtenForm(slide.figureLabel ?? ""), 26, 460).slice(0, 3);
-    parts.push(
-      `<rect x="${W - 620}" y="300" width="460" height="360" rx="28" fill="${theme.surface}"/>`,
-      `<text x="${W - 390}" y="480" text-anchor="middle" font-family="${theme.fontFamily}" font-size="${slide.figure.length > 7 ? 66 : 96}" font-weight="700" fill="${theme.accent}">${esc(writtenForm(slide.figure))}</text>`,
-      ...figureLines.map(
-        (l, i) =>
-          `<text x="${W - 390}" y="${540 + i * 34}" text-anchor="middle" font-family="${theme.fontFamily}" font-size="26" fill="${theme.muted}">${esc(l)}</text>`,
-      ),
-    );
-  }
-
+  parts.push(chromeSvg(theme, logoDataUri));
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">\n  ${parts.join("\n  ")}\n</svg>`;
 }
 
@@ -357,94 +352,8 @@ export interface RenderedSlide {
   durationSec: number;
 }
 
-/**
- * Rasterise every slide to PNG.
- *
- * `sharp` is imported dynamically so that merely importing this module — which
- * the CAPE checklist does, to report whether a video exists — does not load a
- * native binary. The checklist runs on every page render; the encoder runs on a
- * queue.
- */
-export async function renderSlides(
-  script: CapeScript,
-  subtitle: string,
-  outDir: string,
-  sectionDurations: number[],
-  theme: SlideTheme = DEFAULT_THEME,
-  photos: CountyPhoto[] = [],
-  logoDataUri?: string | null,
-): Promise<RenderedSlide[]> {
-  const { default: sharp } = await import("sharp");
-  await mkdir(outDir, { recursive: true });
-
-  /*
-   * The photograph takes its seconds from the section it interrupts, so the
-   * narration runs straight through it. Nothing is added to the timeline and
-   * nothing has to be padded: the section's own total is unchanged, it is just
-   * spent on two shots instead of one.
-   */
-  const slots = photoSlots(script.sections.length, photos.length, sectionDurations);
-  const svgs: string[] = [titleSlideSvg(script.title, subtitle, theme, logoDataUri)];
-  const sectionPlan: number[] = [];
-  let taken = 0;
-
-  for (const [i, section] of script.sections.entries()) {
-    const total = sectionDurations[i] ?? 4;
-    const slotAt = slots.indexOf(i);
-    if (slotAt === -1 || !photos[taken]) {
-      svgs.push(contentSlideSvg(section.slide, theme, logoDataUri));
-      sectionPlan.push(total);
-      continue;
-    }
-    const hold = Math.min(PHOTO_HOLD_SEC, total * 0.4);
-    svgs.push(contentSlideSvg(section.slide, theme, logoDataUri));
-    sectionPlan.push(total - hold);
-    svgs.push(photoSlideSvg(photos[taken], theme, logoDataUri));
-    sectionPlan.push(hold);
-    taken++;
-  }
-
-  /*
-   * The title card is held for a fixed beat because nothing is spoken over it.
-   * Every other slide runs exactly as long as its own narration, which is what
-   * keeps picture and voice in step without a timing track.
-   */
-  const durations = [TITLE_HOLD_SEC, ...sectionPlan];
-
-  const out: RenderedSlide[] = [];
-  for (const [i, svg] of svgs.entries()) {
-    const pngPath = path.join(outDir, `slide-${String(i).padStart(3, "0")}.png`);
-    await sharp(Buffer.from(svg)).png().toFile(pngPath);
-    out.push({ index: i, pngPath, durationSec: durations[i] ?? 4 });
-  }
-
-  // Kept next to the frames: when a slide looks wrong, the SVG is the diff.
-  await writeFile(
-    path.join(outDir, "slides.svg.json"),
-    JSON.stringify(
-      svgs.map((v) => v.replace(/href="data:[^"]+"/, 'href="data:…elided…"')),
-      null,
-      1,
-    ),
-    "utf8",
-  );
-
-  return out;
-}
-
 /** Seconds the opening card is held before the first narrated slide. */
 export const TITLE_HOLD_SEC = 3;
-
-/**
- * Longest a photograph is held, and the shortest section worth splitting.
- *
- * A photograph now runs *under* the narration rather than in a silent gap of
- * its own, so its seconds are taken from the section it sits inside. A section
- * shorter than the floor is left alone: cutting eight seconds of speech into
- * two shots reads as a stutter, not as editing.
- */
-export const PHOTO_HOLD_SEC = 5;
-export const MIN_SPLITTABLE_SEC = 11;
 
 /**
  * Total silent lead-in, which `encodeVideo` pads the narration by.
@@ -458,24 +367,65 @@ export function leadInSec(): number {
 }
 
 /**
- * Which sections give up time to a photograph.
+ * Rasterise every slide to PNG.
  *
- * Spread across the middle. The opening section is where the sale is
- * identified and the closing one carries the single point the viewer is meant
- * to leave with; cutting away from either is the one place a photograph costs
- * more than it adds.
+ * `sharp` is imported dynamically so that merely importing this module — which
+ * the CAPE checklist does, to report whether a video exists — does not load a
+ * native binary.
+ *
+ * Photographs are cycled as backdrops rather than given slides of their own.
+ * The reference briefings never cut to a bare photograph and never show a flat
+ * panel; the picture is the ground the text sits on throughout, and the text
+ * column alternates sides so a long deck does not read as one slab.
  */
-export function photoSlots(sectionCount: number, photoCount: number, durations: number[]): number[] {
-  if (photoCount < 1 || sectionCount < 3) return [];
-  const eligible: number[] = [];
-  for (let i = 1; i < sectionCount - 1; i++) {
-    if ((durations[i] ?? 0) >= MIN_SPLITTABLE_SEC) eligible.push(i);
+export async function renderSlides(
+  script: CapeScript,
+  subtitle: string,
+  outDir: string,
+  sectionDurations: number[],
+  theme: SlideTheme = DEFAULT_THEME,
+  photos: CountyPhoto[] = [],
+  logoDataUri?: string | null,
+): Promise<RenderedSlide[]> {
+  const { default: sharp } = await import("sharp");
+  await mkdir(outDir, { recursive: true });
+
+  const pick = (i: number) => (photos.length ? photos[i % photos.length] : null);
+
+  const svgs: string[] = [
+    titleSlideSvg(script.title, subtitle, theme, logoDataUri, pick(0)),
+    ...script.sections.map((sec, i) =>
+      contentSlideSvg(
+        sec.slide,
+        theme,
+        logoDataUri,
+        pick(i + 1),
+        i % 2 === 0 ? "left" : "right",
+        sec.heading,
+        `c${i}`,
+      ),
+    ),
+  ];
+
+  const durations = [TITLE_HOLD_SEC, ...sectionDurations];
+
+  const out: RenderedSlide[] = [];
+  for (const [i, svg] of svgs.entries()) {
+    const pngPath = path.join(outDir, `slide-${String(i).padStart(3, "0")}.png`);
+    await sharp(Buffer.from(svg)).png().toFile(pngPath);
+    out.push({ index: i, pngPath, durationSec: durations[i] ?? 4 });
   }
-  if (eligible.length === 0) return [];
-  const take = Math.min(photoCount, eligible.length);
-  // Evenly spaced through the eligible middle rather than clustered at the front.
-  const step = eligible.length / take;
-  const out: number[] = [];
-  for (let n = 0; n < take; n++) out.push(eligible[Math.floor(n * step)]);
-  return [...new Set(out)];
+
+  // Kept next to the frames: when a slide looks wrong, the SVG is the diff.
+  await writeFile(
+    path.join(outDir, "slides.svg.json"),
+    JSON.stringify(
+      svgs.map((v) => v.replace(/href="data:[^"]+"/g, 'href="data:…elided…"')),
+      null,
+      1,
+    ),
+    "utf8",
+  );
+
+  return out;
 }
