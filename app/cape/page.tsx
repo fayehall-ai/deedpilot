@@ -22,12 +22,22 @@ import { DetailSkeleton } from "@/components/skeleton";
 import { getCapeAuctions, getCapeParcelCoverage } from "@/lib/queries";
 import { buildPackage, type ItemState } from "@/lib/cape/components";
 import { productionStates, publishedVideoUrls } from "@/lib/cape/inputs";
+import {
+  STAGE_LABEL,
+  STAGE_NEXT,
+  STAGE_ORDER,
+  crawledCountyFips,
+  latestCrawlRun,
+  latestProductionRun,
+  stageFor,
+  type CapeStage,
+} from "@/lib/cape/board";
 import { TIER_LABEL, TIER_RANK, type SourceTier } from "@/lib/cape/sources";
 import { getCounty, resolveCountyRule } from "@/lib/atlas";
 import { statuteFor } from "@/lib/deal/statute";
 import directory from "@/data/county-directory.json";
 import { pickLink, type CountyDirectory, type OfficeKind } from "@/lib/directory/onlinesearches";
-import { num, saleDate } from "@/lib/format";
+import { num, parcelsShown, relativeTime, saleDate } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "CAPE — auction intake and source verification",
@@ -93,12 +103,16 @@ async function Board() {
    * every overdue badge at build time.
    */
   await connection();
-  const [rows, coverage, productions, videoUrls] = await Promise.all([
-    getCapeAuctions(),
-    getCapeParcelCoverage(),
-    productionStates(),
-    publishedVideoUrls(),
-  ]);
+  const [rows, coverage, productions, videoUrls, crawledFips, crawlRun, productionRun] =
+    await Promise.all([
+      getCapeAuctions(),
+      getCapeParcelCoverage(),
+      productionStates(),
+      publishedVideoUrls(),
+      crawledCountyFips(),
+      latestCrawlRun(),
+      latestProductionRun(),
+    ]);
   const today = new Date().toISOString().slice(0, 10);
   const empty = { total: 0, withParcelNumber: 0, withAssessed: 0, withAddress: 0, withZoning: 0, withGeo: 0 };
 
@@ -148,8 +162,6 @@ async function Board() {
     }),
   }));
 
-  const ready = assessed.filter((a) => a.cape.releasable);
-
   /* Component-level completion across every upcoming package. */
   const byComponent = assessed.length
     ? assessed[0].cape.components.map((c, idx) => ({
@@ -193,8 +205,49 @@ async function Board() {
   }
   const tiers = [...byTier.entries()].sort((x, y) => TIER_RANK[x[0]] - TIER_RANK[y[0]]);
 
+  /*
+   * Eight weeks, because that is the window a production calendar can still
+   * act on. Component Eight's deadline for a sale further out has not arrived,
+   * so listing it here would bury the sales that are actually due behind
+   * several hundred that are not.
+   */
+  const HORIZON_WEEKS = 8;
+  /*
+   * Derived from `today` rather than from a second `Date.now()`. The clock is
+   * read once, after `connection()` has licensed it; reading it again here is
+   * an impure call in a render and React's lint rule rejects it outright.
+   */
+  const horizonCursor = new Date(`${today}T00:00:00Z`);
+  horizonCursor.setUTCDate(horizonCursor.getUTCDate() + HORIZON_WEEKS * 7);
+  const horizonEnd = horizonCursor.toISOString().slice(0, 10);
+  const inHorizon = assessed.filter((a) => a.row.saleDate <= horizonEnd);
+
+  const stages = new Map<string, CapeStage>();
+  for (const a of inHorizon) {
+    stages.set(
+      a.row.id,
+      stageFor({
+        parcels: a.row.lotCount,
+        production: productions[a.row.id],
+        countyCrawled: crawledFips.has(a.row.countyFips),
+      }),
+    );
+  }
+  /*
+   * These sum to `inHorizon.length` by construction — see the note on
+   * `CapeStage`. A funnel whose parts do not add up to the whole cannot answer
+   * the question this section is titled after.
+   */
+  const funnel = STAGE_ORDER.map((stage) => ({
+    stage,
+    n: inHorizon.filter((a) => stages.get(a.row.id) === stage).length,
+  }));
+  const widest = Math.max(1, ...funnel.map((f) => f.n));
+  /* Component Nine's gate, which is a different question from the stage. */
+  const releasable = inHorizon.filter((a) => a.cape.releasable).length;
+
   const byDate = new Map<string, typeof assessed>();
-  for (const a of assessed) {
+  for (const a of inHorizon) {
     const day = byDate.get(a.row.saleDate) ?? [];
     day.push(a);
     byDate.set(a.row.saleDate, day);
@@ -202,37 +255,58 @@ async function Board() {
 
   return (
     <>
-      <div className="mb-10 grid gap-4 sm:grid-cols-3">
-        <Card>
-          <div className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Releasable</div>
-          <div className="tnum font-display mt-2 text-4xl font-medium" style={{ color: "var(--accent)" }}>
-            {num(ready.length)}
-            <span className="text-xl font-normal text-muted"> / {num(assessed.length)}</span>
+      {/* Is what I am looking at current? One line each, nothing more. */}
+      <div className="mb-8 grid gap-3 sm:grid-cols-2">
+        {[
+          { label: "Last crawl", run: crawlRun },
+          { label: "Last production", run: productionRun },
+        ].map(({ label, run }) => (
+          <div key={label} className="rounded-2xl border border-border/70 bg-surface-2 px-5 py-4">
+            <div className="text-sm font-medium uppercase tracking-[0.12em] text-muted">{label}</div>
+            {run ? (
+              <>
+                <div className="tnum mt-1 text-lg font-medium">{relativeTime(run.at)}</div>
+                <div className="mt-0.5 text-base text-muted">{run.detail}</div>
+              </>
+            ) : (
+              <div className="mt-1 text-base text-muted">never run</div>
+            )}
           </div>
-          <p className="mt-2 text-base text-muted">Passes Component Nine&apos;s quality gate</p>
-        </Card>
-        <Card>
-          <div className="text-sm font-medium uppercase tracking-[0.12em] text-muted">Mean package</div>
-          <div className="tnum font-display mt-2 text-4xl font-medium">
-            {assessed.length
-              ? Math.round(
-                  (assessed.reduce((n, a) => n + a.cape.score, 0) / assessed.length) * 100,
-                )
-              : 0}
-            %
-          </div>
-          <p className="mt-2 text-base text-muted">Across the nine components, averaged</p>
-        </Card>
-        <Card>
-          <div className="text-sm font-medium uppercase tracking-[0.12em] text-muted">
-            Government source of record
-          </div>
-          <div className="tnum font-display mt-2 text-4xl font-medium">
-            {num(byTier.get("government")?.parcels ?? 0)}
-          </div>
-          <p className="mt-2 text-base text-muted">parcels from a county office or state agency</p>
-        </Card>
+        ))}
       </div>
+
+      <section className="mb-10">
+        <h2 className="font-display mb-1 text-2xl font-medium">Where we are</h2>
+        <p className="mb-4 text-base text-muted">
+          Every one of the {num(inHorizon.length)} sales in the next {HORIZON_WEEKS} weeks, in
+          exactly one stage. The counts add up to the whole list. {num(releasable)}{" "}
+          pass Component Nine&apos;s quality gate.
+        </p>
+        <Card className="overflow-hidden p-0">
+          <ul className="divide-y divide-border">
+            {funnel.map(({ stage, n }) => (
+              <li key={stage} className="grid gap-2 px-5 py-3.5 sm:grid-cols-[7rem_minmax(0,1fr)_auto] sm:items-center">
+                <div className="tnum text-2xl font-medium" style={n > 0 && (stage === "video" || stage === "script") ? { color: "var(--accent)" } : undefined}>
+                  {num(n)}
+                </div>
+                <div>
+                  <div className="text-base font-medium">{STAGE_LABEL[stage]}</div>
+                  <div className="mt-0.5 text-sm text-muted">{STAGE_NEXT[stage]}</div>
+                </div>
+                <div className="hidden h-2 w-32 overflow-hidden rounded-full bg-surface-2 sm:block">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.round((100 * n) / widest)}%`,
+                      background: stage === "video" || stage === "script" ? "var(--accent)" : "var(--border)",
+                    }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </section>
 
       {/* The work-list: which intake field is missing most often. */}
       {ranked.length > 0 ? (
@@ -328,7 +402,7 @@ async function Board() {
       </section>
 
       <section>
-        <h2 className="font-display mb-4 text-2xl font-medium">Every upcoming sale</h2>
+        <h2 className="font-display mb-4 text-2xl font-medium">The next 8 weeks</h2>
         <div className="space-y-8">
           {[...byDate.entries()].map(([day, group]) => (
             <div key={day}>
@@ -346,7 +420,11 @@ async function Board() {
                         {row.countyName} County, {row.state}
                       </Link>
                       <div className="tnum mt-1 text-base text-muted">
-                        {num(row.lotCount)} parcels
+                        {num(parcelsShown(row).count)}{" "}
+                        {parcelsShown(row).announced ? "announced, not crawled" : "parcels held"}
+                      </div>
+                      <div className="mt-1 text-sm text-muted">
+                        {STAGE_LABEL[stages.get(row.id) ?? "nosource"]}
                       </div>
                     </div>
                     <div>

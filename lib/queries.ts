@@ -565,6 +565,12 @@ export interface CapeAuctionRow {
   platform: string;
   listingKind: string;
   lotCount: number;
+  /**
+   * Parcels the county says it is offering when nothing has crawled the list.
+   * The board must show this rather than `lotCount` 0, or an announced sale of
+   * 2,583 parcels reads as an empty one.
+   */
+  announcedParcelCount: number | null;
   registrationDeadline: Date | null;
   depositDeadline: Date | null;
 }
@@ -592,12 +598,20 @@ export async function getCapeAuctions(): Promise<CapeAuctionRow[]> {
       platform: auctions.platform,
       listingKind: auctions.listingKind,
       lotCount: auctions.lotCount,
+      announcedParcelCount: auctions.announcedParcelCount,
       registrationDeadline: auctions.registrationDeadline,
       depositDeadline: auctions.depositDeadline,
     })
     .from(auctions)
     .innerJoin(counties, eq(counties.fips, auctions.countyFips))
-    .where(and(gte(auctions.saleDate, todayIso()), sql`${auctions.lotCount} >= 0`))
+    /*
+     * The same inventory rule as the producer — see `lib/db/inventory.ts`.
+     * This read `lot_count >= 0`, which admits every row ever written, so the
+     * board listed 848 packages where `cape:plan` offered 488. A production
+     * board and the producer disagreeing about what work exists is the exact
+     * drift that shared module was extracted to end.
+     */
+    .where(and(gte(auctions.saleDate, todayIso()), hasParcels(), isConfirmedInventory()))
     .orderBy(asc(auctions.saleDate), asc(counties.state), asc(counties.name))
     .limit(1000);
 }

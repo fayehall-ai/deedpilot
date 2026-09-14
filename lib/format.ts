@@ -85,6 +85,26 @@ const PLATFORM_LABELS: Record<string, string> = {
   in_person: "In person",
 };
 
+/**
+ * How long ago something happened, at timestamp granularity.
+ *
+ * `relativeDays` answers "which day", which is the right answer for a sale
+ * date and the wrong one for a pipeline run: a crawl that finished two hours
+ * ago and one that finished twenty-two both read as "today", and the whole
+ * reason to show a run time is to tell those apart.
+ */
+export function relativeTime(at: Date | string | null | undefined): string {
+  if (!at) return "";
+  const then = at instanceof Date ? at.getTime() : Date.parse(at);
+  if (!Number.isFinite(then)) return "";
+  const mins = Math.round((Date.now() - then) / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 48) return `${hours}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
+}
+
 export function platformLabel(platform: string | null | undefined): string {
   if (!platform) return "—";
   return PLATFORM_LABELS[platform] ?? platform;
