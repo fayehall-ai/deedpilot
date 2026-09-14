@@ -682,8 +682,20 @@ const OCCASION = [
   new RegExp(`\\b(?:${DAY})\\s+of\\s+(?:${MONTH})\\b`, "i"),
   /\b(?:19|20)\d{2}\b/,
   /\btwo thousand\b/i,
-  /\b\d{1,2}[:.]\d{2}\s*(?:a\.?m|p\.?m)?\b/i,
-  /\b(?:o'clock|a\.?m\.?|p\.?m\.?)\b/i,
+  /*
+   * A time needs a colon, or a meridiem beside it.
+   *
+   * `\d{1,2}[.:]\d{2}` on its own reads a statute citation as a clock: "Wis.
+   * Stat. 75.521" is 75.52, "RCW 84.64" is 84.64, and both were rejected — so
+   * Wisconsin and Washington would have written a county half for every sale
+   * and cached none of them, with the log insisting each one named an occasion.
+   * The dotted form is only a time when something says so.
+   */
+  /\b\d{1,2}:\d{2}\b/,
+  /\b\d{1,2}[:.]\d{2}\s*[ap]\.?m\.?\b/i,
+  /\b(?:\d{1,2}|ten|eleven|twelve)\s*[ap]\.?m\.?\b/i,
+  /\b(?:noon|midnight)\b/i,
+  /\ba\.m\.|\bp\.m\.|\bo'clock\b/i,
   /\bthis (?:sale|auction)\b/i,
   /\b(?:sale day|upcoming sale|this coming|next month)\b/i,
 ];

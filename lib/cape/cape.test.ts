@@ -580,6 +580,36 @@ for (const leak of [
   assert(countyHalfLeak(dirty as never) !== null, `caught as an occasion: ${leak}`);
 }
 
+/*
+ * A statute citation is not a clock. `\d{1,2}[.:]\d{2}` reads "Wis. Stat.
+ * 75.521" as 75.52 and "RCW 84.64" as 84.64, so Wisconsin and Washington would
+ * have written a county half for every sale and cached none of them, the log
+ * insisting each one named an occasion. Same silent-and-total failure as "may".
+ */
+for (const fine of [
+  "Wis. Stat. 75.521, 75.35, 75.69 govern the sale.",
+  "The county may sell at any time under RCW 84.64.",
+  "Sales run under A.C.A. 26-37-202.",
+  "Colorado Revised Statutes sections 39-11-101 through 39-12-113 apply.",
+  "Georgia sells redeemable deeds under O.C.G.A. 48-4-40 through 48-4-48.",
+  "Kentucky certificates fall under KRS 134.128 and KRS 426.530.",
+  "Indiana Code 6-1.1-24 covers delinquent property.",
+]) {
+  const half = { ...cleanHalf, howItWorks: sec("statute", fine) };
+  assert(countyHalfLeak(half as never) === null, `a citation is not a time: ${fine}`);
+}
+
+/* A real time still is one, written any of the ways a narrator says it. */
+for (const clock of [
+  "Bidding opens at 10:00 AM.",
+  "The auction starts at ten a.m.",
+  "Registration closes at 9 a.m. on the day.",
+  "Doors open at noon.",
+]) {
+  const half = { ...cleanHalf, howItWorks: sec("statute", clock) };
+  assert(countyHalfLeak(half as never) !== null, `a time is an occasion: ${clock}`);
+}
+
 /* A bullet is read by the viewer too, so it is checked the same way. */
 const dirtyBullet = { ...cleanHalf, howItWorks: sec("statute", "Liens are sold at auction.", ["October 6 sale"]) };
 assert(countyHalfLeak(dirtyBullet as never) !== null, "an occasion on a slide is caught");
