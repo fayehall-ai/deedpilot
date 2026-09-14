@@ -261,14 +261,39 @@ export async function GET(req: NextRequest) {
      * invocation is torn down with it; a fire-and-forget request would be
      * cancelled in flight, and a chain that silently fails to continue looks
      * exactly like one that finished.
+     *
+     * Retried, because this one request is the entire difference between the
+     * backlog finishing unattended and it stopping in a way nobody can see. A
+     * dropped connection here does not fail loudly, or at all: the queue keeps
+     * its rows, the leases lapse quietly, and from outside a dead chain is
+     * indistinguishable from a completed one. The status is checked rather than
+     * only the promise, since a 401 resolves perfectly happily — that is exactly
+     * what a deploy mid-chain produces, when a link still holds the secret of
+     * the deployment it started on.
+     *
+     * A refusal is not retried. It will be refused again, and the log line is
+     * the useful output.
      */
     waitUntil(
-      fetch(next.toString(), {
-        headers: secret ? { authorization: `Bearer ${secret}` } : {},
-      }).catch(() => {
-        /* Nothing useful to do here: the chain is broken and the queue is
-           durable, so a later kick picks the work up exactly where it is. */
-      }),
+      (async () => {
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const res = await fetch(next.toString(), {
+              headers: secret ? { authorization: `Bearer ${secret}` } : {},
+            });
+            if (res.ok) return;
+            console.warn(`[cape] lane ${lane} successor refused: ${res.status}`);
+            if (res.status === 401 || res.status === 403) return;
+          } catch (e) {
+            console.warn(
+              `[cape] lane ${lane} successor attempt ${attempt} failed: ` +
+                (e instanceof Error ? e.message : String(e)),
+            );
+          }
+          await new Promise((r) => setTimeout(r, 1500 * attempt));
+        }
+        console.warn(`[cape] lane ${lane} chain broken at link ${link + 1}`);
+      })(),
     );
     chained = `link ${link + 1} lane ${lane}`;
   }
