@@ -50,8 +50,16 @@ const TYPICAL_CHARS = 2000;
 const OUT_ROOT = arg("out") ?? path.join(process.cwd(), "artifacts", "cape");
 
 async function main() {
-  const inputs = await capePackageInputs();
   const auctionId = arg("auction");
+  /*
+   * A named auction is fetched by id, not filtered out of the default
+   * selection. `capePackageInputs` already honours the distinction; the CLI
+   * did not pass it through, so `--auction` silently did nothing for any sale
+   * the inventory rule excludes — a delinquent list, an unconfirmed date. Those
+   * are exactly the packages someone names explicitly, usually to correct a
+   * script that is already wrong.
+   */
+  const inputs = await capePackageInputs(auctionId ? { auctionId } : {});
 
   // Deadline order — Component Eight's, not a second opinion about urgency.
   const ranked = inputs

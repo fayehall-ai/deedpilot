@@ -6,6 +6,7 @@
  * audio — the one output surface where a listener cannot see the source.
  */
 import { verifyNarration, spokenToDigits, estimateDurationSec, type CapeScript } from "./script";
+import { writtenForm } from "./slides";
 
 let failures = 0;
 function check(name: string, cond: unknown, detail = "") {
@@ -261,6 +262,37 @@ check(
   flagged("Do not treat September thirteenth as firm.") === '["13"]',
   flagged("Do not treat September thirteenth as firm."),
 );
+
+// --- slide copy is written, not spoken ---------------------------------------
+/*
+ * The prompt tells the model to expand symbols because the narration is read
+ * aloud, and that instruction reached the slide copy too — 417 of 487 scripts
+ * put "August seventeenth, two thousand twenty-six" on screen. `writtenForm`
+ * converts the figures back at render time so scripts already written are
+ * fixed without regenerating any of them.
+ *
+ * The last three assertions matter most: a general `spokenToDigits` pass over
+ * slide prose was the first attempt and it produced "Three 165 day window" and
+ * turned "first tier" into "1 tier". Only figures may change.
+ */
+check("a spoken date becomes a written one",
+  writtenForm("August seventeenth, two thousand twenty-six") === "August 17, 2026",
+  writtenForm("August seventeenth, two thousand twenty-six"));
+check("a spoken span becomes a written one",
+  writtenForm("Three hundred sixty-five day window") === "365-day window",
+  writtenForm("Three hundred sixty-five day window"));
+check("a dictated citation becomes a section number",
+  writtenForm("Governed by O.C.G.A. forty-eight dash four dash forty") === "Governed by O.C.G.A. 48-4-40",
+  writtenForm("Governed by O.C.G.A. forty-eight dash four dash forty"));
+check("an adjectival ordinal is left alone",
+  writtenForm("Twenty percent first tier") === "20 percent first tier",
+  writtenForm("Twenty percent first tier"));
+check("prose with no figures is untouched",
+  writtenForm("Quiet title required after purchase") === "Quiet title required after purchase",
+  writtenForm("Quiet title required after purchase"));
+check("a bare headline is untouched",
+  writtenForm("Redeemable deed at winning bid") === "Redeemable deed at winning bid",
+  writtenForm("Redeemable deed at winning bid"));
 
 if (failures) {
   console.error(`\n${failures} assertion(s) failed`);

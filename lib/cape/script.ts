@@ -44,11 +44,11 @@ import type { CapePackage } from "./components";
  */
 
 const SlideSchema = z.object({
-  headline: z.string().describe("Six words or fewer. Appears large on the slide."),
+  headline: z.string().describe("Six words or fewer. Appears large on the slide. Written notation, not spelled-out numbers."),
   bullets: z
     .array(z.string())
     .max(4)
-    .describe("At most four, each under twelve words. May be empty for a title slide."),
+    .describe("At most four, each under twelve words. Written notation — \"20%\", \"365 days\" — never spelled out. May be empty for a title slide."),
   /** One figure worth showing large, e.g. "20%" or "Nov 3". */
   figure: z.string().nullable().describe("A single short figure to display prominently, or null"),
   figureLabel: z.string().nullable().describe("What the figure means, e.g. 'assessment ratio'"),
@@ -93,7 +93,7 @@ WHAT NOT TO DO.
 - Do not claim the sale is verified if the facts say the date is projected.
 
 VOICE.
-Direct and calm. Short sentences. Spoken English — this is read aloud, so expand symbols and abbreviations: "twenty percent", "November third", "twelve months". No markdown, no lists, no stage directions, no speaker labels.
+Direct and calm. Short sentences. Spoken English — the NARRATION is read aloud, so expand symbols and abbreviations there: "twenty percent", "November third", "twelve months". No markdown, no lists, no stage directions, no speaker labels.\nSLIDE text is read, not spoken, so it uses ordinary written notation instead: "20%", "November 3", "12 months", "O.C.G.A. 48-4-40". Never spell a figure out on a slide.
 
 Where a fact is marked as requiring verification, say so in the narration. Telling a viewer what is not yet confirmed is the most useful thing this system does.`;
 
@@ -199,7 +199,7 @@ const TENS: Record<string, number> = {
 
 const SCALES: Record<string, number> = { hundred: 100, thousand: 1000, million: 1_000_000 };
 
-const NUMBER_WORD = new RegExp(
+export const NUMBER_WORD = new RegExp(
   `\\b(?:${[...Object.keys(UNITS), ...Object.keys(TENS), ...Object.keys(SCALES), "and"].join("|")})\\b`,
   "g",
 );

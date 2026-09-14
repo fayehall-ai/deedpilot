@@ -5,7 +5,7 @@
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { CapeScript, CapeSection } from "./script";
+import { NUMBER_WORD, spokenToDigits, type CapeScript, type CapeSection } from "./script";
 
 /**
  * Slides, drawn as SVG and rasterised to PNG.
@@ -165,6 +165,58 @@ export function brandLockupSvg(theme: SlideTheme, logoDataUri?: string | null): 
   return parts.join("\n  ");
 }
 
+/**
+ * Slide text, in written form.
+ *
+ * The narration is spoken and the slide is read. The prompt's instruction to
+ * "expand symbols and abbreviations" belongs only to the first, and it reached
+ * both: 417 of 487 scripts put lines like "August seventeenth, two thousand
+ * twenty-six" and "Three hundred sixty-five day window" on screen, where they
+ * read as a transcription error rather than as design.
+ *
+ * Three targeted rules, not a general conversion. Running `spokenToDigits`
+ * across slide prose was the first attempt and it made the copy worse — it is
+ * case-sensitive by design, because `verifyNarration` lowercases before
+ * calling it, so "Three hundred sixty-five" became "Three 165"; and it reads
+ * ordinals as quantities, so "first tier" became "1 tier". A slide is prose
+ * with a few figures in it, and only those figures should change.
+ */
+const MONTHS =
+  "January|February|March|April|May|June|July|August|September|October|November|December";
+
+export function writtenForm(text: string): string {
+  if (!text) return text;
+  const num = (phrase: string) => spokenToDigits(phrase.toLowerCase()).trim();
+  const WORDS = NUMBER_WORD.source;
+
+  return (
+    text
+      /*
+       * A section number, dictated. "forty-eight dash four dash forty" is
+       * O.C.G.A. § 48-4-40; nothing in ordinary prose is joined by `dash`.
+       */
+      .replace(
+        new RegExp(`(?:${WORDS})(?:[\\s-]+(?:${WORDS}))*(?:\\s+dash\\s+(?:${WORDS})(?:[\\s-]+(?:${WORDS}))*)+`, "gi"),
+        (run) => run.split(/\s+dash\s+/i).map(num).join("-"),
+      )
+      /* A date. The month is what marks the ordinal as a day rather than a rank. */
+      .replace(
+        new RegExp(`\\b(${MONTHS})\\s+((?:${WORDS})(?:[\\s-]+(?:${WORDS}))*)(,\\s*((?:${WORDS})(?:[\\s-]+(?:${WORDS}))*))?`, "gi"),
+        (_m, month: string, day: string, _c: string, year: string) =>
+          `${month} ${num(day)}${year ? `, ${num(year)}` : ""}`,
+      )
+      /* A span. Only when the run is followed by the unit it counts. */
+      .replace(
+        new RegExp(`\\b((?:${WORDS})(?:[\\s-]+(?:${WORDS}))*)\\s+(day|month|year|percent)\\b`, "gi"),
+        (_m, run: string, unit: string) => {
+          const n = num(run);
+          if (!/^\d+$/.test(n)) return _m;
+          return unit.toLowerCase() === "percent" ? `${n} percent` : `${n}-${unit.toLowerCase()}`;
+        },
+      )
+  );
+}
+
 /** The title card. */
 export function titleSlideSvg(
   title: string,
@@ -251,7 +303,7 @@ export function contentSlideSvg(
   // The figure occupies the right third, so text wraps into what is left.
   const textWidth = hasFigure ? W - 760 : W - 320;
 
-  const headlineLines = wrapText(slide.headline, 64, textWidth).slice(0, 2);
+  const headlineLines = wrapText(writtenForm(slide.headline), 64, textWidth).slice(0, 2);
   let y = 260;
 
   const parts: string[] = [
@@ -273,7 +325,7 @@ export function contentSlideSvg(
   y += 80;
 
   for (const bullet of slide.bullets.slice(0, 4)) {
-    const lines = wrapText(bullet, 38, textWidth - 60).slice(0, 2);
+    const lines = wrapText(writtenForm(bullet), 38, textWidth - 60).slice(0, 2);
     parts.push(`<circle cx="176" cy="${y - 12}" r="7" fill="${theme.accent}"/>`);
     for (const [i, line] of lines.entries()) {
       parts.push(
@@ -284,10 +336,10 @@ export function contentSlideSvg(
   }
 
   if (slide.figure) {
-    const figureLines = wrapText(slide.figureLabel ?? "", 26, 460).slice(0, 3);
+    const figureLines = wrapText(writtenForm(slide.figureLabel ?? ""), 26, 460).slice(0, 3);
     parts.push(
       `<rect x="${W - 620}" y="300" width="460" height="360" rx="28" fill="${theme.surface}"/>`,
-      `<text x="${W - 390}" y="480" text-anchor="middle" font-family="${theme.fontFamily}" font-size="${slide.figure.length > 7 ? 66 : 96}" font-weight="700" fill="${theme.accent}">${esc(slide.figure)}</text>`,
+      `<text x="${W - 390}" y="480" text-anchor="middle" font-family="${theme.fontFamily}" font-size="${slide.figure.length > 7 ? 66 : 96}" font-weight="700" fill="${theme.accent}">${esc(writtenForm(slide.figure))}</text>`,
       ...figureLines.map(
         (l, i) =>
           `<text x="${W - 390}" y="${540 + i * 34}" text-anchor="middle" font-family="${theme.fontFamily}" font-size="26" fill="${theme.muted}">${esc(l)}</text>`,
