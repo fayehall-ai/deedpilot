@@ -1,5 +1,5 @@
 /**
- * The CAPE script worker, as a scheduled function.
+ * The CAPE script worker, which continues itself until the work is done.
  *
  * ## Why this is not part of `/api/cron/dispatch`
  *
@@ -13,23 +13,42 @@
  * Separate route, separate budget, same queue. Leases are what make that safe:
  * two ticks overlapping claim different rows or nothing at all.
  *
- * ## Why the schedule can overlap itself
+ * ## Why it chains instead of being scheduled
  *
- * `vercel.json` runs this every two minutes and the budget is four, so at
- * steady state two invocations are usually in flight. That is deliberate — it
- * is how throughput gets to roughly eight concurrent generations without any
- * one function running longer than its ceiling. `claimNext` is atomic
- * (`FOR UPDATE SKIP LOCKED`), so the overlap costs nothing but is the reason
- * the work is claimed rather than assigned.
+ * There is no cron. A backlog of 477 packages is a job with an end, and a
+ * schedule is the wrong shape for that: it either runs forever after the work
+ * is finished, or it has to be removed by hand at a moment nobody is watching
+ * for. So the last thing each invocation does, if work remains, is start its
+ * own successor and return. The chain ends when `enqueueCapeScripts` reports
+ * nothing outstanding — which is the same question that decides what to queue,
+ * so "finished" means exactly "every upcoming package has a script written from
+ * the facts now in force".
  *
- * ## What stops it
+ * ## What stops a chain that should not have started
  *
- * Nothing, and that is correct. `enqueueCapeScripts` queues only packages whose
- * script was not written from the facts now in force, so when everything is
- * current a tick queues nothing, claims nothing, and returns in one query. The
- * schedule is a standing offer to do work, not a job with an end.
+ * A function that invokes itself is a loop with a deploy cycle between you and
+ * the brakes, so it gets three independent ones:
+ *
+ *  - It stops when nothing is outstanding. This is the ordinary exit.
+ *  - `MAX_LINKS` caps the chain whatever the queue says, so a bug that
+ *    miscounts outstanding work still terminates.
+ *  - `CAPE_CHAIN_DISABLED=1` in the environment stops every chain at its next
+ *    link, with no deploy. This is the one to reach for.
+ *
+ * Successors are started through `waitUntil`, because the response returns
+ * first and a plain fire-and-forget fetch would be cancelled with the
+ * invocation — a chain that silently fails to continue looks identical to one
+ * that finished.
+ *
+ * ## Lanes
+ *
+ * One chain is one function at a time, which is `CONCURRENCY` generations. Two
+ * chains started independently give twice that. `?lane=` carries a label so the
+ * logs say which is which; nothing else depends on it, because `claimNext` is
+ * atomic and lanes simply take different rows.
  */
 import { NextResponse, type NextRequest } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import { claimNext, completeJob, failJob } from "@/lib/admin/queue";
 import { capeAuctionId, enqueueCapeScripts, isCapeJob } from "@/lib/admin/cape-jobs";
 import { tokenMatches } from "@/lib/admin/token";
@@ -91,6 +110,9 @@ const CONCURRENCY = 3;
  * The operator token still works, so a tick can be forced from a terminal
  * without waiting for the schedule.
  */
+/** However long the chain says it is, it is not longer than this. */
+const MAX_LINKS = 400;
+
 function authorised(req: NextRequest): boolean {
   const auth = req.headers.get("authorization") ?? "";
   const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : "";
@@ -109,6 +131,9 @@ export async function GET(req: NextRequest) {
 
   const started = Date.now();
   const left = () => BUDGET_MS - (Date.now() - started);
+
+  const link = Number(req.nextUrl.searchParams.get("link") ?? "0") || 0;
+  const lane = req.nextUrl.searchParams.get("lane") ?? "1";
 
   const fill = await enqueueCapeScripts();
 
@@ -179,10 +204,49 @@ export async function GET(req: NextRequest) {
 
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
+  /*
+   * Ask again rather than trusting the count from the top of the tick.
+   *
+   * This invocation has just written scripts, so the number that decided what
+   * to queue four hundred seconds ago is stale by exactly the work we did. The
+   * successor is started, or not, on what is true now.
+   */
+  const after = await enqueueCapeScripts();
+  const disabled = /^(1|true|yes)$/i.test(process.env.CAPE_CHAIN_DISABLED ?? "");
+  const more = after.outstanding > 0 && link < MAX_LINKS && !disabled;
+
+  let chained: string | null = null;
+  if (more) {
+    const next = new URL(req.nextUrl);
+    next.searchParams.set("link", String(link + 1));
+    next.searchParams.set("lane", lane);
+    const secret = (process.env.CRON_SECRET ?? "").trim();
+
+    /*
+     * `waitUntil`, not a bare fetch. The response below returns first and the
+     * invocation is torn down with it; a fire-and-forget request would be
+     * cancelled in flight, and a chain that silently fails to continue looks
+     * exactly like one that finished.
+     */
+    waitUntil(
+      fetch(next.toString(), {
+        headers: secret ? { authorization: `Bearer ${secret}` } : {},
+      }).catch(() => {
+        /* Nothing useful to do here: the chain is broken and the queue is
+           durable, so a later kick picks the work up exactly where it is. */
+      }),
+    );
+    chained = `link ${link + 1} lane ${lane}`;
+  }
+
   return NextResponse.json({
     ok: true,
     elapsedMs: Date.now() - started,
-    outstanding: fill.outstanding,
+    lane,
+    link,
+    chained,
+    stopped: more ? null : disabled ? "CAPE_CHAIN_DISABLED" : link >= MAX_LINKS ? "max links" : "nothing outstanding",
+    outstanding: after.outstanding,
     queued: fill.queued,
     inFlight: fill.inFlight,
     wrote: wrote.length,
