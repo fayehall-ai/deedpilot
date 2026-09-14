@@ -53,6 +53,26 @@ const conn =
      * it is the queue's own lease expiry. See `lib/admin/queue.ts`.
      */
     connect_timeout: 30,
+
+    /*
+     * Recycle a connection before the pooler does it for us.
+     *
+     * This is what the twenty-minute hang actually was. `runAdapter` spends
+     * between five seconds and four minutes fetching a county's website, and
+     * the pooled connection sits idle for all of it. Neon drops it, the next
+     * query goes out on a socket that is no longer there, and the promise is
+     * never settled — the worker parks with an idle event loop and no sockets
+     * at all, still holding its job lease. Instrumenting the pool caught it
+     * exactly: `SELECT now() AS t` issued, then nothing, ever.
+     *
+     * Thirty seconds is comfortably under any pooler idle window, so
+     * postgres.js closes and reopens rather than handing out a dead one. A
+     * reconnect costs milliseconds; this cost twenty minutes and a stuck
+     * queue slot. It also explains why the first worker managed 24 jobs and
+     * the second died on its first — it depends entirely on how long the
+     * crawl in between took.
+     */
+    idle_timeout: 30,
   });
 
 if (process.env.NODE_ENV !== "production") globalForDb.conn = conn;
