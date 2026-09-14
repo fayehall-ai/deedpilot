@@ -167,8 +167,32 @@ export interface CapePackage {
  *
  * `production` is excluded because it is the thing being judged.
  */
+/**
+ * Bump when the *rendering* of the facts changes, not the facts themselves.
+ *
+ * This hash is computed from `PackageInput` and is documented as the identity
+ * of "the computed package the script was written from". It is not: it is the
+ * identity of the inputs. Change how an input is phrased for the narrator —
+ * "4,015 days" becoming "4,015 days (about eleven years)", or the whole
+ * production calendar leaving the fact sheet — and every stored script is now
+ * written from a fact sheet that no longer exists, while the hash insists they
+ * are current. Nothing is stale, nothing regenerates, and the fix ships to
+ * nobody.
+ *
+ * `--force` is not the answer to that. It also bypasses the county-half cache
+ * and makes a batch unresumable, so a five-hour run that dies at package 300
+ * cannot be restarted without buying those 300 again. A version here makes the
+ * regeneration ordinary: everything is stale, the run resumes like any other,
+ * and reuse still works.
+ *
+ * 2 — the fact sheet dropped Components Seven through Ten and every silent
+ *     item, and redemption windows over a year gained a human scale.
+ */
+const FACT_SHEET_VERSION = 2;
+
 export function capeInputsHash(i: PackageInput): string {
   const shape = {
+    v: FACT_SHEET_VERSION,
     auctionId: i.auctionId,
     county: i.countyName,
     state: i.state,
