@@ -14,7 +14,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { and, eq, gte } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { auctions } from "@/lib/db/schema";
 import { buildCoverageScoreboard } from "@/lib/coverage/scoreboard";
@@ -23,22 +23,54 @@ import { getAdapter } from "@/lib/ingest/adapters";
 
 export const maxDuration = 60;
 
-const CRON_SECRET = process.env.VERCEL_CRON_SECRET || "dev-secret";
+/**
+ * Fail closed. There is no default secret.
+ *
+ * This read `process.env.VERCEL_CRON_SECRET || "dev-secret"`, and
+ * `VERCEL_CRON_SECRET` is not set in production — so the live value was the
+ * string "dev-secret", and `?secret=dev-secret` authorised anyone who typed it.
+ * `api/cron` is deliberately outside the site gate because Vercel's scheduler
+ * cannot present a cookie, which left this endpoint reachable by anyone on the
+ * internet.
+ *
+ * What it does once authorised is the part that matters: it deletes every
+ * future auction with `lot_count = 0`. That is not a no-op on this database —
+ * `announced_parcel_count` exists precisely because an imported sale calendar
+ * carries a headline count with no parcel list behind it, so a county
+ * announcing 16,062 parcels sits at `lot_count = 0` until something crawls it.
+ *
+ * `lib/admin/token.ts` states the rule this file broke: an unset secret must
+ * deny every candidate, because the tempting default turns a missing
+ * environment variable into an open door.
+ */
+function configuredSecrets(): string[] {
+  return [process.env.CRON_SECRET, process.env.VERCEL_CRON_SECRET]
+    .map((v) => (v ?? "").trim())
+    .filter((v) => v.length > 0);
+}
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  const cronHeader = request.headers.get("x-vercel-cron");
-  const secret = request.nextUrl.searchParams.get("secret");
+  const authHeader = request.headers.get("authorization") ?? "";
+  const bearer = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const secret = request.nextUrl.searchParams.get("secret") ?? "";
+  const secrets = configuredSecrets();
 
-  if (
-    authHeader !== `Bearer ${CRON_SECRET}` &&
-    secret !== CRON_SECRET &&
-    !cronHeader
-  ) {
+  /*
+   * `x-vercel-cron` is no longer accepted on its own.
+   *
+   * It was the only credential the schedule ever presented, and the logs say
+   * every one of those invocations was refused anyway — six in seven days, all
+   * 401. Trusting a header that demonstrably does not arrive bought nothing
+   * except a second way in for anyone who sets it by hand.
+   */
+  const ok =
+    secrets.length > 0 && (secrets.includes(bearer) || secrets.includes(secret));
+
+  if (!ok) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -52,16 +84,28 @@ export async function GET(request: NextRequest) {
   try {
     const before = await buildCoverageScoreboard();
 
-    // Purge skeletons
+    /*
+     * Purge skeletons — but an announced sale is not a skeleton.
+     *
+     * `lot_count = 0` means "no parcel rows in this database", which is the
+     * normal and honest state of a sale imported from a calendar: the county
+     * has said it is offering 16,062 parcels and nothing has crawled the list
+     * yet. `announced_parcel_count` was added to record exactly that, and its
+     * own comment calls the gap between the two figures "the enrichment
+     * worklist". Deleting those rows destroys the worklist and the sale with
+     * it, and the county goes on holding the auction either way.
+     *
+     * A skeleton is a row with neither: no parcels and nobody claiming any.
+     */
     const today = todayIso();
-    const skel = await db
-      .select({ id: auctions.id })
-      .from(auctions)
-      .where(and(gte(auctions.saleDate, today), eq(auctions.lotCount, 0)));
+    const isSkeleton = and(
+      gte(auctions.saleDate, today),
+      eq(auctions.lotCount, 0),
+      sql`coalesce(${auctions.announcedParcelCount}, 0) = 0`,
+    );
+    const skel = await db.select({ id: auctions.id }).from(auctions).where(isSkeleton);
     if (skel.length > 0) {
-      await db
-        .delete(auctions)
-        .where(and(gte(auctions.saleDate, today), eq(auctions.lotCount, 0)));
+      await db.delete(auctions).where(isSkeleton);
       actions.push(`purged ${skel.length} skeleton auction(s)`);
     }
 
