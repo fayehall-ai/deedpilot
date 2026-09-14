@@ -99,7 +99,9 @@ WHAT NOT TO DO.
 VOICE.
 Direct and calm. Short sentences. Spoken English — the NARRATION is read aloud, so expand symbols and abbreviations there: "twenty percent", "November third", "twelve months". No markdown, no lists, no stage directions, no speaker labels.\nSLIDE text is read, not spoken, so it uses ordinary written notation instead: "20%", "November 3", "12 months", "O.C.G.A. 48-4-40". Never spell a figure out on a slide.
 
-Where a fact is marked as requiring verification, say so in the narration. Telling a viewer what is not yet confirmed is the most useful thing this system does.`;
+Where a fact is marked as requiring verification, say so — as an instruction to the viewer, not as an inventory of what is missing. "Confirm the start time with the county before you register" is useful. "There is no start time in our file" is not: it describes us rather than the sale.
+
+Never list what this briefing does not cover. If a subject is not in the FACTS, it does not exist for the purposes of this script — do not name it, do not say a source is unavailable for it, and do not gather several such subjects into a sentence about what was not collected.`;
 
 /**
  * The facts, flattened for the prompt.
@@ -117,6 +119,15 @@ function factSheet(pkg: CapePackage, meta: CapeScriptMeta): string {
     `Auction platform: ${meta.platform ?? "not recorded"}`,
     `Official source: ${pkg.source.tier} (${pkg.source.host || "no host"}) — ${pkg.source.basis}`,
     `Package due: ${pkg.deadline.dueDate} (${pkg.deadline.mode} auction)`,
+    /*
+     * Population, because the narrator kept reaching for it and inventing it.
+     * "About one million ninety thousand residents" was held on a Fulton script
+     * — a figure recalled from training rather than computed here, and exactly
+     * what the guard exists to stop. It is real context for a briefing and we
+     * already hold it, so the fix is to supply it rather than to forbid the
+     * sentence.
+     */
+    ...(meta.population != null ? [`County population: ${meta.population.toLocaleString()}`] : []),
     "",
     "COMPONENT CHECKLIST — what is on record and what is not:",
   ];
@@ -124,9 +135,31 @@ function factSheet(pkg: CapePackage, meta: CapeScriptMeta): string {
   for (const c of pkg.components) {
     // Seven describes this very deliverable; narrating its own absence is noise.
     if (c.n === 7) continue;
+    /*
+     * `absent` items never reach the narrator.
+     *
+     * An absent item is one there was never going to be a source for — code
+     * enforcement, IRS liens, HOA exposure, probate, environmental. Listing
+     * them produced narration that catalogued what the briefing does not
+     * cover, which tells a bidder nothing and makes the product sound thin.
+     * `component()` already excludes them from its own denominator for the
+     * same reason: they measure the product's scope, not this sale.
+     *
+     * Component Ten made it worse than noise. Its items are TDC's own
+     * production steps — "Google Drive upload", "GHL course attachment",
+     * "Detailed PDF reports (Viktor / Slack)" — and as `absent` they were
+     * being handed to the narrator as though they were facts about the
+     * auction.
+     *
+     * `verify` items still go through. Those are different in kind: things a
+     * bidder must confirm with the county before acting, which is the most
+     * useful thing this system says.
+     */
+    const items = c.items.filter((i) => i.state !== "absent");
+    if (items.length === 0) continue;
     lines.push(`\n${c.n}. ${c.title}`);
-    for (const item of c.items) {
-      const mark = item.state === "have" ? "ON RECORD" : item.state === "verify" ? "NEEDS VERIFICATION" : "NO SOURCE";
+    for (const item of items) {
+      const mark = item.state === "have" ? "ON RECORD" : "NEEDS VERIFICATION";
       lines.push(`   [${mark}] ${item.label}${item.detail ? ` — ${item.detail}` : ""}`);
     }
   }
@@ -142,6 +175,8 @@ export interface CapeScriptMeta {
   saleType: string | null;
   platform: string | null;
   countyFips?: string;
+  /** Census population, so the narrator does not reach for it from memory. */
+  population?: number | null;
 }
 
 export interface GeneratedScript {

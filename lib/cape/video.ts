@@ -244,13 +244,15 @@ export interface EncodeOptions {
    */
   leadInSec?: number;
   /**
-   * How much of the deck moves. Defaults to `all`.
+   * How much of the deck moves. Defaults to `opening`.
    *
    * The move costs roughly five times the file — 103 MB against 22 for the
    * same briefing — and that is bandwidth on every view, which is what
-   * suspended this account once already. `opening` is the middle setting: the
-   * title card moves, which is where a viewer decides whether this is a video
-   * or a slideshow, and the sections that follow hold.
+   * suspended this account once already. `opening` is the default after review:
+   * the title card moves, which is where a viewer decides whether this is a
+   * video or a slideshow, and the sections that follow hold. It lands within
+   * half a megabyte of a fully still cut — 22.3 MB against 21.8 — where moving
+   * the whole deck costs 102.5.
    */
   motion?: "all" | "opening" | "none";
 }
@@ -279,7 +281,7 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
    */
   await writeFile(concatPath, buildConcatList(opts.slides), "utf8");
 
-  const motion = opts.motion ?? "all";
+  const motion = opts.motion ?? "opening";
 
   const clipDir = path.join(opts.outDir, "clips");
   await mkdir(clipDir, { recursive: true });

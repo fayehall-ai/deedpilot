@@ -146,6 +146,7 @@ export async function produceCapePackage(
       saleDateConfirmed: input.saleDateConfirmed,
       saleType: input.saleType,
       platform: input.platform,
+      population: input.population,
     });
 
     const script = generated.script;
@@ -263,7 +264,7 @@ export async function produceCapePackage(
       // Silence under the title and the photograph, so the voice does not run
       // ahead of the picture. See `silenceFile` in `video.ts`.
       leadInSec: leadInSec(),
-      motion: opts.motion ?? "all",
+      motion: opts.motion ?? "opening",
     });
 
     await upsert(input.auctionId, {
