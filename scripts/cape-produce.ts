@@ -7,6 +7,7 @@
  *   npm run cape:produce -- --script-only    # no speech, no encode, no spend
  *   npm run cape:produce -- --silent         # slides and video, no narration
  *   npm run cape:produce -- --still          # hold every slide, no camera move
+ *   npm run cape:produce -- --motion opening # only the title card moves
  *   npm run cape:produce -- --limit 20 --force
  *   npm run cape:produce -- --limit 1 --publish   # upload and print the URL
  *
@@ -179,7 +180,7 @@ async function main() {
       outRoot: OUT_ROOT,
       scriptOnly: flag("script-only"),
       silent: flag("silent"),
-      still: flag("still"),
+      motion: flag("still") ? "none" : (arg("motion") as "all" | "opening" | "none" | undefined) ?? "all",
       force: flag("force"),
       publish: flag("publish"),
       onProgress: (m) => console.log(m),

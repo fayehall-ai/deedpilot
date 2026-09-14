@@ -187,9 +187,9 @@ async function renderSlideClip(
   pngPath: string,
   seconds: number,
   outPath: string,
-  opts: { fps: number; width: number; height: number; index: number },
+  opts: { fps: number; width: number; height: number; index: number; move: boolean },
 ): Promise<string> {
-  const { fps, width, height, index } = opts;
+  const { fps, width, height, index, move } = opts;
   const frames = Math.max(1, Math.round(seconds * fps));
   const zoomIn = index % 2 === 0;
   /* Slow: about 8% across the whole slide, whatever its length. */
@@ -198,16 +198,25 @@ async function renderSlideClip(
     ? `min(1+${span}*on/${frames},${1 + span})`
     : `max(${1 + span}-${span}*on/${frames},1)`;
 
+  /*
+   * A held slide is still encoded as a clip, so every segment the demuxer
+   * joins has the same encoder, rate and pixel format and the final mux can
+   * stream-copy. It costs almost nothing: a static clip is a keyframe and a
+   * few hundred near-empty frames.
+   */
+  const vf = move
+    ? `scale=${width * 2}:${height * 2},` +
+      `zoompan=z='${z}':d=${frames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':` +
+      `s=${width}x${height}:fps=${fps},setsar=1,format=yuv420p`
+    : `scale=${width}:${height},setsar=1,format=yuv420p,fps=${fps}`;
+
   await run(
     "ffmpeg",
     [
       "-y",
       "-loop", "1",
       "-i", pngPath,
-      "-vf",
-      `scale=${width * 2}:${height * 2},` +
-        `zoompan=z='${z}':d=${frames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':` +
-        `s=${width}x${height}:fps=${fps},setsar=1,format=yuv420p`,
+      "-vf", vf,
       "-frames:v", String(frames),
       "-c:v", "libx264",
       "-preset", "medium",
@@ -235,14 +244,15 @@ export interface EncodeOptions {
    */
   leadInSec?: number;
   /**
-   * Whether the camera moves. Defaults to true.
+   * How much of the deck moves. Defaults to `all`.
    *
-   * A still cut is not a lesser version: the move costs about fifteen times
-   * the file — 103 MB against 7 for the same briefing — and that is real
-   * bandwidth on every view. Worth being able to produce both and choose,
-   * rather than deciding once in the encoder.
+   * The move costs roughly five times the file — 103 MB against 22 for the
+   * same briefing — and that is bandwidth on every view, which is what
+   * suspended this account once already. `opening` is the middle setting: the
+   * title card moves, which is where a viewer decides whether this is a video
+   * or a slideshow, and the sections that follow hold.
    */
-  motion?: boolean;
+  motion?: "all" | "opening" | "none";
 }
 
 /**
@@ -269,13 +279,13 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
    */
   await writeFile(concatPath, buildConcatList(opts.slides), "utf8");
 
-  const motion = opts.motion !== false;
+  const motion = opts.motion ?? "all";
 
   const clipDir = path.join(opts.outDir, "clips");
   await mkdir(clipDir, { recursive: true });
   let videoInput = concatPath;
 
-  if (motion) {
+  if (motion !== "none") {
     const { width, height } = await probeSize(opts.slides[0]?.pngPath ?? "");
     const clips: string[] = [];
     for (const [i, slide] of opts.slides.entries()) {
@@ -284,7 +294,7 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
           slide.pngPath,
           Math.max(0.5, slide.durationSec),
           path.join(clipDir, `clip-${String(i).padStart(3, "0")}.mp4`),
-          { fps, width, height, index: i },
+          { fps, width, height, index: i, move: motion === "all" || i === 0 },
         ),
       );
     }
@@ -323,7 +333,7 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
    * encodes cleanly then will not open. Re-encoding here would cost a second
    * generation of loss for nothing.
    */
-  if (motion) {
+  if (motion !== "none") {
     args.push("-c:v", "copy");
   } else {
     /*
