@@ -719,6 +719,7 @@ export function countyHalfLeak(half: CountyHalf): string | null {
 export async function generateCountyHalf(
   pkg: CapePackage,
   meta: CapeScriptMeta,
+  timeoutMs?: number,
 ): Promise<{ half: CountyHalf; model: string; usedFallback: boolean; facts: string }> {
   const facts = factSheet(pkg, meta);
   const submarkets = pkg.components
@@ -732,6 +733,7 @@ export async function generateCountyHalf(
     schema: CountyHalfSchema,
     schemaName: "CountyHalf",
     maxTokens: 7000,
+    timeoutMs,
     prompt:
       `Write the standing sections of the briefing for ${meta.countyName ?? "this county"}, ` +
       `${meta.state ?? "this state"} — the parts that are true of EVERY ${meta.saleType ?? "tax"} ` +
@@ -772,6 +774,7 @@ export async function generateSaleHalf(
   pkg: CapePackage,
   meta: CapeScriptMeta,
   county: CountyHalf,
+  timeoutMs?: number,
 ): Promise<{ half: SaleHalf; model: string; usedFallback: boolean; facts: string }> {
   const facts = factSheet(pkg, meta);
 
@@ -786,6 +789,7 @@ export async function generateSaleHalf(
     schema: SaleHalfSchema,
     schemaName: "SaleHalf",
     maxTokens: 7000,
+    timeoutMs,
     prompt:
       `Write the sale-specific sections of the briefing for the ${meta.saleDate} sale in ` +
       `${meta.countyName ?? "this county"}, ${meta.state ?? "this state"}.\n\n` +
@@ -863,6 +867,16 @@ export async function generateCapeScript(
     loadCountyHalf?: () => Promise<CountyHalf | null>;
     /** Called with a freshly written half, for the caller to cache. */
     saveCountyHalf?: (half: CountyHalf, model: string) => Promise<void>;
+    /**
+     * Per-provider deadline, for callers that have one of their own.
+     *
+     * A scheduled function does. `runStructured` retries a timeout three times
+     * with backoff, so the default four-minute deadline makes a single job's
+     * worst case over twelve minutes — longer than any function may run, and
+     * the job would be killed mid-write rather than failing cleanly. A shorter
+     * deadline there keeps the worst case inside the slot.
+     */
+    timeoutMs?: number;
   } = {},
 ): Promise<GeneratedScript> {
   const cached = opts.loadCountyHalf ? await opts.loadCountyHalf() : null;
@@ -875,7 +889,7 @@ export async function generateCapeScript(
   if (cached) {
     county = cached;
   } else {
-    const written = await generateCountyHalf(pkg, meta);
+    const written = await generateCountyHalf(pkg, meta, opts.timeoutMs);
     county = written.half;
     countyModel = written.model;
     usedFallback = written.usedFallback;
@@ -890,7 +904,7 @@ export async function generateCapeScript(
     else if (opts.saveCountyHalf) await opts.saveCountyHalf(county, written.model);
   }
 
-  const sale = await generateSaleHalf(pkg, meta, county);
+  const sale = await generateSaleHalf(pkg, meta, county, opts.timeoutMs);
   const script = assembleScript(county, sale.half);
   const facts = sale.facts;
 

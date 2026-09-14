@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/coverage",
       "schedule": "30 10 * * *"
+    },
+    {
+      "path": "/api/cron/cape",
+      "schedule": "*/2 * * * *"
     }
   ]
 }

@@ -31,6 +31,8 @@ import path from "node:path";
 import { asc, eq } from "drizzle-orm";
 import { db } from "../lib/db";
 import { auctions, capeCountyScripts, capeProductions, counties } from "../lib/db/schema";
+import { capePackageInputs } from "../lib/cape/inputs";
+import { capeInputsHash } from "../lib/cape/components";
 
 const OUT = (() => {
   const i = process.argv.indexOf("--out");
@@ -62,6 +64,15 @@ interface OutScript {
   sections: OutSection[];
   /** How many upcoming sales share this county's standing sections. */
   sharedWith: number;
+  /**
+   * True when this script was written from the fact sheet currently in force.
+   *
+   * Shown rather than hidden. A regeneration pass takes hours, and during it
+   * the page holds a mixture — a reviewer told "these are the scripts" while
+   * three quarters of them still say "Assessor/GIS not in file" would waste an
+   * afternoon reporting a fault that is already fixed and queued.
+   */
+  current: boolean;
 }
 
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -80,6 +91,8 @@ async function main() {
       figures: capeProductions.unsupportedFigures,
       stage: capeProductions.stage,
       error: capeProductions.error,
+      auctionId: auctions.id,
+      hash: capeProductions.inputsHash,
     })
     .from(capeProductions)
     .innerJoin(auctions, eq(auctions.id, capeProductions.auctionId))
@@ -95,6 +108,10 @@ async function main() {
    * is mislabelled. The text is what was actually reused, so the text is what
    * identifies it.
    */
+  /* What the fact sheet in force would hash to, per package. */
+  const inputs = await capePackageInputs();
+  const wanted = new Map(inputs.map((i) => [i.auctionId, capeInputsHash(i)]));
+
   const halves = await db.select().from(capeCountyScripts);
   const countyText = new Map<string, Set<string>>();
   const countyUses = new Map<string, number>();
@@ -143,6 +160,7 @@ async function main() {
         scope: shared.has(sec.narration) ? ("county" as const) : ("sale" as const),
       })),
       sharedWith: countyUses.get(r.fips) ?? 1,
+      current: wanted.get(r.auctionId) === r.hash,
     });
   }
 
@@ -167,7 +185,9 @@ async function main() {
   console.log(`  ${countySections} county-scoped section(s), ${saleSections} sale-scoped`);
   console.log(`  ${halves.length} county half/halves on file`);
   console.log(`  ${words.toLocaleString()} spoken words in total`);
+  const fresh = out.filter((d) => d.current).length;
   console.log(`  ${out.filter((d) => d.held).length} held (unsupported figure or wrong county)`);
+  console.log(`  ${fresh} of ${out.length} written from the fact sheet now in force`);
 }
 
 main().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });

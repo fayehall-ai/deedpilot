@@ -64,6 +64,8 @@ export interface ProduceOptions {
   silent?: boolean;
   /** Re-run even when the stored hash matches the current facts. */
   force?: boolean;
+  /** Per-provider deadline, for a caller running under a function ceiling. */
+  scriptTimeoutMs?: number;
   /** Upload the finished video to Vercel Blob and record its public URL. */
   publish?: boolean;
   /** How much of the deck moves: `all`, `opening`, or `none`. See `video.ts`. */
@@ -234,7 +236,7 @@ export async function produceCapePackage(
       platform: input.platform,
       population: input.population,
       countyFips: input.countyFips,
-    }, { loadCountyHalf, saveCountyHalf });
+    }, { loadCountyHalf, saveCountyHalf, timeoutMs: opts.scriptTimeoutMs });
 
     const script = generated.script;
     base.script = script;
