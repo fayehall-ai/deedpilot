@@ -117,11 +117,60 @@ export function wrapText(text: string, fontSize: number, maxWidth: number): stri
   return lines;
 }
 
+/**
+ * The standing brand lockup, upper left on every slide.
+ *
+ * Asked for by the reviewer after watching a finished briefing: the mark and
+ * the address should be on screen throughout, not only on the closing card,
+ * because a clip of any single slide has to identify who made it.
+ *
+ * `logoDataUri` is deliberately optional and deliberately not defaulted to
+ * DeedPilot's own `§` mark. That mark belongs to a different product, and
+ * putting one brand's identity on another's video is worse than showing none.
+ * With no file supplied this draws the wordmark alone, which is accurate; drop
+ * the real artwork in and it sits to the left of the words.
+ *
+ * Placed at the same x as the body column and above y=200, which every slide
+ * layout leaves clear — content headlines begin at y=260.
+ */
+export const BRAND_NAME = "THE TAX DEED COLLECTIVE";
+export const BRAND_URLS = ["www.thetaxdeedcollective.com", "map.thetaxdeedcollective.com"];
+
+export function brandLockupSvg(theme: SlideTheme, logoDataUri?: string | null): string {
+  const hasLogo = Boolean(logoDataUri);
+  const parts: string[] = [];
+
+  /*
+   * The artwork already carries the words "TAX DEED COLLECTIVE", so the text
+   * wordmark is drawn only when there is no logo to draw. Setting them both
+   * would say the name twice in the same two inches of screen.
+   */
+  if (hasLogo) {
+    parts.push(
+      `<image href="${logoDataUri}" x="160" y="58" width="96" height="96" preserveAspectRatio="xMidYMid meet"/>`,
+    );
+  } else {
+    parts.push(
+      `<text x="160" y="104" font-family="${theme.fontFamily}" font-size="25" font-weight="700" letter-spacing="2.4" fill="${theme.accent}">${esc(BRAND_NAME)}</text>`,
+    );
+  }
+
+  const x = hasLogo ? 276 : 160;
+  const firstY = hasLogo ? 106 : 140;
+  BRAND_URLS.forEach((url, i) => {
+    parts.push(
+      `<text x="${x}" y="${firstY + i * 32}" font-family="${theme.fontFamily}" font-size="23" letter-spacing="0.5" fill="${i === 0 ? theme.text : theme.muted}">${esc(url)}</text>`,
+    );
+  });
+  return parts.join("\n  ");
+}
+
 /** The title card. */
 export function titleSlideSvg(
   title: string,
   subtitle: string,
   theme: SlideTheme = DEFAULT_THEME,
+  logoDataUri?: string | null,
 ): string {
   const { width: W, height: H } = theme;
   const titleLines = wrapText(title, 86, W - 320).slice(0, 3);
@@ -130,6 +179,7 @@ export function titleSlideSvg(
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <rect width="${W}" height="${H}" fill="${theme.background}"/>
   <rect x="0" y="0" width="14" height="${H}" fill="${theme.accent}"/>
+  ${brandLockupSvg(theme, logoDataUri)}
   ${titleLines
     .map(
       (l, i) =>
@@ -137,7 +187,7 @@ export function titleSlideSvg(
     )
     .join("\n  ")}
   <text x="160" y="${startY + titleLines.length * 110 + 40}" font-family="${theme.fontFamily}" font-size="38" fill="${theme.accent}">${esc(subtitle)}</text>
-  <text x="160" y="${H - 90}" font-family="${theme.fontFamily}" font-size="28" fill="${theme.muted}">The Tax Deed Collective — county auction briefing</text>
+  <text x="160" y="${H - 90}" font-family="${theme.fontFamily}" font-size="28" fill="${theme.muted}">County auction briefing</text>
 </svg>`;
 }
 
@@ -166,7 +216,11 @@ export interface CountyPhoto {
   credit: string;
 }
 
-export function photoSlideSvg(photo: CountyPhoto, theme: SlideTheme = DEFAULT_THEME): string {
+export function photoSlideSvg(
+  photo: CountyPhoto,
+  theme: SlideTheme = DEFAULT_THEME,
+  logoDataUri?: string | null,
+): string {
   const { width: W, height: H } = theme;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
@@ -180,6 +234,7 @@ export function photoSlideSvg(photo: CountyPhoto, theme: SlideTheme = DEFAULT_TH
   <image href="${photo.dataUri}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
   <rect width="${W}" height="${H}" fill="url(#scrim)"/>
   <rect x="0" y="0" width="14" height="${H}" fill="${theme.accent}"/>
+  ${brandLockupSvg(theme, logoDataUri)}
   <text x="160" y="${H - 132}" font-family="${theme.fontFamily}" font-size="54" font-weight="700" fill="${theme.text}">${esc(photo.caption)}</text>
   <text x="160" y="${H - 80}" font-family="${theme.fontFamily}" font-size="24" fill="${theme.muted}">${esc(photo.credit)}</text>
 </svg>`;
@@ -189,6 +244,7 @@ export function photoSlideSvg(photo: CountyPhoto, theme: SlideTheme = DEFAULT_TH
 export function contentSlideSvg(
   slide: CapeSection["slide"],
   theme: SlideTheme = DEFAULT_THEME,
+  logoDataUri?: string | null,
 ): string {
   const { width: W, height: H } = theme;
   const hasFigure = Boolean(slide.figure);
@@ -201,6 +257,7 @@ export function contentSlideSvg(
   const parts: string[] = [
     `<rect width="${W}" height="${H}" fill="${theme.background}"/>`,
     `<rect x="0" y="0" width="14" height="${H}" fill="${theme.accent}"/>`,
+    brandLockupSvg(theme, logoDataUri),
   ];
 
   for (const line of headlineLines) {
@@ -263,6 +320,7 @@ export async function renderSlides(
   sectionDurations: number[],
   theme: SlideTheme = DEFAULT_THEME,
   photos: CountyPhoto[] = [],
+  logoDataUri?: string | null,
 ): Promise<RenderedSlide[]> {
   const { default: sharp } = await import("sharp");
   await mkdir(outDir, { recursive: true });
@@ -274,7 +332,7 @@ export async function renderSlides(
    * spent on two shots instead of one.
    */
   const slots = photoSlots(script.sections.length, photos.length, sectionDurations);
-  const svgs: string[] = [titleSlideSvg(script.title, subtitle, theme)];
+  const svgs: string[] = [titleSlideSvg(script.title, subtitle, theme, logoDataUri)];
   const sectionPlan: number[] = [];
   let taken = 0;
 
@@ -282,14 +340,14 @@ export async function renderSlides(
     const total = sectionDurations[i] ?? 4;
     const slotAt = slots.indexOf(i);
     if (slotAt === -1 || !photos[taken]) {
-      svgs.push(contentSlideSvg(section.slide, theme));
+      svgs.push(contentSlideSvg(section.slide, theme, logoDataUri));
       sectionPlan.push(total);
       continue;
     }
     const hold = Math.min(PHOTO_HOLD_SEC, total * 0.4);
-    svgs.push(contentSlideSvg(section.slide, theme));
+    svgs.push(contentSlideSvg(section.slide, theme, logoDataUri));
     sectionPlan.push(total - hold);
-    svgs.push(photoSlideSvg(photos[taken], theme));
+    svgs.push(photoSlideSvg(photos[taken], theme, logoDataUri));
     sectionPlan.push(hold);
     taken++;
   }

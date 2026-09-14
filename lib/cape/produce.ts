@@ -19,6 +19,7 @@ import {
 } from "./voice";
 import { encodeVideo, EncoderMissingError } from "./video";
 import { countyPhotos } from "./photo";
+import { readFile as readFileAsync } from "node:fs/promises";
 import { blobConfigured, publishVideo } from "./publish";
 
 /**
@@ -223,6 +224,16 @@ export async function produceCapePackage(
      * photograph simply does not get the slides. See `photo.ts`.
      */
     const photos = await countyPhotos(input.countyFips, input.countyName, input.state);
+
+    /*
+     * The brand artwork, read from disk and inlined as a data URI because the
+     * SVG is rasterised without a base URL to resolve a relative path against.
+     * Missing artwork falls back to the wordmark rather than failing the run.
+     */
+    const logo = await readFileAsync(path.join(process.cwd(), "public", "brand", "tdc-logo.png"))
+      .then((b) => `data:image/png;base64,${b.toString("base64")}`)
+      .catch(() => null);
+    if (!logo) log("  brand logo not found at public/brand/tdc-logo.png — wordmark only");
     log(
       photos.length
         ? `  county photos: ${photos.length} (${photos.map((p) => p.credit.split(" — ")[1] ?? "?").join(", ")})`
@@ -236,6 +247,7 @@ export async function produceCapePackage(
       sectionDurations,
       undefined,
       photos,
+      logo,
     );
     log(`  slides: ${slides.length} rendered (title held ${TITLE_HOLD_SEC}s)`);
 

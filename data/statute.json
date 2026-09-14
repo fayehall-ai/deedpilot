@@ -209,7 +209,7 @@
             "penalty": 0.4
           }
         ],
-        "maxDays": 1095,
+        "maxDays": 365,
         "extendedFor": "redemption stays open indefinitely until the purchaser forecloses it by statutory notice (barment)"
       },
       "quietTitle": {

@@ -1663,7 +1663,23 @@ export const STATUTE_PARAMS: Record<string, StatuteParams> = {
         { throughDays: 730, penalty: 0.3 },
         { throughDays: 1095, penalty: 0.4 },
       ],
-      maxDays: 1095,
+      /*
+       * Twelve months, not the outer bound of the tiers above.
+       *
+       * This read 1095 and was wrong in a way that only showed up when it was
+       * spoken aloud: a briefing told bidders "the redemption period on record
+       * is one thousand ninety-five days", which describes a lien state, not
+       * Georgia. O.C.G.A. § 48-4-40 gives the owner twelve months; after that
+       * the purchaser may bar the right by statutory notice.
+       *
+       * The tiers still run to 1095 and are still correct — they price a
+       * redemption that happens late because barment has not been served yet,
+       * which `extendedFor` is there to say. What they never described is how
+       * long a bidder must wait, and `maxDays` is the field that answers that.
+       * The atlas prose had it right all along ("1 year from sale"); this is
+       * the copy of the same fact that drifted.
+       */
+      maxDays: 365,
       extendedFor:
         "redemption stays open indefinitely until the purchaser forecloses it by statutory notice (barment)",
     },
