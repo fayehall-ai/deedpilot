@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { capeProductions } from "@/lib/db/schema";
 import { buildPackage, capeInputsHash, type PackageInput } from "./components";
 import { generateCapeScript, estimateDurationSec, type CapeScript } from "./script";
-import { renderSlides, TITLE_HOLD_SEC } from "./slides";
+import { leadInSec, renderSlides, TITLE_HOLD_SEC } from "./slides";
 import {
   characterCount,
   estimateUsd,
@@ -18,7 +18,7 @@ import {
   VoiceUnavailableError,
 } from "./voice";
 import { encodeVideo, EncoderMissingError } from "./video";
-import { establishingShot } from "./establishing";
+import { countyPhoto } from "./photo";
 import { blobConfigured, publishVideo } from "./publish";
 
 /**
@@ -219,11 +219,11 @@ export async function produceCapePackage(
     // --- 3. Slides ----------------------------------------------------------
     const subtitle = `${input.countyName ?? ""}, ${input.state ?? ""} — sale ${input.saleDate}`.trim();
     /*
-     * Decoration, and treated as such: a null backdrop costs the card nothing
-     * and must never cost the run its video. See `establishing.ts`.
+     * Decoration, and treated as such: a county with no safely-licensed
+     * photograph simply does not get the slide. See `photo.ts`.
      */
-    const backdrop = await establishingShot(input.countyFips);
-    if (backdrop) log(`  establishing shot: ${backdrop.seat}`);
+    const photo = await countyPhoto(input.countyFips, input.countyName, input.state);
+    log(photo ? `  county photo: ${photo.credit}` : "  no safely-licensed county photo — slide skipped");
 
     const slides = await renderSlides(
       script,
@@ -231,7 +231,7 @@ export async function produceCapePackage(
       path.join(outDir, "slides"),
       sectionDurations,
       undefined,
-      backdrop,
+      photo,
     );
     log(`  slides: ${slides.length} rendered (title held ${TITLE_HOLD_SEC}s)`);
 
@@ -242,6 +242,9 @@ export async function produceCapePackage(
       audioPaths,
       outDir,
       name: slug(input),
+      // Silence under the title and the photograph, so the voice does not run
+      // ahead of the picture. See `silenceFile` in `video.ts`.
+      leadInSec: leadInSec(Boolean(photo)),
     });
 
     await upsert(input.auctionId, {

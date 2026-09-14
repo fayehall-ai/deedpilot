@@ -118,42 +118,17 @@ export function wrapText(text: string, fontSize: number, maxWidth: number): stri
 }
 
 /** The title card. */
-export interface TitleBackdrop {
-  dataUri: string;
-  seat: string;
-  credit: string;
-}
-
 export function titleSlideSvg(
   title: string,
   subtitle: string,
   theme: SlideTheme = DEFAULT_THEME,
-  backdrop?: TitleBackdrop | null,
 ): string {
   const { width: W, height: H } = theme;
   const titleLines = wrapText(title, 86, W - 320).slice(0, 3);
   const startY = H / 2 - (titleLines.length - 1) * 55 - 20;
 
-  /*
-   * The scrim is not a style choice. Aerial imagery is high-frequency detail at
-   * every brightness, and white text laid straight onto it is unreadable over
-   * roofs and parking lots. 0.72 keeps the town legible underneath while the
-   * title stays the thing being read.
-   */
-  const backdropSvg = backdrop
-    ? `<image href="${backdrop.dataUri}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
-  <rect width="${W}" height="${H}" fill="${theme.background}" opacity="0.72"/>`
-    : "";
-
-  const backdropCaption = backdrop
-    ? `<text x="160" y="${H - 140}" font-family="${theme.fontFamily}" font-size="30" fill="${theme.muted}">County seat — ${esc(backdrop.seat)}</text>
-  <text x="${W - 160}" y="${H - 90}" text-anchor="end" font-family="${theme.fontFamily}" font-size="22" fill="${theme.muted}">${esc(backdrop.credit)}</text>`
-    : "";
-
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <rect width="${W}" height="${H}" fill="${theme.background}"/>
-  ${backdropSvg}
-  ${backdropCaption}
   <rect x="0" y="0" width="14" height="${H}" fill="${theme.accent}"/>
   ${titleLines
     .map(
@@ -163,6 +138,50 @@ export function titleSlideSvg(
     .join("\n  ")}
   <text x="160" y="${startY + titleLines.length * 110 + 40}" font-family="${theme.fontFamily}" font-size="38" fill="${theme.accent}">${esc(subtitle)}</text>
   <text x="160" y="${H - 90}" font-family="${theme.fontFamily}" font-size="28" fill="${theme.muted}">The Tax Deed Collective — county auction briefing</text>
+</svg>`;
+}
+
+/**
+ * The county photograph, on its own slide after the title.
+ *
+ * ## Why the attribution is part of the frame
+ *
+ * Every photograph here is used under a licence that asks for credit, and CC
+ * BY asks for it as a condition rather than a courtesy. Rendering it into the
+ * slide is the only placement that survives the thing being a video: there is
+ * no caption field, no alt text and no page around it, so a credit that lives
+ * anywhere else does not travel with the work. `data/county-photos.json`
+ * carries the string; this draws it.
+ *
+ * ## Why full bleed behind a gradient
+ *
+ * Courthouse photographs are framed for a building, not for a 16:9 slide, so
+ * they are cropped to fill rather than letterboxed into bars. The gradient is
+ * what keeps the caption readable over a sky in one county and a dark stone
+ * facade in the next.
+ */
+export interface CountyPhoto {
+  dataUri: string;
+  caption: string;
+  credit: string;
+}
+
+export function photoSlideSvg(photo: CountyPhoto, theme: SlideTheme = DEFAULT_THEME): string {
+  const { width: W, height: H } = theme;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <defs>
+    <linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${theme.background}" stop-opacity="0"/>
+      <stop offset="55%" stop-color="${theme.background}" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="${theme.background}" stop-opacity="0.95"/>
+    </linearGradient>
+  </defs>
+  <rect width="${W}" height="${H}" fill="${theme.background}"/>
+  <image href="${photo.dataUri}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="${W}" height="${H}" fill="url(#scrim)"/>
+  <rect x="0" y="0" width="14" height="${H}" fill="${theme.accent}"/>
+  <text x="160" y="${H - 132}" font-family="${theme.fontFamily}" font-size="54" font-weight="700" fill="${theme.text}">${esc(photo.caption)}</text>
+  <text x="160" y="${H - 80}" font-family="${theme.fontFamily}" font-size="24" fill="${theme.muted}">${esc(photo.credit)}</text>
 </svg>`;
 }
 
@@ -243,13 +262,14 @@ export async function renderSlides(
   outDir: string,
   sectionDurations: number[],
   theme: SlideTheme = DEFAULT_THEME,
-  backdrop?: TitleBackdrop | null,
+  photo?: CountyPhoto | null,
 ): Promise<RenderedSlide[]> {
   const { default: sharp } = await import("sharp");
   await mkdir(outDir, { recursive: true });
 
   const svgs: string[] = [
-    titleSlideSvg(script.title, subtitle, theme, backdrop),
+    titleSlideSvg(script.title, subtitle, theme),
+    ...(photo ? [photoSlideSvg(photo, theme)] : []),
     ...script.sections.map((s) => contentSlideSvg(s.slide, theme)),
   ];
 
@@ -258,7 +278,7 @@ export async function renderSlides(
    * Every other slide runs exactly as long as its own narration, which is what
    * keeps picture and voice in step without a timing track.
    */
-  const durations = [TITLE_HOLD_SEC, ...sectionDurations];
+  const durations = [TITLE_HOLD_SEC, ...(photo ? [PHOTO_HOLD_SEC] : []), ...sectionDurations];
 
   const out: RenderedSlide[] = [];
   for (const [i, svg] of svgs.entries()) {
@@ -283,3 +303,17 @@ export async function renderSlides(
 
 /** Seconds the opening card is held before the first narrated slide. */
 export const TITLE_HOLD_SEC = 3;
+
+/** Seconds the county photograph is held. Nothing is spoken over it either. */
+export const PHOTO_HOLD_SEC = 4;
+
+/**
+ * Total silent lead-in, which `encodeVideo` pads the narration by.
+ *
+ * Exported rather than recomputed at the call site: the audio and the slide
+ * plan disagreeing about this number is precisely the bug that put every slide
+ * three seconds behind its own narration.
+ */
+export function leadInSec(hasPhoto: boolean): number {
+  return TITLE_HOLD_SEC + (hasPhoto ? PHOTO_HOLD_SEC : 0);
+}

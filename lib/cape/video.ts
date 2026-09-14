@@ -96,6 +96,32 @@ async function probeDuration(file: string): Promise<number> {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
+/**
+ * Silence, to sit under the slides that have nothing spoken over them.
+ *
+ * Without this the audio began at the first narrated word while the picture
+ * began at the title card, so every slide ran behind its own narration by the
+ * length of the lead-in — three seconds, on every video ever produced here —
+ * and the encode, being cut at the narration's length, took those three
+ * seconds off the closing slide instead. The opening of section one was spoken
+ * over the title.
+ *
+ * Generating the gap rather than shortening the lead-in keeps the title card
+ * on screen for as long as it was designed to be.
+ */
+async function silenceFile(seconds: number, outPath: string): Promise<string> {
+  await run("ffmpeg", [
+    "-y",
+    "-f", "lavfi",
+    "-i", "anullsrc=r=44100:cl=mono",
+    "-t", seconds.toFixed(3),
+    "-c:a", "libmp3lame",
+    "-b:a", "192k",
+    outPath,
+  ]);
+  return outPath;
+}
+
 /** Concatenate the per-section narration into one continuous track. */
 async function concatAudio(mp3Paths: string[], outPath: string): Promise<void> {
   const listPath = `${outPath}.txt`;
@@ -126,6 +152,12 @@ export interface EncodeOptions {
   /** Base filename without extension. */
   name: string;
   fps?: number;
+  /**
+   * Seconds of slide shown before the narration starts — the title card, and
+   * anything else held silently in front of it. Padded onto the audio so
+   * picture and voice stay in step.
+   */
+  leadInSec?: number;
 }
 
 /**
@@ -156,7 +188,12 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
   let audioPath: string | null = null;
   if (opts.audioPaths.length > 0) {
     audioPath = path.join(opts.outDir, `${opts.name}.narration.mp3`);
-    await concatAudio(opts.audioPaths, audioPath);
+    const leadIn = opts.leadInSec ?? 0;
+    const paths =
+      leadIn > 0
+        ? [await silenceFile(leadIn, path.join(opts.outDir, `${opts.name}.leadin.mp3`)), ...opts.audioPaths]
+        : opts.audioPaths;
+    await concatAudio(paths, audioPath);
     args.push("-i", audioPath);
   }
 
