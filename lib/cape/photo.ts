@@ -35,10 +35,14 @@ interface CatalogueEntry {
   source: string;
 }
 
-const CATALOGUE = photos as Record<string, CatalogueEntry>;
+/* v1 of the file held one entry per county; v2 holds a list. */
+const RAW = photos as Record<string, CatalogueEntry | CatalogueEntry[]>;
+const CATALOGUE: Record<string, CatalogueEntry[]> = Object.fromEntries(
+  Object.entries(RAW).map(([k, v]) => [k, Array.isArray(v) ? v : [v]]),
+);
 
 export function hasCountyPhoto(fips: string | null | undefined): boolean {
-  return Boolean(fips && CATALOGUE[fips]);
+  return Boolean(fips && CATALOGUE[fips]?.length);
 }
 
 /**
@@ -48,20 +52,33 @@ export function hasCountyPhoto(fips: string | null | undefined): boolean {
  * a file that has since been deleted must not cost a briefing its video — the
  * slide is simply not rendered, and the deck is the one it was before.
  */
-export async function countyPhoto(
+export async function countyPhotos(
   fips: string | null | undefined,
   countyName: string | null,
   state: string | null,
-  opts: { timeoutMs?: number } = {},
-): Promise<CountyPhoto | null> {
-  if (!fips) return null;
-  const entry = CATALOGUE[fips];
-  if (!entry?.url) return null;
+  opts: { timeoutMs?: number; max?: number } = {},
+): Promise<CountyPhoto[]> {
+  if (!fips) return [];
+  const entries = (CATALOGUE[fips] ?? []).slice(0, opts.max ?? 4);
+  const out: CountyPhoto[] = [];
+  for (const entry of entries) {
+    const one = await fetchOne(entry, countyName, state, opts.timeoutMs ?? 20_000);
+    if (one) out.push(one);
+  }
+  return out;
+}
 
+async function fetchOne(
+  entry: CatalogueEntry,
+  countyName: string | null,
+  state: string | null,
+  timeoutMs: number,
+): Promise<CountyPhoto | null> {
+  if (!entry.url) return null;
   try {
     const res = await fetch(entry.url, {
       headers: { "User-Agent": "deedpilot/1.0 (county briefing imagery)" },
-      signal: AbortSignal.timeout(opts.timeoutMs ?? 20_000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (!res.ok) return null;
     const type = res.headers.get("content-type") ?? "";

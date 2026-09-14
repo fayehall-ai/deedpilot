@@ -262,23 +262,44 @@ export async function renderSlides(
   outDir: string,
   sectionDurations: number[],
   theme: SlideTheme = DEFAULT_THEME,
-  photo?: CountyPhoto | null,
+  photos: CountyPhoto[] = [],
 ): Promise<RenderedSlide[]> {
   const { default: sharp } = await import("sharp");
   await mkdir(outDir, { recursive: true });
 
-  const svgs: string[] = [
-    titleSlideSvg(script.title, subtitle, theme),
-    ...(photo ? [photoSlideSvg(photo, theme)] : []),
-    ...script.sections.map((s) => contentSlideSvg(s.slide, theme)),
-  ];
+  /*
+   * The photograph takes its seconds from the section it interrupts, so the
+   * narration runs straight through it. Nothing is added to the timeline and
+   * nothing has to be padded: the section's own total is unchanged, it is just
+   * spent on two shots instead of one.
+   */
+  const slots = photoSlots(script.sections.length, photos.length, sectionDurations);
+  const svgs: string[] = [titleSlideSvg(script.title, subtitle, theme)];
+  const sectionPlan: number[] = [];
+  let taken = 0;
+
+  for (const [i, section] of script.sections.entries()) {
+    const total = sectionDurations[i] ?? 4;
+    const slotAt = slots.indexOf(i);
+    if (slotAt === -1 || !photos[taken]) {
+      svgs.push(contentSlideSvg(section.slide, theme));
+      sectionPlan.push(total);
+      continue;
+    }
+    const hold = Math.min(PHOTO_HOLD_SEC, total * 0.4);
+    svgs.push(contentSlideSvg(section.slide, theme));
+    sectionPlan.push(total - hold);
+    svgs.push(photoSlideSvg(photos[taken], theme));
+    sectionPlan.push(hold);
+    taken++;
+  }
 
   /*
    * The title card is held for a fixed beat because nothing is spoken over it.
    * Every other slide runs exactly as long as its own narration, which is what
    * keeps picture and voice in step without a timing track.
    */
-  const durations = [TITLE_HOLD_SEC, ...(photo ? [PHOTO_HOLD_SEC] : []), ...sectionDurations];
+  const durations = [TITLE_HOLD_SEC, ...sectionPlan];
 
   const out: RenderedSlide[] = [];
   for (const [i, svg] of svgs.entries()) {
@@ -304,8 +325,16 @@ export async function renderSlides(
 /** Seconds the opening card is held before the first narrated slide. */
 export const TITLE_HOLD_SEC = 3;
 
-/** Seconds the county photograph is held. Nothing is spoken over it either. */
-export const PHOTO_HOLD_SEC = 4;
+/**
+ * Longest a photograph is held, and the shortest section worth splitting.
+ *
+ * A photograph now runs *under* the narration rather than in a silent gap of
+ * its own, so its seconds are taken from the section it sits inside. A section
+ * shorter than the floor is left alone: cutting eight seconds of speech into
+ * two shots reads as a stutter, not as editing.
+ */
+export const PHOTO_HOLD_SEC = 5;
+export const MIN_SPLITTABLE_SEC = 11;
 
 /**
  * Total silent lead-in, which `encodeVideo` pads the narration by.
@@ -314,6 +343,29 @@ export const PHOTO_HOLD_SEC = 4;
  * plan disagreeing about this number is precisely the bug that put every slide
  * three seconds behind its own narration.
  */
-export function leadInSec(hasPhoto: boolean): number {
-  return TITLE_HOLD_SEC + (hasPhoto ? PHOTO_HOLD_SEC : 0);
+export function leadInSec(): number {
+  return TITLE_HOLD_SEC;
+}
+
+/**
+ * Which sections give up time to a photograph.
+ *
+ * Spread across the middle. The opening section is where the sale is
+ * identified and the closing one carries the single point the viewer is meant
+ * to leave with; cutting away from either is the one place a photograph costs
+ * more than it adds.
+ */
+export function photoSlots(sectionCount: number, photoCount: number, durations: number[]): number[] {
+  if (photoCount < 1 || sectionCount < 3) return [];
+  const eligible: number[] = [];
+  for (let i = 1; i < sectionCount - 1; i++) {
+    if ((durations[i] ?? 0) >= MIN_SPLITTABLE_SEC) eligible.push(i);
+  }
+  if (eligible.length === 0) return [];
+  const take = Math.min(photoCount, eligible.length);
+  // Evenly spaced through the eligible middle rather than clustered at the front.
+  const step = eligible.length / take;
+  const out: number[] = [];
+  for (let n = 0; n < take; n++) out.push(eligible[Math.floor(n * step)]);
+  return [...new Set(out)];
 }

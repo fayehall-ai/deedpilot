@@ -41,6 +41,9 @@ const IS_PHOTO = /\.(jpe?g|png)$/i;
 
 interface Entry { file: string; url: string; licence: string; credit: string; source: "wikidata" | "commons"; }
 
+/** How many photographs are worth keeping for one county. */
+const PER_COUNTY = 4;
+
 const strip = (html: string) => html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 
 async function imageinfo(titles: string[]) {
@@ -71,24 +74,34 @@ function toEntry(p: Record<string, unknown>, source: Entry["source"]): Entry | n
   };
 }
 
-async function fallback(county: string, state: string): Promise<Entry | null> {
+async function fallback(county: string, state: string): Promise<Entry[]> {
   const q = `${county} County ${state} courthouse`;
   const url =
     "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search" +
     `&gsrsearch=${encodeURIComponent(q)}&gsrnamespace=6&gsrlimit=25` +
     "&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1920";
   const res = await fetch(url, { headers: UA });
-  if (!res.ok) return null;
+  if (!res.ok) return [];
   const d = (await res.json()) as { query?: { pages?: Record<string, Record<string, unknown>> } };
   const pages = Object.values(d.query?.pages ?? {});
-  // Prefer something that names the county: a search for "Foo County courthouse"
-  // will happily return a courthouse in the next state over.
+  /*
+   * Prefer something that names the county: a search for "Foo County
+   * courthouse" will happily return a courthouse in the next state over.
+   *
+   * Every safe hit is kept, not just the first. One search is one request
+   * against a service that throttles, so taking four photographs from it
+   * instead of one is the difference between a county having a sequence and
+   * having a single card.
+   */
   const named = pages.filter((p) => String(p.title ?? "").toLowerCase().includes(county.toLowerCase()));
+  const out: Entry[] = [];
+  const seen = new Set<string>();
   for (const p of [...named, ...pages]) {
     const e = toEntry(p, "commons");
-    if (e) return e;
+    if (e && !seen.has(e.file)) { seen.add(e.file); out.push(e); }
+    if (out.length >= PER_COUNTY) break;
   }
-  return null;
+  return out;
 }
 
 async function main() {
@@ -109,9 +122,12 @@ async function main() {
   }
   console.log(`counties with a Wikidata image: ${primary.size}`);
 
-  const out: Record<string, Entry> = existsSync("data/county-photos.json")
-    ? (JSON.parse(readFileSync("data/county-photos.json", "utf8")) as Record<string, Entry>)
+  const raw = existsSync("data/county-photos.json")
+    ? (JSON.parse(readFileSync("data/county-photos.json", "utf8")) as Record<string, Entry | Entry[]>)
     : {};
+  // The first version of this file held one entry per county.
+  const out: Record<string, Entry[]> = {};
+  for (const [k, v] of Object.entries(raw)) out[k] = Array.isArray(v) ? v : [v];
   console.log(`existing catalogue entries: ${Object.keys(out).length}`);
   const fips = [...primary.keys()];
   let needFallback: string[] = [];
@@ -123,8 +139,9 @@ async function main() {
     for (const f of batch) {
       const p = byTitle.get(primary.get(f)!.file);
       const e = p ? toEntry(p, "wikidata") : null;
-      if (e) out[f] = e;
-      else needFallback.push(f);
+      if (e) out[f] = [e, ...(out[f] ?? []).filter((x) => x.file !== e.file)].slice(0, PER_COUNTY);
+      // A county with a usable primary still benefits from a few more.
+      if (!e || (out[f]?.length ?? 0) < PER_COUNTY) needFallback.push(f);
     }
     if (i % 450 === 0) process.stdout.write(`  primary pass ${i}/${fips.length}\r`);
   }
@@ -132,7 +149,7 @@ async function main() {
   console.log(`needing a Commons fallback:   ${needFallback.length}`);
 
   // Only chase a fallback where a seat exists — those are the counties we ship.
-  needFallback = needFallback.filter((f) => seats[f] && !out[f]);
+  needFallback = needFallback.filter((f) => seats[f] && (out[f]?.length ?? 0) < PER_COUNTY);
 
   if (process.argv.includes("--window")) {
     const { db } = await import("../lib/db");
@@ -158,14 +175,20 @@ async function main() {
   for (const [n, f] of needFallback.entries()) {
     const { county, state } = primary.get(f)!;
     if (!county || !state) continue;
-    const e = await fallback(county, state);
-    if (e) { out[f] = e; found++; }
+    const found_ = await fallback(county, state);
+    if (found_.length) {
+      const merged = [...(out[f] ?? [])];
+      for (const e of found_) if (!merged.some((x) => x.file === e.file)) merged.push(e);
+      out[f] = merged.slice(0, PER_COUNTY);
+      found++;
+    }
     if (n % 25 === 0) process.stdout.write(`  fallback ${n}/${needFallback.length} (found ${found})\r`);
     await new Promise((r) => setTimeout(r, 400)); // polite to Commons, and not throttled
   }
   console.log(`\nfallback found: ${found}`);
   writeFileSync("data/county-photos.json", JSON.stringify(out));
-  console.log(`total counties with a safe photo: ${Object.keys(out).length}`);
+  const total = Object.values(out).reduce((n, v) => n + v.length, 0);
+  console.log(`counties with a safe photo: ${Object.keys(out).length}   photographs: ${total}`);
 }
 
 main().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });
