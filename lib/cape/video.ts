@@ -84,6 +84,20 @@ export function buildConcatList(slides: RenderedSlide[]): string {
   return parts.join("\n") + "\n";
 }
 
+/** Pixel dimensions of a rendered slide, so the clips match it exactly. */
+async function probeSize(file: string): Promise<{ width: number; height: number }> {
+  if (!file) return { width: 1920, height: 1080 };
+  const { stdout } = await run("ffprobe", [
+    "-v", "error",
+    "-select_streams", "v:0",
+    "-show_entries", "stream=width,height",
+    "-of", "csv=p=0:s=x",
+    file,
+  ]);
+  const [w, h] = stdout.trim().split("x").map(Number);
+  return Number.isFinite(w) && Number.isFinite(h) ? { width: w, height: h } : { width: 1920, height: 1080 };
+}
+
 /** Exact duration of a media file, from ffprobe. */
 async function probeDuration(file: string): Promise<number> {
   const { stdout } = await run("ffprobe", [
@@ -144,6 +158,68 @@ async function concatAudio(mp3Paths: string[], outPath: string): Promise<void> {
   ]);
 }
 
+/**
+ * One slide, as a clip that moves.
+ *
+ * ## Why each slide is encoded separately
+ *
+ * The module note above explains why the concat demuxer beat a filter graph
+ * for stills, and that reasoning holds harder here: `zoompan` per input would
+ * put eleven of these in one command line. Encoding each clip on its own and
+ * concatenating the results keeps the command the same shape whether there are
+ * four slides or forty, and a failure names the slide it happened on.
+ *
+ * ## Why the source is upscaled first
+ *
+ * `zoompan` computes an integer crop per frame, so zooming a 1920-wide still
+ * directly steps a whole pixel at a time and reads as judder rather than as a
+ * camera move. Scaling up first makes each step a fraction of an output pixel.
+ * 2x is the point where it looks smooth without the frame buffer getting
+ * expensive.
+ *
+ * ## Why the direction alternates
+ *
+ * A deck where every shot pushes in the same way reads as a slideshow with an
+ * effect applied. Alternating in and out, keyed to the slide index so it is
+ * deterministic, is what the reference briefings do.
+ */
+async function renderSlideClip(
+  pngPath: string,
+  seconds: number,
+  outPath: string,
+  opts: { fps: number; width: number; height: number; index: number },
+): Promise<string> {
+  const { fps, width, height, index } = opts;
+  const frames = Math.max(1, Math.round(seconds * fps));
+  const zoomIn = index % 2 === 0;
+  /* Slow: about 8% across the whole slide, whatever its length. */
+  const span = 0.08;
+  const z = zoomIn
+    ? `min(1+${span}*on/${frames},${1 + span})`
+    : `max(${1 + span}-${span}*on/${frames},1)`;
+
+  await run(
+    "ffmpeg",
+    [
+      "-y",
+      "-loop", "1",
+      "-i", pngPath,
+      "-vf",
+      `scale=${width * 2}:${height * 2},` +
+        `zoompan=z='${z}':d=${frames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':` +
+        `s=${width}x${height}:fps=${fps},setsar=1,format=yuv420p`,
+      "-frames:v", String(frames),
+      "-c:v", "libx264",
+      "-preset", "medium",
+      "-crf", "20",
+      "-r", String(fps),
+      outPath,
+    ],
+    { maxBuffer: 1024 * 1024 * 32 },
+  );
+  return outPath;
+}
+
 export interface EncodeOptions {
   slides: RenderedSlide[];
   /** Per-section narration, in order. Empty produces a silent slide deck. */
@@ -176,13 +252,42 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
   const concatPath = path.join(opts.outDir, `${opts.name}.concat.txt`);
   const mp4Path = path.join(opts.outDir, `${opts.name}.mp4`);
 
+  /*
+   * Each slide becomes its own moving clip, and the demuxer concatenates those
+   * instead of stills. The playlist is still written — it is the inspectable
+   * record of what was held for how long, and the first thing to read when a
+   * cut looks wrong.
+   */
   await writeFile(concatPath, buildConcatList(opts.slides), "utf8");
+
+  const clipDir = path.join(opts.outDir, "clips");
+  await mkdir(clipDir, { recursive: true });
+  const { width, height } = await probeSize(opts.slides[0]?.pngPath ?? "");
+
+  const clips: string[] = [];
+  for (const [i, slide] of opts.slides.entries()) {
+    clips.push(
+      await renderSlideClip(
+        slide.pngPath,
+        Math.max(0.5, slide.durationSec),
+        path.join(clipDir, `clip-${String(i).padStart(3, "0")}.mp4`),
+        { fps, width, height, index: i },
+      ),
+    );
+  }
+
+  const clipList = path.join(opts.outDir, `${opts.name}.clips.txt`);
+  await writeFile(
+    clipList,
+    clips.map((c) => `file '${c.replace(/'/g, "'\\''")}'`).join("\n") + "\n",
+    "utf8",
+  );
 
   const args = [
     "-y",
     "-f", "concat",
     "-safe", "0",
-    "-i", concatPath,
+    "-i", clipList,
   ];
 
   let audioPath: string | null = null;
@@ -197,21 +302,15 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
     args.push("-i", audioPath);
   }
 
-  args.push(
-    "-c:v", "libx264",
-    /*
-     * `yuv420p` is not optional. Without it ffmpeg picks a pixel format from
-     * the PNG source that QuickTime, Safari and most social platforms refuse to
-     * play — the video encodes cleanly and then will not open on the machines
-     * the audience actually uses.
-     */
-    "-pix_fmt", "yuv420p",
-    "-r", String(fps),
-    // Even dimensions, or libx264 rejects the stream outright.
-    "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
-    "-preset", "medium",
-    "-crf", "20",
-  );
+  /*
+   * Stream-copied. Every clip was written by `renderSlideClip` with the same
+   * encoder, rate and pixel format — `yuv420p` among them, which is not
+   * optional: without it ffmpeg picks a format from the PNG source that
+   * QuickTime, Safari and most social platforms refuse to play, and the file
+   * encodes cleanly then will not open. Re-encoding here would cost a second
+   * generation of loss for nothing.
+   */
+  args.push("-c:v", "copy");
 
   if (audioPath) {
     args.push("-c:a", "aac", "-b:a", "192k");
