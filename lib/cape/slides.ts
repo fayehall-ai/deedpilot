@@ -118,17 +118,42 @@ export function wrapText(text: string, fontSize: number, maxWidth: number): stri
 }
 
 /** The title card. */
+export interface TitleBackdrop {
+  dataUri: string;
+  seat: string;
+  credit: string;
+}
+
 export function titleSlideSvg(
   title: string,
   subtitle: string,
   theme: SlideTheme = DEFAULT_THEME,
+  backdrop?: TitleBackdrop | null,
 ): string {
   const { width: W, height: H } = theme;
   const titleLines = wrapText(title, 86, W - 320).slice(0, 3);
   const startY = H / 2 - (titleLines.length - 1) * 55 - 20;
 
+  /*
+   * The scrim is not a style choice. Aerial imagery is high-frequency detail at
+   * every brightness, and white text laid straight onto it is unreadable over
+   * roofs and parking lots. 0.72 keeps the town legible underneath while the
+   * title stays the thing being read.
+   */
+  const backdropSvg = backdrop
+    ? `<image href="${backdrop.dataUri}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="${W}" height="${H}" fill="${theme.background}" opacity="0.72"/>`
+    : "";
+
+  const backdropCaption = backdrop
+    ? `<text x="160" y="${H - 140}" font-family="${theme.fontFamily}" font-size="30" fill="${theme.muted}">County seat — ${esc(backdrop.seat)}</text>
+  <text x="${W - 160}" y="${H - 90}" text-anchor="end" font-family="${theme.fontFamily}" font-size="22" fill="${theme.muted}">${esc(backdrop.credit)}</text>`
+    : "";
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <rect width="${W}" height="${H}" fill="${theme.background}"/>
+  ${backdropSvg}
+  ${backdropCaption}
   <rect x="0" y="0" width="14" height="${H}" fill="${theme.accent}"/>
   ${titleLines
     .map(
@@ -218,12 +243,13 @@ export async function renderSlides(
   outDir: string,
   sectionDurations: number[],
   theme: SlideTheme = DEFAULT_THEME,
+  backdrop?: TitleBackdrop | null,
 ): Promise<RenderedSlide[]> {
   const { default: sharp } = await import("sharp");
   await mkdir(outDir, { recursive: true });
 
   const svgs: string[] = [
-    titleSlideSvg(script.title, subtitle, theme),
+    titleSlideSvg(script.title, subtitle, theme, backdrop),
     ...script.sections.map((s) => contentSlideSvg(s.slide, theme)),
   ];
 
@@ -244,7 +270,11 @@ export async function renderSlides(
   // Kept next to the frames: when a slide looks wrong, the SVG is the diff.
   await writeFile(
     path.join(outDir, "slides.svg.json"),
-    JSON.stringify(svgs, null, 1),
+    JSON.stringify(
+      svgs.map((v) => v.replace(/href="data:[^"]+"/, 'href="data:…elided…"')),
+      null,
+      1,
+    ),
     "utf8",
   );
 

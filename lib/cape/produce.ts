@@ -18,6 +18,7 @@ import {
   VoiceUnavailableError,
 } from "./voice";
 import { encodeVideo, EncoderMissingError } from "./video";
+import { establishingShot } from "./establishing";
 import { blobConfigured, publishVideo } from "./publish";
 
 /**
@@ -217,11 +218,20 @@ export async function produceCapePackage(
 
     // --- 3. Slides ----------------------------------------------------------
     const subtitle = `${input.countyName ?? ""}, ${input.state ?? ""} — sale ${input.saleDate}`.trim();
+    /*
+     * Decoration, and treated as such: a null backdrop costs the card nothing
+     * and must never cost the run its video. See `establishing.ts`.
+     */
+    const backdrop = await establishingShot(input.countyFips);
+    if (backdrop) log(`  establishing shot: ${backdrop.seat}`);
+
     const slides = await renderSlides(
       script,
       subtitle,
       path.join(outDir, "slides"),
       sectionDurations,
+      undefined,
+      backdrop,
     );
     log(`  slides: ${slides.length} rendered (title held ${TITLE_HOLD_SEC}s)`);
 

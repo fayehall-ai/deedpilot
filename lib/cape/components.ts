@@ -49,6 +49,12 @@ export interface Component {
 
 export interface PackageInput {
   auctionId: string;
+  /**
+   * The county's FIPS code. Optional because the checklist never needed it —
+   * it is what the establishing shot looks a county seat up by, and
+   * `capePackageInputs` has always supplied it alongside.
+   */
+  countyFips?: string;
   countyName: string | null;
   state: string | null;
   saleDate: string;
