@@ -302,6 +302,8 @@ export interface GeneratedScript {
    * used but not cached. Null on the ordinary path, cached or not.
    */
   countyLeak?: string | null;
+  /** Set when the script is about a different county than the facts. */
+  countyMismatch?: string | null;
 }
 
 /*
@@ -808,6 +810,40 @@ export async function generateSaleHalf(
 }
 
 /**
+ * Whether the script is about the county it was commissioned for.
+ *
+ * A stored Lake County, Indiana script is titled "St. Joseph County, Indiana —
+ * September 15 Tax Lien Sale" and narrates St. Joseph throughout: its
+ * downtown, its university corridor, its treasurer. The facts said Lake. The
+ * model substituted a neighbouring county it evidently knows better and wrote
+ * eight confident sections about the wrong place.
+ *
+ * Nothing in the pipeline could see it. `verifyNarration` checks figures, and
+ * a wrong county name is not a figure; the slide guard checks for absences, and
+ * this asserts rather than omits. It is the most serious failure this system
+ * can produce — a briefing that names the wrong courthouse — and it was the
+ * cheapest to detect: the county's name is right there in the facts.
+ *
+ * Checked against the title and the opening only. A later section may
+ * legitimately name a neighbouring county ("the Mishawaka corridor runs into
+ * St. Joseph"), and flagging that would be noise. If the opening has it right,
+ * the briefing is about the right place.
+ */
+export function countyMismatch(script: CapeScript, meta: CapeScriptMeta): string | null {
+  const county = meta.countyName?.trim();
+  if (!county) return null;
+
+  /* "St. Lucie" is written "St Lucie" and "Saint Lucie" about equally often. */
+  const canon = (t: string) =>
+    t.toLowerCase().replace(/\bsaint\b/g, "st").replace(/[^a-z0-9]+/g, " ");
+  const want = canon(county);
+  const where = `${script.title}\n${script.sections[0]?.narration ?? ""}`;
+  if (canon(where).includes(want)) return null;
+
+  return `facts say ${county}, the script opens with "${script.title}"`;
+}
+
+/**
  * Write the script and slide plan for one auction package.
  *
  * Two calls rather than one, and the first is usually not made: see
@@ -881,6 +917,7 @@ export async function generateCapeScript(
     unsupportedFigures: verifyNarration(script, facts),
     droppedBullets,
     countyLeak,
+    countyMismatch: countyMismatch(script, meta),
   };
 }
 

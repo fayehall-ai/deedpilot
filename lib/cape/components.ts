@@ -310,6 +310,40 @@ function contactSummary(i: PackageInput): ComponentItem | null {
   return parts.length ? have("Official county contacts", parts.join(", plus ")) : null;
 }
 
+/**
+ * A redemption window in days, and in something a listener can picture.
+ *
+ * Kentucky's is 4,015 days — the eleven-year limit in KRS 134.546, and correct.
+ * Spoken, it came out as "the redemption period on record is four thousand
+ * fifteen days", which is a true sentence that tells a bidder nothing: nobody
+ * holds a number that size in their head as a duration. The figure stays,
+ * because it is the statutory one and the narration must be able to cite it,
+ * and the human scale travels beside it.
+ *
+ * Only added where it says something the days do not. "365 days (one year)"
+ * earns its place; "90 days (about three months)" does not, so the threshold is
+ * a year.
+ */
+export function redemptionWindow(days: number): string {
+  if (days < 365) return `${days} days`;
+  const years = days / 365;
+  const rounded = Math.round(years);
+  const human =
+    Math.abs(years - rounded) < 0.08
+      ? rounded === 1
+        ? "one year"
+        : `about ${NUMBER_NAMES[rounded] ?? rounded} years`
+      : `about ${years.toFixed(1)} years`;
+  return `${days.toLocaleString()} days (${human})`;
+}
+
+/** Spelled out so the narrator has the word, not just the digits, in the facts. */
+const NUMBER_NAMES: Record<number, string> = {
+  1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven",
+  8: "eight", 9: "nine", 10: "ten", 11: "eleven", 12: "twelve", 15: "fifteen",
+  20: "twenty",
+};
+
 function tally(items: ComponentItem[]): Component["counts"] {
   return {
     have: items.filter((i) => i.state === "have").length,
@@ -412,7 +446,7 @@ export function buildPackage(i: PackageInput): CapePackage {
       ? have("Parcel list source", "Published sale list")
       : advise("Parcel list source", `The document behind this list is a ${i.listingKind} listing, not a published sale list`),
     i.statute?.redemption
-      ? have("Redemption rules", `${i.statute.redemption.maxDays} day window`)
+      ? have("Redemption rules", redemptionWindow(i.statute.redemption.maxDays))
       : i.statute
         ? have("Redemption rules", "No post-sale redemption in this state")
         : verify("Redemption rules", `No verified statutory parameters for ${i.state}`),
@@ -435,7 +469,7 @@ export function buildPackage(i: PackageInput): CapePackage {
     i.statute
       ? have(
           "Redemption period",
-          i.statute.redemption ? `${i.statute.redemption.maxDays} days` : "None post-sale",
+          i.statute.redemption ? redemptionWindow(i.statute.redemption.maxDays) : "None post-sale",
         )
       : verify("Redemption period", `No verified statutory parameters for ${i.state}`),
     i.statute?.redemption

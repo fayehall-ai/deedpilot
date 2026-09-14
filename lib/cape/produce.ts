@@ -255,6 +255,25 @@ export async function produceCapePackage(
       `  script: ${script.sections.length} section(s), ~${estimateDurationSec(script)}s, ` +
         `${generated.model}${generated.usedFallback ? " (fallback)" : ""}`,
     );
+    /*
+     * A script about the wrong county is held, not shipped.
+     *
+     * Treated exactly like an unsupported figure, and for the same reason: it
+     * is a confident false statement that a viewer has no way to check, and the
+     * next steps would spend money turning it into audio and then put it in
+     * front of an audience. Held rather than retried, because a second roll of
+     * the same dice is not a fix and a person should see that this happened.
+     */
+    if (generated.countyMismatch) {
+      log(`  HELD — wrong county: ${generated.countyMismatch}`);
+      await upsert(input.auctionId, {
+        inputsHash,
+        stage: "script",
+        error: `wrong county — ${generated.countyMismatch}`,
+      });
+      return { ...base, stage: "script", skipped: "script names the wrong county" };
+    }
+
     if (generated.countyLeak) {
       log(`  county half NOT cached — it names an occasion: ${generated.countyLeak.slice(0, 90)}`);
     }

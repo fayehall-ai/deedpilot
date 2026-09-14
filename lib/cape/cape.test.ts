@@ -9,8 +9,14 @@
 import { assessIntake, INTAKE_KEYS, type IntakeInput } from "./intake";
 import { classifySource, TIER_RANK } from "./sources";
 import { productionDeadline } from "./deadline";
-import { buildPackage } from "./components";
-import { assembleScript, countyHalfLeak, spokenToDigits, stripAbsenceBullets } from "./script";
+import { buildPackage, redemptionWindow } from "./components";
+import {
+  assembleScript,
+  countyHalfLeak,
+  countyMismatch,
+  spokenToDigits,
+  stripAbsenceBullets,
+} from "./script";
 import {
   csvField,
   exportFilename,
@@ -596,3 +602,56 @@ assert(
 );
 
 console.log("cape county half: all assertions passed");
+
+// ---------------------------------------------------------------------------
+// The briefing must be about the county it was commissioned for
+// ---------------------------------------------------------------------------
+/*
+ * A stored Lake County, Indiana script is titled "St. Joseph County, Indiana —
+ * September 15 Tax Lien Sale" and narrates St. Joseph throughout: its downtown,
+ * its university corridor, its treasurer. The facts said Lake. Nothing in the
+ * pipeline could see it — `verifyNarration` checks figures and a county name is
+ * not a figure — and it is the worst thing this system can produce, a briefing
+ * naming the wrong courthouse.
+ */
+const scriptFor = (title: string, opening: string) =>
+  ({ title, keyTakeaway: "k", sections: [sec("opening", opening)] }) as never;
+
+assert(
+  countyMismatch(scriptFor("Lake County, Indiana — Tax Lien Sale", "This covers Lake County."),
+    { countyName: "Lake", state: "IN", saleDate: "2026-09-08", saleDateConfirmed: true,
+      saleType: "Tax Lien", platform: "zeus" }) === null,
+  "the right county passes",
+);
+
+assert(
+  countyMismatch(scriptFor("St. Joseph County, Indiana — Tax Lien Sale", "This covers St. Joseph County."),
+    { countyName: "Lake", state: "IN", saleDate: "2026-09-08", saleDateConfirmed: true,
+      saleType: "Tax Lien", platform: "zeus" }) !== null,
+  "a substituted county is caught",
+);
+
+/* "St. Lucie", "St Lucie" and "Saint Lucie" are one county, not three. */
+assert(
+  countyMismatch(scriptFor("Saint Lucie County, Florida — Tax Deed Sale", "Saint Lucie County sells deeds."),
+    { countyName: "St. Lucie", state: "FL", saleDate: "2026-09-14", saleDateConfirmed: true,
+      saleType: "Tax Deed", platform: "realforeclose" }) === null,
+  "punctuation and Saint/St are not a mismatch",
+);
+
+// ---------------------------------------------------------------------------
+// A redemption window a listener can picture
+// ---------------------------------------------------------------------------
+/*
+ * Kentucky's is 4,015 days — the eleven-year limit in KRS 134.546, and correct.
+ * Spoken it became "the redemption period on record is four thousand fifteen
+ * days", which is true and useless: nobody holds a number that size as a
+ * duration. The statutory figure stays so the narration can cite it.
+ */
+assert(redemptionWindow(4015) === "4,015 days (about eleven years)", redemptionWindow(4015));
+assert(redemptionWindow(365) === "365 days (one year)", redemptionWindow(365));
+assert(redemptionWindow(1095) === "1,095 days (about three years)", redemptionWindow(1095));
+/* Under a year, the days are already the clearest form. */
+assert(redemptionWindow(180) === "180 days", redemptionWindow(180));
+
+console.log("cape script identity: all assertions passed");
