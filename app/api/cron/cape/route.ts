@@ -60,9 +60,22 @@ const RESERVE_MS = 170_000;
  * function may run. At eighty seconds a job that fails every attempt gives up
  * inside the reserve instead of being cut off mid-write.
  */
-const SCRIPT_TIMEOUT_MS = 80_000;
-/** Model calls, not CPU. Four in flight per function, ~8 across two ticks. */
-const CONCURRENCY = 4;
+const SCRIPT_TIMEOUT_MS = 150_000;
+/**
+ * Three, and the schedule is every three minutes — so about six calls in flight.
+ *
+ * The first deployment ran four per function against a two-minute schedule and a
+ * ten-minute ceiling, which is up to five overlapping invocations and twenty
+ * concurrent generations. The logs show what that bought: "grok attempt 1 —
+ * Request timed out" seven times in one tick. Piling on more concurrency made
+ * every individual call slower until they all missed the deadline, and the
+ * eighty-second deadline then turned ordinary slowness into failure — locally
+ * the same work takes ninety to a hundred and fifty seconds.
+ *
+ * Six in flight finishes the backlog in roughly three hours and leaves the
+ * provider able to answer.
+ */
+const CONCURRENCY = 3;
 
 /**
  * Who may run this.

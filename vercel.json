@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/cape",
-      "schedule": "*/2 * * * *"
+      "schedule": "*/3 * * * *"
     }
   ]
 }
