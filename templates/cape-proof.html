@@ -1,0 +1,374 @@
+<title>Briefing Script Proof</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#EEF0EC; --surface:#F7F8F5; --raised:#FFFFFF;
+    --ink:#171C19; --muted:#6E766E; --line:#D6DAD4;
+    --accent:#2F5D50; --accent-soft:#DCE7E1;
+    --flag:#9C4221; --flag-soft:#F3E2D8;
+    --ok:#3F6B3A; --ok-soft:#DFEAD9;
+    --shadow:0 1px 2px rgba(23,28,25,.06),0 8px 24px rgba(23,28,25,.05);
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  :root:not([data-theme="light"]){ @media (prefers-color-scheme:dark){
+    --ground:#12150F; --surface:#191D17; --raised:#1F241D;
+    --ink:#E7EBE3; --muted:#949C92; --line:#2C3229;
+    --accent:#83C4AB; --accent-soft:#23302A;
+    --flag:#E0906A; --flag-soft:#33241C;
+    --ok:#95C288; --ok-soft:#1F2A1C;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+  }}
+  :root[data-theme="dark"]{
+    --ground:#12150F; --surface:#191D17; --raised:#1F241D;
+    --ink:#E7EBE3; --muted:#949C92; --line:#2C3229;
+    --accent:#83C4AB; --accent-soft:#23302A;
+    --flag:#E0906A; --flag-soft:#33241C;
+    --ok:#95C288; --ok-soft:#1F2A1C;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--serif);margin:0;
+       -webkit-font-smoothing:antialiased}
+  .wrap{padding-inline:20px;padding-block:24px 56px;max-width:1500px;margin:0 auto}
+  header.top{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:baseline;
+             border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px}
+  h1{font-size:clamp(25px,3.4vw,36px);font-weight:600;margin:0;letter-spacing:-.015em;text-wrap:balance}
+  .sub{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .stats{display:flex;gap:22px;margin-left:auto;flex-wrap:wrap}
+  .stat b{display:block;font-family:var(--mono);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+  .stat.flagged b{color:var(--flag)} .stat.done b{color:var(--ok)}
+  .desk{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:26px;align-items:start}
+  @media(max-width:900px){.desk{grid-template-columns:1fr}}
+  .rail{position:sticky;top:18px;display:flex;flex-direction:column;gap:12px;
+        max-height:calc(100vh - 40px)}
+  @media(max-width:900px){.rail{position:static;max-height:none}}
+  .controls{display:flex;flex-direction:column;gap:9px}
+  input[type=search]{width:100%;font-family:var(--mono);font-size:13px;padding:10px 12px;
+    border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:6px 11px;border-radius:999px;
+        border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+  .chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--ground)}
+  .chip.flag[aria-pressed=true]{background:var(--flag);border-color:var(--flag)}
+  .chip.ok[aria-pressed=true]{background:var(--ok);border-color:var(--ok)}
+  .list{overflow-y:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);flex:1}
+  @media(max-width:900px){.list{max-height:46vh}}
+  .row{display:grid;grid-template-columns:1fr auto;gap:3px 10px;width:100%;text-align:left;
+       padding:10px 13px;background:none;border:0;border-bottom:1px solid var(--line);cursor:pointer;color:inherit;font:inherit}
+  .row:last-child{border-bottom:0}
+  .row:hover{background:var(--accent-soft)}
+  .row[aria-current=true]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+  .row .nm{font-weight:500;font-size:15px}
+  .row .mt{grid-column:1/-1;font-family:var(--mono);font-size:11px;color:var(--muted);
+           font-variant-numeric:tabular-nums}
+  .dot{width:8px;height:8px;border-radius:999px;align-self:center}
+  .dot.f{background:var(--flag)} .dot.o{background:var(--ok)} .dot.n{background:var(--line)}
+  .paper{background:var(--raised);border:1px solid var(--line);border-radius:12px;
+         box-shadow:var(--shadow);padding:clamp(20px,3.4vw,42px);min-width:0}
+  .ph{border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:8px}
+  .ph h2{font-size:clamp(21px,2.5vw,29px);font-weight:600;margin:0 0 9px;letter-spacing:-.01em;text-wrap:balance}
+  .meta{display:flex;gap:7px 16px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--muted);
+        font-variant-numeric:tabular-nums}
+  .flagbar{margin-top:14px;background:var(--flag-soft);border-left:3px solid var(--flag);
+           padding:11px 14px;border-radius:0 7px 7px 0}
+  .flagbar b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--flag)}
+  .flagbar p{margin:5px 0 0;font-size:14.5px;line-height:1.55}
+  .flagbar code{font-family:var(--mono);background:var(--raised);padding:1px 6px;border-radius:4px;color:var(--flag)}
+  .sec{padding:22px 0;border-bottom:1px solid var(--line)}
+  .sec:last-of-type{border-bottom:0}
+  .sh{display:flex;gap:11px;align-items:baseline;margin-bottom:9px}
+  .sn{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:600;letter-spacing:.05em}
+  .st{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.09em;text-transform:uppercase}
+  .scope{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+         padding:2px 7px;border-radius:999px;margin-left:auto;white-space:nowrap}
+  .scope.county{background:var(--accent-soft);color:var(--accent)}
+  .scope.sale{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+  .sec.county{background:linear-gradient(90deg,var(--accent-soft) 0 3px,transparent 3px);padding-left:15px}
+  .shared{margin-top:14px;background:var(--accent-soft);border-left:3px solid var(--accent);
+          padding:11px 14px;border-radius:0 7px 7px 0}
+  .shared b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+  .shared p{margin:5px 0 0;font-size:14.5px;line-height:1.55}
+  .nar{font-size:clamp(16.5px,1.5vw,18.5px);line-height:1.72;margin:0;max-width:66ch}
+  .nar mark{background:var(--flag-soft);color:var(--flag);padding:0 3px;border-radius:3px;font-weight:500}
+  .take{margin-top:20px;background:var(--accent-soft);border-radius:9px;padding:15px 18px}
+  .take b{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+  .take p{margin:6px 0 0;font-size:16px;line-height:1.62;max-width:66ch}
+  .verdict{margin-top:24px;border-top:1px solid var(--line);padding-top:18px;display:flex;
+           gap:10px;flex-wrap:wrap;align-items:center}
+  .vb{font-family:var(--mono);font-size:12px;padding:9px 16px;border-radius:7px;border:1px solid var(--line);
+      background:var(--surface);color:var(--ink);cursor:pointer}
+  .vb.on-ok{background:var(--ok);border-color:var(--ok);color:var(--ground)}
+  .vb.on-fix{background:var(--flag);border-color:var(--flag);color:var(--ground)}
+  .vnote{flex:1;min-width:210px;font-family:var(--mono);font-size:12.5px;padding:9px 12px;
+         border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
+  .vstate{font-family:var(--mono);font-size:11px;color:var(--muted);width:100%}
+  .nav{display:flex;gap:9px;margin-top:18px}
+  .nav button{font-family:var(--mono);font-size:12px;padding:8px 15px;border-radius:7px;
+    border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+  .nav button:disabled{opacity:.4;cursor:default}
+  button:focus-visible,input:focus-visible,.row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<script>window.__SCRIPTS__=/*DATA*/[]/*DATA*/;</script>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Briefing Script Proof</h1>
+      <div class="sub" id="subline"></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="s-total">—</b><span>scripts</span></div>
+      <div class="stat flagged"><b id="s-flag">—</b><span>flagged</span></div>
+      <div class="stat done"><b id="s-done">—</b><span>reviewed</span></div>
+      <div class="stat"><b id="s-counties">—</b><span>counties</span></div>
+      <div class="stat"><b id="s-words">—</b><span>words</span></div>
+    </div>
+  </header>
+
+  <div class="desk">
+    <aside class="rail">
+      <div class="controls">
+        <input type="search" id="q" placeholder="county, state, date…" autocomplete="off">
+        <div class="chips">
+          <button class="chip" id="f-all" aria-pressed="true">all</button>
+          <button class="chip flag" id="f-flag" aria-pressed="false">flagged</button>
+          <button class="chip" id="f-todo" aria-pressed="false">unreviewed</button>
+          <button class="chip ok" id="f-ok" aria-pressed="false">cleared</button>
+          <button class="chip" id="f-county" aria-pressed="false">county material</button>
+        </div>
+      </div>
+      <div class="list" id="list" role="listbox" aria-label="Scripts"></div>
+    </aside>
+
+    <main class="paper" id="paper" aria-live="polite"></main>
+  </div>
+</div>
+<script>
+(function(){
+  var DATA = window.__SCRIPTS__ || [];
+  var reviews = Object.create(null);   // slug -> {verdict, note}
+  var dbNs = null;
+  var current = null;
+  var filter = "all";
+
+  var $ = function(id){ return document.getElementById(id); };
+  var esc = function(s){ return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
+
+  // Highlight the exact figures the verifier flagged, wherever they are spoken.
+  function markFigures(text, flagged){
+    var out = esc(text);
+    if (!flagged || !flagged.length) return out;
+    var words = {0:"zero",1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",
+                 8:"eight",9:"nine",10:"ten",11:"eleven",12:"twelve",13:"thirteen",
+                 20:"twenty",30:"thirty",40:"forty",50:"fifty",60:"sixty",70:"seventy",
+                 80:"eighty",90:"ninety",100:"hundred"};
+    flagged.forEach(function(f){
+      var n = Number(f);
+      var terms = [f];
+      if (words[n]) terms.push(words[n]);
+      terms.forEach(function(t){
+        out = out.replace(new RegExp("\\b(" + t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + ")\\b","gi"),
+                          "<mark>$1</mark>");
+      });
+    });
+    return out;
+  }
+
+  function counts(){
+    var done = 0;
+    for (var k in reviews) if (reviews[k] && reviews[k].verdict) done++;
+    return { total: DATA.length,
+             flag: DATA.filter(function(d){ return d.flagged.length; }).length,
+             done: done };
+  }
+
+  /*
+   * In "county material" the list collapses to one sale per county.
+   *
+   * The statute, redemption, deed and submarket sections are written once per
+   * county and spoken verbatim in every sale it holds — nineteen of them in
+   * Monmouth. Listing all nineteen asks a reader to check identical paragraphs
+   * eighteen times and buries the four sections that actually differ. One entry
+   * per county, showing only the shared half, is the same review for a
+   * nineteenth of the reading.
+   */
+  function oncePerCounty(list){
+    var seen = Object.create(null);
+    return list.filter(function(d){
+      var k = d.state + "|" + d.county;
+      if (seen[k]) return false;
+      if (!d.sections.some(function(s){ return s.scope === "county"; })) return false;
+      seen[k] = 1;
+      return true;
+    });
+  }
+
+  function visible(){
+    var q = ($("q").value || "").trim().toLowerCase();
+    var base = filter === "county" ? oncePerCounty(DATA) : DATA;
+    return base.filter(function(d){
+      var r = reviews[d.slug];
+      if (filter === "flag" && !d.flagged.length) return false;
+      if (filter === "todo" && r && r.verdict) return false;
+      if (filter === "ok" && !(r && r.verdict === "ok")) return false;
+      if (!q) return true;
+      return (d.county + " " + d.state + " " + d.saleDate + " " + d.title).toLowerCase().indexOf(q) > -1;
+    });
+  }
+
+  function renderStats(){
+    var c = counts();
+    $("s-total").textContent = c.total;
+    $("s-flag").textContent = c.flag;
+    $("s-done").textContent = c.done;
+    var seen = Object.create(null);
+    DATA.forEach(function(d){ seen[d.state + "|" + d.county] = 1; });
+    $("s-counties").textContent = Object.keys(seen).length;
+    var w = DATA.reduce(function(n,d){
+      return n + d.sections.reduce(function(m,s){ return m + s.narration.split(/\s+/).length; }, 0); }, 0);
+    $("s-words").textContent = w >= 1000 ? Math.round(w/1000) + "k" : w;
+    $("subline").textContent = filter === "county"
+      ? "One briefing per county · the standing sections, spoken in every sale that county holds"
+      : "CAPE narration · every upcoming county sale · read for accuracy before it is spoken";
+  }
+
+  function renderList(){
+    var rows = visible();
+    $("list").innerHTML = rows.map(function(d){
+      var r = reviews[d.slug];
+      var cls = r && r.verdict === "ok" ? "o" : (d.flagged.length ? "f" : "n");
+      return '<button class="row" role="option" data-slug="' + esc(d.slug) + '"' +
+        ' aria-current="' + (current === d.slug) + '">' +
+        '<span class="nm">' + esc(d.county) + ' County, ' + esc(d.state) + '</span>' +
+        '<span class="dot ' + cls + '"></span>' +
+        '<span class="mt">' + esc(d.saleDate) + ' · ' + Number(d.parcels).toLocaleString() +
+        (d.held ? " announced" : " parcels") +
+        (d.flagged.length ? ' · flagged ' + esc(d.flagged.join(", ")) : "") +
+        (r && r.verdict ? ' · ' + (r.verdict === "ok" ? "cleared" : "needs change") : "") +
+        '</span></button>';
+    }).join("") || '<div style="padding:18px;font-family:var(--mono);font-size:12px;color:var(--muted)">No scripts match.</div>';
+    if (!rows.length) return;
+    if (!rows.some(function(d){ return d.slug === current; })) show(rows[0].slug);
+  }
+
+  function show(slug){
+    current = slug;
+    var d = DATA.filter(function(x){ return x.slug === slug; })[0];
+    if (!d) return;
+    var r = reviews[slug] || {};
+    var idx = visible().findIndex ? visible().findIndex(function(x){ return x.slug === slug; }) : -1;
+    var vis = visible();
+
+    $("paper").innerHTML =
+      '<div class="ph"><h2>' + esc(d.title) + '</h2>' +
+      '<div class="meta"><span>' + esc(d.county) + ' County, ' + esc(d.state) + '</span>' +
+      '<span>sale ' + esc(d.saleDate) + '</span>' +
+      '<span>' + esc(d.saleType || "—") + '</span>' +
+      '<span>' + esc(d.platform || "—") + '</span>' +
+      '<span>' + Number(d.parcels).toLocaleString() + (d.held ? " announced" : " parcels") + '</span>' +
+      '<span>' + d.sections.length + ' sections</span></div>' +
+      (d.flagged.length
+        ? '<div class="flagbar"><b>Held for review</b><p>The narration speaks ' +
+          d.flagged.map(function(f){ return "<code>" + esc(f) + "</code>"; }).join(", ") +
+          ', which ' + (d.flagged.length > 1 ? "do" : "does") +
+          ' not appear in the facts CAPE computed for this sale. Highlighted below. ' +
+          'Usually a figure the model invented — a fee, a count, a date.</p></div>'
+        : "") +
+      (d.sharedWith > 1 && d.sections.some(function(s){ return s.scope === "county"; })
+        ? '<div class="shared"><b>Shared sections</b><p>The sections marked ' +
+          '<em>every ' + esc(d.county) + ' sale</em> are spoken word for word in ' +
+          d.sharedWith + ' upcoming ' + esc(d.county) + ' County sales. A correction to one of ' +
+          'them is a correction to all ' + d.sharedWith + '.</p></div>'
+        : "") +
+      '</div>' +
+      d.sections.filter(function(s){
+        return filter !== "county" || s.scope === "county";
+      }).map(function(s, i){
+        var shared = s.scope === "county" && d.sharedWith > 1;
+        return '<section class="sec' + (s.scope === "county" ? " county" : "") + '">' +
+          '<div class="sh"><span class="sn">' + (i+1) + '</span>' +
+          '<span class="st">' + esc(s.heading) + '</span>' +
+          '<span class="scope ' + s.scope + '">' +
+            (s.scope === "county"
+              ? (shared ? "every " + d.county + " sale · " + d.sharedWith : "county")
+              : "this sale") +
+          '</span></div>' +
+          '<p class="nar">' + markFigures(s.narration, d.flagged) + '</p></section>';
+      }).join("") +
+      (filter === "county" ? "" :
+        '<div class="take"><b>Key takeaway</b><p>' + esc(d.takeaway) + '</p></div>') +
+      '<div class="verdict">' +
+        '<button class="vb' + (r.verdict === "ok" ? " on-ok" : "") + '" id="v-ok">Reads correctly</button>' +
+        '<button class="vb' + (r.verdict === "fix" ? " on-fix" : "") + '" id="v-fix">Needs a change</button>' +
+        '<input class="vnote" id="v-note" placeholder="what to change…" value="' + esc(r.note || "") + '">' +
+        '<div class="vstate" id="v-state"></div>' +
+      '</div>' +
+      '<div class="nav"><button id="prev">← previous</button><button id="next">next →</button></div>';
+
+    var i = vis.map(function(x){ return x.slug; }).indexOf(slug);
+    $("prev").disabled = i <= 0;
+    $("next").disabled = i < 0 || i >= vis.length - 1;
+    $("prev").onclick = function(){ if (i > 0) { show(vis[i-1].slug); renderList(); } };
+    $("next").onclick = function(){ if (i < vis.length - 1) { show(vis[i+1].slug); renderList(); } };
+    $("v-ok").onclick  = function(){ save(slug, "ok",  $("v-note").value); };
+    $("v-fix").onclick = function(){ save(slug, "fix", $("v-note").value); };
+    $("v-note").onchange = function(){ if (reviews[slug]) save(slug, reviews[slug].verdict, this.value); };
+    $("v-state").textContent = dbNs
+      ? (r.verdict ? "Saved — visible to everyone with this link." : "Your verdict is saved for everyone with this link.")
+      : "Read-only here: verdicts cannot be saved in this view.";
+    Array.prototype.forEach.call(document.querySelectorAll(".row"), function(b){
+      b.setAttribute("aria-current", String(b.dataset.slug === slug));
+    });
+  }
+
+  function save(slug, verdict, note){
+    reviews[slug] = { verdict: verdict, note: note || "" };
+    show(slug); renderList(); renderStats();
+    if (!dbNs) return;
+    dbNs.doc("reviews/" + slug).set({
+      slug: slug, verdict: verdict, note: note || "", at: new Date().toISOString()
+    }).catch(function(){ /* a refusal leaves the local mark; nothing to retry */ });
+  }
+
+  $("list").addEventListener("click", function(e){
+    var b = e.target.closest(".row"); if (b) show(b.dataset.slug);
+  });
+  $("q").addEventListener("input", renderList);
+  [["f-all","all"],["f-flag","flag"],["f-todo","todo"],["f-ok","ok"],["f-county","county"]].forEach(function(p){
+    $(p[0]).addEventListener("click", function(){
+      filter = p[1];
+      ["f-all","f-flag","f-todo","f-ok","f-county"].forEach(function(id){
+        $(id).setAttribute("aria-pressed", String(id === p[0]));
+      });
+      renderStats();
+      renderList();
+      if (current) show(current);
+    });
+  });
+
+  // Open on the first flagged script — those are the ones that need an expert.
+  var firstFlagged = DATA.filter(function(d){ return d.flagged.length; })[0];
+  current = (firstFlagged || DATA[0] || {}).slug || null;
+  renderStats(); renderList(); if (current) show(current);
+
+  if (window.claude && window.claude.use) {
+    window.claude.use("db").then(function(ns){
+      if (!ns) return;
+      dbNs = ns;
+      ns.collection("reviews").onSnapshot(function(snap){
+        reviews = Object.create(null);
+        snap.docs.forEach(function(doc){
+          var v = doc.data() || {};
+          reviews[v.slug || doc.id] = { verdict: v.verdict, note: v.note || "" };
+        });
+        renderStats(); renderList(); if (current) show(current);
+      }, function(){ /* subscribe failed; local marks still work */ });
+    });
+  }
+})();
+</script>
+
+</body></html>
