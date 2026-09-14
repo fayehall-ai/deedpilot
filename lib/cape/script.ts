@@ -65,6 +65,89 @@ const SectionSchema = z.object({
   slide: SlideSchema,
 });
 
+/**
+ * The county half: everything true of any sale this county holds under this
+ * statute.
+ *
+ * Named fields rather than a free array, and that is deliberate. The assembled
+ * script interleaves the two halves in a fixed order, and an array would make
+ * the ordering a guess about what the model meant by each heading — which is
+ * exactly the kind of inference that produces a briefing explaining redemption
+ * before it has said what is being sold. Named slots make the running order a
+ * property of the code.
+ */
+export const CountyHalfSchema = z.object({
+  howItWorks: SectionSchema.describe(
+    "How this sale type works in this state, naming the governing statute.",
+  ),
+  redemption: SectionSchema.describe(
+    "Redemption: how long, what it costs the redeemer, and when it ends. If the state has no post-sale redemption, say so and what that means instead.",
+  ),
+  deedConveys: SectionSchema.describe(
+    "What the deed conveys, and what curative work is still required after it.",
+  ),
+  submarkets: z
+    .array(SectionSchema)
+    .max(5)
+    .describe(
+      "One section for EACH submarket in the FACTS, in order. Name it, say what kind of place it is and what that implies for a bidder. Empty when the facts list none.",
+    ),
+});
+
+/**
+ * The sale half: everything that turns on which occasion this is.
+ *
+ * These five are regenerated for every sale, because every one of them names
+ * the date, the time, the venue, the parcel count or the checks outstanding on
+ * this particular notice.
+ */
+export const SaleHalfSchema = z.object({
+  title: z.string().describe("Video title, e.g. 'Cobb County, Georgia — November 3 Tax Deed Sale'"),
+  opening: SectionSchema.describe(
+    "Open by naming the county, the state and the sale date.",
+  ),
+  beforeSaleDay: SectionSchema.describe(
+    "Before sale day: registration, deposit, payment method and deadlines.",
+  ),
+  inventory: SectionSchema.describe(
+    "The inventory in aggregate — how many parcels, and what the list gives a bidder to work from.",
+  ),
+  stillToVerify: SectionSchema.describe(
+    "What still needs verifying with the county before anyone acts.",
+  ),
+  close: SectionSchema.describe("Close on the single most important point."),
+  keyTakeaway: z.string().describe("One sentence"),
+});
+
+export type CountyHalf = z.infer<typeof CountyHalfSchema>;
+export type SaleHalf = z.infer<typeof SaleHalfSchema>;
+
+/**
+ * Put the halves in running order.
+ *
+ * Opening, then what is being sold and on what terms, then how to turn up and
+ * what is on offer, then the neighbourhoods, then the checks and the close. The
+ * submarket sections sit after the inventory because they are about the parcels
+ * a bidder has just been told exist.
+ */
+export function assembleScript(county: CountyHalf, sale: SaleHalf): CapeScript {
+  return {
+    title: sale.title,
+    keyTakeaway: sale.keyTakeaway,
+    sections: [
+      sale.opening,
+      county.howItWorks,
+      county.redemption,
+      county.deedConveys,
+      sale.beforeSaleDay,
+      sale.inventory,
+      ...county.submarkets,
+      sale.stillToVerify,
+      sale.close,
+    ],
+  };
+}
+
 export const CapeScriptSchema = z.object({
   title: z.string().describe("Video title, e.g. 'Cobb County, Georgia — November 3 Tax Deed Sale'"),
   sections: z
@@ -214,6 +297,11 @@ export interface GeneratedScript {
   unsupportedFigures: string[];
   /** Slide bullets dropped by `stripAbsenceBullets`. Empty is the pass. */
   droppedBullets: string[];
+  /**
+   * Set when a freshly written county half named an occasion and was therefore
+   * used but not cached. Null on the ordinary path, cached or not.
+   */
+  countyLeak?: string | null;
 }
 
 /*
@@ -267,6 +355,25 @@ const TENS: Record<string, number> = {
 
 const SCALES: Record<string, number> = { hundred: 100, thousand: 1000, million: 1_000_000 };
 
+/**
+ * The ordinal spellings, which are in `UNITS` and `TENS` for their values but
+ * must not behave like cardinals inside a run.
+ *
+ * English lets a cardinal keep accumulating — "two thousand twenty-six" is one
+ * number — and an ordinal ends that. "Fourteenth two thousand twenty-six" is a
+ * day followed by a year, never a single quantity, and reading it as one
+ * produced 16026: fourteen and two summed to sixteen, scaled by the thousand
+ * and topped with twenty-six. Every sale whose date falls on a day spoken with
+ * "-th" was held as though the narrator had invented a figure — four of the
+ * first six packages in a batch run, in four different states, all reporting
+ * the same impossible number.
+ */
+const ORDINALS = new Set(
+  [...Object.keys(UNITS), ...Object.keys(TENS)].filter((w) =>
+    /(?:th|st|nd|rd)$/.test(w) && !/^(?:six|seven|eight|nine|ten)$/.test(w),
+  ),
+);
+
 export const NUMBER_WORD = new RegExp(
   `\\b(?:${[...Object.keys(UNITS), ...Object.keys(TENS), ...Object.keys(SCALES), "and"].join("|")})\\b`,
   "g",
@@ -315,18 +422,7 @@ export function spokenToDigits(text: string): string {
     return { value: total + current, sawNumber };
   };
 
-  return text.replace(
-    /*
-     * A run of number words, allowing hyphens and spaces between them — and
-     * `point` / `dash`, which are not number words but which join one into an
-     * identifier. Matching them here is what lets the identifier be recognised
-     * as a whole instead of being silently split into two innocent cardinals.
-     */
-    new RegExp(
-      `(${NUMBER_WORD.source})(?:[\\s-]+(?:point|dash)?[\\s-]*(${NUMBER_WORD.source}))*`,
-      "g",
-    ),
-    (run) => {
+  const convertRun = (run: string): string => {
       const lower = run.toLowerCase();
 
       /*
@@ -413,6 +509,44 @@ export function spokenToDigits(text: string): string {
 
       const { value, sawNumber } = cardinal(flat);
       return sawNumber ? String(value) : run;
+  };
+
+  return text.replace(
+    /*
+     * A run of number words, allowing hyphens and spaces between them — and
+     * `point` / `dash`, which are not number words but which join one into an
+     * identifier. Matching them here is what lets the identifier be recognised
+     * as a whole instead of being silently split into two innocent cardinals.
+     */
+    new RegExp(
+      `(${NUMBER_WORD.source})(?:[\\s-]+(?:point|dash)?[\\s-]*(${NUMBER_WORD.source}))*`,
+      "g",
+    ),
+    (run) => {
+      /*
+       * Cut the run after an ordinal that is not its last word, and read the
+       * halves separately. See `ORDINALS`.
+       *
+       * Splitting rather than bailing out is what keeps the check useful: "14"
+       * and "2026" are both then compared against the facts, so a narrator who
+       * says the twentieth of a sale held on the fourteenth is still caught —
+       * which the comment on the ordinal entries in `UNITS` says is the whole
+       * reason they are there. Returning the run untouched would have bought
+       * silence instead.
+       */
+      const parts = run.split(/([\s-]+)/);
+      const words = parts.map((_, n) => n).filter((n) => n % 2 === 0 && parts[n]);
+      const last = words[words.length - 1];
+      for (const n of words) {
+        if (n !== last && ORDINALS.has(parts[n].toLowerCase())) {
+          return (
+            convertRun(parts.slice(0, n + 1).join("")) +
+            (parts[n + 1] ?? " ") +
+            convertRun(parts.slice(n + 2).join(""))
+          );
+        }
+      }
+      return convertRun(run);
     },
   );
 }
@@ -494,8 +628,192 @@ export function stripAbsenceBullets(script: CapeScript): string[] {
   return dropped;
 }
 
+/*
+ * The shared length budget, split between the halves.
+ *
+ * Still 850–950 spoken words for the finished briefing, because that is five
+ * minutes at 180 wpm and five minutes is what gets watched. The split is by
+ * section count rather than by a second word figure, so the two prompts cannot
+ * quietly drift into commissioning eleven minutes between them.
+ */
+const WORDS_PER_SECTION = "EIGHTY TO NINETY WORDS";
+
+const DEPTH =
+  `Go deeper rather than wider: explain the mechanism behind each fact, what it means ` +
+  `for a bidder's money and timeline, and what the consequence is of getting it wrong. ` +
+  `A section that states a fact and stops is too short. Never pad by repeating a fact ` +
+  `you have already given.\n\n`;
+
+/**
+ * Anything in a county half that ties it to one occasion.
+ *
+ * The prompt forbids all of this twice over and the sampled halves obeyed, but
+ * the consequence of one slipping through is not proportional to how rarely it
+ * happens: a county half is reused for every future sale in the county, so a
+ * date that leaks into the redemption section is spoken confidently in
+ * nineteen Monmouth videos, eighteen of them produced weeks after anyone read
+ * this one, all naming a sale that already happened.
+ *
+ * `verifyNarration` cannot catch it. A leaked sale date is not an invented
+ * number — it is in the facts, correctly, for the sale that commissioned the
+ * half. It only becomes a lie on reuse, which is after every check has passed.
+ */
+const MONTH =
+  "january|february|march|april|may|june|july|august|september|october|november|december";
+/*
+ * A day, spoken or written, so a month only counts as a date when one follows.
+ *
+ * "May" is a month and also the commonest modal verb in this whole subject —
+ * "the owner may redeem", "liens may be sold at a premium". Matching the bare
+ * word rejected a clean half on its first test, and in production that failure
+ * is silent and total: every county half naming a right the statute grants
+ * would have been used once and never cached, leaving the split switched off
+ * while appearing to work.
+ */
+const DAY =
+  "\\d{1,2}(?:st|nd|rd|th)?|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|" +
+  "eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|" +
+  "twentieth|thirtieth|twenty-\\w+|thirty-first";
+
+const OCCASION = [
+  new RegExp(`\\b(?:${MONTH})\\s+(?:the\\s+)?(?:${DAY})\\b`, "i"),
+  new RegExp(`\\b(?:${DAY})\\s+of\\s+(?:${MONTH})\\b`, "i"),
+  /\b(?:19|20)\d{2}\b/,
+  /\btwo thousand\b/i,
+  /\b\d{1,2}[:.]\d{2}\s*(?:a\.?m|p\.?m)?\b/i,
+  /\b(?:o'clock|a\.?m\.?|p\.?m\.?)\b/i,
+  /\bthis (?:sale|auction)\b/i,
+  /\b(?:sale day|upcoming sale|this coming|next month)\b/i,
+];
+
+/**
+ * Whether this half is safe to keep, and what disqualified it if not.
+ *
+ * A leaked half is still correct for the sale that produced it, so it is used
+ * and simply not cached — the cheapest possible handling of a rare event, and
+ * it degrades to exactly the behaviour before the split rather than failing a
+ * package over a turn of phrase.
+ */
+export function countyHalfLeak(half: CountyHalf): string | null {
+  const sections = [half.howItWorks, half.redemption, half.deedConveys, ...half.submarkets];
+  for (const sec of sections) {
+    for (const text of [sec.narration, sec.slide.headline, ...sec.slide.bullets]) {
+      const hit = OCCASION.find((re) => re.test(text));
+      if (hit) return `[${sec.heading}] ${text}`;
+    }
+  }
+  return null;
+}
+
+/**
+ * Write the county half — the sections true of any sale this county holds.
+ *
+ * Kept free of the occasion on purpose, and the prompt says so twice, because
+ * this text is reused verbatim for every future sale in the county. A date that
+ * slips into the redemption section is not a small error: it is a wrong date
+ * spoken confidently in nineteen videos, sixteen of which were produced weeks
+ * after anyone read this one.
+ */
+export async function generateCountyHalf(
+  pkg: CapePackage,
+  meta: CapeScriptMeta,
+): Promise<{ half: CountyHalf; model: string; usedFallback: boolean; facts: string }> {
+  const facts = factSheet(pkg, meta);
+  const submarkets = pkg.components
+    .find((c) => c.n === 6)
+    ?.items.find((i) => i.label === "Submarkets identified" && i.state === "have")?.detail;
+
+  const result = await runStructured({
+    operation: "cape-script",
+    countyFips: meta.countyFips,
+    system: SYSTEM,
+    schema: CountyHalfSchema,
+    schemaName: "CountyHalf",
+    maxTokens: 7000,
+    prompt:
+      `Write the standing sections of the briefing for ${meta.countyName ?? "this county"}, ` +
+      `${meta.state ?? "this state"} — the parts that are true of EVERY ${meta.saleType ?? "tax"} ` +
+      `sale this county holds under this statute.\n\n` +
+      `THIS TEXT IS REUSED FOR EVERY FUTURE SALE IN THIS COUNTY. Therefore:\n` +
+      `  - Do NOT name a sale date, a start time, a venue, a parcel count, a registration\n` +
+      `    deadline or a payment deadline. Not once, in narration or on a slide.\n` +
+      `  - Do NOT say "this sale", "this auction", "on sale day" or "the upcoming sale".\n` +
+      `    Write about how sales work here, not about an occasion.\n` +
+      `  - Everything you write must stay true a year from now.\n\n` +
+      `Sections, one each:\n` +
+      `  - How this sale type works in this state, naming the governing statute.\n` +
+      `  - Redemption: how long, what it costs the redeemer, and when it ends.\n` +
+      `  - What the deed conveys, and what curative work is still required after it.\n` +
+      `  - One section for EACH submarket in the facts, if any. Name it, and say what kind\n` +
+      `    of place it is and what that implies for a bidder. These are the most useful\n` +
+      `    sections in the briefing; do not compress several submarkets into one.\n` +
+      (submarkets ? `    The submarkets are: ${submarkets}\n` : `    There are none on file — return an empty array.\n`) +
+      `\nLENGTH — A HARD BUDGET. ${WORDS_PER_SECTION} per section and no more.\n\n` +
+      DEPTH +
+      `Every number you speak must appear in the FACTS below.\n\n` +
+      `FACTS\n=====\n${facts}\n`,
+  });
+
+  return { half: result.data, model: result.model, usedFallback: result.usedFallback, facts };
+}
+
+/**
+ * Write the sale half — the sections that turn on which occasion this is.
+ *
+ * The county half is passed in as context rather than regenerated, so the model
+ * can see what has already been said and avoid explaining redemption twice. It
+ * is explicitly marked as not-to-be-rewritten: the schema only accepts the five
+ * sale sections back, and a model invited to improve on text it cannot return
+ * spends its budget doing so.
+ */
+export async function generateSaleHalf(
+  pkg: CapePackage,
+  meta: CapeScriptMeta,
+  county: CountyHalf,
+): Promise<{ half: SaleHalf; model: string; usedFallback: boolean; facts: string }> {
+  const facts = factSheet(pkg, meta);
+
+  const already = [county.howItWorks, county.redemption, county.deedConveys, ...county.submarkets]
+    .map((s) => `  [${s.heading}] ${s.narration}`)
+    .join("\n");
+
+  const result = await runStructured({
+    operation: "cape-script",
+    countyFips: meta.countyFips,
+    system: SYSTEM,
+    schema: SaleHalfSchema,
+    schemaName: "SaleHalf",
+    maxTokens: 7000,
+    prompt:
+      `Write the sale-specific sections of the briefing for the ${meta.saleDate} sale in ` +
+      `${meta.countyName ?? "this county"}, ${meta.state ?? "this state"}.\n\n` +
+      `Sections, one each:\n` +
+      `  - Opening: name the county, the state and the sale date.\n` +
+      `  - Before sale day: registration, deposit, payment method and deadlines.\n` +
+      `  - The inventory in aggregate — how many parcels, and what the list gives a bidder\n` +
+      `    to work from. Describe what is there. Do not account for what is not: no\n` +
+      `    sentence may name a record, layer or field as missing.\n` +
+      `  - What still needs verifying with the county before anyone acts.\n` +
+      `  - Close on the single most important point.\n\n` +
+      `LENGTH — A HARD BUDGET. ${WORDS_PER_SECTION} per section and no more.\n\n` +
+      DEPTH +
+      `ALREADY WRITTEN — these sections run between yours and are NOT yours to rewrite.\n` +
+      `Do not repeat what they say; refer back to it in a clause if you must.\n` +
+      `${already}\n\n` +
+      `Every number you speak must appear in the FACTS below.\n\n` +
+      `FACTS\n=====\n${facts}\n`,
+  });
+
+  return { half: result.data, model: result.model, usedFallback: result.usedFallback, facts };
+}
+
 /**
  * Write the script and slide plan for one auction package.
+ *
+ * Two calls rather than one, and the first is usually not made: see
+ * `capeCountyScripts`. `loadCountyHalf` is injected rather than imported so this
+ * module stays free of the database and `cape.test.ts` can still run it with no
+ * connection.
  *
  * Throws `NoProviderAvailableError` when neither Grok nor Claude is configured,
  * rather than returning an empty script — an empty narration that renders into
@@ -504,55 +822,65 @@ export function stripAbsenceBullets(script: CapeScript): string[] {
 export async function generateCapeScript(
   pkg: CapePackage,
   meta: CapeScriptMeta,
+  opts: {
+    /** Returns a cached county half, or null to write a fresh one. */
+    loadCountyHalf?: () => Promise<CountyHalf | null>;
+    /** Called with a freshly written half, for the caller to cache. */
+    saveCountyHalf?: (half: CountyHalf, model: string) => Promise<void>;
+  } = {},
 ): Promise<GeneratedScript> {
-  const facts = factSheet(pkg, meta);
+  const cached = opts.loadCountyHalf ? await opts.loadCountyHalf() : null;
 
-  const result = await runStructured({
-    operation: "cape-script",
-    countyFips: meta.countyFips,
-    system: SYSTEM,
-    schema: CapeScriptSchema,
-    schemaName: "CapeScript",
-    maxTokens: 9000,
-    prompt:
-      `Write the narration script and slide plan for the county auction briefing video.\n\n` +
-      `Open by naming the county, the state and the sale date.\n\n` +
-      `Then work through, one section each and in this order:\n` +
-      `  - How this sale type works in this state, naming the governing statute.\n` +
-      `  - Redemption: how long, what it costs the redeemer, and when it ends.\n` +
-      `  - What the deed conveys, and what curative work is still required after it.\n` +
-      `  - Before sale day: registration, deposit, payment method and deadlines.\n` +
-      `  - The inventory in aggregate — how many parcels, and what the list gives a\n` +
-      `    bidder to work from. Describe what is there. Do not account for what is not:\n` +
-      `    no sentence in this section may name a record, layer or field as missing.\n` +
-      `  - One section for EACH submarket on file, if any. Name it, and say what kind of\n` +
-      `    place it is and what that implies for a bidder. These are the most useful\n` +
-      `    sections in the briefing; do not compress several submarkets into one.\n` +
-      `  - What still needs verifying with the county before anyone acts.\n` +
-      `  - Close on the single most important point.\n\n` +
-      `LENGTH — A HARD BUDGET, NOT A TARGET. The finished script must total between 850 ` +
-      `and 950 spoken words. That is five minutes at the pace this is read. Use TEN ` +
-      `sections of EIGHTY TO NINETY WORDS each and no more. Before you answer, count the ` +
-      `words across every narration field; if the total is over 950, cut the least useful ` +
-      `sentences until it is not. A briefing that runs seven minutes is not watched, and ` +
-      `one that runs three is thin.\n\n` +
-      `Within that budget, go deeper rather than wider: explain the mechanism behind each ` +
-      `fact, what it means for a bidder's money and timeline, and what the consequence is ` +
-      `of getting it wrong. A section that states a fact and stops is too short. Never pad ` +
-      `by repeating a fact you have already given.\n\n` +
-      `Every number you speak must appear in the FACTS below.\n\n` +
-      `FACTS\n=====\n${facts}\n`,
-  });
+  let county: CountyHalf;
+  let countyModel = "cached";
+  let usedFallback = false;
+  let countyLeak: string | null = null;
 
-  /* Mutates `result.data` in place, before anything reads the slide plan. */
-  const droppedBullets = stripAbsenceBullets(result.data);
+  if (cached) {
+    county = cached;
+  } else {
+    const written = await generateCountyHalf(pkg, meta);
+    county = written.half;
+    countyModel = written.model;
+    usedFallback = written.usedFallback;
+
+    /*
+     * Cached only if it is reusable. See `countyHalfLeak` — a half naming this
+     * sale's date is right for this sale and wrong for every later one, so it
+     * is used here and thrown away rather than stored.
+     */
+    const leak = countyHalfLeak(county);
+    if (leak) countyLeak = leak;
+    else if (opts.saveCountyHalf) await opts.saveCountyHalf(county, written.model);
+  }
+
+  const sale = await generateSaleHalf(pkg, meta, county);
+  const script = assembleScript(county, sale.half);
+  const facts = sale.facts;
+
+  /* Mutates `script` in place, before anything reads the slide plan. */
+  const droppedBullets = stripAbsenceBullets(script);
 
   return {
-    script: result.data,
-    model: result.model,
-    usedFallback: result.usedFallback,
-    unsupportedFigures: verifyNarration(result.data, facts),
+    script,
+    /*
+     * Both, because they can differ: a county half written by Grok in August
+     * and a sale half written by Claude today is one script from two models,
+     * and "which model wrote this" is the first question asked of a bad line.
+     */
+    model: `${countyModel}+${sale.model}`,
+    usedFallback: usedFallback || sale.usedFallback,
+    /*
+     * Verified as assembled, against this sale's facts.
+     *
+     * A reused county half is re-checked on every sale it is reused for, which
+     * is the point: if the statute entry changed, `capeCountyInputsHash` would
+     * have replaced the half — but if something else moved a figure out from
+     * under it, this is what catches it before the audio is bought.
+     */
+    unsupportedFigures: verifyNarration(script, facts),
     droppedBullets,
+    countyLeak,
   };
 }
 

@@ -2,12 +2,22 @@
  * No `server-only` guard — this is the CLI's entry point and shells out to
  * ffmpeg. See `lib/cape/script.ts` for the same reasoning.
  */
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import path from "node:path";
 import { db } from "@/lib/db";
-import { capeProductions } from "@/lib/db/schema";
-import { buildPackage, capeInputsHash, type PackageInput } from "./components";
-import { generateCapeScript, estimateDurationSec, type CapeScript } from "./script";
+import { capeCountyScripts, capeProductions } from "@/lib/db/schema";
+import {
+  buildPackage,
+  capeCountyInputsHash,
+  capeInputsHash,
+  type PackageInput,
+} from "./components";
+import {
+  generateCapeScript,
+  estimateDurationSec,
+  type CapeScript,
+  type CountyHalf,
+} from "./script";
 import { leadInSec, renderSlides, TITLE_HOLD_SEC } from "./slides";
 import {
   characterCount,
@@ -134,11 +144,87 @@ export async function produceCapePackage(
     return { ...base, stage: "video", skipped: "already produced from these facts" };
   }
 
+  /*
+   * The same skip, measured against what this run is actually asked to make.
+   *
+   * The check above demands a `videoPath`, which a `--script-only` run never
+   * writes — so every script-only run regenerated every script it had already
+   * written. That is invisible on `--limit 1` and expensive across 476: a batch
+   * that dies at package 300 and is restarted buys those 300 model calls a
+   * second time, for identical output from identical facts.
+   *
+   * `stage` is not consulted on purpose. A package held at `script` for an
+   * unsupported figure still has the script that was held, written from these
+   * same facts, and re-rolling it is a fresh sample of the same distribution
+   * rather than a fix. `--force` is how you ask for a new one.
+   */
+  if (!opts.force && opts.scriptOnly && existing?.inputsHash === inputsHash && existing.script) {
+    return { ...base, stage: "script", skipped: "script already written from these facts" };
+  }
+
   const outDir = path.join(opts.outRoot, slug(input));
 
   try {
     // --- 1. Script and slide plan -------------------------------------------
     log("  writing script…");
+
+    /*
+     * The county half, looked up before anything is written.
+     *
+     * Keyed on (county, sale type) and validated by hash, so the row is reused
+     * only while the statute entry, the county rule and the submarket research
+     * behind it are unchanged. `usedCount` is incremented on every reuse purely
+     * so the saving is measurable after the fact — 815 sales across 523
+     * counties is the estimate; this is the count.
+     */
+    const countyHash = capeCountyInputsHash(input);
+    const countyKey = { fips: input.countyFips ?? "", saleType: input.saleType ?? "unknown" };
+
+    const loadCountyHalf = async (): Promise<CountyHalf | null> => {
+      if (!countyKey.fips || opts.force) return null;
+      const [row] = await db
+        .select()
+        .from(capeCountyScripts)
+        .where(
+          and(
+            eq(capeCountyScripts.countyFips, countyKey.fips),
+            eq(capeCountyScripts.saleType, countyKey.saleType),
+          ),
+        )
+        .limit(1);
+      if (!row || row.inputsHash !== countyHash) return null;
+      await db
+        .update(capeCountyScripts)
+        .set({ usedCount: sql`${capeCountyScripts.usedCount} + 1`, updatedAt: new Date() })
+        .where(eq(capeCountyScripts.id, row.id));
+      log(`  county half reused (written ${row.createdAt.toISOString().slice(0, 10)}, ${row.usedCount + 1} sales)`);
+      return row.sections as unknown as CountyHalf;
+    };
+
+    const saveCountyHalf = async (half: CountyHalf, model: string) => {
+      if (!countyKey.fips) return;
+      await db
+        .insert(capeCountyScripts)
+        .values({
+          countyFips: countyKey.fips,
+          saleType: countyKey.saleType,
+          inputsHash: countyHash,
+          sections: half as unknown as Record<string, unknown>[],
+          scriptModel: model,
+          usedCount: 1,
+        })
+        .onConflictDoUpdate({
+          target: [capeCountyScripts.countyFips, capeCountyScripts.saleType],
+          set: {
+            inputsHash: countyHash,
+            sections: half as unknown as Record<string, unknown>[],
+            scriptModel: model,
+            usedCount: 1,
+            updatedAt: new Date(),
+          },
+        });
+    };
+
     const generated = await generateCapeScript(pkg, {
       countyName: input.countyName,
       state: input.state,
@@ -147,7 +233,8 @@ export async function produceCapePackage(
       saleType: input.saleType,
       platform: input.platform,
       population: input.population,
-    });
+      countyFips: input.countyFips,
+    }, { loadCountyHalf, saveCountyHalf });
 
     const script = generated.script;
     base.script = script;
@@ -168,6 +255,9 @@ export async function produceCapePackage(
       `  script: ${script.sections.length} section(s), ~${estimateDurationSec(script)}s, ` +
         `${generated.model}${generated.usedFallback ? " (fallback)" : ""}`,
     );
+    if (generated.countyLeak) {
+      log(`  county half NOT cached — it names an occasion: ${generated.countyLeak.slice(0, 90)}`);
+    }
 
     /*
      * A script that spoke an uncomputed number stops here.

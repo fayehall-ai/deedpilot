@@ -62,7 +62,56 @@ export interface StructuredRequest<T extends z.ZodType> {
    * provider caps total request size.
    */
   images?: ImageInput[];
+  /**
+   * How long one provider may take before the chain gives up on it.
+   *
+   * Nothing here may wait forever, for the same reason nothing in
+   * `lib/db/index.ts` may: a call with no deadline does not fail, it parks. A
+   * batch run found it — 476 scripts, one call each, and a single request that
+   * never returns holds the whole run at package 3 with an idle event loop and
+   * no way to tell that from a slow model. The chain already knows what to do
+   * with a provider that fails; it just needed a reason to decide one had.
+   *
+   * Generous on purpose. A long structured generation legitimately runs into
+   * minutes, so this is a hang detector, not a latency budget — it should never
+   * fire on a call that was going to succeed.
+   */
+  timeoutMs?: number;
 }
+
+/** See `StructuredRequest.timeoutMs`. Four minutes; scripts land inside two. */
+const DEFAULT_TIMEOUT_MS = 240_000;
+
+/**
+ * How many times one provider is re-asked before the chain moves on.
+ *
+ * Only for failures that say nothing about whether the request was reasonable.
+ * A 400 will be a 400 every time; a timeout will not. Measured on a batch run:
+ * grok answered in about ninety seconds most of the time and occasionally not
+ * at all, and with no retry half of the fresh packages failed — while the
+ * Claude leg, which was supposed to catch them, was returning 400 on every call
+ * because the key is not workspace-scoped.
+ */
+const TRANSIENT_ATTEMPTS = 3;
+
+/**
+ * Whether a failure is worth asking the same provider again.
+ *
+ * Deliberately an allow-list of the transient shapes. Anything unrecognised is
+ * treated as permanent and falls through to the next provider immediately,
+ * because re-sending a request that was refused on its merits spends money and
+ * time to be told the same thing — and, for a refusal, is how a system ends up
+ * badgering a safety classifier.
+ */
+function isTransient(e: unknown): boolean {
+  if (e instanceof ProviderRefusedError) return false;
+  const status = (e as { status?: number } | null)?.status;
+  if (typeof status === "number") return status === 408 || status === 409 || status === 429 || status >= 500;
+  const msg = (e instanceof Error ? e.message : String(e)).toLowerCase();
+  return /timed out|timeout|etimedout|econnreset|socket hang up|network|fetch failed|aborted/.test(msg);
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export interface ProviderResult<T> {
   data: T;
@@ -102,7 +151,8 @@ const grokProvider: Provider = {
       baseURL: process.env.XAI_BASE_URL ?? "https://api.x.ai/v1",
     });
 
-    const completion = await client.chat.completions.parse({
+    const completion = await client.chat.completions.parse(
+      {
       model: GROK_MODEL,
       max_completion_tokens: req.maxTokens ?? 16000,
       messages: [
@@ -123,7 +173,17 @@ const grokProvider: Provider = {
         },
       ],
       response_format: zodResponseFormat(req.schema, req.schemaName),
-    });
+      },
+      /*
+       * `maxRetries: 0` because `runStructured` owns the retry, not the SDK.
+       *
+       * The SDK's retries are invisible from outside and multiply the deadline
+       * silently — two of them at four minutes is twelve before the caller
+       * hears anything, and no log line says why. The loop in `runStructured`
+       * does the same job where it can be read, counted and backed off.
+       */
+      { timeout: req.timeoutMs ?? DEFAULT_TIMEOUT_MS, maxRetries: 0 },
+    );
 
     const choice = completion.choices[0];
     if (choice?.message?.refusal) {
@@ -171,7 +231,8 @@ const claudeProvider: Provider = {
     // that gate on non-streaming `messages.parse`, so we always stream and
     // take finalMessage() — same structured parse when output_config.format
     // is set.
-    const stream = client.messages.stream({
+    const stream = client.messages.stream(
+      {
       model: CLAUDE_MODEL,
       max_tokens: maxTokens,
       system: req.system,
@@ -195,7 +256,10 @@ const claudeProvider: Provider = {
             : req.prompt,
         },
       ],
-    });
+      },
+      /* See the note on the Grok leg — `runStructured` owns the retry. */
+      { timeout: req.timeoutMs ?? DEFAULT_TIMEOUT_MS, maxRetries: 0 },
+    );
 
     const response = await stream.finalMessage();
 
@@ -272,13 +336,25 @@ export async function runStructured<T extends z.ZodType>(
   const failures: string[] = [];
 
   for (const [i, provider] of usable.entries()) {
-    try {
-      const data = await provider.run(req);
-      return { data, model: provider.model, usedFallback: i > 0 };
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      failures.push(`${provider.name}: ${msg}`);
-      console.warn(`[ai] ${provider.name} failed, trying next provider — ${msg}`);
+    for (let attempt = 1; attempt <= TRANSIENT_ATTEMPTS; attempt++) {
+      try {
+        const data = await provider.run(req);
+        return { data, model: provider.model, usedFallback: i > 0 };
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        const retryable = isTransient(e) && attempt < TRANSIENT_ATTEMPTS;
+        if (retryable) {
+          /* Backoff, jittered, so a batch that all timed out does not all
+             return at the same instant and time out together again. */
+          const wait = Math.round(2000 * 2 ** (attempt - 1) * (0.5 + Math.random()));
+          console.warn(`[ai] ${provider.name} attempt ${attempt} — ${msg}; retrying in ${wait}ms`);
+          await sleep(wait);
+          continue;
+        }
+        failures.push(`${provider.name}: ${msg}`);
+        console.warn(`[ai] ${provider.name} failed, trying next provider — ${msg}`);
+        break;
+      }
     }
   }
 

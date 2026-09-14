@@ -9,6 +9,7 @@
  *   npm run cape:produce -- --still          # hold every slide, no camera move
  *   npm run cape:produce -- --motion all     # move every slide (5x the file)
  *   npm run cape:produce -- --limit 20 --force
+ *   npm run cape:produce -- --script-only --concurrency 6
  *   npm run cape:produce -- --limit 1 --publish   # upload and print the URL
  *
  * ## Order of work
@@ -170,28 +171,67 @@ async function main() {
   let spentChars = 0;
   const urls: string[] = [];
 
-  for (const [n, { input, pkg }] of work.entries()) {
-    console.log(
-      `[${n + 1}/${work.length}] ${input.countyName}, ${input.state} — sale ${input.saleDate} ` +
-        `(due ${pkg.deadline.dueDate})`,
-    );
+  /*
+   * One at a time by default, and that default is not timidity.
+   *
+   * A full run encodes video, and ffmpeg already saturates the machine on a
+   * single clip — running four of those at once makes each of them slower and
+   * the batch no faster. A `--script-only` run is the opposite: every package
+   * is one HTTPS request spending minutes waiting on a model, and 476 of them
+   * in series is roughly twenty hours of a laptop doing nothing. So the lever
+   * exists, and the person who knows which kind of run this is sets it.
+   *
+   * Progress prints on completion rather than on start, because interleaved
+   * "writing script…" lines from six packages at once are unreadable — each
+   * package's output is buffered and flushed as one block.
+   */
+  const concurrency = Math.max(1, Number(arg("concurrency") ?? 1) || 1);
 
-    const result = await produceCapePackage(input, {
-      outRoot: OUT_ROOT,
-      scriptOnly: flag("script-only"),
-      silent: flag("silent"),
-      motion: flag("still") ? "none" : (arg("motion") as "all" | "opening" | "none" | undefined) ?? "opening",
-      force: flag("force"),
-      publish: flag("publish"),
-      onProgress: (m) => console.log(m),
-    });
+  let next = 0;
+  let done = 0;
+  const startedAt = Date.now();
 
-    spentChars += result.characters ?? 0;
-    if (result.videoUrl) urls.push(result.videoUrl);
-    if (result.stage === "video") produced++;
-    else if (result.stage === "failed") failed++;
-    else if (result.skipped) held++;
+  async function worker() {
+    for (;;) {
+      const n = next++;
+      if (n >= work.length) return;
+      const { input, pkg } = work[n];
+      const lines: string[] = [];
+
+      const result = await produceCapePackage(input, {
+        outRoot: OUT_ROOT,
+        scriptOnly: flag("script-only"),
+        silent: flag("silent"),
+        motion: flag("still") ? "none" : (arg("motion") as "all" | "opening" | "none" | undefined) ?? "opening",
+        force: flag("force"),
+        publish: flag("publish"),
+        onProgress: (m) => lines.push(m),
+      });
+
+      done++;
+      /*
+       * Elapsed and remaining, because a run this long is abandoned or babysat
+       * on the strength of whether anyone can tell how far through it is.
+       */
+      const elapsed = (Date.now() - startedAt) / 1000;
+      const eta = done > 0 ? Math.round((elapsed / done) * (work.length - done)) : 0;
+      console.log(
+        `[${done}/${work.length}] ${input.countyName}, ${input.state} — sale ${input.saleDate} ` +
+          `(due ${pkg.deadline.dueDate})  ~${Math.round(eta / 60)}m left`,
+      );
+      for (const l of lines) console.log(l);
+      /* A skip is silent inside `produceCapePackage`; in a batch that reads as a hang. */
+      if (result.skipped && lines.length === 0) console.log(`  skipped — ${result.skipped}`);
+
+      spentChars += result.characters ?? 0;
+      if (result.videoUrl) urls.push(result.videoUrl);
+      if (result.stage === "video") produced++;
+      else if (result.stage === "failed") failed++;
+      else if (result.skipped) held++;
+    }
   }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, work.length) }, worker));
 
   console.log(`\n=== summary ===`);
   console.log(`produced: ${produced}   held: ${held}   failed: ${failed}`);

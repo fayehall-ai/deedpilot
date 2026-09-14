@@ -1275,3 +1275,54 @@ export const capeProductions = pgTable(
 );
 
 export type CapeProduction = typeof capeProductions.$inferSelect;
+
+/**
+ * The half of a briefing script that is about the county rather than the sale.
+ *
+ * ## Why this table exists
+ *
+ * 815 upcoming sales sit in 523 counties: 292 of them are a second, fifth or
+ * nineteenth sale in a county already covered. Monmouth NJ alone holds
+ * nineteen in six weeks. Every one of those regenerated the whole script —
+ * including the sections on the state's statute, the redemption window, what
+ * the deed conveys and the county's submarkets, none of which can differ
+ * between two sales in the same county under the same statute.
+ *
+ * That is paid for twice over. Once in model calls, and again in speech: the
+ * narration cache in `artifacts/cape/_audio-cache` is keyed by a hash of each
+ * section's exact text, so identical sections are free to synthesise — but a
+ * model does not write the same paragraph twice, so the cache never hit across
+ * sales. Fixing the text makes the audio saving fall out for nothing.
+ *
+ * ## What the key is, and why `saleType` is in it
+ *
+ * One row per county per sale type. A county that runs both a deed sale and a
+ * lien sale is telling a bidder two different stories about what they are
+ * buying, and the statute sections are the part that differs most — so those
+ * must not share a cached half. `inputsHash` is `capeCountyInputsHash`: when
+ * the statute entry, the county rule or the submarket research changes, the
+ * hash moves and the half is rewritten on the next sale that needs it.
+ */
+export const capeCountyScripts = pgTable(
+  "cape_county_scripts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    countyFips: text("county_fips")
+      .notNull()
+      .references(() => counties.fips),
+    /** The auction's `sale_type` as written, since the narrative turns on it. */
+    saleType: text("sale_type").notNull(),
+    /** `capeCountyInputsHash` — the identity of the facts this was written from. */
+    inputsHash: text("inputs_hash").notNull(),
+    /** Ordered `CapeSection[]`: statute, redemption, deed, then one per submarket. */
+    sections: jsonb("sections").$type<Record<string, unknown>[]>().notNull(),
+    scriptModel: text("script_model"),
+    /** How many sales have been built on this half, for judging the saving. */
+    usedCount: integer("used_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("cape_county_scripts_key").on(t.countyFips, t.saleType)],
+);
+
+export type CapeCountyScript = typeof capeCountyScripts.$inferSelect;

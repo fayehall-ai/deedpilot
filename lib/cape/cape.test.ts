@@ -10,7 +10,7 @@ import { assessIntake, INTAKE_KEYS, type IntakeInput } from "./intake";
 import { classifySource, TIER_RANK } from "./sources";
 import { productionDeadline } from "./deadline";
 import { buildPackage } from "./components";
-import { stripAbsenceBullets } from "./script";
+import { assembleScript, countyHalfLeak, spokenToDigits, stripAbsenceBullets } from "./script";
 import {
   csvField,
   exportFilename,
@@ -489,3 +489,110 @@ for (const b of [
 }
 
 console.log("cape narration scope: all assertions passed");
+
+// ---------------------------------------------------------------------------
+// Spoken dates are two numbers, not one
+// ---------------------------------------------------------------------------
+/*
+ * A batch run held four of its first six packages — Union IN, Jefferson IN,
+ * Bath KY, Collier FL — every one reporting the same invented figure, 16026.
+ * None of them had invented anything. "September fourteenth two thousand
+ * twenty-six" was being read as a single cardinal: fourteen and two summed to
+ * sixteen, scaled by the thousand, topped with twenty-six. Every sale falling
+ * on a day spoken with "-th" was unproducible.
+ */
+for (const [spoken, want] of [
+  ["september fourteenth two thousand twenty-six", "september 14 2026"],
+  ["october sixth two thousand twenty-six", "october 6 2026"],
+  ["november third two thousand twenty-six", "november 3 2026"],
+  ["august twenty-first two thousand twenty-six", "august 21 2026"],
+  /* An ordinal at the end of a run still reads as one number. */
+  ["august twentieth", "august 20"],
+  ["one hundred forty-seven parcels", "147 parcels"],
+  /* And the earlier false positives stay fixed. */
+  ["twenty twenty-six", "2026"],
+  ["forty-eight dash four dash forty", "forty-eight dash four dash forty"],
+  ["seven seven zero", "seven seven zero"],
+  ["one million ninety thousand three hundred fifty-four", "1090354"],
+] as const) {
+  assert(spokenToDigits(spoken) === want, `${spoken} -> ${spokenToDigits(spoken)}, want ${want}`);
+}
+
+console.log("cape spoken numbers: all assertions passed");
+
+// ---------------------------------------------------------------------------
+// The county half must survive being reused
+// ---------------------------------------------------------------------------
+/*
+ * Monmouth NJ holds nineteen sales in six weeks and every one regenerated the
+ * statute, redemption, deed and submarket sections from scratch. Those are
+ * written once per county now and reused verbatim — which means a sale date
+ * that slips into one of them is not a typo in a script, it is a sale that
+ * already happened being announced in eighteen later videos. `verifyNarration`
+ * cannot catch that: on the day it is written the date is a supported fact.
+ */
+const sec = (heading: string, narration: string, bullets: string[] = []) => ({
+  heading,
+  narration,
+  slide: { headline: "H", bullets, figure: null, figureLabel: null },
+});
+
+const cleanHalf = {
+  howItWorks: sec("statute", "New Jersey municipalities sell tax liens under the Tax Sale Law."),
+  redemption: sec("redemption", "The owner may redeem at any time until the lien is foreclosed."),
+  deedConveys: sec("deed", "A certificate is not a deed. Foreclosure is a separate proceeding."),
+  submarkets: [sec("asbury", "The Asbury Park edge is a coastal redevelopment corridor.")],
+};
+
+assert(countyHalfLeak(cleanHalf as never) === null, "a half with no occasion in it is cacheable");
+
+/*
+ * "May" is a month and the commonest modal verb in this subject. Matching the
+ * bare word rejected every half that named a right the statute grants — which
+ * in production is silent: the split would appear to work while never caching
+ * anything.
+ */
+for (const fine of [
+  "The owner may redeem the certificate at any time before foreclosure.",
+  "Liens may be sold at a premium above the statutory rate.",
+  "A municipality may hold more than one sale a year.",
+  "March of the redemption clock does not stop for a bidder.",
+]) {
+  const half = { ...cleanHalf, redemption: sec("redemption", fine) };
+  assert(countyHalfLeak(half as never) === null, `not an occasion: ${fine}`);
+}
+
+for (const leak of [
+  "The next sale is on October sixth.",
+  "Bidding opens at 10:00 AM.",
+  "Registration closes before this sale.",
+  "Liens sold in 2026 redeem at the statutory rate.",
+  "Arrive early on sale day.",
+  "The auction starts at ten o'clock.",
+]) {
+  const dirty = { ...cleanHalf, redemption: sec("redemption", leak) };
+  assert(countyHalfLeak(dirty as never) !== null, `caught as an occasion: ${leak}`);
+}
+
+/* A bullet is read by the viewer too, so it is checked the same way. */
+const dirtyBullet = { ...cleanHalf, howItWorks: sec("statute", "Liens are sold at auction.", ["October 6 sale"]) };
+assert(countyHalfLeak(dirtyBullet as never) !== null, "an occasion on a slide is caught");
+
+/* Assembly order: what is sold and on what terms, before how to turn up. */
+const assembled = assembleScript(cleanHalf as never, {
+  title: "T",
+  keyTakeaway: "K",
+  opening: sec("opening", "o"),
+  beforeSaleDay: sec("before", "b"),
+  inventory: sec("inventory", "i"),
+  stillToVerify: sec("verify", "v"),
+  close: sec("close", "c"),
+} as never);
+
+assert(
+  assembled.sections.map((x) => x.heading).join(",") ===
+    "opening,statute,redemption,deed,before,inventory,asbury,verify,close",
+  `running order, got ${assembled.sections.map((x) => x.heading).join(",")}`,
+);
+
+console.log("cape county half: all assertions passed");

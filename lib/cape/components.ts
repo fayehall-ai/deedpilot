@@ -192,6 +192,38 @@ export function capeInputsHash(i: PackageInput): string {
   return createHash("sha256").update(JSON.stringify(shape)).digest("hex").slice(0, 16);
 }
 
+/**
+ * The identity of everything a briefing says about the *county*, with nothing
+ * about which sale prompted it.
+ *
+ * The partition is the whole idea, and it is decided by one question per field:
+ * could two sales in this county, under this statute, honestly disagree about
+ * it? The statute, the redemption window, what the deed conveys, the quiet-title
+ * requirement, the submarkets and the offices — no. The date, the time, the
+ * venue, the parcels and the platform — yes, every time.
+ *
+ * `saleType` sits on the county side despite living on the auction row, because
+ * it is not a property of the occasion: it is which body of law the county is
+ * selling under, and it is what the statute sections are written from. A county
+ * that runs both a deed sale and a lien sale gets two rows, which is right —
+ * those are two different explanations of what a bidder is buying.
+ *
+ * `population` is here because the narrator uses it for scale and it does not
+ * move between sales. `countyName`/`state` are here because they are spoken.
+ */
+export function capeCountyInputsHash(i: PackageInput): string {
+  const shape = {
+    county: i.countyName,
+    state: i.state,
+    saleType: i.saleType,
+    population: i.population,
+    offices: i.offices,
+    rule: i.rule ?? null,
+    statute: i.statute ?? null,
+  };
+  return createHash("sha256").update(JSON.stringify(shape)).digest("hex").slice(0, 16);
+}
+
 const have = (label: string, detail: string): ComponentItem => ({ label, state: "have", detail });
 /**
  * An item nobody has confirmed — silent to the narrator by default.
