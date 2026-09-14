@@ -732,6 +732,7 @@ export async function generateCountyHalf(
   pkg: CapePackage,
   meta: CapeScriptMeta,
   timeoutMs?: number,
+  attempts?: number,
 ): Promise<{ half: CountyHalf; model: string; usedFallback: boolean; facts: string }> {
   const facts = factSheet(pkg, meta);
   const submarkets = pkg.components
@@ -746,6 +747,7 @@ export async function generateCountyHalf(
     schemaName: "CountyHalf",
     maxTokens: 7000,
     timeoutMs,
+    attempts,
     prompt:
       `Write the standing sections of the briefing for ${meta.countyName ?? "this county"}, ` +
       `${meta.state ?? "this state"} — the parts that are true of EVERY ${meta.saleType ?? "tax"} ` +
@@ -787,6 +789,7 @@ export async function generateSaleHalf(
   meta: CapeScriptMeta,
   county: CountyHalf,
   timeoutMs?: number,
+  attempts?: number,
 ): Promise<{ half: SaleHalf; model: string; usedFallback: boolean; facts: string }> {
   const facts = factSheet(pkg, meta);
 
@@ -802,6 +805,7 @@ export async function generateSaleHalf(
     schemaName: "SaleHalf",
     maxTokens: 7000,
     timeoutMs,
+    attempts,
     prompt:
       `Write the sale-specific sections of the briefing for the ${meta.saleDate} sale in ` +
       `${meta.countyName ?? "this county"}, ${meta.state ?? "this state"}.\n\n` +
@@ -889,6 +893,8 @@ export async function generateCapeScript(
      * deadline there keeps the worst case inside the slot.
      */
     timeoutMs?: number;
+    /** Per-provider retry count. See `StructuredRequest.attempts`. */
+    attempts?: number;
   } = {},
 ): Promise<GeneratedScript> {
   const cached = opts.loadCountyHalf ? await opts.loadCountyHalf() : null;
@@ -901,7 +907,7 @@ export async function generateCapeScript(
   if (cached) {
     county = cached;
   } else {
-    const written = await generateCountyHalf(pkg, meta, opts.timeoutMs);
+    const written = await generateCountyHalf(pkg, meta, opts.timeoutMs, opts.attempts);
     county = written.half;
     countyModel = written.model;
     usedFallback = written.usedFallback;
@@ -916,7 +922,7 @@ export async function generateCapeScript(
     else if (opts.saveCountyHalf) await opts.saveCountyHalf(county, written.model);
   }
 
-  const sale = await generateSaleHalf(pkg, meta, county, opts.timeoutMs);
+  const sale = await generateSaleHalf(pkg, meta, county, opts.timeoutMs, opts.attempts);
   const script = assembleScript(county, sale.half);
   const facts = sale.facts;
 

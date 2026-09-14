@@ -77,6 +77,21 @@ export interface StructuredRequest<T extends z.ZodType> {
    * fire on a call that was going to succeed.
    */
   timeoutMs?: number;
+  /**
+   * How many times ONE provider is re-asked on a transient failure.
+   *
+   * Defaults to `TRANSIENT_ATTEMPTS`. A caller under a wall-clock ceiling needs
+   * to be able to lower it, because the retries multiply through the whole
+   * chain: two providers at three attempts each, at a 150-second deadline, is
+   * fifteen minutes for a single call — and a CAPE package is two calls. That
+   * arithmetic produced `Vercel Runtime Timeout Error: Task timed out after 800
+   * seconds` on a function whose claim window was sixty.
+   *
+   * Setting it to 1 does not remove the safety net, it moves it: the provider
+   * chain still falls through to Claude, and the job queue still retries the
+   * whole job up to `MAX_ATTEMPTS` times with a fresh lease.
+   */
+  attempts?: number;
 }
 
 /** See `StructuredRequest.timeoutMs`. Four minutes; scripts land inside two. */
@@ -335,14 +350,16 @@ export async function runStructured<T extends z.ZodType>(
 
   const failures: string[] = [];
 
+  const maxAttempts = Math.max(1, req.attempts ?? TRANSIENT_ATTEMPTS);
+
   for (const [i, provider] of usable.entries()) {
-    for (let attempt = 1; attempt <= TRANSIENT_ATTEMPTS; attempt++) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const data = await provider.run(req);
         return { data, model: provider.model, usedFallback: i > 0 };
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        const retryable = isTransient(e) && attempt < TRANSIENT_ATTEMPTS;
+        const retryable = isTransient(e) && attempt < maxAttempts;
         if (retryable) {
           /* Backoff, jittered, so a batch that all timed out does not all
              return at the same instant and time out together again. */

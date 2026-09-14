@@ -66,6 +66,8 @@ export interface ProduceOptions {
   force?: boolean;
   /** Per-provider deadline, for a caller running under a function ceiling. */
   scriptTimeoutMs?: number;
+  /** Per-provider retry count for the script calls. */
+  scriptAttempts?: number;
   /** Upload the finished video to Vercel Blob and record its public URL. */
   publish?: boolean;
   /** How much of the deck moves: `all`, `opening`, or `none`. See `video.ts`. */
@@ -236,7 +238,12 @@ export async function produceCapePackage(
       platform: input.platform,
       population: input.population,
       countyFips: input.countyFips,
-    }, { loadCountyHalf, saveCountyHalf, timeoutMs: opts.scriptTimeoutMs });
+    }, {
+      loadCountyHalf,
+      saveCountyHalf,
+      timeoutMs: opts.scriptTimeoutMs,
+      attempts: opts.scriptAttempts,
+    });
 
     const script = generated.script;
     base.script = script;

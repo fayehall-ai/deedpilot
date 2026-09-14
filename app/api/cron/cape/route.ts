@@ -97,6 +97,23 @@ const RESERVE_MS = 240_000;
  */
 const SCRIPT_TIMEOUT_MS = 150_000;
 /**
+ * One attempt per provider here, and the arithmetic is why.
+ *
+ * `runStructured` retries a transient failure three times per provider by
+ * default, and there are two providers, and a package is two sequential calls.
+ * At a 150-second deadline that is fifteen minutes for one call and half an
+ * hour for one package — behind an 800-second ceiling and a 60-second claim
+ * window. The logs recorded the result exactly: `Vercel Runtime Timeout Error:
+ * Task timed out after 800 seconds`, preceded by a column of "grok attempt 1 —
+ * Request timed out".
+ *
+ * Dropping to one does not remove the safety net, it moves it somewhere that
+ * costs nothing: the chain still falls through to Claude on the same call, and
+ * the job queue still re-leases the whole job up to three times. Worst case is
+ * now two calls at two providers — 600 seconds — which fits.
+ */
+const SCRIPT_ATTEMPTS = 1;
+/**
  * Three, and the schedule is every three minutes — so about six calls in flight.
  *
  * The first deployment ran four per function against a two-minute schedule and a
@@ -198,6 +215,7 @@ export async function GET(req: NextRequest) {
           outRoot: "/tmp/cape",
           scriptOnly: true,
           scriptTimeoutMs: SCRIPT_TIMEOUT_MS,
+          scriptAttempts: SCRIPT_ATTEMPTS,
         });
 
         await completeJob(job.id, {
