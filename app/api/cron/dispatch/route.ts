@@ -61,10 +61,17 @@ const RESERVE_MS = 45_000;
 const BUDGET_MS = 240_000;
 
 function authorised(req: NextRequest): boolean {
-  // Vercel's own scheduler identifies itself; anything else needs the token.
-  if (req.headers.get("x-vercel-cron")) return true;
   const auth = req.headers.get("authorization") ?? "";
   const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  /*
+   * `CRON_SECRET` first, because `x-vercel-cron` is not dependable on its own.
+   * The CAPE schedule fired every two minutes for half an hour and was refused
+   * every time on exactly that assumption. Same fix here, since this route made
+   * the same one.
+   */
+  const cronSecret = (process.env.CRON_SECRET ?? "").trim();
+  if (cronSecret && bearer === cronSecret) return true;
+  if (req.headers.get("x-vercel-cron")) return true;
   return (
     tokenMatches(bearer) ||
     tokenMatches(req.nextUrl.searchParams.get("token")) ||

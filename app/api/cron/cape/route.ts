@@ -64,10 +64,28 @@ const SCRIPT_TIMEOUT_MS = 80_000;
 /** Model calls, not CPU. Four in flight per function, ~8 across two ticks. */
 const CONCURRENCY = 4;
 
+/**
+ * Who may run this.
+ *
+ * `CRON_SECRET` is the one that matters, and it is here because the schedule
+ * did not work without it. The cron fired on time, every two minutes, and every
+ * invocation was refused: `x-vercel-cron` alone is not something to rely on, and
+ * the logs showed a tidy column of 401s next to a queue that never moved — a
+ * schedule that looks healthy from the outside and does nothing. When
+ * `CRON_SECRET` is set, Vercel presents it as `Authorization: Bearer`, which is
+ * the documented contract and the one this checks first.
+ *
+ * The operator token still works, so a tick can be forced from a terminal
+ * without waiting for the schedule.
+ */
 function authorised(req: NextRequest): boolean {
-  if (req.headers.get("x-vercel-cron")) return true;
   const auth = req.headers.get("authorization") ?? "";
   const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+
+  const cronSecret = (process.env.CRON_SECRET ?? "").trim();
+  if (cronSecret && bearer === cronSecret) return true;
+  if (req.headers.get("x-vercel-cron")) return true;
+
   return tokenMatches(bearer) || tokenMatches(req.nextUrl.searchParams.get("token"));
 }
 
