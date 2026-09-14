@@ -234,6 +234,15 @@ export interface EncodeOptions {
    * picture and voice stay in step.
    */
   leadInSec?: number;
+  /**
+   * Whether the camera moves. Defaults to true.
+   *
+   * A still cut is not a lesser version: the move costs about fifteen times
+   * the file — 103 MB against 7 for the same briefing — and that is real
+   * bandwidth on every view. Worth being able to produce both and choose,
+   * rather than deciding once in the encoder.
+   */
+  motion?: boolean;
 }
 
 /**
@@ -260,34 +269,38 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
    */
   await writeFile(concatPath, buildConcatList(opts.slides), "utf8");
 
+  const motion = opts.motion !== false;
+
   const clipDir = path.join(opts.outDir, "clips");
   await mkdir(clipDir, { recursive: true });
-  const { width, height } = await probeSize(opts.slides[0]?.pngPath ?? "");
+  let videoInput = concatPath;
 
-  const clips: string[] = [];
-  for (const [i, slide] of opts.slides.entries()) {
-    clips.push(
-      await renderSlideClip(
-        slide.pngPath,
-        Math.max(0.5, slide.durationSec),
-        path.join(clipDir, `clip-${String(i).padStart(3, "0")}.mp4`),
-        { fps, width, height, index: i },
-      ),
+  if (motion) {
+    const { width, height } = await probeSize(opts.slides[0]?.pngPath ?? "");
+    const clips: string[] = [];
+    for (const [i, slide] of opts.slides.entries()) {
+      clips.push(
+        await renderSlideClip(
+          slide.pngPath,
+          Math.max(0.5, slide.durationSec),
+          path.join(clipDir, `clip-${String(i).padStart(3, "0")}.mp4`),
+          { fps, width, height, index: i },
+        ),
+      );
+    }
+    videoInput = path.join(opts.outDir, `${opts.name}.clips.txt`);
+    await writeFile(
+      videoInput,
+      clips.map((c) => `file '${c.replace(/'/g, "'\\''")}'`).join("\n") + "\n",
+      "utf8",
     );
   }
-
-  const clipList = path.join(opts.outDir, `${opts.name}.clips.txt`);
-  await writeFile(
-    clipList,
-    clips.map((c) => `file '${c.replace(/'/g, "'\\''")}'`).join("\n") + "\n",
-    "utf8",
-  );
 
   const args = [
     "-y",
     "-f", "concat",
     "-safe", "0",
-    "-i", clipList,
+    "-i", videoInput,
   ];
 
   let audioPath: string | null = null;
@@ -310,7 +323,25 @@ export async function encodeVideo(opts: EncodeOptions): Promise<EncodeResult> {
    * encodes cleanly then will not open. Re-encoding here would cost a second
    * generation of loss for nothing.
    */
-  args.push("-c:v", "copy");
+  if (motion) {
+    args.push("-c:v", "copy");
+  } else {
+    /*
+     * Stills go through the encoder, since there is nothing to copy — and
+     * `yuv420p` is not optional here: without it ffmpeg picks a format from the
+     * PNG source that QuickTime, Safari and most social platforms refuse to
+     * play, and the file encodes cleanly then will not open.
+     */
+    args.push(
+      "-c:v", "libx264",
+      "-pix_fmt", "yuv420p",
+      "-r", String(fps),
+      // Even dimensions, or libx264 rejects the stream outright.
+      "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
+      "-preset", "medium",
+      "-crf", "20",
+    );
+  }
 
   if (audioPath) {
     args.push("-c:a", "aac", "-b:a", "192k");

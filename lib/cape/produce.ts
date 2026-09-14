@@ -56,6 +56,8 @@ export interface ProduceOptions {
   force?: boolean;
   /** Upload the finished video to Vercel Blob and record its public URL. */
   publish?: boolean;
+  /** Hold every slide still instead of moving the camera. See `video.ts`. */
+  still?: boolean;
   onProgress?: (msg: string) => void;
 }
 
@@ -261,6 +263,7 @@ export async function produceCapePackage(
       // Silence under the title and the photograph, so the voice does not run
       // ahead of the picture. See `silenceFile` in `video.ts`.
       leadInSec: leadInSec(),
+      motion: !opts.still,
     });
 
     await upsert(input.auctionId, {
