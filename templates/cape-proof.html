@@ -1,4 +1,4 @@
-<title>Briefing Script Proof</title>
+<title>County Briefing Proofs</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   :root{
@@ -86,6 +86,14 @@
   .scope.county{background:var(--accent-soft);color:var(--accent)}
   .scope.sale{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
   .sec.county{background:linear-gradient(90deg,var(--accent-soft) 0 3px,transparent 3px);padding-left:15px}
+  .rebuild{border:1px solid var(--line);border-left:3px solid var(--flag);background:var(--flag-soft);
+           border-radius:0 9px 9px 0;padding:13px 16px;margin-bottom:20px}
+  .rebuild b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--flag)}
+  .rebuild p{margin:5px 0 0;font-size:14.5px;line-height:1.55;max-width:78ch}
+  .bar{height:5px;border-radius:999px;background:var(--line);margin-top:10px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--flag);border-radius:999px}
+  .stale{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+         color:var(--flag)}
   .shared{margin-top:14px;background:var(--accent-soft);border-left:3px solid var(--accent);
           padding:11px 14px;border-radius:0 7px 7px 0}
   .shared b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
@@ -115,7 +123,7 @@
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>Briefing Script Proof</h1>
+      <h1>County Briefing Proofs</h1>
       <div class="sub" id="subline"></div>
     </div>
     <div class="stats">
@@ -126,6 +134,8 @@
       <div class="stat"><b id="s-words">—</b><span>words</span></div>
     </div>
   </header>
+
+  <div id="rebuild"></div>
 
   <div class="desk">
     <aside class="rail">
@@ -219,6 +229,28 @@
     });
   }
 
+  /*
+   * Say plainly how much of this page is already rewritten.
+   *
+   * A reviewer told "these are the scripts" while three quarters still carry a
+   * fault that is fixed and queued will spend an afternoon reporting it back.
+   * The banner removes itself once every script is current.
+   */
+  function renderRebuild(){
+    var fresh = DATA.filter(function(d){ return d.current; }).length;
+    var el = $("rebuild");
+    if (!DATA.length || fresh === DATA.length) { el.innerHTML = ""; return; }
+    var pct = Math.round((100 * fresh) / DATA.length);
+    el.innerHTML =
+      '<div class="rebuild"><b>Rewrite in progress — ' + fresh + ' of ' + DATA.length + ' done</b>' +
+      '<p>Every script is being rewritten against a corrected fact sheet: the briefings no longer ' +
+      'list what the system does not hold, no longer speak the internal production deadline, and ' +
+      'redemption windows over a year now read in years as well as days. Scripts marked ' +
+      '<b class="stale">older</b> are still awaiting that pass \u2014 a fault you find in one of ' +
+      'those may already be fixed.</p>' +
+      '<div class="bar"><i style="width:' + Math.max(pct, 2) + '%"></i></div></div>';
+  }
+
   function renderStats(){
     var c = counts();
     $("s-total").textContent = c.total;
@@ -248,6 +280,7 @@
         (d.held ? " announced" : " parcels") +
         (d.flagged.length ? ' · flagged ' + esc(d.flagged.join(", ")) : "") +
         (r && r.verdict ? ' · ' + (r.verdict === "ok" ? "cleared" : "needs change") : "") +
+        (d.current ? "" : ' · <b class="stale">older</b>') +
         '</span></button>';
     }).join("") || '<div style="padding:18px;font-family:var(--mono);font-size:12px;color:var(--muted)">No scripts match.</div>';
     if (!rows.length) return;
@@ -269,7 +302,8 @@
       '<span>' + esc(d.saleType || "—") + '</span>' +
       '<span>' + esc(d.platform || "—") + '</span>' +
       '<span>' + Number(d.parcels).toLocaleString() + (d.held ? " announced" : " parcels") + '</span>' +
-      '<span>' + d.sections.length + ' sections</span></div>' +
+      '<span>' + d.sections.length + ' sections</span>' +
+      (d.current ? '' : '<span class="stale">older fact sheet</span>') + '</div>' +
       (d.flagged.length
         ? '<div class="flagbar"><b>Held for review</b><p>The narration speaks ' +
           d.flagged.map(function(f){ return "<code>" + esc(f) + "</code>"; }).join(", ") +
@@ -352,7 +386,7 @@
   // Open on the first flagged script — those are the ones that need an expert.
   var firstFlagged = DATA.filter(function(d){ return d.flagged.length; })[0];
   current = (firstFlagged || DATA[0] || {}).slug || null;
-  renderStats(); renderList(); if (current) show(current);
+  renderRebuild(); renderStats(); renderList(); if (current) show(current);
 
   if (window.claude && window.claude.use) {
     window.claude.use("db").then(function(ns){
@@ -364,7 +398,7 @@
           var v = doc.data() || {};
           reviews[v.slug || doc.id] = { verdict: v.verdict, note: v.note || "" };
         });
-        renderStats(); renderList(); if (current) show(current);
+        renderRebuild(); renderStats(); renderList(); if (current) show(current);
       }, function(){ /* subscribe failed; local marks still work */ });
     });
   }
