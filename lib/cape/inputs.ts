@@ -34,6 +34,22 @@ import type { PackageInput, CapeProductionState } from "./components";
  */
 export const MIN_PARCELS = 20;
 
+/**
+ * How far out a sale must be before it is worth briefing.
+ *
+ * A briefing that arrives after the hammer is not a briefing. Component Eight
+ * already says so — `productionDeadline` puts a package due the Monday or
+ * Tuesday night before its sale, five to seven days ahead — and until now that
+ * deadline was reported rather than enforced: a sale three days out was still
+ * selected, produced, and marked overdue on arrival.
+ *
+ * Seven days is the outer edge of that existing lead time, so this floor and
+ * the deadline model agree rather than each carrying their own number. It also
+ * buys the crawler a week: 90% of packages have no parcel list yet, and a sale
+ * selected a week out can still gain one before the script is written.
+ */
+export const MIN_LEAD_DAYS = 7;
+
 export async function capePackageInputs(opts: { auctionId?: string; today?: string } = {}): Promise<
   (PackageInput & { countyFips: string })[]
 > {
@@ -79,10 +95,20 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
    * `--auction <id>` bypasses it, so a small sale can still be produced on
    * purpose.
    */
+  /*
+   * The earliest sale worth producing. See `MIN_LEAD_DAYS`.
+   *
+   * Computed here rather than in SQL so the same string arithmetic drives the
+   * query and anything that reports on it.
+   */
+  const earliest = new Date(Date.parse(`${today}T12:00:00Z`) + MIN_LEAD_DAYS * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+
   const where = opts.auctionId
     ? eq(auctions.id, opts.auctionId)
     : and(
-        gte(auctions.saleDate, today),
+        gte(auctions.saleDate, earliest),
         hasParcels(),
         isConfirmedInventory(),
         rawSql`greatest(${auctions.lotCount}, coalesce(${auctions.announcedParcelCount}, 0)) >= ${MIN_PARCELS}`,
