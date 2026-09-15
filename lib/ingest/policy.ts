@@ -41,7 +41,7 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     decision: "requires_agreement",
     minDelayMs: 5000,
     reason:
-      "RealAuction robots.txt is `Disallow: /`. Florida tax deed lists are public records available " +
+      "OPERATOR AGREEMENT STATED 2026-09-15: the operator reports an agreement is in place for this host. Recorded here rather than flipped to `allow`, following the bid4assets precedent: `requires_agreement` is a true statement about the host's public posture, and our permission is a fact about us, not about it. An adapter with a transport may now pass `underAgreement` to `politeFetch`. Note that the agreement does not by itself defeat the edge control measured below — a 403 to this project's user agent stays a 403 until the agreement supplies credentials, an allow-listed agent, or an API. RealAuction robots.txt is `Disallow: /`. Florida tax deed lists are public records available " +
       "directly from each county Clerk of Court — ingest those instead. Use RealAuction only under a " +
       "data agreement or the subscriber's own authenticated session.",
   },
@@ -49,14 +49,14 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     host: "realforeclose.com",
     decision: "requires_agreement",
     minDelayMs: 5000,
-    reason: "Same RealAuction platform and robots policy as realtaxdeed.com.",
+    reason: "OPERATOR AGREEMENT STATED 2026-09-15: the operator reports an agreement is in place for this host. Recorded here rather than flipped to `allow`, following the bid4assets precedent: `requires_agreement` is a true statement about the host's public posture, and our permission is a fact about us, not about it. An adapter with a transport may now pass `underAgreement` to `politeFetch`. Note that the agreement does not by itself defeat the edge control measured below — a 403 to this project's user agent stays a 403 until the agreement supplies credentials, an allow-listed agent, or an API. Same RealAuction platform and robots policy as realtaxdeed.com.",
   },
   {
     host: "realtaxlien.com",
     decision: "requires_agreement",
     minDelayMs: 5000,
     reason:
-      "Same RealAuction platform as realtaxdeed.com and realforeclose.com. Measured 2026-09-14: " +
+      "OPERATOR AGREEMENT STATED 2026-09-15: the operator reports an agreement is in place for this host. Recorded here rather than flipped to `allow`, following the bid4assets precedent: `requires_agreement` is a true statement about the host's public posture, and our permission is a fact about us, not about it. An adapter with a transport may now pass `underAgreement` to `politeFetch`. Note that the agreement does not by itself defeat the edge control measured below — a 403 to this project's user agent stays a 403 until the agreement supplies credentials, an allow-listed agent, or an API. Same RealAuction platform as realtaxdeed.com and realforeclose.com. Measured 2026-09-14: " +
       "403 to this project's user agent, 403 with no user agent, 200 to Chrome's — and 403 for " +
       "robots.txt itself, so the file cannot even be read. The block is on who is asking.",
   },
@@ -65,7 +65,7 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     decision: "requires_agreement",
     minDelayMs: 5000,
     reason:
-      "Answers a browser and refuses us, identically to the RealAuction hosts above — measured " +
+      "OPERATOR AGREEMENT STATED 2026-09-15: the operator reports an agreement is in place for this host. Recorded here rather than flipped to `allow`, following the bid4assets precedent: `requires_agreement` is a true statement about the host's public posture, and our permission is a fact about us, not about it. An adapter with a transport may now pass `underAgreement` to `politeFetch`. Note that the agreement does not by itself defeat the edge control measured below — a 403 to this project's user agent stays a 403 until the agreement supplies credentials, an allow-listed agent, or an API. Answers a browser and refuses us, identically to the RealAuction hosts above — measured " +
       "2026-09-14: 403 to our user agent, 403 to none, 200 to Chrome's, 403 for robots.txt. " +
       "Several Texas counties have moved here from the LGBS pages we crawl, which is how it " +
       "surfaced; the move does not make the new host fetchable. Getting in would mean claiming to " +
@@ -76,7 +76,7 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     decision: "requires_agreement",
     minDelayMs: 5000,
     reason:
-      "liveauctions.govease.com/robots.txt is `User-agent: * / Disallow: /` — verified 2026-08-05. " +
+      "OPERATOR AGREEMENT STATED 2026-09-15: the operator reports an agreement is in place for this host. Recorded here rather than flipped to `allow`, following the bid4assets precedent: `requires_agreement` is a true statement about the host's public posture, and our permission is a fact about us, not about it. An adapter with a transport may now pass `underAgreement` to `politeFetch`. Note that the agreement does not by itself defeat the edge control measured below — a 403 to this project's user agent stays a 403 until the agreement supplies credentials, an allow-listed agent, or an API. liveauctions.govease.com/robots.txt is `User-agent: * / Disallow: /` — verified 2026-08-05. " +
       "GovEase is the widest-reach platform in the researched set (59 counties across AL, CA, IA, IN, " +
       "MO, MS, OK, PA, TN, TX, WA). The data itself is public — no login — but this entry stays " +
       "`requires_agreement` so nothing in the ingest path can crawl it by default. The `govease` " +
