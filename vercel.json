@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/cape",
       "schedule": "*/3 * * * *"
+    },
+    {
+      "path": "/api/cron/dispatch",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
