@@ -1,0 +1,809 @@
+sale_date	state	jurisdiction	auction_type	sale_venue	sale_time	parcels	aggregate_sale_amount	list_posted	auction_id
+2026-09-10	Arkansas	Lee County	Deed	Live	10:00 AM	46	27101.73	Y	91377
+2026-09-10	Arkansas	Monroe County	Deed	Live	10:00 AM	51	31629.95	Y	91373
+2026-09-10	Arkansas	Phillips County	Deed	Live	10:00 AM	330	291977.23	Y	91369
+2026-09-10	Colorado	Pueblo County	Deed	Online	04:30 PM	5	20512.41	Y	100671
+2026-09-10	Florida	Miami-Dade County	Deed	Online	02:00 PM	1	3283.83	Y	100841
+2026-09-10	Florida	Orange County	Deed	Online	10:00 AM	21	110608.28	Y	99241
+2026-09-10	Florida	Sarasota County	Deed	Online	09:00 AM	2	13683.17	Y	96703
+2026-09-10	Florida	Seminole County	Deed	Online	09:00 AM	10	614710.36	Y	98002
+2026-09-10	Florida	Sumter County	Deed	Live	11:00 AM	7	23306.83	Y	99255
+2026-09-10	Idaho	Shoshone County	Deed	Live	10:00 AM	6	64364.16	Y	92116
+2026-09-10	Indiana	Putnam County	Lien	Live	10:00 AM	117	259577.12	Y	96779
+2026-09-10	Michigan	Newaygo County	Deed	Live	01:00 PM	44	95000.0	Y	98244
+2026-09-10	New Jersey	Edgewater Park Township (Burlington)	Lien	Live	10:00 AM	154	191838.24	Y	94683
+2026-09-10	New Jersey	Madison Borough (Morris)	Lien	Live	10:00 AM	8	16213.33	Y	98202
+2026-09-10	New Jersey	Mount Olive Township (Morris)	Lien	Live	09:30 AM	42	156791.84	Y	96751
+2026-09-10	New Mexico	Hidalgo County	Deed	Live	10:00 AM	15	28800.0	Y	99970
+2026-09-10	New York	Ulster County	Deed	Online	10:00 AM	184	6053375.0	Y	97148
+2026-09-10	Ohio	Lucas County	Deed	Online	10:00 AM	13	337672.42	Y	99907
+2026-09-10	Ohio	Ross County	Deed	Online	10:00 AM	1	20500.0	Y	100361
+2026-09-10	Vermont	Calais Town (Washington)	Lien	Live	01:00 PM	2	0.0	Y	100168
+2026-09-10	Virginia	King and Queen County	Deed	Simulcast	11:00 AM	9	0.0	Y	100134
+2026-09-11	California	Fresno County	Deed	Online	08:00 AM	129	5668600.0	Y	99743
+2026-09-11	Indiana	Cass County	Lien	Live	10:00 AM	145	516038.16	Y	96781
+2026-09-11	Indiana	Dubois County	Lien	Online	07:00 AM	30	60595.81	Y	96780
+2026-09-11	New York	Cayuga County	Deed	Online	12:00 PM	24	0.0	Y	90626
+2026-09-11	North Carolina	Carteret County	Deed	Live	10:00 AM	3	38189.76	Y	100373
+2026-09-11	Ohio	Franklin County	Deed	Online	09:00 AM	1	14049.16	Y	99913
+2026-09-11	Ohio	Knox County	Deed	Online	10:00 AM	11	82750.0	Y	100352
+2026-09-11	Ohio	Pike County	Deed	Live	10:00 AM	2	29031.81	Y	99774
+2026-09-11	Pennsylvania	Berks County	Deed	Online	10:00 AM	1445	9998000.0	Y	99283
+2026-09-11	Pennsylvania	Schuylkill County	Deed	Online	10:00 AM	1439	7788303.0	Y	93172
+2026-09-14	Florida	Collier County	Deed	Live	01:00 PM	4	115857.09	Y	96643
+2026-09-14	Florida	Manatee County	Deed	Online	10:00 AM	4	304723.03	Y	99225
+2026-09-14	Florida	Saint Lucie County	Deed	Online	08:00 AM	12	284226.25	Y	98536
+2026-09-14	Indiana	Jefferson County	Lien	Live	10:00 AM	57	184374.35	Y	96782
+2026-09-14	Indiana	Union County	Lien	Live	10:00 AM	13	13043.86	Y	96783
+2026-09-14	Kentucky	Bath County	Lien	Live	10:00 AM	143	93485.9	Y	93336
+2026-09-14	Kentucky	Hopkins County	Lien	Live	10:00 AM	1697	986127.87	Y	96330
+2026-09-14	North Carolina	Buncombe County	Deed	Live	11:30 AM	1	14677.7	Y	101109
+2026-09-14	Ohio	Lake County	Deed	Online	10:00 AM	1	269000.0	Y	100191
+2026-09-14	Pennsylvania	Butler County	Deed	Live	06:00 PM	779	8632950.01	Y	99465
+2026-09-14	Pennsylvania	Cambria County	Deed	Live	10:00 AM	1641	16308913.62	Y	98928
+2026-09-14	Pennsylvania	Forest County	Deed	Live	10:00 AM	98	210954.54	Y	98934
+2026-09-14	Pennsylvania	Forest County	Deed	Live	10:00 AM	3	7209.64	Y	99893
+2026-09-14	Pennsylvania	Franklin County	Deed	Live	09:30 AM	555	1996529.75	Y	99459
+2026-09-14	Pennsylvania	Juniata County	Deed	Live	10:00 AM	111	555537.36	Y	97378
+2026-09-14	Pennsylvania	Lancaster County	Deed	Online	09:00 AM	446	4416300.0	Y	98936
+2026-09-14	Pennsylvania	Lebanon County	Deed	Live	05:00 PM	336	3357433.54	Y	99569
+2026-09-14	Pennsylvania	Mifflin County	Deed	Live	07:00 PM	260	973940.52	Y	99830
+2026-09-14	Pennsylvania	Monroe County	Deed	Live	09:00 AM	2583	26228419.54	Y	100200
+2026-09-14	Pennsylvania	Potter County	Deed	Online	08:00 AM	169	690587.23	Y	99528
+2026-09-14	Pennsylvania	Sullivan County	Deed	Live	10:00 AM	30	179170.63	Y	98940
+2026-09-14	Pennsylvania	Westmoreland County	Deed	Live	10:00 AM	2187	9172993.49	Y	100202
+2026-09-14	Wisconsin	Racine County	Deed	Sealed Bid	11:00 AM	28	1672550.0	Y	100109
+2026-09-15	Arkansas	Clay County	Deed	Live	10:00 AM	38	147192.72	Y	91382
+2026-09-15	Arkansas	Greene County	Deed	Live	10:00 AM	72	142130.72	Y	91381
+2026-09-15	Arkansas	Lawrence County	Deed	Live	10:00 AM	30	22710.03	Y	91379
+2026-09-15	Arkansas	Randolph County	Deed	Live	10:00 AM	22	19660.21	Y	91380
+2026-09-15	Colorado	Costilla County	Deed	Online	10:00 AM	12	32767.52	Y	97176
+2026-09-15	Florida	Alachua County	Deed	Online	10:00 AM	3	12619.31	Y	100013
+2026-09-15	Florida	Bay County	Deed	Online	10:00 AM	1	33194.52	Y	99156
+2026-09-15	Florida	Charlotte County	Deed	Online	09:00 AM	33	93773.36	Y	100021
+2026-09-15	Florida	Jackson County	Deed	Online	11:00 AM	20	47194.14	Y	100498
+2026-09-15	Florida	Lee County	Deed	Online	10:00 AM	73	304810.3	Y	99221
+2026-09-15	Florida	Nassau County	Deed	Online	11:30 AM	1	8160.11	Y	99235
+2026-09-15	Florida	Osceola County	Deed	Online	11:00 AM	17	232506.99	Y	100049
+2026-09-15	Florida	Volusia County	Deed	Online	09:00 AM	26	624763.82	Y	99261
+2026-09-15	Florida	Washington County	Deed	Online	10:00 AM	14	33911.3	Y	95064
+2026-09-15	Indiana	LaGrange County	Lien	Live	10:00 AM	85	183840.77	Y	90694
+2026-09-15	Indiana	Marshall County	Lien	Online	08:00 AM	55	186084.18	Y	95446
+2026-09-15	Indiana	Montgomery County	Lien	Online	08:00 AM	58	208206.8	Y	96785
+2026-09-15	Indiana	Ohio County	Lien	Live	01:00 PM	8	20646.15	Y	96787
+2026-09-15	Indiana	Orange County	Lien	Live	10:00 AM	70	230069.34	Y	96786
+2026-09-15	Indiana	Switzerland County	Lien	Live	10:00 AM	38	30330.42	Y	96784
+2026-09-15	Kentucky	Cumberland County	Lien	Online	08:00 AM	138	76128.05	Y	91612
+2026-09-15	Kentucky	Edmonson County	Lien	Live	09:00 AM	565	388795.13	Y	91614
+2026-09-15	Kentucky	Metcalfe County	Lien	Live	10:00 AM	188	124246.17	Y	91691
+2026-09-15	Kentucky	Union County	Lien	Live	10:00 AM	312	94300.15	Y	91663
+2026-09-15	New Jersey	Kinnelon Borough (Morris)	Lien	Online	09:00 AM	3	31173.06	Y	98258
+2026-09-15	New Jersey	Long Branch City (Monmouth)	Lien	Live	10:00 AM	306	519061.42	Y	100860
+2026-09-15	New Jersey	Ridgewood Village (Bergen)	Lien	Online	09:00 AM	8	87916.52	Y	98233
+2026-09-15	North Carolina	Burke County	Deed	Live	11:00 AM	10	0.0	Y	100087
+2026-09-15	Ohio	Clermont County	Deed	Live	10:00 AM	1	12257.0	Y	100235
+2026-09-15	Ohio	Montgomery County	Deed	Online	09:00 AM	1	16981.5	Y	100360
+2026-09-15	Ohio	Summit County	Deed	Online	10:00 AM	3	30780.15	Y	101147
+2026-09-15	Pennsylvania	Bradford County	Deed	Live	09:00 AM	33	0.0	Y	98635
+2026-09-15	Pennsylvania	Bucks County	Deed	Online	10:00 AM	235	7643922.23	Y	98927
+2026-09-15	Pennsylvania	Centre County	Deed	Live	10:00 AM	286	2383563.49	Y	99464
+2026-09-15	Pennsylvania	Columbia County	Deed	Online	10:00 AM	623	4322433.0	Y	99284
+2026-09-15	Pennsylvania	Fulton County	Deed	Live	01:30 PM	3	0.0	Y	99468
+2026-09-15	Pennsylvania	Lycoming County	Deed	Live	10:00 AM	364	1958242.66	Y	99568
+2026-09-15	Pennsylvania	Mercer County	Deed	Live	09:00 AM	879	4746118.36	Y	90240
+2026-09-15	Pennsylvania	Somerset County	Deed	Live	09:00 AM	884	1104459.51	Y	98939
+2026-09-15	Pennsylvania	Susquehanna County	Deed	Live	10:00 AM	193	1414894.17	Y	99463
+2026-09-15	Pennsylvania	Wyoming County	Deed	Live	11:00 AM	114	728645.63	Y	100201
+2026-09-15	Tennessee	Lawrence County	Redeemable Deed	Online	09:00 AM	26	69966.1	Y	100084
+2026-09-15	Virginia	Warren County	Deed	Simulcast	11:17 AM	12	1035000.0	Y	99779
+2026-09-15	Virginia	Warren County	Deed	Simulcast	11:17 AM	3	21000.0	Y	100083
+2026-09-15	Washington	Grays Harbor County	Deed	Online	09:00 AM	18	23935.0	Y	97632
+2026-09-16	Alaska	Anchorage City-Borough	Deed	Sealed Bid	08:00 AM	1	18828.1	Y	99475
+2026-09-16	Arkansas	Sharp County	Deed	Live	10:00 AM	597	283422.23	Y	91383
+2026-09-16	California	Kern County	Deed	Online	08:00 AM	1054	7023800.0	Y	96746
+2026-09-16	Colorado	Baca County	Deed	Live	10:00 AM	2	0.0	Y	99527
+2026-09-16	Colorado	Crowley County	Deed	Live	10:00 AM	1	0.0	Y	96267
+2026-09-16	Colorado	Huerfano County	Deed	Live	10:00 AM	1	0.0	Y	99958
+2026-09-16	Colorado	Jackson County	Deed	Live	01:30 PM	2	1160.03	Y	97889
+2026-09-16	Colorado	Jefferson County	Deed	Online	10:00 AM	1	15720.32	Y	100643
+2026-09-16	Connecticut	Thompson Town (Northeastern Connecticut)	Redeemable Deed	Live	10:00 AM	6	31630.27	Y	98292
+2026-09-16	Florida	Citrus County	Deed	Online	10:00 AM	16	31943.53	Y	100022
+2026-09-16	Florida	De Soto County	Deed	Live	11:00 AM	2	18190.12	Y	99167
+2026-09-16	Florida	Duval County	Deed	Online	09:00 AM	126	1945038.29	Y	99168
+2026-09-16	Florida	Hernando County	Deed	Online	10:00 AM	15	729584.74	Y	100491
+2026-09-16	Florida	Highlands County	Deed	Online	10:00 AM	1	2375.78	Y	96659
+2026-09-16	Florida	Leon County	Deed	Online	10:00 AM	3	155503.32	Y	100040
+2026-09-16	Florida	Marion County	Deed	Online	09:00 AM	48	371829.5	Y	99714
+2026-09-16	Florida	Palm Beach County	Deed	Online	09:30 AM	28	1176757.41	Y	100050
+2026-09-16	Florida	Putnam County	Deed	Online	09:00 AM	63	953548.26	Y	100057
+2026-09-16	Florida	Saint Johns County	Deed	Live	12:00 PM	8	263020.78	Y	88290
+2026-09-16	Indiana	Allen County	Lien	Online	08:00 AM	625	3336523.07	Y	97522
+2026-09-16	Indiana	Clay County	Lien	Live	10:00 AM	268	702094.1	Y	96788
+2026-09-16	Indiana	Daviess County	Lien	Online	08:00 AM	32	154458.61	Y	96878
+2026-09-16	Indiana	Martin County	Lien	Live	10:00 AM	26	46091.1	Y	96877
+2026-09-16	Indiana	Steuben County	Lien	Live	10:00 AM	271	700132.64	Y	94605
+2026-09-16	Indiana	Vanderburgh County	Lien	Online	08:00 AM	460	4712827.17	Y	95447
+2026-09-16	Kentucky	Hancock County	Lien	Live	09:30 AM	74	54900.54	Y	97708
+2026-09-16	Kentucky	Morgan County	Lien	Live	09:00 AM	346	128960.73	Y	93354
+2026-09-16	Louisiana	Kenner City (Jefferson)	Lien	Online	10:00 AM	83	165029.8	Y	93695
+2026-09-16	Minnesota	Cottonwood County	Deed	Online	10:55 AM	12	128150.0	Y	100372
+2026-09-16	Minnesota	Goodhue County	Deed	Online	10:10 AM	2	104100.0	Y	100371
+2026-09-16	Minnesota	Lyon County	Deed	Online	08:00 AM	4	20817.44	Y	99671
+2026-09-16	New Jersey	Branchburg Township (Somerset)	Lien	Live	10:00 AM	48	775654.02	Y	100691
+2026-09-16	New Jersey	Randolph Township (Morris)	Lien	Online	08:30 AM	38	101671.38	Y	98943
+2026-09-16	New Jersey	Somerdale Borough (Camden)	Lien	Online	08:00 AM	154	115606.63	Y	98259
+2026-09-16	New York	Sullivan County	Deed	Online	10:00 AM	126	0.0	Y	92718
+2026-09-16	North Carolina	Chatham County	Deed	Live	12:00 PM	4	0.0	Y	100400
+2026-09-16	North Carolina	Wayne County	Deed	Live	10:00 AM	1	7252.55	Y	100956
+2026-09-16	Ohio	Miami County	Deed	Online	10:00 AM	1	25098.53	Y	101148
+2026-09-16	Pennsylvania	Blair County	Deed	Live	09:00 AM	624	2050003.54	Y	96909
+2026-09-16	Pennsylvania	Elk County	Deed	Live	10:00 AM	209	1302032.15	Y	100401
+2026-09-16	Pennsylvania	Greene County	Deed	Live	08:30 AM	591	1793499.24	Y	99460
+2026-09-16	Pennsylvania	McKean County	Deed	Live	06:00 PM	0	0.0	N	99567
+2026-09-16	Pennsylvania	Philadelphia City-County	Redeemable Deed	Online	10:00 AM	87	134403.0	Y	95372
+2026-09-16	Rhode Island	West Greenwich Town (Kent)	Lien	Live	11:00 AM	4	0.0	Y	89574
+2026-09-16	Vermont	Londonderry Town (Windham)	Lien	Live	10:30 AM	7	0.0	Y	100166
+2026-09-16	Wyoming	Uinta County	Lien	Live	09:00 AM	363	339668.48	Y	99876
+2026-09-17	Arkansas	Fulton County	Deed	Live	10:00 AM	375	92497.94	Y	91399
+2026-09-17	Arkansas	Izard County	Deed	Live	10:00 AM	1009	163094.57	Y	91397
+2026-09-17	Florida	Brevard County	Deed	Online	09:00 AM	48	317543.38	Y	97783
+2026-09-17	Florida	Hillsborough County	Deed	Online	10:00 AM	10	174996.92	Y	99271
+2026-09-17	Florida	Okeechobee County	Deed	Online	10:00 AM	14	197253.21	Y	97430
+2026-09-17	Florida	Orange County	Deed	Online	10:00 AM	11	75177.67	Y	99712
+2026-09-17	Florida	Polk County	Deed	Online	09:30 AM	41	442756.85	Y	100054
+2026-09-17	Indiana	Dearborn County	Lien	Live	10:00 AM	76	480685.31	Y	96876
+2026-09-17	Indiana	Fayette County	Lien	Live	10:00 AM	130	344656.97	Y	96873
+2026-09-17	Indiana	Hendricks County	Lien	Live	10:00 AM	94	1434904.31	Y	96875
+2026-09-17	Indiana	Henry County	Lien	Online	08:00 AM	259	583451.77	Y	96874
+2026-09-17	Kentucky	Clay County	Lien	Live	09:00 AM	1017	311751.52	Y	94350
+2026-09-17	Kentucky	Floyd County	Lien	Live	09:00 AM	3063	1437464.33	Y	95872
+2026-09-17	Kentucky	Whitley County	Lien	Live	09:00 AM	2078	570178.41	Y	91662
+2026-09-17	Michigan	Eaton County	Deed	Live	06:00 PM	8	109300.0	Y	99290
+2026-09-17	Michigan	Midland County	Deed	Live	05:30 PM	5	2000.0	Y	99995
+2026-09-17	Michigan	Wayne County	Deed	Online	09:00 AM	3153	20667700.0	Y	98634
+2026-09-17	Minnesota	Morrison County	Deed	Online	07:00 AM	16	279300.0	Y	99306
+2026-09-17	New Jersey	Barrington Borough (Camden)	Lien	Live	09:30 AM	110	90764.27	Y	101158
+2026-09-17	New Jersey	Beverly City (Burlington)	Lien	Online	08:30 AM	52	69962.69	Y	98297
+2026-09-17	New Jersey	Manalapan Township (Monmouth)	Lien	Online	08:30 AM	373	433076.26	Y	99488
+2026-09-17	New Jersey	Palmyra Borough (Burlington)	Lien	Online	08:00 AM	92	112681.1	Y	92216
+2026-09-17	New Jersey	Vineland City (Cumberland)	Lien	Online	10:00 AM	764	952335.51	Y	97981
+2026-09-17	New York	Madison County	Deed	Online	10:00 AM	38	0.0	Y	92721
+2026-09-17	North Carolina	Haywood County	Deed	Live	10:00 AM	6	0.0	Y	100205
+2026-09-17	North Carolina	Rowan County	Deed	Live	11:00 AM	5	0.0	Y	100341
+2026-09-17	Ohio	Columbiana County	Deed	Live	10:00 AM	25	0.0	Y	90833
+2026-09-17	Ohio	Medina County	Deed	Online	09:00 AM	1	21383.54	Y	100350
+2026-09-17	Pennsylvania	Bedford County	Deed	Online	09:00 AM	221	423081.0	Y	98926
+2026-09-17	Pennsylvania	York County	Deed	Online	07:00 AM	1264	8982056.61	Y	91384
+2026-09-17	Tennessee	Montgomery County	Redeemable Deed	Online	10:00 AM	212	235922.48	Y	96422
+2026-09-18	Indiana	Hancock County	Lien	Online	08:00 AM	39	201230.08	Y	94606
+2026-09-18	Indiana	Pulaski County	Lien	Live	10:00 AM	107	79636.05	Y	96872
+2026-09-18	Indiana	Tippecanoe County	Lien	Live	10:00 AM	77	1027108.89	Y	97523
+2026-09-18	New Jersey	Jamesburg Borough (Middlesex)	Lien	Live	09:00 AM	78	183669.6	Y	100678
+2026-09-18	Ohio	Franklin County	Deed	Online	09:00 AM	2	76882.48	Y	100190
+2026-09-18	Pennsylvania	Clearfield County	Deed	Live	10:00 AM	886	3871258.5	Y	99566
+2026-09-18	Pennsylvania	Indiana County	Deed	Online	10:00 AM	755	4421350.07	Y	99461
+2026-09-18	Pennsylvania	Tioga County	Deed	Live	10:00 AM	237	1409046.93	Y	93174
+2026-09-18	Pennsylvania	Tioga County	Deed	Live	10:00 AM	11	0.0	Y	93173
+2026-09-18	Virginia	Carroll County	Deed	Simulcast	05:56 PM	15	42800.0	Y	100532
+2026-09-18	Virginia	Carroll County	Deed	Simulcast	05:56 PM	5	308500.0	Y	97589
+2026-09-21	North Carolina	Buncombe County	Deed	Live	12:00 PM	1	12500.0	Y	101110
+2026-09-21	Pennsylvania	Chester County	Deed	Live	10:00 AM	349	5747265.29	Y	90630
+2026-09-21	Pennsylvania	Clarion County	Deed	Live	10:00 AM	110	447732.82	Y	97372
+2026-09-21	Pennsylvania	Cumberland County	Deed	Online	10:00 AM	314	2483137.0	Y	96508
+2026-09-21	Pennsylvania	Fulton County	Deed	Live	10:30 AM	110	307926.44	Y	99469
+2026-09-21	Pennsylvania	Huntingdon County	Deed	Live	06:00 PM	320	1710296.43	Y	99466
+2026-09-21	Pennsylvania	Lackawanna County	Deed	Live	10:00 AM	931	12101347.57	Y	99829
+2026-09-21	Pennsylvania	Venango County	Deed	Live	10:00 AM	592	2717853.75	Y	99471
+2026-09-22	Arkansas	Calhoun County	Deed	Live	10:00 AM	17	13716.3	Y	91419
+2026-09-22	Arkansas	Columbia County	Deed	Live	10:00 AM	48	33661.87	Y	91409
+2026-09-22	Arkansas	Union County	Deed	Live	10:00 AM	205	215913.63	Y	91437
+2026-09-22	Florida	Alachua County	Deed	Online	10:00 AM	5	46424.73	Y	100014
+2026-09-22	Florida	Jackson County	Deed	Online	11:00 AM	14	162421.2	Y	100499
+2026-09-22	Florida	Lee County	Deed	Online	10:00 AM	32	92774.95	Y	99222
+2026-09-22	Florida	Walton County	Deed	Online	11:00 AM	6	10986.12	Y	100063
+2026-09-22	Kentucky	Lawrence County	Lien	Live	09:00 AM	749	440114.26	Y	98058
+2026-09-22	Kentucky	Wayne County	Lien	Live	10:00 AM	397	186290.59	Y	95881
+2026-09-22	Louisiana	Independence Town (Tangipahoa)	Lien	Online	08:00 AM	19	1127.17	Y	99575
+2026-09-22	New Jersey	Clayton Borough (Gloucester)	Lien	Online	09:00 AM	56	211688.18	Y	97180
+2026-09-22	New Jersey	Delaware Township (Hunterdon)	Lien	Live	10:00 AM	7	91472.19	Y	99905
+2026-09-22	New Mexico	Curry County	Deed	Live	10:00 AM	16	47400.0	Y	100319
+2026-09-22	North Carolina	Rutherford County	Deed	Live	11:00 AM	5	0.0	Y	100340
+2026-09-22	Oregon	Lane County	Deed	Sealed Bid	10:00 AM	25	294500.0	Y	100489
+2026-09-22	Pennsylvania	Fayette County	Deed	Online	10:00 AM	2109	12412217.0	Y	98933
+2026-09-22	Pennsylvania	Philadelphia City-County	Redeemable Deed	Online	10:00 AM	61	1360700.0	Y	99825
+2026-09-23	Arkansas	Howard County	Deed	Live	10:00 AM	18	12690.4	Y	91438
+2026-09-23	Arkansas	Montgomery County	Deed	Live	10:00 AM	12	11491.14	Y	91443
+2026-09-23	Arkansas	Pike County	Deed	Live	10:00 AM	15	12369.06	Y	91440
+2026-09-23	Arkansas	Polk County	Deed	Live	10:00 AM	38	536112.76	Y	91442
+2026-09-23	Arkansas	Sevier County	Deed	Live	10:00 AM	23	10127.09	Y	91439
+2026-09-23	Colorado	Grand County	Deed	Live	10:00 AM	1	0.0	Y	97072
+2026-09-23	Florida	Clay County	Deed	Online	09:30 AM	9	184107.34	Y	98632
+2026-09-23	Florida	De Soto County	Deed	Live	11:00 AM	1	12348.85	Y	99915
+2026-09-23	Kansas	Shawnee County	Deed	Online	11:00 AM	129	0.0	Y	101154
+2026-09-23	Kentucky	Knott County	Lien	Live	09:00 AM	933	431825.28	Y	91637
+2026-09-23	Kentucky	Lee County	Lien	Live	10:00 AM	381	176348.63	Y	93346
+2026-09-23	Kentucky	Monroe County	Lien	Live	01:00 PM	188	81914.96	Y	91690
+2026-09-23	New Jersey	Deptford Township (Gloucester)	Lien	Online	08:00 AM	117	341504.1	Y	99593
+2026-09-23	New Jersey	Eatontown Borough (Monmouth)	Lien	Online	08:30 AM	86	210282.65	Y	92234
+2026-09-23	New Jersey	Fair Lawn Borough (Bergen)	Lien	Live	10:00 AM	12	130133.69	Y	100403
+2026-09-23	New Jersey	Hillsborough Township (Somerset)	Lien	Online	08:00 AM	125	393087.82	Y	99594
+2026-09-23	New Jersey	Old Bridge Township (Middlesex)	Lien	Live	10:00 AM	471	994913.59	Y	100708
+2026-09-23	New Jersey	South Orange Village Township (Essex)	Lien	Online	08:30 AM	141	433119.84	Y	98262
+2026-09-23	New Jersey	Vernon Township (Sussex)	Lien	Online	08:30 AM	364	636684.33	Y	99595
+2026-09-23	New Jersey	Wanaque Borough (Passaic)	Lien	Live	10:00 AM	16	57909.71	Y	100698
+2026-09-23	New Mexico	De Baca County	Deed	Live	09:00 AM	1	200.0	Y	100366
+2026-09-23	New Mexico	Roosevelt County	Deed	Live	01:00 PM	17	23900.0	Y	100367
+2026-09-23	Ohio	Fayette County	Deed	Online	10:00 AM	1	3004.54	Y	100354
+2026-09-23	Ohio	Miami County	Deed	Online	10:00 AM	1	33779.49	Y	100193
+2026-09-23	Pennsylvania	Carbon County	Deed	Live	10:00 AM	492	1540347.02	Y	99828
+2026-09-23	Pennsylvania	Pike County	Deed	Live	10:00 AM	631	5140225.39	Y	99571
+2026-09-23	Rhode Island	Newport City (Newport)	Lien	Live	10:00 AM	37	243420.85	Y	98226
+2026-09-23	Tennessee	Madison County	Redeemable Deed	Online	10:00 AM	85	208973.2	Y	100639
+2026-09-24	Florida	Hillsborough County	Deed	Online	10:00 AM	8	579364.85	Y	99272
+2026-09-24	Florida	Okeechobee County	Deed	Online	10:00 AM	2	17145.24	Y	100046
+2026-09-24	Florida	Orange County	Deed	Online	10:00 AM	1	20693.01	Y	100048
+2026-09-24	Florida	Pasco County	Deed	Online	10:00 AM	23	836127.29	Y	100053
+2026-09-24	Kentucky	Johnson County	Lien	Live	02:00 PM	1001	433303.64	Y	92431
+2026-09-24	Kentucky	Knox County	Lien	Live	10:00 AM	2143	908898.84	Y	97709
+2026-09-24	Louisiana	Mamou Town (Evangeline)	Lien	Live	10:00 AM	0	0.0	N	100963
+2026-09-24	New Jersey	National Park Borough (Gloucester)	Lien	Online	09:00 AM	11	31050.2	Y	97846
+2026-09-24	New Jersey	Oldmans Township (Salem)	Lien	Online	09:00 AM	12	19033.88	Y	94251
+2026-09-24	New Mexico	Chaves County	Deed	Live	10:00 AM	83	134700.0	Y	100409
+2026-09-24	North Carolina	Mecklenburg County	Deed	Live	11:00 AM	4	0.0	Y	100339
+2026-09-24	Pennsylvania	Delaware County	Deed	Live	10:00 AM	2106	8184383.77	Y	92225
+2026-09-24	Pennsylvania	Lawrence County	Deed	Online	10:00 AM	727	5189485.09	Y	99462
+2026-09-24	Pennsylvania	Luzerne County	Deed	Live	10:00 AM	1788	15631288.62	Y	93163
+2026-09-24	Pennsylvania	Montgomery County	Deed	Live	10:00 AM	646	7077080.63	Y	93165
+2026-09-24	Pennsylvania	Northampton County	Deed	Live	01:00 PM	0	0.0	N	96512
+2026-09-24	Rhode Island	Foster Town (Providence)	Lien	Live	10:00 AM	10	0.0	Y	98213
+2026-09-24	Vermont	Hardwick Town (Caledonia)	Lien	Live	10:00 AM	0	0.0	N	101212
+2026-09-24	Vermont	Stamford Town (Bennington)	Lien	Live	01:00 PM	6	0.0	Y	100631
+2026-09-25	Indiana	Decatur County	Lien	Live	10:00 AM	55	395766.31	Y	96871
+2026-09-25	Indiana	Vermillion County	Lien	Live	10:00 AM	187	351702.87	Y	96870
+2026-09-25	Michigan	Arenac County	Deed	Online	10:00 AM	1	2076.25	Y	100455
+2026-09-25	Michigan	Bay County	Deed	Online	10:00 AM	3	16753.15	Y	100456
+2026-09-25	Michigan	Berrien County	Deed	Online	10:00 AM	3	13270.32	Y	100457
+2026-09-25	Michigan	Calhoun County	Deed	Online	10:00 AM	2	16089.35	Y	100458
+2026-09-25	Michigan	Chippewa County	Deed	Online	10:00 AM	1	6551.95	Y	100729
+2026-09-25	Michigan	Clare County	Deed	Online	10:00 AM	1	10339.74	Y	100465
+2026-09-25	Michigan	Clinton County	Deed	Online	10:00 AM	1	4738.47	Y	100459
+2026-09-25	Michigan	Crawford County	Deed	Online	10:00 AM	1	692.89	Y	100732
+2026-09-25	Michigan	Gratiot County	Deed	Online	10:00 AM	2	26863.23	Y	100460
+2026-09-25	Michigan	Huron County	Deed	Online	10:00 AM	1	2981.68	Y	100461
+2026-09-25	Michigan	Iosco County	Deed	Online	10:00 AM	2	4784.67	Y	100733
+2026-09-25	Michigan	Iron County	Deed	Online	10:00 AM	4	6741.78	Y	100734
+2026-09-25	Michigan	Kalamazoo County	Deed	Online	10:00 AM	2	108341.98	Y	100466
+2026-09-25	Michigan	Kalkaska County	Deed	Online	10:00 AM	2	71500.0	Y	100735
+2026-09-25	Michigan	Mason County	Deed	Online	10:00 AM	2	28561.41	Y	100462
+2026-09-25	Michigan	Menominee County	Deed	Online	10:00 AM	1	3068.54	Y	100737
+2026-09-25	Michigan	Montcalm County	Deed	Online	10:00 AM	1	5572.34	Y	100463
+2026-09-25	Michigan	Oakland County	Deed	Online	10:00 AM	0	0.0	N	100738
+2026-09-25	Michigan	Roscommon County	Deed	Online	10:00 AM	2	14280.85	Y	100740
+2026-09-25	Michigan	Van Buren County	Deed	Online	10:00 AM	2	13926.52	Y	100464
+2026-09-25	New Jersey	Bogota Borough (Bergen)	Lien	Online	08:30 AM	6	60332.15	Y	99596
+2026-09-25	New Jersey	Hightstown Borough (Mercer)	Lien	Live	10:00 AM	23	177102.43	Y	96245
+2026-09-25	New Jersey	Norwood Borough (Bergen)	Lien	Online	09:30 AM	12	105938.99	Y	99597
+2026-09-25	Ohio	Franklin County	Deed	Online	09:00 AM	1	12426.52	Y	100355
+2026-09-25	Ohio	Ottawa County	Deed	Online	10:00 AM	2	28917.49	Y	100218
+2026-09-25	Pennsylvania	Adams County	Deed	Live	09:00 AM	129	1709550.35	Y	93684
+2026-09-25	Pennsylvania	Adams County	Deed	Live	09:00 AM	3	6245.39	Y	93683
+2026-09-25	Pennsylvania	Cameron County	Deed	Live	10:00 AM	82	267412.48	Y	99458
+2026-09-25	Pennsylvania	Crawford County	Deed	Live	10:00 AM	837	3952910.67	Y	99572
+2026-09-25	Pennsylvania	Northumberland County	Deed	Live	10:00 AM	288	1768646.74	Y	99570
+2026-09-25	Pennsylvania	Philadelphia City-County	Redeemable Deed	Online	10:00 AM	32	368800.0	Y	99826
+2026-09-25	Pennsylvania	Union County	Deed	Live	10:00 AM	88	405118.36	Y	98941
+2026-09-25	Pennsylvania	Wayne County	Deed	Live	01:00 PM	641	4359705.56	Y	89238
+2026-09-26	New York	St. Lawrence County	Deed	Online	12:00 PM	96	144417.87	Y	89600
+2026-09-27	Minnesota	Wright County	Deed	Online	07:49 AM	12	323000.0	Y	100374
+2026-09-28	Florida	Collier County	Deed	Live	01:00 PM	2	23580.36	Y	97117
+2026-09-28	Florida	Manatee County	Deed	Online	10:00 AM	12	648890.03	Y	99226
+2026-09-28	Indiana	Benton County	Lien	Live	01:00 PM	20	76296.29	Y	96867
+2026-09-28	Indiana	Newton County	Lien	Live	09:00 AM	192	375098.12	Y	96869
+2026-09-28	Indiana	Shelby County	Lien	Live	10:00 AM	86	231329.63	Y	96868
+2026-09-28	Kentucky	Leslie County	Lien	Live	10:00 AM	1115	411933.99	Y	96332
+2026-09-28	New Jersey	Alloway Township (Salem)	Lien	Live	12:30 PM	45	80069.84	Y	98361
+2026-09-28	New Jersey	Glen Ridge Borough (Essex)	Lien	Online	09:00 AM	0	0.0	N	99600
+2026-09-28	New Jersey	Greenwich Township (Gloucester)	Lien	Live	09:00 AM	30	110729.81	Y	98946
+2026-09-28	New Jersey	Mannington Township (Salem)	Lien	Live	01:30 PM	31	86467.71	Y	98362
+2026-09-28	New Jersey	Pilesgrove Township (Salem)	Lien	Live	11:30 AM	17	89197.4	Y	98363
+2026-09-28	New Jersey	Upper Saddle River Borough (Bergen)	Lien	Online	08:30 AM	22	448658.43	Y	97911
+2026-09-28	New Jersey	Woodstown Borough (Salem)	Lien	Live	10:30 AM	59	100851.8	Y	98364
+2026-09-28	Ohio	Huron County	Deed	Online	10:00 AM	3	35000.0	Y	101151
+2026-09-28	Pennsylvania	Clinton County	Deed	Live	10:00 AM	366	1819446.34	Y	100630
+2026-09-28	Pennsylvania	Erie County	Deed	Online	09:00 AM	2044	18675173.65	Y	96507
+2026-09-28	Pennsylvania	Jefferson County	Deed	Live	06:00 PM	279	976657.79	Y	100682
+2026-09-28	Pennsylvania	Montour County	Deed	Live	10:00 AM	70	277351.25	Y	99467
+2026-09-28	Pennsylvania	Warren County	Deed	Live	01:00 PM	522	2223653.34	Y	98944
+2026-09-28	Wisconsin	Douglas County	Deed	Online	05:00 AM	13	98000.0	Y	100844
+2026-09-29	Colorado	Costilla County	Deed	Online	10:00 AM	0	0.0	N	101205
+2026-09-29	Colorado	El Paso County	Deed	Online	10:00 AM	0	0.0	N	99952
+2026-09-29	Connecticut	Seymour Town (Naugatuck Valley)	Redeemable Deed	Live	06:00 PM	0	0.0	N	99914
+2026-09-29	Florida	Baker County	Deed	Online	11:00 AM	1	3142.16	Y	100016
+2026-09-29	Florida	Bay County	Deed	Online	10:00 AM	4	76382.01	Y	99157
+2026-09-29	Florida	Charlotte County	Deed	Online	09:00 AM	36	479246.82	Y	100485
+2026-09-29	Florida	Jackson County	Deed	Online	11:00 AM	14	98072.36	Y	100500
+2026-09-29	Florida	Lee County	Deed	Online	10:00 AM	11	33503.37	Y	100037
+2026-09-29	Florida	Nassau County	Deed	Online	11:30 AM	1	5053.29	Y	99236
+2026-09-29	Florida	Volusia County	Deed	Online	09:00 AM	18	434609.37	Y	100062
+2026-09-29	Florida	Walton County	Deed	Online	11:00 AM	3	21247.91	Y	100064
+2026-09-29	Florida	Washington County	Deed	Online	10:00 AM	10	24049.71	Y	100066
+2026-09-29	Indiana	Lawrence County	Lien	Online	08:00 AM	338	1069425.05	Y	97525
+2026-09-29	Indiana	Spencer County	Lien	Live	10:00 AM	181	435677.0	Y	96866
+2026-09-29	Indiana	Starke County	Lien	Live	10:00 AM	149	248904.18	Y	94607
+2026-09-29	Indiana	Sullivan County	Lien	Live	10:00 AM	136	240424.36	Y	96864
+2026-09-29	Louisiana	Bogalusa City (Washington)	Lien	Online	08:00 AM	0	0.0	N	98229
+2026-09-29	Louisiana	West Baton Rouge Parish	Deed	Online	10:00 AM	1	3599.0	Y	100317
+2026-09-29	New Jersey	Emerson Borough (Bergen)	Lien	Live	10:00 AM	6	43516.08	Y	99507
+2026-09-29	Pennsylvania	Armstrong County	Deed	Live	10:00 AM	0	0.0	N	92027
+2026-09-29	Pennsylvania	Dauphin County	Deed	Live	06:00 PM	1584	18058673.19	Y	99909
+2026-09-29	Pennsylvania	Perry County	Deed	Live	09:00 AM	219	1268765.7	Y	99831
+2026-09-30	Florida	De Soto County	Deed	Live	11:00 AM	2	5798.18	Y	99916
+2026-09-30	Florida	Putnam County	Deed	Online	09:00 AM	61	732828.7	Y	100058
+2026-09-30	Indiana	Blackford County	Lien	Live	10:00 AM	134	298259.56	Y	96865
+2026-09-30	Indiana	Clinton County	Lien	Live	10:00 AM	102	282871.8	Y	90693
+2026-09-30	Indiana	Huntington County	Lien	Live	10:00 AM	48	241426.64	Y	96862
+2026-09-30	Kentucky	Adair County	Lien	Live	10:00 AM	191	98051.36	Y	91585
+2026-09-30	Kentucky	McCreary County	Lien	Live	10:00 AM	439	129002.73	Y	91644
+2026-09-30	Kentucky	Rowan County	Lien	Live	10:00 AM	318	437699.62	Y	91677
+2026-09-30	New Jersey	Lincoln Park Borough (Morris)	Lien	Online	08:00 AM	16	107696.25	Y	98085
+2026-09-30	New Jersey	Millville City (Cumberland)	Lien	Live	10:00 AM	9	17719.61	Y	98075
+2026-09-30	New Jersey	Pemberton Borough (Burlington)	Lien	Live	10:00 AM	30	40986.19	Y	97236
+2026-09-30	New Jersey	Rochelle Park Township (Bergen)	Lien	Live	11:00 AM	4	23544.54	Y	101155
+2026-09-30	New Jersey	Rockaway Township (Morris)	Lien	Online	09:00 AM	0	0.0	N	98261
+2026-09-30	New Mexico	Sandoval County	Deed	Live	10:00 AM	112	149000.0	N	101111
+2026-09-30	New York	Niagara County	Deed	Online	12:00 PM	1	50.0	N	100408
+2026-09-30	New York	Otsego County	Deed	Online	10:00 AM	0	0.0	N	92713
+2026-09-30	North Carolina	Scotland County	Deed	Live	12:00 PM	6	0.0	Y	100632
+2026-09-30	Pennsylvania	Snyder County	Deed	Live	10:00 AM	0	0.0	N	98938
+2026-09-30	Pennsylvania	Washington County	Deed	Live	10:00 AM	1439	8421471.45	Y	98948
+2026-09-30	Virginia	Chesapeake City	Deed	Online	10:00 AM	13	25401.0	Y	100316
+2026-10-01	Colorado	Gilpin County	Deed	Live	11:00 AM	0	0.0	N	99950
+2026-10-01	Connecticut	Manchester Town (Capitol)	Redeemable Deed	Live	10:00 AM	0	0.0	N	99557
+2026-10-01	Florida	Hillsborough County	Deed	Online	10:00 AM	13	295739.05	Y	99273
+2026-10-01	Indiana	Elkhart County	Lien	Online	08:00 AM	0	0.0	N	96861
+2026-10-01	Indiana	Washington County	Lien	Live	10:00 AM	108	253595.98	Y	96860
+2026-10-01	Kansas	Jefferson County	Deed	Live	10:00 AM	74	284831.72	Y	99944
+2026-10-01	Minnesota	Sibley County	Deed	Online	07:00 AM	1	6500.0	Y	99559
+2026-10-01	New Jersey	Bordentown Township (Burlington)	Lien	Online	09:00 AM	57	120038.08	Y	100565
+2026-10-01	New Jersey	Fanwood Borough (Union)	Lien	Online	08:30 AM	9	124604.48	Y	100575
+2026-10-01	New Jersey	Garfield City (Bergen)	Lien	Live	09:00 AM	34	288216.09	Y	100641
+2026-10-01	New Jersey	Laurel Springs Borough (Camden)	Lien	Live	10:00 AM	66	42040.0	Y	100179
+2026-10-01	New Jersey	Oceanport Borough (Monmouth)	Lien	Live	10:00 AM	28	62969.35	Y	98086
+2026-10-01	New Jersey	Pitman Borough (Gloucester)	Lien	Online	08:00 AM	19	105600.25	Y	100600
+2026-10-01	Pennsylvania	Westmoreland County	Deed	Live	10:00 AM	40	0.0	Y	98945
+2026-10-02	Indiana	Rush County	Lien	Live	10:00 AM	37	240918.82	Y	96859
+2026-10-02	Indiana	Vigo County	Lien	Online	08:00 AM	838	4183841.81	Y	96863
+2026-10-02	Indiana	Warren County	Lien	Live	12:00 PM	25	54631.99	Y	96857
+2026-10-02	Indiana	Warrick County	Lien	Online	10:00 AM	0	0.0	N	96858
+2026-10-02	Minnesota	Brown County	Deed	Live	09:30 AM	0	0.0	N	100502
+2026-10-02	New Jersey	Andover Township (Sussex)	Lien	Online	08:00 AM	16	92659.9	Y	100558
+2026-10-02	New Jersey	Bridgewater Township (Somerset)	Lien	Online	08:00 AM	98	295389.52	Y	100566
+2026-10-02	New Jersey	Deerfield Township (Cumberland)	Lien	Live	10:00 AM	24	71685.69	Y	100670
+2026-10-02	New Jersey	Franklin Township (Somerset)	Lien	Online	08:30 AM	888	1151634.04	Y	100658
+2026-10-02	New Jersey	Harmony Township (Warren)	Lien	Online	09:00 AM	23	52122.75	Y	98074
+2026-10-05	Florida	Collier County	Deed	Live	01:00 PM	8	204552.31	Y	97118
+2026-10-05	Florida	Saint Lucie County	Deed	Online	08:00 AM	14	254759.27	Y	100059
+2026-10-05	Indiana	Fountain County	Lien	Live	10:00 AM	80	321514.99	Y	96855
+2026-10-05	Indiana	Gibson County	Lien	Online	09:00 AM	100	263460.76	Y	96880
+2026-10-05	Indiana	Noble County	Lien	Live	10:00 AM	98	567564.57	Y	96879
+2026-10-05	New Jersey	Franklin Township (Warren)	Lien	Online	10:00 AM	24	114540.09	Y	98545
+2026-10-05	New Jersey	Seaside Park Borough (Ocean)	Lien	Online	08:00 AM	7	24815.9	Y	100605
+2026-10-05	North Carolina	Chowan County	Deed	Live	12:00 PM	4	0.0	Y	100953
+2026-10-05	Pennsylvania	Allegheny County	Deed	Live	09:00 AM	0	0.0	N	88739
+2026-10-05	South Carolina	Beaufort County	Redeemable Deed	Live	10:00 AM	946	6087916.8	Y	97718
+2026-10-05	South Carolina	Greenwood County	Redeemable Deed	Live	09:00 AM	0	0.0	N	100211
+2026-10-05	South Carolina	McCormick County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100215
+2026-10-05	Virginia	Danville City (Pittsylvania)	Deed	Simulcast	12:00 PM	0	0.0	N	100697
+2026-10-05	Virginia	Shenandoah County	Deed	Simulcast	09:40 PM	25	2508000.0	N	99781
+2026-10-06	California	Merced County	Deed	Online	08:00 AM	48	15709601.0	Y	101112
+2026-10-06	Florida	Alachua County	Deed	Online	10:00 AM	6	65482.63	Y	100015
+2026-10-06	Florida	Bay County	Deed	Online	10:00 AM	5	56809.04	Y	100017
+2026-10-06	Florida	Dixie County	Deed	Live	11:00 AM	10	106906.26	Y	101156
+2026-10-06	Florida	Lee County	Deed	Online	10:00 AM	9	25099.8	Y	100038
+2026-10-06	Florida	Volusia County	Deed	Online	09:00 AM	19	337466.46	Y	100512
+2026-10-06	Florida	Walton County	Deed	Online	11:00 AM	3	36964.87	Y	100065
+2026-10-06	Florida	Washington County	Deed	Online	10:00 AM	11	26897.41	Y	100067
+2026-10-06	Georgia	Appling County	Redeemable Deed	Live	10:00 AM	0	0.0	N	87254
+2026-10-06	Georgia	Bryan County	Redeemable Deed	Live	10:00 AM	43	0.0	Y	97796
+2026-10-06	Georgia	Burke County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99608
+2026-10-06	Georgia	Byron City (Peach)	Redeemable Deed	Live	10:00 AM	0	0.0	N	87226
+2026-10-06	Georgia	Catoosa County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99610
+2026-10-06	Georgia	Cherokee County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101214
+2026-10-06	Georgia	Clayton County	Redeemable Deed	Live	10:00 AM	55	484182.21	N	101218
+2026-10-06	Georgia	Cook County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99611
+2026-10-06	Georgia	Dawson County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99614
+2026-10-06	Georgia	Decatur County	Redeemable Deed	Live	10:00 AM	0	0.0	N	97798
+2026-10-06	Georgia	DeKalb County	Redeemable Deed	Live	10:00 AM	256	2475833.15	Y	100861
+2026-10-06	Georgia	Fayette County	Redeemable Deed	Live	10:00 AM	0	0.0	N	89591
+2026-10-06	Georgia	Gwinnett County	Redeemable Deed	Live	10:00 AM	0	0.0	N	92418
+2026-10-06	Georgia	Hall County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101215
+2026-10-06	Georgia	Marion County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99615
+2026-10-06	Georgia	Oglethorpe County	Redeemable Deed	Live	10:00 AM	0	0.0	N	97810
+2026-10-06	Georgia	Paulding County	Redeemable Deed	Live	10:00 AM	0	0.0	N	97805
+2026-10-06	Georgia	Polk County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101217
+2026-10-06	Georgia	Reynolds City (Taylor)	Redeemable Deed	Live	10:00 AM	7	0.0	N	88870
+2026-10-06	Georgia	Sardis City (Burke)	Redeemable Deed	Live	10:00 AM	0	0.0	N	99609
+2026-10-06	Georgia	Seminole County	Redeemable Deed	Live	10:00 AM	0	0.0	N	88921
+2026-10-06	Georgia	Sky Valley City (Rabun)	Redeemable Deed	Live	10:00 AM	0	0.0	N	99612
+2026-10-06	Georgia	Thomas County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101216
+2026-10-06	Georgia	Treutlen County	Redeemable Deed	Live	10:00 AM	0	0.0	N	88872
+2026-10-06	Georgia	Upson County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99616
+2026-10-06	Georgia	Washington County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99617
+2026-10-06	Georgia	Whitfield County	Redeemable Deed	Live	10:00 AM	0	0.0	N	91720
+2026-10-06	Indiana	Carroll County	Lien	Live	10:00 AM	39	93978.79	Y	96882
+2026-10-06	Indiana	DeKalb County	Lien	Online	08:00 AM	105	343941.54	Y	95448
+2026-10-06	Indiana	Tipton County	Lien	Live	10:00 AM	29	82197.46	Y	96881
+2026-10-06	Michigan	Lenawee County	Deed	Online	10:00 AM	0	0.0	N	100827
+2026-10-06	Missouri	Saint Louis City (Saint Louis County)	Deed	Live	09:00 AM	0	0.0	N	90731
+2026-10-06	New Jersey	Avon-by-the-Sea Borough (Monmouth)	Lien	Live	10:00 AM	2	6771.7	Y	97834
+2026-10-06	New Jersey	Bernards Township (Somerset)	Lien	Online	08:30 AM	34	143533.53	Y	100562
+2026-10-06	New Jersey	Manchester Township (Ocean)	Lien	Online	08:30 AM	359	407748.94	Y	100402
+2026-10-06	New Jersey	Monroe Township (Middlesex)	Lien	Online	08:30 AM	250	418580.67	Y	100588
+2026-10-06	New Jersey	New Hanover Township (Burlington)	Lien	Live	01:30 PM	4	27431.06	Y	101141
+2026-10-06	New Jersey	Ocean City (Cape May)	Lien	Live	10:00 AM	39	109441.61	Y	99564
+2026-10-06	New Jersey	Southampton Township (Burlington)	Lien	Live	10:00 AM	42	96562.3	Y	100664
+2026-10-06	New Jersey	Spring Lake Heights Borough (Monmouth)	Lien	Live	02:00 PM	1	714.52	Y	100680
+2026-10-06	North Carolina	Cleveland County	Deed	Live	11:00 AM	3	0.0	Y	100954
+2026-10-06	Ohio	Stark County	Deed	Live	09:00 AM	0	0.0	N	98488
+2026-10-06	Oregon	Baker County	Deed	Live	10:00 AM	0	0.0	N	100482
+2026-10-06	South Carolina	Florence County	Redeemable Deed	Live	10:00 AM	2095	5007142.2	Y	97711
+2026-10-06	Tennessee	Weakley County	Redeemable Deed	Online	10:00 AM	21	62064.29	Y	100640
+2026-10-06	Texas	Atascosa County	Redeemable Deed	Online	10:00 AM	0	0.0	N	101113
+2026-10-06	Texas	Bandera County	Redeemable Deed	Live	10:00 AM	0	0.0	N	98454
+2026-10-06	Texas	Bexar County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101114
+2026-10-06	Texas	Bosque County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101115
+2026-10-06	Texas	Burnet County	Redeemable Deed	Online	10:00 AM	14	60175.0	N	100966
+2026-10-06	Texas	Caldwell County	Redeemable Deed	Online	10:00 AM	4	21723.0	Y	101116
+2026-10-06	Texas	Cameron County	Redeemable Deed	Online	10:30 AM	0	0.0	N	101117
+2026-10-06	Texas	Cass County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101118
+2026-10-06	Texas	Coleman County	Redeemable Deed	Live	02:00 PM	0	0.0	N	101119
+2026-10-06	Texas	Concho County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101120
+2026-10-06	Texas	Dallas County	Redeemable Deed	Online	09:00 AM	34	1461464.09	N	100967
+2026-10-06	Texas	Ellis County	Redeemable Deed	Online	10:00 AM	0	0.0	N	101121
+2026-10-06	Texas	Fannin County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101122
+2026-10-06	Texas	Galveston County	Redeemable Deed	Online	10:00 AM	0	0.0	N	100968
+2026-10-06	Texas	Galveston County	Redeemable Deed	Online	10:00 AM	0	0.0	N	101123
+2026-10-06	Texas	Gonzales County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101124
+2026-10-06	Texas	Hamilton County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101125
+2026-10-06	Texas	Harris County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100969
+2026-10-06	Texas	Harrison County	Redeemable Deed	Online	10:00 AM	32	178231.6	N	100970
+2026-10-06	Texas	Hill County	Redeemable Deed	Live	10:00 AM	58	160045.94	Y	101126
+2026-10-06	Texas	Hunt County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101127
+2026-10-06	Texas	Jefferson County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101128
+2026-10-06	Texas	Kerr County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100971
+2026-10-06	Texas	Lampasas County	Redeemable Deed	Live	10:00 AM	7	79100.0	N	101129
+2026-10-06	Texas	Llano County	Redeemable Deed	Online	10:00 AM	7	75036.61	Y	100972
+2026-10-06	Texas	Mason County	Redeemable Deed	Live	10:00 AM	4	26100.0	N	100973
+2026-10-06	Texas	Navarro County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101130
+2026-10-06	Texas	Newton County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100974
+2026-10-06	Texas	Nueces County	Redeemable Deed	Online	10:00 AM	0	0.0	N	101131
+2026-10-06	Texas	Robertson County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101132
+2026-10-06	Texas	Rockwall County	Redeemable Deed	Live	10:00 AM	0	0.0	N	94384
+2026-10-06	Texas	San Augustine County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101133
+2026-10-06	Texas	Smith County	Redeemable Deed	Online	10:00 AM	0	0.0	N	101134
+2026-10-06	Texas	Tarrant County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100976
+2026-10-06	Texas	Tom Green County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101135
+2026-10-06	Texas	Upshur County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101136
+2026-10-06	Texas	Victoria County	Redeemable Deed	Online	10:00 AM	0	0.0	N	101137
+2026-10-06	Texas	Wise County	Redeemable Deed	Online	10:00 AM	0	0.0	N	100979
+2026-10-06	Virginia	Halifax County	Deed	Online	10:00 AM	1	40000.0	N	100692
+2026-10-06	Virginia	Newport News City (Newport News)	Deed	Online	10:00 AM	2	43600.0	N	100694
+2026-10-06	Virginia	Southampton County	Deed	Online	10:00 AM	3	45600.0	N	100693
+2026-10-07	Colorado	Crowley County	Deed	Live	10:00 AM	0	0.0	N	96266
+2026-10-07	Colorado	Routt County	Deed	Live	11:00 AM	0	0.0	N	98057
+2026-10-07	Florida	Clay County	Deed	Online	09:30 AM	4	20243.99	Y	100023
+2026-10-07	Florida	Escambia County	Deed	Online	10:00 AM	42	393522.67	Y	96647
+2026-10-07	Florida	Gadsden County	Deed	Live	10:00 AM	13	126746.02	Y	100034
+2026-10-07	Florida	Highlands County	Deed	Online	10:00 AM	44	96451.43	Y	99918
+2026-10-07	Florida	Martin County	Deed	Online	10:00 AM	24	102835.16	Y	100507
+2026-10-07	Indiana	Brown County	Lien	Live	10:00 AM	68	200080.6	Y	90692
+2026-10-07	Indiana	Knox County	Lien	Live	10:00 AM	186	582632.7	Y	96883
+2026-10-07	Indiana	Morgan County	Lien	Live	10:00 AM	0	0.0	N	97524
+2026-10-07	Indiana	Owen County	Lien	Online	08:00 AM	134	220626.2	Y	96884
+2026-10-07	Kentucky	Pike County	Lien	Live	10:00 AM	9165	2646926.25	Y	98059
+2026-10-07	Minnesota	Hennepin County	Deed	Online	08:00 AM	34	0.0	Y	100619
+2026-10-07	New Jersey	Boonton Town (Morris)	Lien	Online	08:00 AM	0	0.0	N	98942
+2026-10-07	New Jersey	Garwood Borough (Union)	Lien	Live	09:00 AM	0	0.0	N	97848
+2026-10-07	New Jersey	Hainesport Township (Burlington)	Lien	Live	10:00 AM	0	0.0	N	97847
+2026-10-07	New Jersey	Newton Town (Sussex)	Lien	Online	08:30 AM	25	102486.47	Y	98077
+2026-10-07	New Jersey	Pennsville Township (Salem)	Lien	Online	08:30 AM	131	581617.91	Y	100599
+2026-10-07	New Jersey	Raritan Borough (Somerset)	Lien	Live	10:00 AM	5	20084.29	Y	101210
+2026-10-07	New Jersey	Secaucus Town (Hudson)	Lien	Online	08:30 AM	13	73813.76	Y	100606
+2026-10-07	New Jersey	Springfield Township (Union)	Lien	Online	08:00 AM	0	0.0	N	99509
+2026-10-07	Pennsylvania	Lehigh County	Deed	Live	10:00 AM	0	0.0	N	93161
+2026-10-07	Virginia	Halifax County	Deed	Online	10:00 AM	12	23600.0	Y	100533
+2026-10-08	Florida	Hillsborough County	Deed	Online	10:00 AM	8	123563.3	Y	99274
+2026-10-08	Florida	Lafayette County	Deed	Live	10:00 AM	9	0.0	Y	101162
+2026-10-08	Florida	Miami-Dade County	Deed	Online	02:00 PM	13	1092603.61	Y	100042
+2026-10-08	Florida	Okeechobee County	Deed	Online	10:00 AM	14	85238.95	Y	100047
+2026-10-08	Florida	Suwannee County	Deed	Online	11:00 AM	33	424382.07	Y	101163
+2026-10-08	Indiana	Greene County	Lien	Live	10:00 AM	229	602507.15	Y	96885
+2026-10-08	Indiana	Hamilton County	Lien	Live	10:00 AM	135	1344895.58	Y	94611
+2026-10-08	Indiana	Whitley County	Lien	Live	10:00 AM	50	140113.9	Y	96886
+2026-10-08	Kansas	Chautauqua County	Deed	Live	11:00 AM	33	72231.51	Y	100877
+2026-10-08	New Jersey	Bloomfield Township (Essex)	Lien	Online	08:00 AM	0	0.0	N	100563
+2026-10-08	New Jersey	Clementon Borough (Camden)	Lien	Live	10:00 AM	0	0.0	N	100843
+2026-10-08	New Jersey	Denville Township (Morris)	Lien	Online	08:00 AM	0	0.0	N	97835
+2026-10-08	New Jersey	Ocean Township (Monmouth)	Lien	Online	09:00 AM	118	303790.29	Y	100594
+2026-10-08	New Jersey	Piscataway Township (Middlesex)	Lien	Online	09:00 AM	0	0.0	N	98237
+2026-10-08	New Jersey	West Orange Township (Essex)	Lien	Online	08:30 AM	0	0.0	N	100616
+2026-10-08	New Jersey	Winslow Township (Camden)	Lien	Live	10:00 AM	926	1035838.74	Y	98232
+2026-10-08	New Jersey	Woodbury Heights Borough (Gloucester)	Lien	Live	09:00 AM	0	0.0	N	99626
+2026-10-08	New Jersey	Woodlynne Borough (Camden)	Lien	Live	10:00 AM	0	0.0	N	101213
+2026-10-08	New York	Onondaga County	Deed	Online	10:00 AM	0	0.0	N	99852
+2026-10-08	North Carolina	Harnett County	Deed	Live	12:00 PM	6	0.0	Y	100955
+2026-10-08	North Carolina	Randolph County	Deed	Live	10:00 AM	13	55836.07	Y	96426
+2026-10-08	Ohio	Lucas County	Deed	Online	10:00 AM	26	446703.93	Y	101150
+2026-10-09	Indiana	Jackson County	Lien	Live	10:00 AM	79	163328.81	Y	96887
+2026-10-09	Indiana	Johnson County	Lien	Live	10:00 AM	206	1468417.76	Y	94612
+2026-10-09	New Jersey	Cranbury Township (Middlesex)	Lien	Online	09:00 AM	0	0.0	N	100570
+2026-10-09	New Jersey	Eagleswood Township (Ocean)	Lien	Live	10:00 AM	21	51921.6	Y	100683
+2026-10-09	New Jersey	Scotch Plains Township (Union)	Lien	Online	08:30 AM	0	0.0	N	100604
+2026-10-09	New Jersey	Union Beach Borough (Monmouth)	Lien	Online	09:00 AM	0	0.0	N	99498
+2026-10-09	New Jersey	White Township (Warren)	Lien	Online	09:00 AM	0	0.0	N	99505
+2026-10-09	Ohio	Knox County	Deed	Online	10:00 AM	9	220891.7	Y	101149
+2026-10-12	Florida	Manatee County	Deed	Online	10:00 AM	1	74556.11	Y	99227
+2026-10-12	Florida	Saint Lucie County	Deed	Online	08:00 AM	6	392680.21	Y	100060
+2026-10-12	New Jersey	Helmetta Borough (Middlesex)	Lien	Online	09:00 AM	0	0.0	N	100579
+2026-10-12	New Jersey	Oxford Township (Warren)	Lien	Online	08:00 AM	0	0.0	N	100595
+2026-10-12	New Jersey	Runnemede Borough (Camden)	Lien	Online	09:00 AM	0	0.0	N	100603
+2026-10-12	South Carolina	York County	Redeemable Deed	Live	09:00 AM	0	0.0	N	97712
+2026-10-13	Colorado	Costilla County	Deed	Online	10:00 AM	0	0.0	N	101206
+2026-10-13	Florida	Nassau County	Deed	Online	11:30 AM	1	8122.0	Y	100043
+2026-10-13	Florida	Volusia County	Deed	Online	09:00 AM	22	545399.61	Y	100513
+2026-10-13	Florida	Walton County	Deed	Online	11:00 AM	3	5433.16	Y	100511
+2026-10-13	Indiana	Clark County	Lien	Online	10:00 AM	0	0.0	N	96888
+2026-10-13	Indiana	La Porte County	Lien	Live	10:00 AM	615	3183838.75	Y	96889
+2026-10-13	Indiana	Marion & Indianapolis County	Lien	Online	08:00 AM	1841	16413659.51	Y	99877
+2026-10-13	Indiana	Randolph County	Lien	Live	10:00 AM	188	486137.44	Y	96223
+2026-10-13	New Jersey	Bethlehem Township (Hunterdon)	Lien	Live	10:00 AM	14	102666.87	Y	101140
+2026-10-13	New Jersey	Washington Borough (Warren)	Lien	Online	08:00 AM	0	0.0	N	99489
+2026-10-13	South Carolina	Pickens County	Redeemable Deed	Live	10:00 AM	0	0.0	N	96930
+2026-10-14	Connecticut	Cromwell Town (Lower Connecticut River Valley)	Redeemable Deed	Live	10:00 AM	0	0.0	N	99558
+2026-10-14	Florida	Duval County	Deed	Online	09:00 AM	183	3282637.52	Y	100031
+2026-10-14	Florida	Hardee County	Deed	Live	11:00 AM	3	9118.85	Y	101159
+2026-10-14	Florida	Palm Beach County	Deed	Online	09:30 AM	40	1579871.67	Y	100051
+2026-10-14	Indiana	Boone County	Lien	Live	10:00 AM	83	2068501.45	Y	90689
+2026-10-14	Indiana	Delaware County	Lien	Live	09:00 AM	913	4682582.85	N	96890
+2026-10-14	Indiana	Pike County	Lien	Online	08:00 AM	190	321901.94	Y	96891
+2026-10-14	Kansas	Wyandotte County	Deed	Live	10:00 AM	0	0.0	N	99492
+2026-10-14	Kentucky	Marion County	Lien	Live	09:00 AM	127	90979.37	Y	95874
+2026-10-14	Kentucky	Powell County	Lien	Live	10:00 AM	1426	519372.03	Y	91681
+2026-10-14	Michigan	Macomb County	Deed	Online	10:00 AM	0	0.0	N	99882
+2026-10-14	New Jersey	Berlin Township (Camden)	Lien	Live	10:30 AM	0	0.0	N	100272
+2026-10-14	New Jersey	Buena Borough (Atlantic)	Lien	Online	08:00 AM	0	0.0	N	100826
+2026-10-14	New Jersey	Clifton City (Passaic)	Lien	Online	08:30 AM	0	0.0	N	100569
+2026-10-14	New Jersey	Hamburg Borough (Sussex)	Lien	Online	09:00 AM	0	0.0	N	100576
+2026-10-14	New Jersey	Hampton Township (Sussex)	Lien	Live	10:00 AM	0	0.0	N	99503
+2026-10-14	New Jersey	Independence Township (Warren)	Lien	Live	10:00 AM	0	0.0	N	100710
+2026-10-14	New Jersey	Maple Shade Township (Burlington)	Lien	Online	08:00 AM	0	0.0	N	100713
+2026-10-14	New Jersey	Montague Township (Sussex)	Lien	Online	09:00 AM	0	0.0	N	100589
+2026-10-14	New Jersey	Montgomery Township (Somerset)	Lien	Online	09:00 AM	0	0.0	N	100705
+2026-10-14	New Jersey	Moorestown Township (Burlington)	Lien	Live	10:00 AM	0	0.0	N	100689
+2026-10-14	New Jersey	Peapack-Gladstone Borough (Somerset)	Lien	Online	08:00 AM	0	0.0	N	100597
+2026-10-14	New Jersey	Pennsauken Township (Camden)	Lien	Online	08:00 AM	0	0.0	N	100598
+2026-10-14	New Jersey	Somerville Borough (Somerset)	Lien	Online	09:00 AM	0	0.0	N	100609
+2026-10-14	New Jersey	Spotswood Borough (Middlesex)	Lien	Online	09:00 AM	0	0.0	N	100611
+2026-10-14	New Jersey	West Deptford Township (Gloucester)	Lien	Online	09:00 AM	0	0.0	N	99508
+2026-10-14	New Jersey	Willingboro Township (Burlington)	Lien	Online	09:00 AM	0	0.0	N	100825
+2026-10-14	Ohio	Belmont County	Deed	Live	10:00 AM	0	0.0	N	100230
+2026-10-14	Pennsylvania	Monroe County	Deed	Online	10:00 AM	0	0.0	N	100830
+2026-10-15	Colorado	Douglas County	Deed	Online	10:00 AM	0	0.0	N	93501
+2026-10-15	Florida	Hillsborough County	Deed	Online	10:00 AM	0	0.0	N	100036
+2026-10-15	Florida	Miami-Dade County	Deed	Online	02:00 PM	0	0.0	N	100508
+2026-10-15	Florida	Polk County	Deed	Online	09:30 AM	0	0.0	N	100055
+2026-10-15	Florida	Seminole County	Deed	Online	09:00 AM	0	0.0	N	100061
+2026-10-15	Indiana	Adams County	Lien	Live	01:00 PM	0	0.0	N	96895
+2026-10-15	Indiana	Floyd County	Lien	Online	10:00 AM	0	0.0	N	96892
+2026-10-15	Indiana	Wayne County	Lien	Live	10:00 AM	0	0.0	N	96893
+2026-10-15	Indiana	Wells County	Lien	Live	10:00 AM	0	0.0	N	96894
+2026-10-15	New Jersey	Berlin Borough (Camden)	Lien	Online	09:00 AM	0	0.0	N	100560
+2026-10-15	New Jersey	Delanco Township (Burlington)	Lien	Live	10:00 AM	0	0.0	N	100712
+2026-10-15	New Jersey	Fieldsboro Borough (Burlington)	Lien	Online	09:00 AM	0	0.0	N	97919
+2026-10-15	New Jersey	Monroe Township (Gloucester)	Lien	Live	10:00 AM	0	0.0	N	99504
+2026-10-15	New Jersey	Pompton Lakes Borough (Passaic)	Lien	Live	10:00 AM	22	117392.12	Y	100679
+2026-10-15	New Jersey	Ringwood Borough (Passaic)	Lien	Online	08:30 AM	0	0.0	N	100651
+2026-10-15	New Jersey	Union Township (Union)	Lien	Live	09:00 AM	0	0.0	N	97843
+2026-10-15	New York	Poughkeepsie City (Dutchess)	Deed	Online	10:00 AM	0	0.0	N	100406
+2026-10-15	Ohio	Lawrence County	Deed	Online	12:00 PM	1	25842.04	Y	99477
+2026-10-15	Tennessee	Franklin County	Redeemable Deed	Live	10:00 AM	37	21098.0	N	99563
+2026-10-15	Virginia	Martinsville City (Henry)	Deed	Online	12:00 PM	0	0.0	N	100702
+2026-10-16	Indiana	Harrison County	Lien	Live	10:00 AM	0	0.0	N	96896
+2026-10-16	Indiana	Jasper County	Lien	Live	10:00 AM	0	0.0	N	96898
+2026-10-16	New Jersey	Bergenfield Borough (Bergen)	Lien	Online	09:00 AM	0	0.0	N	99490
+2026-10-16	New Jersey	Brielle Borough (Monmouth)	Lien	Online	09:00 AM	0	0.0	N	97844
+2026-10-16	New Jersey	Byram Township (Sussex)	Lien	Online	08:30 AM	0	0.0	N	100567
+2026-10-16	New Jersey	Carteret Borough (Middlesex)	Lien	Online	08:30 AM	0	0.0	N	100568
+2026-10-16	New Jersey	Clark Township (Union)	Lien	Online	08:30 AM	0	0.0	N	100824
+2026-10-16	New Jersey	Kingwood Township (Hunterdon)	Lien	Online	09:00 AM	0	0.0	N	98073
+2026-10-16	New Jersey	Livingston Township (Essex)	Lien	Online	08:00 AM	0	0.0	N	100677
+2026-10-16	New Jersey	Red Bank Borough (Monmouth)	Lien	Online	08:30 AM	0	0.0	N	100601
+2026-10-16	New Jersey	Totowa Borough (Passaic)	Lien	Live	12:00 PM	0	0.0	N	97837
+2026-10-16	New Jersey	West Milford Township (Passaic)	Lien	Online	08:30 AM	0	0.0	N	100615
+2026-10-17	New York	Warren County	Deed	Live	08:00 AM	0	0.0	N	90376
+2026-10-19	Florida	Collier County	Deed	Live	01:00 PM	0	0.0	N	100026
+2026-10-19	Florida	Levy County	Deed	Live	10:00 AM	0	0.0	N	85559
+2026-10-19	Florida	Pinellas County	Deed	Online	11:00 AM	0	0.0	N	94178
+2026-10-19	Indiana	Kosciusko County	Lien	Live	10:00 AM	0	0.0	N	94613
+2026-10-19	Indiana	Madison County	Lien	Live	10:00 AM	0	0.0	N	96899
+2026-10-19	New Jersey	Lambertville City (Hunterdon)	Lien	Online	08:30 AM	0	0.0	N	100584
+2026-10-19	South Carolina	Anderson County	Redeemable Deed	Live	09:00 AM	0	0.0	N	95272
+2026-10-19	South Carolina	Dorchester County	Redeemable Deed	Live	10:00 AM	0	0.0	N	97715
+2026-10-19	South Carolina	Greenville County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100210
+2026-10-20	California	Los Angeles County	Deed	Online	03:00 PM	0	0.0	N	100171
+2026-10-20	Florida	Bay County	Deed	Online	10:00 AM	0	0.0	N	100483
+2026-10-20	Florida	Charlotte County	Deed	Online	09:00 AM	0	0.0	N	100486
+2026-10-20	Florida	Lee County	Deed	Online	10:00 AM	0	0.0	N	100039
+2026-10-20	Florida	Nassau County	Deed	Online	11:30 AM	0	0.0	N	100044
+2026-10-20	Minnesota	Carver County	Deed	Online	07:00 AM	2	661800.0	Y	99994
+2026-10-20	New Jersey	Blairstown Township (Warren)	Lien	Live	11:00 AM	0	0.0	N	100687
+2026-10-20	New Jersey	Fair Haven Borough (Monmouth)	Lien	Live	10:00 AM	0	0.0	N	100674
+2026-10-20	New Jersey	Hardwick Township (Warren)	Lien	Live	09:00 AM	0	0.0	N	100688
+2026-10-20	New Jersey	Howell Township (Monmouth)	Lien	Online	08:00 AM	0	0.0	N	100650
+2026-10-20	New Jersey	North Plainfield Borough (Somerset)	Lien	Online	08:00 AM	0	0.0	N	100593
+2026-10-20	New Jersey	Oradell Borough (Bergen)	Lien	Online	09:00 AM	0	0.0	N	100709
+2026-10-20	Pennsylvania	Mercer County	Deed	Live	10:00 AM	0	0.0	N	90241
+2026-10-21	California	Placer County	Deed	Live	09:00 AM	0	0.0	N	90982
+2026-10-21	Colorado	Alamosa County	Lien	Online	08:00 AM	0	0.0	N	97894
+2026-10-21	Colorado	Crowley County	Deed	Live	10:00 AM	0	0.0	N	98318
+2026-10-21	Florida	Clay County	Deed	Online	09:30 AM	0	0.0	N	100024
+2026-10-21	Florida	Highlands County	Deed	Online	10:00 AM	0	0.0	N	100838
+2026-10-21	Florida	Saint Johns County	Deed	Live	12:00 PM	0	0.0	N	88291
+2026-10-21	Florida	Wakulla County	Deed	Live	10:00 AM	0	0.0	N	100514
+2026-10-21	Indiana	Porter County	Lien	Online	09:00 AM	0	0.0	N	96900
+2026-10-21	New Jersey	Flemington Borough (Hunterdon)	Lien	Online	09:00 AM	0	0.0	N	99506
+2026-10-21	New Jersey	Maplewood Township (Essex)	Lien	Online	08:30 AM	0	0.0	N	100586
+2026-10-21	New Jersey	Medford Township (Burlington)	Lien	Online	09:00 AM	0	0.0	N	98080
+2026-10-21	New Jersey	Milltown Borough (Middlesex)	Lien	Online	09:00 AM	0	0.0	N	100587
+2026-10-21	New Jersey	Morris Township (Morris)	Lien	Online	08:30 AM	0	0.0	N	100590
+2026-10-21	New Jersey	Pohatcong Township (Warren)	Lien	Live	11:00 AM	0	0.0	N	100727
+2026-10-21	New Jersey	Rutherford Borough (Bergen)	Lien	Live	10:00 AM	11	107096.49	Y	98242
+2026-10-21	New Jersey	South Harrison Township (Gloucester)	Lien	Live	03:00 PM	0	0.0	N	100863
+2026-10-21	New Jersey	Stanhope Borough (Sussex)	Lien	Online	08:30 AM	0	0.0	N	100612
+2026-10-21	New Jersey	Wildwood Crest Borough (Cape May)	Lien	Live	10:00 AM	31	71409.06	Y	100718
+2026-10-21	New York	Dutchess County	Deed	Online	10:00 AM	0	0.0	N	92724
+2026-10-21	New York	Lockport City (Niagara)	Deed	Online	12:00 PM	0	0.0	N	100410
+2026-10-21	Pennsylvania	Philadelphia City-County	Redeemable Deed	Online	10:00 AM	0	0.0	N	95373
+2026-10-21	Tennessee	Davidson County	Redeemable Deed	Live	12:00 PM	0	0.0	N	91597
+2026-10-21	Virginia	Gloucester County	Deed	Live	12:00 PM	0	0.0	N	100695
+2026-10-22	Florida	Brevard County	Deed	Online	09:00 AM	0	0.0	N	100018
+2026-10-22	Florida	Hillsborough County	Deed	Online	10:00 AM	0	0.0	N	100493
+2026-10-22	Florida	Madison County	Deed	Live	08:00 AM	0	0.0	N	99922
+2026-10-22	Kentucky	Green County	Lien	Live	09:00 AM	0	0.0	N	95873
+2026-10-22	Kentucky	Ohio County	Lien	Live	09:00 AM	670	230330.68	Y	91684
+2026-10-22	Michigan	Eaton County	Deed	Live	06:00 PM	0	0.0	N	99963
+2026-10-22	New Jersey	Aberdeen Township (Monmouth)	Lien	Online	08:30 AM	0	0.0	N	99497
+2026-10-22	New Jersey	Burlington City (Burlington)	Lien	Online	09:00 AM	0	0.0	N	97836
+2026-10-22	New Jersey	Delran Township (Burlington)	Lien	Online	08:30 AM	0	0.0	N	100571
+2026-10-22	New Jersey	East Rutherford Borough (Bergen)	Lien	Live	11:00 AM	0	0.0	N	100905
+2026-10-22	New Jersey	Holmdel Township (Monmouth)	Lien	Online	08:30 AM	0	0.0	N	100580
+2026-10-22	New Jersey	Hopatcong Borough (Sussex)	Lien	Online	08:30 AM	0	0.0	N	100581
+2026-10-22	New Jersey	Marlboro Township (Monmouth)	Lien	Online	08:30 AM	0	0.0	N	100823
+2026-10-22	New Jersey	Millburn Township (Essex)	Lien	Live	10:00 AM	2	50022.59	Y	101160
+2026-10-22	New Jersey	Neptune City Borough (Monmouth)	Lien	Online	08:30 AM	0	0.0	N	100592
+2026-10-22	New Jersey	Plainsboro Township (Middlesex)	Lien	Live	10:00 AM	0	0.0	N	99510
+2026-10-22	New Jersey	Saddle Brook Township (Bergen)	Lien	Live	10:00 AM	0	0.0	N	100717
+2026-10-22	New Jersey	Watchung Borough (Somerset)	Lien	Online	08:30 AM	0	0.0	N	100614
+2026-10-22	New York	Orange County	Deed	Online	10:00 AM	0	0.0	N	101139
+2026-10-22	Rhode Island	Chepachet Village (Providence)	Lien	Live	11:00 AM	0	0.0	N	92568
+2026-10-22	Virginia	Caroline County	Deed	Simulcast	11:00 AM	0	0.0	N	100696
+2026-10-23	Colorado	Routt County	Lien	Online	08:00 AM	0	0.0	N	97966
+2026-10-23	New Jersey	East Windsor Township (Mercer)	Lien	Online	09:00 AM	0	0.0	N	100574
+2026-10-23	New Jersey	Green Brook Township (Somerset)	Lien	Live	11:00 AM	0	0.0	N	100673
+2026-10-23	New Jersey	Harding Township (Morris)	Lien	Online	08:00 AM	0	0.0	N	100577
+2026-10-23	New Jersey	Hopewell Township (Mercer)	Lien	Live	09:00 AM	0	0.0	N	100871
+2026-10-23	New Jersey	South Bound Brook Borough (Somerset)	Lien	Online	08:30 AM	0	0.0	N	100610
+2026-10-26	California	Santa Clara County	Deed	Online	08:00 AM	0	0.0	N	97630
+2026-10-26	Colorado	Ouray County	Lien	Online	08:00 AM	0	0.0	N	97891
+2026-10-26	Florida	Broward County	Deed	Online	11:00 AM	0	0.0	N	100019
+2026-10-26	Florida	Collier County	Deed	Live	01:00 PM	0	0.0	N	100027
+2026-10-26	Florida	Manatee County	Deed	Online	10:00 AM	0	0.0	N	99228
+2026-10-26	Indiana	Franklin County	Lien	Live	10:00 AM	0	0.0	N	96901
+2026-10-26	Indiana	Grant County	Lien	Live	10:00 AM	0	0.0	N	96902
+2026-10-26	New Jersey	Elk Township (Gloucester)	Lien	Live	10:00 AM	0	0.0	N	100681
+2026-10-26	New Jersey	Pequannock Township (Morris)	Lien	Online	08:30 AM	0	0.0	N	99939
+2026-10-26	New Jersey	Roxbury Township (Morris)	Lien	Online	10:00 AM	0	0.0	N	100602
+2026-10-26	New Jersey	Stratford Borough (Camden)	Lien	Online	08:30 AM	0	0.0	N	100613
+2026-10-26	Rhode Island	Bristol Town (Bristol)	Lien	Live	10:00 AM	0	0.0	N	94066
+2026-10-26	South Carolina	Chesterfield County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100448
+2026-10-26	Washington	Pierce County	Deed	Online	08:30 AM	0	0.0	N	97633
+2026-10-26	Washington	Pierce County	Deed	Online	08:30 AM	0	0.0	N	97634
+2026-10-27	Colorado	Costilla County	Deed	Online	10:00 AM	0	0.0	N	101207
+2026-10-27	Florida	Bay County	Deed	Online	10:00 AM	0	0.0	N	100484
+2026-10-27	Florida	Nassau County	Deed	Online	11:30 AM	0	0.0	N	100045
+2026-10-27	Florida	Washington County	Deed	Online	10:00 AM	0	0.0	N	100068
+2026-10-27	Indiana	Bartholomew County	Lien	Online	10:00 AM	0	0.0	N	96903
+2026-10-27	Indiana	Crawford County	Lien	Live	10:00 AM	0	0.0	N	96904
+2026-10-27	Indiana	Howard County	Lien	Live	10:00 AM	0	0.0	N	97076
+2026-10-27	New Jersey	Chatham Borough (Morris)	Lien	Live	10:00 AM	0	0.0	N	99499
+2026-10-27	New Jersey	Hazlet Township (Monmouth)	Lien	Online	08:30 AM	0	0.0	N	98543
+2026-10-27	New Jersey	Lindenwold Borough (Camden)	Lien	Live	10:00 AM	0	0.0	N	101200
+2026-10-27	Tennessee	Shelby County	Redeemable Deed	Online	07:00 AM	0	0.0	N	90017
+2026-10-28	Georgia	Macon City (Bibb)	Deed	Live	11:00 AM	31	100750.0	Y	100197
+2026-10-28	Indiana	Ripley County	Lien	Live	10:00 AM	0	0.0	N	97073
+2026-10-28	Louisiana	Jeanerette City (Iberia)	Lien	Online	09:00 AM	0	0.0	N	100964
+2026-10-28	Louisiana	Vivian Town (Caddo)	Lien	Online	09:00 AM	0	0.0	N	100965
+2026-10-28	New Jersey	Chesilhurst Borough (Camden)	Lien	Live	10:00 AM	0	0.0	N	100723
+2026-10-28	New Jersey	Neptune Township (Monmouth)	Lien	Online	08:30 AM	0	0.0	N	100591
+2026-10-28	New Jersey	Paulsboro Borough (Gloucester)	Lien	Online	08:30 AM	0	0.0	N	100596
+2026-10-28	New Jersey	Swedesboro Borough (Gloucester)	Lien	Online	10:00 AM	0	0.0	N	101164
+2026-10-28	New Jersey	Upper Pittsgrove Township (Salem)	Lien	Live	10:00 AM	0	0.0	N	100690
+2026-10-28	New Jersey	Washington Township (Bergen)	Lien	Online	09:00 AM	0	0.0	N	100822
+2026-10-28	New York	Albany County	Deed	Online	12:00 PM	0	0.0	N	97147
+2026-10-28	New York	Essex County	Deed	Simulcast	10:00 AM	0	0.0	N	97731
+2026-10-29	Colorado	Montrose County	Lien	Live	09:00 AM	0	0.0	N	97951
+2026-10-29	Florida	Hillsborough County	Deed	Online	10:00 AM	0	0.0	N	100494
+2026-10-29	New Jersey	Brooklawn Borough (Camden)	Lien	Live	09:00 AM	0	0.0	N	98108
+2026-10-29	New Jersey	East Orange City (Essex)	Lien	Online	09:00 AM	0	0.0	N	100815
+2026-10-29	New Jersey	Montvale Borough (Bergen)	Lien	Live	10:00 AM	0	0.0	N	100684
+2026-10-29	Pennsylvania	Schuylkill County	Deed	Live	10:00 AM	0	0.0	N	93171
+2026-10-30	Michigan	Allegan County	Deed	Online	10:00 AM	0	0.0	N	100467
+2026-10-30	Michigan	Arenac County	Deed	Online	10:00 AM	0	0.0	N	100468
+2026-10-30	Michigan	Bay County	Deed	Online	10:00 AM	0	0.0	N	100469
+2026-10-30	Michigan	Berrien County	Deed	Online	10:00 AM	0	0.0	N	100470
+2026-10-30	Michigan	Calhoun County	Deed	Online	10:00 AM	0	0.0	N	100471
+2026-10-30	Michigan	Gladwin County	Deed	Online	10:00 AM	0	0.0	N	100472
+2026-10-30	Michigan	Huron County	Deed	Online	10:00 AM	0	0.0	N	100473
+2026-10-30	Michigan	Ionia County	Deed	Online	10:00 AM	0	0.0	N	100474
+2026-10-30	Michigan	Kalamazoo County	Deed	Online	10:00 AM	0	0.0	N	100475
+2026-10-30	Michigan	Lapeer County	Deed	Online	10:00 AM	0	0.0	N	100476
+2026-10-30	Michigan	Montcalm County	Deed	Online	10:00 AM	0	0.0	N	100477
+2026-10-30	Michigan	Saint Clair County	Deed	Online	10:00 AM	0	0.0	N	100478
+2026-10-30	Michigan	Saint Joseph County	Deed	Online	10:00 AM	0	0.0	N	100479
+2026-10-30	Michigan	Shiawassee County	Deed	Online	10:00 AM	0	0.0	N	100480
+2026-10-30	Michigan	Tuscola County	Deed	Online	10:00 AM	0	0.0	N	100481
+2026-10-30	New Jersey	Phillipsburg Town (Warren)	Lien	Online	08:30 AM	0	0.0	N	100412
+2026-10-30	New Jersey	Rahway City (Union)	Lien	Live	10:00 AM	0	0.0	N	98287
+2026-10-30	Pennsylvania	Philadelphia City-County	Redeemable Deed	Online	10:00 AM	0	0.0	N	99827
+2026-10-31	New Jersey	Monmouth Beach Borough (Monmouth)	Lien	Online	10:00 AM	0	0.0	N	98203
+2026-10-31	Tennessee	Wilson County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99834
+2026-11-02	Florida	Collier County	Deed	Live	01:00 PM	0	0.0	N	100028
+2026-11-02	New Jersey	East Hanover Township (Morris)	Lien	Online	09:00 AM	0	0.0	N	100573
+2026-11-02	Pennsylvania	Allegheny County	Deed	Live	09:00 AM	0	0.0	N	88740
+2026-11-02	South Carolina	Abbeville County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99741
+2026-11-02	South Carolina	Aiken County	Redeemable Deed	Live	09:00 AM	0	0.0	N	100686
+2026-11-02	South Carolina	Cherokee County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100207
+2026-11-02	South Carolina	Clarendon County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100554
+2026-11-02	South Carolina	Fairfield County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100208
+2026-11-02	South Carolina	Georgetown County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100209
+2026-11-02	South Carolina	Jasper County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100213
+2026-11-02	South Carolina	Kershaw County	Redeemable Deed	Live	09:30 AM	0	0.0	N	100413
+2026-11-02	South Carolina	Lee County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100214
+2026-11-02	South Carolina	Lexington County	Redeemable Deed	Live	10:00 AM	0	0.0	N	97714
+2026-11-02	South Carolina	Marion County	Redeemable Deed	Live	10:00 AM	0	0.0	N	97717
+2026-11-03	Florida	Gilchrist County	Deed	Online	11:00 AM	0	0.0	N	100490
+2026-11-03	Florida	Nassau County	Deed	Online	11:30 AM	0	0.0	N	101143
+2026-11-03	Florida	Washington County	Deed	Online	10:00 AM	0	0.0	N	100069
+2026-11-03	Georgia	Avera City (Jefferson)	Redeemable Deed	Live	10:00 AM	0	0.0	N	100538
+2026-11-03	Georgia	Banks County	Redeemable Deed	Live	10:00 AM	0	0.0	N	92440
+2026-11-03	Georgia	Bartow Town (Jefferson)	Redeemable Deed	Live	10:00 AM	0	0.0	N	90116
+2026-11-03	Georgia	Chatham County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100862
+2026-11-03	Georgia	Chattahoochee County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100526
+2026-11-03	Georgia	Chickamauga City (Walker)	Redeemable Deed	Live	10:00 AM	0	0.0	N	100527
+2026-11-03	Georgia	Claxton City (Evans)	Redeemable Deed	Live	10:00 AM	0	0.0	N	100536
+2026-11-03	Georgia	Clayton County	Redeemable Deed	Live	10:00 AM	0	0.0	N	101219
+2026-11-03	Georgia	Cobb County	Redeemable Deed	Live	10:00 AM	0	0.0	N	90741
+2026-11-03	Georgia	Crawford County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99810
+2026-11-03	Georgia	Duluth City (Gwinnett)	Redeemable Deed	Live	10:00 AM	0	0.0	N	100528
+2026-11-03	Georgia	Evans County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100535
+2026-11-03	Georgia	Habersham County	Redeemable Deed	Live	10:00 AM	0	0.0	N	89592
+2026-11-03	Georgia	Jefferson County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100537
+2026-11-03	Georgia	Kennesaw City (Cobb)	Redeemable Deed	Live	10:00 AM	0	0.0	N	88843
+2026-11-03	Georgia	Lookout Mountain City (Walker)	Redeemable Deed	Live	10:00 AM	0	0.0	N	100529
+2026-11-03	Georgia	Miller County	Redeemable Deed	Live	10:00 AM	0	0.0	N	97803
+2026-11-03	Georgia	Rossville City (Walker)	Redeemable Deed	Live	10:00 AM	0	0.0	N	100530
+2026-11-03	Georgia	Swainsboro City (Emanuel)	Redeemable Deed	Live	10:00 AM	0	0.0	N	100531
+2026-11-03	Georgia	Sycamore City (Turner)	Redeemable Deed	Live	10:00 AM	0	0.0	N	100534
+2026-11-03	Georgia	Taylor County	Redeemable Deed	Live	10:00 AM	0	0.0	N	100539
+2026-11-03	Georgia	Wrens City (Jefferson)	Redeemable Deed	Live	10:00 AM	0	0.0	N	88851
+2026-11-03	Ohio	Stark County	Deed	Live	09:00 AM	0	0.0	N	99785
+2026-11-03	South Carolina	Richland County	Redeemable Deed	Live	10:00 AM	0	0.0	N	99748
+2026-11-03	Texas	Bastrop County	Redeemable Deed	Live	10:00 AM	0	0.0	N	93537
+2026-11-04	Colorado	Dolores County	Lien	Live	10:00 AM	0	0.0	N	97904
+2026-11-04	Colorado	Kit Carson County	Lien	Live	10:00 AM	0	0.0	N	97944
+2026-11-04	Colorado	Prowers County	Lien	Online	09:00 AM	0	0.0	N	97960
+2026-11-04	Colorado	Saguache County	Lien	Online	08:00 AM	0	0.0	N	97967
+2026-11-04	Colorado	Washington County	Lien	Online	11:00 AM	0	0.0	N	98313
+2026-11-04	Florida	Clay County	Deed	Online	09:30 AM	0	0.0	N	100025
+2026-11-04	Florida	Escambia County	Deed	Online	10:00 AM	0	0.0	N	96648
+2026-11-04	New Jersey	Magnolia Borough (Camden)	Lien	Online	10:00 AM	0	0.0	N	100714

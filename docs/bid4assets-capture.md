@@ -146,3 +146,37 @@ they stood when it was taken, which is the right behaviour for a record of what
 was offered — but it means a file left in place after the sale will keep
 asserting a lot list that is no longer live. Delete captures once their sale has
 run and been reconciled.
+
+
+## Philadelphia, and any county with a sheriff's list
+
+The storefront pages carry no catalog, but `/philataxsales` does — a public
+Kendo grid, no session, with every scheduled sale behind `?salesdate=YYYYMMDD`.
+Read it from the grid's own dataSource rather than the table: the rows carry
+more than is rendered.
+
+```js
+const ds = jQuery('.k-grid').data('kendoGrid').dataSource;
+ds.pageSize(1000);                      // one page, whole sale
+await new Promise(r => setTimeout(r, 3000));
+const cl = s => String(s ?? '').replace(/\s+/g, ' ').trim();
+copy(JSON.stringify({
+  slug: 'PhilaTaxSale' + ds.view()[0].SaleDateString,
+  county: 'Philadelphia County', state: 'PA',
+  saleDate: cl(ds.view()[0].SaleDateString).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
+  title: 'Philadelphia County Sheriff Tax Sale',
+  capturedAt: new Date().toISOString(),
+  rows: ds.view().map(r => ({
+    auctionId: cl(r.AuctionID), apn: cl(r.Apn), address: cl(r.Address),
+    minimumBid: cl(r.MinimumBid), taxesOwed: cl(r.DebtAmount),
+    owner: cl(r.Defendant), status: cl(r.AuctionStatusString),
+  })),
+}, null, 1));
+```
+
+Save to `data/bid4assets-capture/<slug>.json`. Verified 2026-09-15 against the
+22 September sale (66 parcels) and the 25th (35).
+
+**The storefronts are the exception, not the rule to assume.** Before deciding a
+Bid4Assets county cannot be read, look for a list page like this one; five
+storefronts have served nothing and this page serves everything.

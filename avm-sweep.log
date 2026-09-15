@@ -1,0 +1,29 @@
+2026-08-25T19:19:10.356Z sweep start — provider=realestateapi concurrency=5 limit=30
+2026-08-25T19:19:11.107Z targets: 30
+2026-08-25T19:19:14.959Z sweep done in 0.1m — attempted 30/30, hit 22, of which echoed-assessment 11, miss 8, errors 0
+2026-08-25T19:19:27.105Z sweep start — provider=realestateapi concurrency=6
+2026-08-25T19:19:28.259Z targets: 16695
+2026-08-25T19:19:37.362Z 100/16695 — hit 84 (echo 22) miss 16 err 0 — 11.0/s, eta 25m
+2026-08-25T19:19:48.194Z 200/16695 — hit 177 (echo 45) miss 23 err 0 — 10.0/s, eta 27m
+2026-08-25T19:19:59.375Z 300/16695 — hit 266 (echo 62) miss 34 err 0 — 9.6/s, eta 28m
+2026-08-25T19:20:08.110Z 400/16695 — hit 360 (echo 87) miss 40 err 0 — 10.0/s, eta 27m
+2026-08-25T19:20:17.535Z 500/16695 — hit 456 (echo 101) miss 44 err 0 — 10.1/s, eta 27m
+2026-08-25T19:20:26.543Z 600/16695 — hit 546 (echo 122) miss 54 err 0 — 10.3/s, eta 26m
+2026-08-25T19:20:35.938Z 700/16695 — hit 642 (echo 142) miss 58 err 0 — 10.3/s, eta 26m
+2026-08-25T19:20:45.177Z 800/16695 — hit 735 (echo 151) miss 65 err 0 — 10.4/s, eta 25m
+2026-08-25T19:20:54.506Z 900/16695 — hit 827 (echo 164) miss 73 err 0 — 10.4/s, eta 25m
+2026-08-25T19:21:05.660Z 1000/16695 — hit 921 (echo 184) miss 79 err 0 — 10.3/s, eta 25m
+2026-08-25T19:21:17.268Z 1100/16695 — hit 1017 (echo 201) miss 83 err 0 — 10.1/s, eta 26m
+2026-08-25T19:21:26.339Z 1200/16695 — hit 1107 (echo 215) miss 93 err 0 — 10.2/s, eta 25m
+2026-08-25T19:21:35.593Z 1300/16695 — hit 1198 (echo 228) miss 102 err 0 — 10.2/s, eta 25m
+2026-08-25T19:21:45.101Z 1400/16695 — hit 1290 (echo 238) miss 110 err 0 — 10.2/s, eta 25m
+2026-08-25T19:21:54.160Z 1500/16695 — hit 1383 (echo 252) miss 117 err 0 — 10.3/s, eta 25m
+2026-08-25T19:22:03.582Z 1600/16695 — hit 1473 (echo 264) miss 127 err 0 — 10.3/s, eta 24m
+2026-08-25T19:22:13.174Z 1700/16695 — hit 1568 (echo 276) miss 132 err 0 — 10.3/s, eta 24m
+2026-08-25T19:22:25.421Z 1800/16695 — hit 1661 (echo 292) miss 139 err 0 — 10.2/s, eta 24m
+2026-08-25T19:22:35.767Z 1900/16695 — hit 1755 (echo 299) miss 145 err 0 — 10.1/s, eta 24m
+2026-08-25T19:22:46.002Z 2000/16695 — hit 1853 (echo 305) miss 147 err 0 — 10.1/s, eta 24m
+2026-08-25T19:22:52.133Z ABORT — provider unusable: realestateapi unavailable (402): payment required — Insufficient wallet balance. Add funds at https://console.realestateapi.com/dashboard/billing
+2026-08-25T19:22:52.177Z ABORT — provider unusable: realestateapi unavailable (402): payment required — Insufficient wallet balance. Add funds at https://console.realestateapi.com/dashboard/billing
+2026-08-25T19:22:52.211Z ABORT — provider unusable: realestateapi unavailable (402): payment required — Insufficient wallet balance. Add funds at https://console.realestateapi.com/dashboard/billing
+2026-08-25T19:22:52.323Z sweep done in 3.4m — attempted 2067/16695, hit 1916, of which echoed-assessment 311, miss 151, errors 0 — ABORTED: realestateapi unavailable (402): payment required — Insufficient wallet balance. Add funds at https://console.realestateapi.com/dashboard/billing

@@ -36,6 +36,7 @@ import { capeInputsHash } from "../lib/cape/components";
 import { figurePhrases } from "../lib/cape/script";
 import { policyFor } from "../lib/ingest/policy";
 import { loadRegistry } from "../lib/ingest/adapters/generic";
+import { isImportedExternalId } from "../lib/import/provenance";
 import { ingestRuns } from "../lib/db/schema";
 
 const OUT = (() => {
@@ -137,6 +138,7 @@ async function main() {
       stage: capeProductions.stage,
       error: capeProductions.error,
       auctionId: auctions.id,
+      externalId: auctions.externalId,
       hash: capeProductions.inputsHash,
     })
     .from(capeProductions)
@@ -203,11 +205,48 @@ async function main() {
     bid4assets: "bid4assets",
   };
 
-  function whyNoList(fips: string, platform: string | null, sourceUrl: string | null): string {
+  /**
+   * A link that names a platform but not a sale.
+   *
+   * `https://www.govease.com/` and `https://www.bid4assets.com/` are front
+   * doors. A capture needs the sale's own page, and nothing in the row says
+   * which that is — so "not captured yet" would be the wrong thing to tell a
+   * reviewer. What is missing is the link, not the capture.
+   */
+  const isFrontDoor = (u: string | null) => {
+    try {
+      const url = new URL(u ?? "");
+      return url.pathname.replace(/\/+$/, "") === "";
+    } catch {
+      return true;
+    }
+  };
+
+  function whyNoList(
+    fips: string,
+    platform: string | null,
+    sourceUrl: string | null,
+    externalId: string,
+  ): string {
     const host = hostOf(sourceUrl);
 
     const adapter = platform ? CAPTURED[platform] : undefined;
     if (adapter) {
+      /*
+       * Imported and pointing at a front door is a different problem from
+       * uncaptured, and conflating them cost a run: four sales filed under
+       * GovEase were chased as captures, and GovEase's own public registry —
+       * eight upcoming auctions on 2026-09-15 — lists none of them. The
+       * platform name came off an uploaded calendar, and no page on that
+       * platform has ever been found for these sales.
+       */
+      if (isImportedExternalId(externalId) && isFrontDoor(sourceUrl)) {
+        return (
+          `named as ${platform} on an uploaded calendar, with only the platform's front page ` +
+          `for a link — no page for this particular sale has been located, so there is nothing ` +
+          `to capture yet`
+        );
+      }
       return (
         `${host || platform} is read one sale at a time from a browser capture, not crawled — ` +
         `this sale has not been captured yet. Nothing is blocking it.`
@@ -314,7 +353,7 @@ async function main() {
       platform: r.platform,
       parcels: r.lotCount,
       announced: r.announced,
-      whyNoList: r.lotCount > 0 ? null : whyNoList(r.fips, r.platform, r.sourceUrl),
+      whyNoList: r.lotCount > 0 ? null : whyNoList(r.fips, r.platform, r.sourceUrl, r.externalId),
       sourceUrl: r.lotCount > 0 ? null : r.sourceUrl,
       held: (r.figures ?? []).length > 0 || Boolean(r.error),
       heldWhy: r.error ?? null,

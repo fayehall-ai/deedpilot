@@ -7,12 +7,20 @@
  * the host, which is a structural guarantee rather than an intention — the same
  * stance `govease.ts` and `sri.ts` take, reached here for two reasons.
  *
- * The first is that the catalog is not in the pages at all. Four storefronts
- * were checked, including `AlamedaMar26`, a sale that closed six months ago,
- * and every one served zero lot rows and zero auction links. Two page loads
- * watched in a real browser produced only tracking pixels. The listings render
- * from a grid whose transport URL appears neither in the page nor in the main
- * bundle, so there is nothing for a fetcher to ask for.
+ * The first is that the catalog is not in the storefront pages. Five were
+ * checked — including `AlamedaMar26`, a sale that closed six months ago, and
+ * `FayetteCoTaxUpset2026`, one still to come — and every one served zero lot
+ * rows and zero auction links. Two page loads watched in a real browser
+ * produced only tracking pixels.
+ *
+ * **That is true of storefronts and not of the host.** `/philataxsales`, the
+ * Philadelphia sheriff's list, renders a full Kendo grid to anyone, with a
+ * `?salesdate=YYYYMMDD` selector covering every scheduled sale and a
+ * dataSource carrying parcel, address, minimum bid, debt, sale type and status
+ * per row — richer than the visible table. `pageSize(1000)` on that dataSource
+ * returns the whole sale in one go. So the shape of a Bid4Assets capture
+ * depends on which kind of page a county publishes, and "no catalog in the
+ * page" is a fact about storefronts rather than a property of the platform.
  *
  * The second is an active edge control, and it is worth recording precisely
  * because the obvious reading of it is wrong. `robots.txt` returns 404 — no
