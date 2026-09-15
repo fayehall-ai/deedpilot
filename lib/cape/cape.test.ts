@@ -524,6 +524,42 @@ for (const [spoken, want] of [
   assert(spokenToDigits(spoken) === want, `${spoken} -> ${spokenToDigits(spoken)}, want ${want}`);
 }
 
+/*
+ * A spoken statute citation is not a quantity, and neither half of a spoken
+ * figure is a figure.
+ *
+ * These two between them held 82 of 454 packages in one batch — scripts whose
+ * text was correct and whose verdict was not. The `point`/`dash` rule only
+ * catches a citation spoken with its punctuation; most are spoken as bare
+ * words, and a comma inside a number ended the run halfway through.
+ */
+for (const [spoken, want] of [
+  /* Ark. Code 18-12-609, summed to 3609. */
+  ["section eighteen twelve six hundred nine", "section eighteen twelve six hundred nine"],
+  /* N.J.S.A. 54:5, summed to 59. */
+  ["new jersey statutes annotated fifty-four five", "new jersey statutes annotated fifty-four five"],
+  /* RPTL 1110, summed to 21. */
+  ["sections eleven ten and eleven thirty-one", "sections eleven ten and eleven thirty-one"],
+  /* Bergen's population, split at the comma into 978000 and 641. */
+  ["nine hundred seventy-eight thousand, six hundred forty-one", "978641"],
+  ["one million ninety thousand, three hundred fifty-four", "1090354"],
+  /*
+   * A comma joins a number only after a scale word. "All five, one hundred
+   * percent, carry a parcel number" is two figures and an appositive; joining
+   * them read 600 out of a sentence that says five and a hundred per cent.
+   */
+  ["all five, one hundred percent", "all 5, 100 percent"],
+  ["every one of those ten, one hundred percent", "every 1 of those 10, 100 percent"],
+  /* And the comma must not resurrect the date fold. */
+  ["september fifteenth, two thousand twenty-six", "september 15, 2026"],
+  ["october sixth, two thousand twenty-six", "october 6, 2026"],
+  /* A cue has to be adjacent — a real figure later in the passage still counts. */
+  ["the statute applies. the deposit is four thousand dollars",
+   "the statute applies. the deposit is 4000 dollars"],
+] as const) {
+  assert(spokenToDigits(spoken) === want, `${spoken} -> ${spokenToDigits(spoken)}, want ${want}`);
+}
+
 console.log("cape spoken numbers: all assertions passed");
 
 // ---------------------------------------------------------------------------

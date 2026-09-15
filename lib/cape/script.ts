@@ -194,7 +194,7 @@ Never list what this briefing does not cover. If a subject is not in the FACTS, 
  * checklist marks `verify` reaches the narrator as unconfirmed rather than as
  * fact.
  */
-function factSheet(pkg: CapePackage, meta: CapeScriptMeta): string {
+export function factSheet(pkg: CapePackage, meta: CapeScriptMeta): string {
   const lines: string[] = [
     `County: ${meta.countyName ?? "unknown"}, ${meta.state ?? "unknown"}`,
     `Sale date: ${meta.saleDate}${meta.saleDateConfirmed ? " (confirmed by the county)" : " (PROJECTED — not confirmed by the county)"}`,
@@ -451,6 +451,7 @@ export function spokenToDigits(text: string): string {
        * year the sale is in.
        */
       const groups = lower
+        .replace(/,/g, " ")
         .split(/\s+/)
         .map((g) => g.split(/-+/).filter((w) => w && w !== "and"))
         .filter((g) => g.length > 0);
@@ -521,10 +522,39 @@ export function spokenToDigits(text: string): string {
      * as a whole instead of being silently split into two innocent cardinals.
      */
     new RegExp(
-      `(${NUMBER_WORD.source})(?:[\\s-]+(?:point|dash)?[\\s-]*(${NUMBER_WORD.source}))*`,
+      /*
+       * A comma may sit inside a single spoken number, and must not end the run.
+       *
+       * "nine hundred seventy-eight thousand, six hundred forty-one" is one
+       * figure — Bergen County's population, 978,641, and in the facts. Ending
+       * the run at the comma split it into 978,000 and 641, neither of which
+       * appears anywhere, so a correct script was held as though the narrator
+       * had invented two numbers.
+       */
+      `(${NUMBER_WORD.source})(?:[\\s,-]+(?:point|dash)?[\\s,-]*(${NUMBER_WORD.source}))*`,
       "g",
     ),
-    (run) => {
+    (run, _a, _b, offset: number, whole: string) => {
+      /*
+       * A citation cue immediately before the run means it is an identifier.
+       *
+       * The `point`/`dash` rule already catches a citation spoken with its
+       * punctuation — "forty-eight dash four dash forty" for O.C.G.A. 48-4-40.
+       * It cannot catch one spoken as bare words, and most are: "Section
+       * eighteen twelve six hundred nine" is Ark. Code 18-12-609 and summed to
+       * 3609; "New Jersey Statutes Annotated fifty-four five" is N.J.S.A. 54:5
+       * and summed to 59; "Section eleven ten" is RPTL 1110 and summed to 21.
+       * Between them these accounted for most of a batch's held packages —
+       * scripts whose text was correct and whose verdict was not.
+       *
+       * The cue has to be adjacent: a sentence that merely mentions a statute
+       * somewhere and then states a real figure is still checked.
+       */
+      const before = whole.slice(Math.max(0, offset - 48), offset).toLowerCase();
+      if (/\b(?:section|sections|chapter|chapters|article|articles|title|paragraph|subsection|annotated|code|statutes?|rule)\s*[.:§-]?\s*$/.test(before)) {
+        return run;
+      }
+
       /*
        * Cut the run after an ordinal that is not its last word, and read the
        * halves separately. See `ORDINALS`.
@@ -536,7 +566,40 @@ export function spokenToDigits(text: string): string {
        * reason they are there. Returning the run untouched would have bought
        * silence instead.
        */
-      const parts = run.split(/([\s-]+)/);
+      /*
+       * A comma only stays inside the number when a scale word precedes it.
+       *
+       * "nine hundred seventy-eight thousand, six hundred forty-one" is one
+       * figure and the comma is its thousands separator — the word before it is
+       * `thousand`. "All five, one hundred percent, carry a parcel number" is
+       * two figures and an appositive, and joining them produced 600 out of a
+       * sentence that says five and a hundred per cent. English writes the
+       * separator only after a scale, so that is the test.
+       */
+      {
+        const tok = run.split(/([\s,-]+)/);
+        for (let n = 1; n < tok.length; n += 2) {
+          if (!tok[n].includes(",")) continue;
+          const prev = tok[n - 1]?.toLowerCase().replace(/[^a-z]/g, "");
+          if (prev && prev in SCALES) continue;
+          return (
+            convertRun(tok.slice(0, n).join("")) + tok[n] + convertRun(tok.slice(n + 1).join(""))
+          );
+        }
+      }
+
+      /*
+       * Split on commas as well as spaces and hyphens.
+       *
+       * The run may now span a comma, so a token taken on whitespace alone can
+       * be "fifteenth," — which is not in `ORDINALS`, so the ordinal rule below
+       * misses it and "September fifteenth, two thousand twenty-six" sums to
+       * 17026. That is the same date fold as before, reintroduced by allowing
+       * commas inside a number, and it held 110 correct scripts the moment the
+       * two changes met. The tokenizer has to know about every separator the
+       * matcher accepts.
+       */
+      const parts = run.split(/([\s,-]+)/);
       const words = parts.map((_, n) => n).filter((n) => n % 2 === 0 && parts[n]);
       const last = words[words.length - 1];
       for (const n of words) {
