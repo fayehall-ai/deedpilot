@@ -182,12 +182,38 @@ async function main() {
   /**
    * One sentence naming the actual obstacle.
    *
-   * Ordered by which fact settles the question. A policy block settles it
-   * whatever else is true; after that, whether anyone has located a source;
-   * then whether it was ever tried; then what trying produced.
+   * Ordered by which fact settles the question. Whether the source is one we
+   * read by capture rather than by crawling; then a policy block, which settles
+   * it whatever else is true; then whether anyone has located a source; then
+   * whether it was ever tried; then what trying produced.
+   *
+   * The capture case is first because it used to be told wrong. Every one of
+   * these hosts refuses our user agent, so `policyFor` says `requires_agreement`
+   * and this sentence said the list was "behind a platform we do not crawl" —
+   * which was true when it was written and is not any more. Three adapters now
+   * read these pages from captures taken in a browser, and sixteen of the sales
+   * on this page are not blocked at all; nobody has opened them yet. "We cannot
+   * get this" and "we have not got to this" are different things to tell a
+   * reviewer, and only the second is true here.
    */
+  const CAPTURED: Record<string, string> = {
+    realtaxdeed: "realauction",
+    realforeclose: "realauction",
+    govease: "govease",
+    bid4assets: "bid4assets",
+  };
+
   function whyNoList(fips: string, platform: string | null, sourceUrl: string | null): string {
     const host = hostOf(sourceUrl);
+
+    const adapter = platform ? CAPTURED[platform] : undefined;
+    if (adapter) {
+      return (
+        `${host || platform} is read one sale at a time from a browser capture, not crawled — ` +
+        `this sale has not been captured yet. Nothing is blocking it.`
+      );
+    }
+
     const policy = host ? policyFor(host) : null;
     if (policy && policy.decision !== "allow") {
       return `${host} needs a data agreement before it can be read — the sale is real, the list is behind a platform we do not crawl`;
