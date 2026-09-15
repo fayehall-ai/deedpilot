@@ -140,6 +140,47 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
 
   if (rows.length === 0) return [];
 
+  /*
+   * One sale, one package — even when the database holds two rows for it.
+   *
+   * `auctions` is unique on (county, platform, external_id), so a sale that
+   * arrives twice under different ids is two rows. It happens whenever a
+   * platform crawl meets a calendar import of the same auction: Marion County
+   * Indiana on 2026-10-13 exists as `govease|1282` with 50 crawled parcels and
+   * as `import:99877` with 1,841 announced and none crawled. 44 county-and-date
+   * pairs are in that state.
+   *
+   * Left alone it produces two briefings for one auction — one describing the
+   * parcels, one saying the list has not been published — and a reviewer cannot
+   * tell which to believe. The crawled row wins, because parcels this database
+   * holds outrank a count somebody announced.
+   *
+   * This is a presentation fix, not the cure. The rows are still two, and
+   * reconciling them belongs in the ingest path where the collision is made.
+   * Doing it here at least stops the duplicate reaching a script, a video and a
+   * reviewer while that is outstanding.
+   */
+  const bySale = new Map<string, (typeof rows)[number]>();
+  for (const r of rows) {
+    const key = `${r.countyFips}|${r.saleDate}`;
+    const held = bySale.get(key);
+    if (!held) { bySale.set(key, r); continue; }
+    /* Prefer crawled parcels, then a published sale list, then whichever came first. */
+    const better =
+      (r.lotCount > 0 ? 2 : 0) + (r.listingKind === "sale_list" ? 1 : 0) >
+      (held.lotCount > 0 ? 2 : 0) + (held.listingKind === "sale_list" ? 1 : 0);
+    if (better) bySale.set(key, r);
+  }
+  const deduped = [...bySale.values()];
+  if (deduped.length !== rows.length) {
+    console.warn(
+      `[cape] ${rows.length - deduped.length} duplicate auction row(s) collapsed — ` +
+        `same county and sale date under different external ids`,
+    );
+  }
+  rows.length = 0;
+  rows.push(...deduped);
+
   const coverage = await parcelCoverage();
   const productions = await productionStates();
 

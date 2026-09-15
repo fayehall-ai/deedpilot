@@ -98,6 +98,8 @@
           padding:11px 14px;border-radius:0 7px 7px 0}
   .nolist b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
   .nolist p{margin:5px 0 0;font-size:14.5px;line-height:1.55;max-width:78ch}
+  .nolist .srcline{font-family:var(--mono);font-size:12px;color:var(--muted);word-break:break-all}
+  .nolist .srcline a{color:var(--accent)}
   .shared{margin-top:14px;background:var(--accent-soft);border-left:3px solid var(--accent);
           padding:11px 14px;border-radius:0 7px 7px 0}
   .shared b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
@@ -134,6 +136,8 @@
       <div class="stat"><b id="s-total">—</b><span>scripts</span></div>
       <div class="stat done"><b id="s-done">—</b><span>reviewed</span></div>
       <div class="stat"><b id="s-counties">—</b><span>counties</span></div>
+      <div class="stat done"><b id="s-parcels">—</b><span>with parcels</span></div>
+      <div class="stat"><b id="s-nolist">—</b><span>no list</span></div>
       <div class="stat"><b id="s-words">—</b><span>words</span></div>
     </div>
   </header>
@@ -243,6 +247,8 @@
     var seen = Object.create(null);
     DATA.forEach(function(d){ seen[d.state + "|" + d.county] = 1; });
     $("s-counties").textContent = Object.keys(seen).length;
+    $("s-parcels").textContent = DATA.filter(function(d){ return d.parcels > 0; }).length;
+    $("s-nolist").textContent = DATA.filter(function(d){ return d.whyNoList; }).length;
     var w = DATA.reduce(function(n,d){
       return n + d.sections.reduce(function(m,s){ return m + s.narration.split(/\s+/).length; }, 0); }, 0);
     $("s-words").textContent = w >= 1000 ? Math.round(w/1000) + "k" : w;
@@ -286,8 +292,12 @@
       '<span>' + d.sections.length + ' sections</span>' +
       (d.current ? '' : '<span class="stale">older fact sheet</span>') + '</div>' +
       (d.whyNoList
-        ? '<div class="nolist"><b>No parcel list, because</b><p>' + esc(d.whyNoList) +
-          '. The briefing says so rather than describing an inventory it does not have.</p></div>'
+        ? '<div class="nolist"><b>No parcel list, because</b><p>' + esc(d.whyNoList) + '.</p>' +
+          (d.sourceUrl
+            ? '<p class="srcline">Address on file: <a href="' + esc(d.sourceUrl) + '" target="_blank" rel="noopener">' +
+              esc(d.sourceUrl.replace(/^https?:\/\//, "").slice(0, 78)) + '</a></p>'
+            : '<p class="srcline">No address on file at all.</p>') +
+          '<p>The briefing says so rather than describing an inventory it does not have.</p></div>'
         : "") +
       (d.sharedWith > 1 && d.sections.some(function(s){ return s.scope === "county"; })
         ? '<div class="shared"><b>Shared sections</b><p>The sections marked ' +

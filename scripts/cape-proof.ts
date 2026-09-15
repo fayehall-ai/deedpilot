@@ -79,6 +79,15 @@ interface OutScript {
    * briefing is worth recording given which one applies.
    */
   whyNoList: string | null;
+  /**
+   * The address on file for this sale, shown when there is no parcel list.
+   *
+   * A reviewer told only "no county source has been located" cannot tell a
+   * wrong address from a missing one, and those need opposite fixes. Seeing
+   * `publicrecords.onlinesearches.com` next to that sentence says immediately
+   * that the county was never pointed at its own site.
+   */
+  sourceUrl: string | null;
   /** True when the package was held and never went to audio. */
   held: boolean;
   /** Why it was held, in the operator's words. */
@@ -280,6 +289,7 @@ async function main() {
       parcels: r.lotCount,
       announced: r.announced,
       whyNoList: r.lotCount > 0 ? null : whyNoList(r.fips, r.platform, r.sourceUrl),
+      sourceUrl: r.lotCount > 0 ? null : r.sourceUrl,
       held: (r.figures ?? []).length > 0 || Boolean(r.error),
       heldWhy: r.error ?? null,
       flagged: r.figures ?? [],
