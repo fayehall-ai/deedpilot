@@ -65,6 +65,11 @@ Only the label says which. Reading `.ASTAT_MSGB` on its own gives every
 scheduled parcel a start time where its status should be — and a start time is
 not nothing, it is the sale's own hour, so the capture records both.
 
+**The labels are not fixed.** Hernando writes `Parcel Key:` where Duval writes
+`Parcel ID:`, and a parser keyed on the exact string returns nothing at all for
+it — silently, since a page with no parcels and a page whose label moved look
+identical. Every field is matched by pattern rather than by literal.
+
 **The grouping is a claim, so the area is captured too.** Thirteen of the
 fifty-two parcels in Charlotte's 29 September sale sit in the closed list with
 no status text whatsoever — `.ASTAT_MSGA` is empty, not "Auction Status". Read
@@ -138,14 +143,16 @@ at a person's pace: one sale at a time, a second between pages.
          const l = cl(c[0].textContent).replace(/:$/, ""), v = cl(c[1].textContent);
          if (l) { f[l] = v; last = l; } else if (last) f[last] = cl((f[last] || "") + " " + v);
        }
+       /* Labels vary by county — see "the labels are not fixed" above. */
+       const pick = (rx) => (Object.keys(f).find((k) => rx.test(k)) || "") && f[Object.keys(f).find((k) => rx.test(k))];
        return {
-         parcelNumber: f["Parcel ID"] || "",
-         openingBid: f["Opening Bid"] || "",
-         addressLine: f["Property Address"] || "",
-         certificate: f["Certificate #"] || "",
-         caseNumber: f["Case #"] || "",
-         assessedValue: f["Assessed Value"] || "",
-         auctionType: f["Auction Type"] || "",
+         parcelNumber: pick(/parcel|folio|alternate\s*key/i) || "",
+         openingBid: pick(/opening bid/i) || "",
+         addressLine: pick(/property address/i) || "",
+         certificate: pick(/certificate/i) || "",
+         caseNumber: pick(/case/i) || "",
+         assessedValue: pick(/assessed/i) || "",
+         auctionType: pick(/auction type/i) || "",
          /*
           * One slot, two meanings, and the label is the only thing that says
           * which. `ASTAT_MSGA` reads "Auction Starts" on a scheduled parcel and

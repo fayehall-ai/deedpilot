@@ -147,9 +147,16 @@ function splitAddress(raw: string | undefined): {
   const noSitus = NO_SITUS.test(s);
   s = s.replace(NO_SITUS, "").trim();
 
-  /* `, FL- 32209`, `, FL 32209`, or the same without the comma. */
+  /*
+   * `, FL- 32209`, `, FL 32209`, and Citrus's `, 34453` with no state at all.
+   *
+   * The state is optional because Citrus omits it, but a comma or a state
+   * abbreviation must precede the digits: five trailing digits on their own
+   * are as likely to be a unit or a lot number as a ZIP, and turning `LOT
+   * 34453` into a ZIP would be worse than leaving the line whole.
+   */
   let zip: string | undefined;
-  const tail = /,?\s*[A-Z]{2}\s*-?\s*(\d{5})(?:-\d{4})?\s*$/.exec(s);
+  const tail = /(?:,\s*(?:[A-Z]{2}\s*-?\s*)?|\s+[A-Z]{2}\s*-?\s*)(\d{5})(?:-\d{4})?\s*$/.exec(s);
   if (tail) {
     zip = tail[1];
     s = s.slice(0, tail.index).replace(/[\s,]+$/, "");
