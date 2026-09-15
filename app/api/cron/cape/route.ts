@@ -13,16 +13,24 @@
  * Separate route, separate budget, same queue. Leases are what make that safe:
  * two ticks overlapping claim different rows or nothing at all.
  *
- * ## Why it chains instead of being scheduled
+ * ## Driven by a schedule, because self-invocation is not allowed
  *
- * There is no cron. A backlog of 477 packages is a job with an end, and a
- * schedule is the wrong shape for that: it either runs forever after the work
- * is finished, or it has to be removed by hand at a moment nobody is watching
- * for. So the last thing each invocation does, if work remains, is start its
- * own successor and return. The chain ends when `enqueueCapeScripts` reports
- * nothing outstanding — which is the same question that decides what to queue,
- * so "finished" means exactly "every upcoming package has a script written from
- * the facts now in force".
+ * This chained for a while: each invocation started its own successor, so a
+ * backlog could finish without a schedule. Vercel does not permit it. Every lane
+ * died at exactly link 5 with HTTP 508, Loop Detected — the platform refusing a
+ * function that calls itself, which is protection against runaway recursion and
+ * not something to engineer around. The logs record it identically on every
+ * lane: three refusals, then `chain broken at link 5`.
+ *
+ * So a cron drives it, and `CAPE_CHAIN_DISABLED=1` turns the chaining off in
+ * production rather than leaving it to generate 508s the schedule has made
+ * pointless. The code stays because it is the right mechanism anywhere without
+ * loop detection, and because turning it back on is an environment variable.
+ *
+ * A schedule wants a reason not to run forever, and this one has it built in:
+ * `enqueueCapeScripts` queues only packages whose script was not written from
+ * the facts now in force, so once everything is current a tick queues nothing,
+ * claims nothing and returns in one query.
  *
  * ## What stops a chain that should not have started
  *
@@ -114,7 +122,7 @@ const SCRIPT_TIMEOUT_MS = 150_000;
  */
 const SCRIPT_ATTEMPTS = 1;
 /**
- * Three, and the schedule is every three minutes — so about six calls in flight.
+ * Six, claimed inside the first minute of a tick that comes every three.
  *
  * The first deployment ran four per function against a two-minute schedule and a
  * ten-minute ceiling, which is up to five overlapping invocations and twenty
@@ -124,10 +132,11 @@ const SCRIPT_ATTEMPTS = 1;
  * eighty-second deadline then turned ordinary slowness into failure — locally
  * the same work takes ninety to a hundred and fifty seconds.
  *
- * Six in flight finishes the backlog in roughly three hours and leaves the
- * provider able to answer.
+ * Six in flight leaves the provider able to answer — twenty did not — and with
+ * the chaining gone this is the only lever on throughput, so it does the work
+ * the extra links used to.
  */
-const CONCURRENCY = 3;
+const CONCURRENCY = 6;
 
 /**
  * Who may run this.

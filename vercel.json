@@ -1,3 +1,8 @@
 {
-  "crons": []
+  "crons": [
+    {
+      "path": "/api/cron/cape",
+      "schedule": "*/3 * * * *"
+    }
+  ]
 }

@@ -11,13 +11,19 @@
  * watchdog: it asks how much work is outstanding, notices when the chain has
  * stopped advancing, and starts it again.
  *
- * The chain does break. A deploy is the reliable way: an in-flight link carries
- * the `CRON_SECRET` from the deployment it started on, so rotating the secret or
- * shipping anything at all leaves the running links holding a stale one and
- * their successors are refused. A provider outage long enough to exhaust a job's
- * three leases does it too. None of that loses work — the queue is durable and
- * an expired lease is claimable again — but nothing restarts a dead chain on its
- * own, and a stopped chain looks exactly like a finished one from the outside.
+ * The chain always breaks, and now we know why. Vercel refuses a function that
+ * invokes itself: every lane dies at link 5 with HTTP 508, Loop Detected. The
+ * logs are unambiguous — `[cape] lane a successor refused: 508` three times, then
+ * `chain broken at link 5`, on every lane, every time. That is platform
+ * behaviour protecting against runaway recursion, not something to work around.
+ *
+ * So chaining is a way to get five links of work per kick, not a way to run a
+ * backlog unattended. This watchdog supplies the kicks. A deploy breaks a chain
+ * too — an in-flight link carries the `CRON_SECRET` of the deployment it started
+ * on — as does a provider outage long enough to exhaust a job's three leases.
+ * None of it loses work: the queue is durable and an expired lease is claimable
+ * again. But nothing restarts a dead chain on its own, and a stopped chain looks
+ * exactly like a finished one from the outside.
  *
  * ## Why it is not a cron
  *
@@ -31,14 +37,22 @@ import { capePackageInputs } from "../lib/cape/inputs";
 import { capeInputsHash } from "../lib/cape/components";
 import { db } from "../lib/db";
 import { capeProductions } from "../lib/db/schema";
-import { inArray } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 
 const ONCE = process.argv.includes("--once");
 const BASE = process.env.CAPE_BASE_URL ?? "https://deedpilot.vercel.app";
 const LANES = Number(process.env.CAPE_LANES ?? 3);
 const POLL_MS = 4 * 60 * 1000;
-/** Re-kick after this long with no completion. Longer than one job. */
-const STALL_MS = 11 * 60 * 1000;
+/**
+ * Kick when fewer than this many jobs are actually in flight.
+ *
+ * Better than waiting for a stall. Chains die at link 5 by design, so the
+ * interesting question is not "has progress stopped" — it always will — but "is
+ * anyone working right now". A leased row is a worker holding a job; when that
+ * count falls to nothing, every lane has hit its 508 and the queue is idle with
+ * work still in it.
+ */
+const IDLE_LEASES = 1;
 
 function secret(): string {
   if (process.env.CRON_SECRET) return process.env.CRON_SECRET.trim();
@@ -73,36 +87,37 @@ async function kick(sec: string) {
   }
 }
 
+/** Jobs a worker is holding right now. Zero means every lane has died. */
+async function leased(): Promise<number> {
+  const rows = (await db.execute(sql`
+    select count(*)::int as n from run_jobs
+    where adapter like 'cape-script:%' and status = 'leased'
+      and lease_expires_at > now()`)) as unknown as { n: number }[];
+  return Number(rows[0]?.n ?? 0);
+}
+
 async function main() {
   const sec = secret();
-  let lastDone = -1;
-  let lastProgress = Date.now();
 
   for (;;) {
     const { total, done } = await outstanding();
     const left = total - done;
+    const busy = await leased();
     const stamp = new Date().toISOString().slice(11, 19);
-
-    if (done !== lastDone) {
-      lastProgress = Date.now();
-      lastDone = done;
-    }
 
     if (left === 0) {
       console.log(`${stamp} all ${total} package(s) written`);
       return;
     }
 
-    const stalled = Date.now() - lastProgress > STALL_MS;
+    const idle = busy < IDLE_LEASES;
     console.log(
-      `${stamp} ${done}/${total} written, ${left} to go` + (stalled ? " — stalled, re-kicking" : ""),
+      `${stamp} ${done}/${total} written, ${left} to go, ${busy} in flight` +
+        (idle ? " — idle, kicking" : ""),
     );
 
     if (ONCE) return;
-    if (stalled) {
-      await kick(sec);
-      lastProgress = Date.now();
-    }
+    if (idle) await kick(sec);
     await new Promise((r) => setTimeout(r, POLL_MS));
   }
 }
