@@ -536,6 +536,51 @@ export function spokenToDigits(
       const bareDigits = groups.filter((g) => g.length === 1 && g[0] in UNITS && UNITS[g[0]] < 10);
       if (groups.length >= 3 && bareDigits.length === groups.length) return run;
 
+      /*
+       * English hyphenates at most two words inside one number.
+       *
+       * "twenty-six", "forty-five", "sixty-five" — a tens word and a unit, and
+       * that is the whole of it. Three or more hyphenated parts is a citation
+       * wearing a cardinal's punctuation: "twelve-fifty-one-fifty-five" is
+       * S.C. Code 12-51-55 and was summed to 118, "twelve-fifty-one-one-thirty"
+       * to 94.
+       */
+      if (groups.some((g) => g.filter((w) => w in UNITS || w in TENS || w in SCALES).length > 2)) {
+        return run;
+      }
+
+      /*
+       * Two adjacent groups of ten or more do not add up to anything.
+       *
+       * "Thirty-seven thirty-one" is California Revenue and Taxation Code 3731
+       * and was summed to 68; "eighteen twelve" is Arkansas Code 18-12. English
+       * licenses a second group only when it is a bare unit — "twenty six" for
+       * 26, "forty seven" for 47 — or when a scale word joins them, as in "two
+       * thousand twenty-six". A year is the one exception that looks like this,
+       * and `yearish` above has already returned it.
+       */
+      if (
+        !hasScale &&
+        groups.length >= 2 &&
+        groups.every((g) => cardinal(g).value >= 10)
+      ) {
+        return run;
+      }
+
+      /*
+       * One number has one `hundred` in it.
+       *
+       * "Seven hundred seventy-four and five hundred fifty-seven" is two
+       * figures read out — a Louisiana statute — and the parser folded them into
+       * 77,957: it scaled the running total by the second hundred, turning 779
+       * into 77,900 before adding 57. English does repeat a scale, but only a
+       * larger one either side of it ("one hundred thousand, five hundred"), so
+       * two hundreds with no thousand or million between them is not a cardinal.
+       */
+      const hundreds = flat.filter((w) => w === "hundred").length;
+      const bigger = flat.some((w) => w === "thousand" || w === "million");
+      if (hundreds > 1 && !bigger) return run;
+
       const descends = (vs: number[]) => vs.every((v, i) => i === 0 || v < vs[i - 1]);
 
       let segment: number[] = [];

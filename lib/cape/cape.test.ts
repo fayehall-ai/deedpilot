@@ -568,6 +568,33 @@ for (const [spoken, want] of [
   ["eight six three", "eight six three"],
   ["seven six five", "seven six five"],
   ["seven seven zero", "seven seven zero"],
+  /*
+   * English hyphenates at most two words inside one number — a tens word and a
+   * unit. Three or more parts is a citation wearing a cardinal's punctuation:
+   * S.C. Code 12-51-55 was summed to 118.
+   */
+  ["twelve-fifty-one-fifty-five", "twelve-fifty-one-fifty-five"],
+  ["twelve-fifty-one-one-thirty", "twelve-fifty-one-one-thirty"],
+  /*
+   * Two adjacent groups of ten or more add up to nothing. "Thirty-seven
+   * thirty-one" is Cal. Rev. & Tax. Code 3731, summed to 68. A second group is
+   * licensed only when it is a bare unit ("twenty six") or a scale joins them.
+   */
+  ["thirty-seven thirty-one", "thirty-seven thirty-one"],
+  ["eighteen twelve", "eighteen twelve"],
+  ["twenty six", "26"],
+  ["forty seven parcels", "47 parcels"],
+  ["one hundred ten dollars", "110 dollars"],
+  /*
+   * One number has one `hundred` in it. "Seven hundred seventy-four and five
+   * hundred fifty-seven" is two figures read out, folded into 77,957 by scaling
+   * the running total at the second hundred. A larger scale between them is the
+   * legitimate case.
+   */
+  ["seven hundred seventy-four and five hundred fifty-seven",
+   "seven hundred seventy-four and five hundred fifty-seven"],
+  ["one hundred thousand, five hundred", "100500"],
+  ["two hundred thousand", "200000"],
   /* A cue has to be adjacent — a real figure later in the passage still counts. */
   ["the statute applies. the deposit is four thousand dollars",
    "the statute applies. the deposit is 4000 dollars"],
