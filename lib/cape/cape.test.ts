@@ -12,6 +12,7 @@ import { productionDeadline } from "./deadline";
 import { buildPackage, redemptionWindow } from "./components";
 import {
   assembleScript,
+  verifyNarration,
   countyHalfLeak,
   countyMismatch,
   spokenToDigits,
@@ -595,12 +596,96 @@ for (const [spoken, want] of [
    "seven hundred seventy-four and five hundred fifty-seven"],
   ["one hundred thousand, five hundred", "100500"],
   ["two hundred thousand", "200000"],
+  /*
+   * One number uses each scale word once. A cardinal descends through its
+   * scales, so a scale that repeats with nothing larger around it is a list:
+   * Columbiana's three deposit tiers summed to 17,000, a Louisiana statute to
+   * 77,957. The legitimate repeat has a larger scale in it.
+   */
+  ["seven hundred seventy-four and five hundred fifty-seven",
+   "seven hundred seventy-four and five hundred fifty-seven"],
+  ["two thousand, five thousand and ten thousand dollars",
+   "2000, five thousand and ten thousand dollars"],
+  ["one hundred thousand, five hundred", "100500"],
+  ["two hundred thousand", "200000"],
+  ["one million ninety thousand, three hundred fifty-four", "1090354"],
   /* A cue has to be adjacent — a real figure later in the passage still counts. */
   ["the statute applies. the deposit is four thousand dollars",
    "the statute applies. the deposit is 4000 dollars"],
 ] as const) {
   assert(spokenToDigits(spoken) === want, `${spoken} -> ${spokenToDigits(spoken)}, want ${want}`);
 }
+
+/*
+ * What the verifier accepts as supported, beyond an exact digit match.
+ *
+ * All six figures still flagged after the citation work turned out to be
+ * correctly spoken facts the verifier could not recognise in the form the
+ * research records them.
+ */
+const vfacts = [
+  "Payment rules — costs + recording (~$110.25) + 2% transfer tax + $25 deed prep",
+  "Deposit requirements — RealAuction registration + $2k/$5k/$10k deposit tiers",
+  "County population: 471,240",
+].join("\n");
+
+const narration = (text: string) =>
+  ({ title: "t", keyTakeaway: "k",
+     sections: [{ heading: "h", narration: text,
+       slide: { headline: "H", bullets: [], figure: null, figureLabel: null } }] }) as never;
+
+/* A price is one token in the facts and two when spoken. */
+assert(
+  verifyNarration(narration("Costs are one hundred ten dollars and twenty-five cents."), vfacts).length === 0,
+  `110.25 spoken as two figures: ${verifyNarration(narration("Costs are one hundred ten dollars and twenty-five cents."), vfacts).join(", ")}`,
+);
+
+/* Research writes "$2k"; a narrator cannot say "two kay". */
+assert(
+  verifyNarration(narration("Deposit tiers are two thousand, five thousand and ten thousand dollars."), vfacts).length === 0,
+  `k-notation: ${verifyNarration(narration("Deposit tiers are two thousand, five thousand and ten thousand dollars."), vfacts).join(", ")}`,
+);
+
+/* A hedged rounding of a fact is not a fabrication. */
+assert(
+  verifyNarration(narration("The county has about four hundred seventy-one thousand residents."), vfacts).length === 0,
+  "a rounded population is supported",
+);
+
+/* But a figure that is merely round is not thereby supported. */
+assert(
+  verifyNarration(narration("The county has about five hundred thousand residents."), vfacts).length > 0,
+  "a wrong round number is still caught",
+);
+
+/* A place named after a number is not a number. */
+assert(
+  verifyNarration(narration("Kingston and Forty Fort sit across the river."), vfacts).length === 0,
+  "Forty Fort is a borough",
+);
+assert(
+  verifyNarration(narration("The fee is forty dollars."), vfacts).length > 0,
+  "but forty dollars is still a figure",
+);
+
+/*
+ * The name can be the last word of the run, not the first. Pasco's payment
+ * address ran straight into the street's own ordinal: 14,236 Sixth Street was
+ * read as 14,242.
+ */
+assert(
+  verifyNarration(
+    narration("Cash is accepted at fourteen thousand two hundred thirty-six Sixth Street, Dade City."),
+    vfacts,
+  ).length === 0,
+  "an address running into a street name is not a figure",
+);
+
+/* A hedged rounding under one per cent: 6,047 people spoken as six thousand. */
+assert(
+  verifyNarration(narration("A county of roughly six thousand people."), "County population: 6,047").length === 0,
+  "6,047 spoken as roughly six thousand",
+);
 
 console.log("cape spoken numbers: all assertions passed");
 

@@ -568,18 +568,31 @@ export function spokenToDigits(
       }
 
       /*
-       * One number has one `hundred` in it.
+       * One number uses each scale word once.
        *
-       * "Seven hundred seventy-four and five hundred fifty-seven" is two
-       * figures read out — a Louisiana statute — and the parser folded them into
-       * 77,957: it scaled the running total by the second hundred, turning 779
-       * into 77,900 before adding 57. English does repeat a scale, but only a
-       * larger one either side of it ("one hundred thousand, five hundred"), so
-       * two hundreds with no thousand or million between them is not a cardinal.
+       * A cardinal descends through its scales — million, then thousand, then
+       * hundred — so a scale that repeats with nothing larger around it is not
+       * one number, it is a list of them. Two ways this appeared:
+       *
+       *   "seven hundred seventy-four and five hundred fifty-seven"  -> 77,957
+       *   "two thousand, five thousand and ten thousand"             -> 17,000
+       *
+       * The first is a Louisiana statute read aloud; the parser scaled its
+       * running total at the second hundred, turning 779 into 77,900 before
+       * adding 57. The second is Columbiana's three deposit tiers, summed into a
+       * figure nobody said and no source holds.
+       *
+       * The legitimate repeat has a larger scale in it — "one hundred thousand,
+       * five hundred" says hundred twice and is a single number — which is
+       * exactly what the test allows.
        */
-      const hundreds = flat.filter((w) => w === "hundred").length;
-      const bigger = flat.some((w) => w === "thousand" || w === "million");
-      if (hundreds > 1 && !bigger) return run;
+      const order = ["hundred", "thousand", "million"];
+      for (const [i, scale] of order.entries()) {
+        const times = flat.filter((w) => w === scale).length;
+        if (times <= 1) continue;
+        const larger = order.slice(i + 1).some((w) => flat.includes(w));
+        if (!larger) return run;
+      }
 
       const descends = (vs: number[]) => vs.every((v, i) => i === 0 || v < vs[i - 1]);
 
@@ -672,7 +685,27 @@ export function spokenToDigits(
         for (let n = 1; n < tok.length; n += 2) {
           if (!tok[n].includes(",")) continue;
           const prev = tok[n - 1]?.toLowerCase().replace(/[^a-z]/g, "");
-          if (prev && prev in SCALES) continue;
+          /*
+           * The part after the separator must be smaller than the scale before
+           * it, because that is what a separator separates.
+           *
+           * "nine hundred seventy-eight thousand, six hundred forty-one" ends in
+           * hundreds and continues a thousands number. "Two thousand, five
+           * thousand and ten thousand" is a list of three deposit tiers, and
+           * joining it summed them to 17,000 — a figure nobody said and no
+           * source holds. A repeat of the same scale is a list; a smaller one
+           * is a continuation.
+           */
+          if (prev && prev in SCALES) {
+            const rest = tok.slice(n + 1).join("").toLowerCase();
+            const nextScale = Math.max(
+              0,
+              ...Object.entries(SCALES)
+                .filter(([w]) => new RegExp(`\\b${w}\\b`).test(rest))
+                .map(([, v]) => v),
+            );
+            if (nextScale < SCALES[prev]) continue;
+          }
           return (
             record(tok.slice(0, n).join(""), convertRun(tok.slice(0, n).join(""))) +
             tok[n] +
@@ -761,12 +794,59 @@ export function figurePhrases(text: string, figures: string[]): string[] {
 
 export function verifyNarration(script: CapeScript, facts: string): string[] {
   const factDigits = new Set<string>();
+  const factNumbers: number[] = [];
+
   for (const m of facts.matchAll(/\d[\d,.]*/g)) {
     const cleaned = m[0].replace(/[,.]+$/, "").replace(/,/g, "");
     factDigits.add(cleaned);
     // "08" in a date is the same claim as "8" in speech.
     factDigits.add(String(Number(cleaned)));
+    /*
+     * A price in the facts is one token; spoken, it is two.
+     *
+     * County research records "costs + recording (~$110.25)" and a narrator
+     * says "one hundred ten dollars and twenty-five cents", which parses to 110
+     * and 25. Neither is `110.25`, so a correctly quoted fee was reported as
+     * invented. Both halves of a decimal are the same claim as the whole.
+     */
+    if (cleaned.includes(".")) {
+      const [whole, frac] = cleaned.split(".");
+      factDigits.add(whole);
+      factDigits.add(String(Number(whole)));
+      if (frac) factDigits.add(String(Number(frac)));
+    }
+    if (Number.isFinite(Number(cleaned))) factNumbers.push(Number(cleaned));
   }
+
+  /*
+   * Research writes "$2k/$5k/$10k"; a narrator cannot say "two kay".
+   *
+   * Columbiana's deposit tiers are recorded in that shorthand, so the facts hold
+   * 2, 5 and 10 while the narration says two thousand, five thousand and ten
+   * thousand — correctly, and every one was reported as unsupported.
+   */
+  for (const m of facts.matchAll(/(\d+(?:\.\d+)?)\s*([km])\b/gi)) {
+    const scaled = Number(m[1]) * (m[2].toLowerCase() === "k" ? 1_000 : 1_000_000);
+    factDigits.add(String(scaled));
+    factNumbers.push(scaled);
+  }
+
+  /**
+   * Whether a spoken figure is a rounding of something in the facts.
+   *
+   * "A county of roughly six thousand people" against a population of 6,047, and
+   * "about four hundred seventy-one thousand" against 471,240. Both are true,
+   * both are hedged, and both were held. The prompt does tell the narrator not
+   * to round — but a guard exists to catch fabrication, and a figure within one
+   * per cent of a fact is not fabricated. A genuine invention is not that close
+   * by accident: "about five hundred thousand" against 471,240 is six per cent
+   * out and still caught. One per cent rather than a half because "roughly six
+   * thousand people" against a population of 6,047 is eight tenths of a per
+   * cent out, and is exactly the sentence this should allow.
+   */
+  const isRounding = (n: number) =>
+    /0{2,}$/.test(String(n)) &&
+    factNumbers.some((f) => f > 0 && Math.abs(f - n) / f <= 0.01);
 
   const unsupported: string[] = [];
 
@@ -785,11 +865,61 @@ export function verifyNarration(script: CapeScript, facts: string): string[] {
       if (factDigits.has(raw)) continue;
       // Years are frequently spoken in dates the facts express differently.
       if (/^(19|20)\d{2}$/.test(raw) && facts.includes(raw)) continue;
+      if (isRounding(n)) continue;
+      /*
+       * A place can be named after a number. Luzerne County contains the
+       * borough of Forty Fort, and "Kingston and Forty Fort" was read as the
+       * figure 40. Checked against the narration as written, because a proper
+       * noun is only distinguishable by its capital — which the lowercasing
+       * above has thrown away.
+       */
+      if (namesAPlace(section.narration, raw)) continue;
       unsupported.push(raw);
     }
   }
 
   return [...new Set(unsupported)];
+}
+
+/**
+ * Whether the words behind a figure are a capitalised name rather than a number.
+ *
+ * Title Case mid-sentence, immediately followed by another capitalised word:
+ * "Forty Fort", not "forty dollars". Deliberately narrow — a figure that opens a
+ * sentence is capitalised too, so the following word has to be capitalised as
+ * well for this to fire.
+ */
+function namesAPlace(narration: string, figure: string): boolean {
+  for (const phrase of figurePhrases(narration, [figure])) {
+    /*
+     * Any capitalised number word in the run, not just the first.
+     *
+     * Two shapes, and neither is the opening word. Luzerne's run is "and Forty",
+     * because the matcher treats "and" as part of it — testing the first word
+     * finds a lowercase connective every time. Pasco's is "fourteen thousand two
+     * hundred thirty-six Sixth", where a real figure runs straight into the
+     * street's name and the capital is on the last word: 14,236 Sixth Street
+     * became 14,242.
+     *
+     * So every number word in the run is considered, and one of them being Title
+     * Case with another capitalised word after it is enough. The figure is
+     * discarded whole, which is right — the run that produced it spans a name,
+     * so the number it yielded was never said.
+     */
+    const at = narration.indexOf(phrase);
+    if (at < 0) continue;
+
+    for (const m of phrase.matchAll(/[A-Za-z][a-z-]*/g)) {
+      const bare = m[0].toLowerCase().replace(/[^a-z]/g, "");
+      if (!(bare in UNITS || bare in TENS || bare in SCALES)) continue;
+      if (!/^[A-Z]/.test(m[0])) continue;
+      /* Sentence-initial words are capitalised too, so require one after. */
+      const rest = narration.slice(at + (m.index ?? 0) + m[0].length);
+      const next = rest.match(/^\s+(\S+)/);
+      if (next && /^[A-Z][a-z]/.test(next[1])) return true;
+    }
+  }
+  return false;
 }
 
 /**
