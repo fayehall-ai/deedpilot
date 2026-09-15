@@ -1,0 +1,32 @@
+{
+  "_source": "The \"Jump to\" site selector rendered on every RealAuction page, read 2026-09-15. It is RealAuction's own public directory of the portals it runs. Read from two pages and merged, because the selector omits the site you are already on: Charlotte is absent from Charlotte's own copy.",
+  "_why": "Two things it settles that guessing could not: which counties run a tax deed sale on RealAuction at all, and whether a county's host is the tax deed site or the mortgage foreclosure site. A county listed only as 'Foreclosure' sells no tax deeds here, and filing one as inventory would be wrong.",
+  "_shape": "Labels verbatim. 'Taxdeed' and 'Treasurer Deed' are tax sales; 'Foreclosure' is a mortgage foreclosure sale and is not inventory. A bare county name runs both kinds on one host, separated by the sale date — which is why lib/ingest/adapters/realauction.ts reads the page's own Auction Type rather than trusting the host.",
+  "sites": [
+    "Apache Taxdeed", "Coconino Taxdeed", "Mohave Taxdeed",
+    "Adams Foreclosure", "Adams Treasurer Deed", "Denver Foreclosure", "Denver Treasurer Deed",
+    "Eagle Foreclosure", "Eagle Treasurer Deed", "El Paso Foreclosure", "El Paso Treasurer Deed",
+    "Larimer Foreclosure", "Larimer Treasurer Deed", "Mesa Foreclosure", "Mesa Treasurer Deed",
+    "Pitkin Treasurer Deed", "Summit Foreclosure", "Weld Foreclosure", "Weld Treasurer Deed",
+    "Alachua Foreclosure", "Alachua Taxdeed", "Baker", "Bay Foreclosure", "Bay Taxdeed",
+    "Brevard", "Broward Foreclosure", "Broward Taxdeed", "Calhoun", "Charlotte", "Citrus Taxdeed",
+    "Clay Foreclosure", "Clay Taxdeed", "Duval Foreclosure", "Duval Tax Deed",
+    "Escambia Foreclosure", "Escambia Taxdeed", "Flagler Foreclosure", "Flagler Taxdeed",
+    "Gilchrist Foreclosure", "Gilchrist Taxdeed", "Gulf Foreclosure", "Gulf Taxdeed",
+    "Hendry TaxDeed", "Hernando Taxdeed", "Highlands Taxdeed",
+    "Hillsborough Foreclosure", "Hillsborough Taxdeed",
+    "Indian River Foreclosure", "Indian River Taxdeed", "Jackson Foreclosure", "Jackson Taxdeed",
+    "Lake Taxdeed", "Lee Foreclosure", "Lee Taxdeed", "Leon Foreclosure", "Leon Taxdeed",
+    "Manatee", "Marion Foreclosure", "Marion Taxdeed", "Martin Foreclosure", "Martin Taxdeed",
+    "Miami-Dade", "Monroe Taxdeed", "Nassau Foreclosure", "Nassau Taxdeed", "Okeechobee",
+    "Orange Foreclosure", "Orange Taxdeed", "Osceola Taxdeed",
+    "Palm Beach Foreclosure", "Palm Beach Taxdeed", "Pasco Foreclosure", "Pasco Taxdeed",
+    "Pinellas Foreclosure", "Pinellas Taxdeed", "Polk Foreclosure", "Polk Taxdeed",
+    "Putnam Foreclosure", "Putnam Taxdeed", "Saint Johns Foreclosure",
+    "Santa Rosa Foreclosure", "Santa Rosa Taxdeed", "Sarasota Foreclosure", "Sarasota Taxdeed",
+    "Seminole Foreclosure", "Seminole Taxdeed", "St. Lucie", "Suwannee Taxdeed",
+    "Volusia Foreclosure", "Volusia Taxdeed", "Walton",
+    "Washington Foreclosure", "Washington Taxdeed",
+    "Hardyston Foreclosure", "Newark"
+  ]
+}

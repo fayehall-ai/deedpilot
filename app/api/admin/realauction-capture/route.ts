@@ -57,6 +57,12 @@ interface CaptureRow {
   caseNumber?: string;
   status?: string;
   assessedValue?: string;
+  /** The page's own "Auction Type" — TAXDEED, TAXLIEN or FORECLOSURE.
+   *
+   * Recorded because several counties run a tax deed sale and a mortgage
+   * foreclosure sale on one realforeclose host, separated only by the date.
+   * Without it the adapter cannot tell which one a capture holds. */
+  auctionType?: string;
 }
 
 export async function POST(req: NextRequest) {
