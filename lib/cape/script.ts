@@ -398,7 +398,20 @@ export const NUMBER_WORD = new RegExp(
  * correct work is a check somebody turns off. Numbers are spoken as compounds,
  * so they have to be read as compounds.
  */
-export function spokenToDigits(text: string): string {
+export function spokenToDigits(
+  text: string,
+  /**
+   * Called with every run this converts and what it became.
+   *
+   * So a caller can say which words produced a figure without reimplementing
+   * the decision. Doing it by converting candidate phrases in isolation gets a
+   * different answer, because several of the rules read the text *around* a run
+   * — the citation cue looks at what precedes it — and an isolated phrase has
+   * no around. Six of sixteen flagged scripts resolved to no phrase at all that
+   * way.
+   */
+  onRun?: (original: string, converted: string) => void,
+): string {
   /** Accumulate one cardinal, e.g. ["one","hundred","twenty"] -> 120. */
   const cardinal = (words: string[]): { value: number; sawNumber: boolean } => {
     let total = 0;
@@ -505,6 +518,24 @@ export function spokenToDigits(text: string): string {
        * twelve follows `hundred`, so it is part of one cardinal and the check
        * does not apply to it.
        */
+      /*
+       * Three or more bare single digits in a row is somebody reading out a
+       * number, not saying one.
+       *
+       * The descending rule below was meant to catch this and only half does:
+       * "seven seven zero" repeats and is rejected, but "eight six three"
+       * descends cleanly and was summed to 17. Those are area codes — 863 for
+       * Highlands County, 765 for Boone and Delaware in Indiana — spoken the way
+       * a phone number is spoken, and each one held a perfectly good script.
+       *
+       * No quantity in this narration is said as loose digits. A count is "one
+       * hundred forty-seven", a rate is "twenty percent", a period is "three
+       * hundred sixty-five days" — every one of them carries a scale word or a
+       * hyphen. A run of bare units carries neither, and that is the signal.
+       */
+      const bareDigits = groups.filter((g) => g.length === 1 && g[0] in UNITS && UNITS[g[0]] < 10);
+      if (groups.length >= 3 && bareDigits.length === groups.length) return run;
+
       const descends = (vs: number[]) => vs.every((v, i) => i === 0 || v < vs[i - 1]);
 
       let segment: number[] = [];
@@ -522,6 +553,11 @@ export function spokenToDigits(text: string): string {
 
       const { value, sawNumber } = cardinal(flat);
       return sawNumber ? String(value) : run;
+  };
+
+  const record = (original: string, converted: string) => {
+    if (onRun && converted !== original) onRun(original, converted);
+    return converted;
   };
 
   return text.replace(
@@ -593,7 +629,9 @@ export function spokenToDigits(text: string): string {
           const prev = tok[n - 1]?.toLowerCase().replace(/[^a-z]/g, "");
           if (prev && prev in SCALES) continue;
           return (
-            convertRun(tok.slice(0, n).join("")) + tok[n] + convertRun(tok.slice(n + 1).join(""))
+            record(tok.slice(0, n).join(""), convertRun(tok.slice(0, n).join(""))) +
+            tok[n] +
+            record(tok.slice(n + 1).join(""), convertRun(tok.slice(n + 1).join("")))
           );
         }
       }
@@ -615,15 +653,65 @@ export function spokenToDigits(text: string): string {
       for (const n of words) {
         if (n !== last && ORDINALS.has(parts[n].toLowerCase())) {
           return (
-            convertRun(parts.slice(0, n + 1).join("")) +
+            record(parts.slice(0, n + 1).join(""), convertRun(parts.slice(0, n + 1).join(""))) +
             (parts[n + 1] ?? " ") +
-            convertRun(parts.slice(n + 2).join(""))
+            record(parts.slice(n + 2).join(""), convertRun(parts.slice(n + 2).join("")))
           );
         }
       }
-      return convertRun(run);
+      return record(run, convertRun(run));
     },
   );
+}
+
+/**
+ * The words that produced a flagged figure.
+ *
+ * `verifyNarration` reports "480", and 480 appears nowhere in the script: the
+ * narration says "four hundred eighty" and the figure is what the parser made
+ * of it. A reviewer told a script speaks 480, searching for 480 and finding
+ * nothing, has been handed an accusation they cannot check — which is worse
+ * than not flagging it, because it costs them the time and teaches them to
+ * distrust the flag.
+ *
+ * So the same matcher runs again and every run that converts to a wanted figure
+ * is returned as it was written. The caller can then show a reviewer the actual
+ * phrase.
+ */
+export function figurePhrases(text: string, figures: string[]): string[] {
+  if (figures.length === 0) return [];
+  const want = new Set(figures.map(String));
+  const out = new Set<string>();
+
+  /* Digits spoken as digits — rare in this narration, but free to catch. */
+  for (const m of text.matchAll(/\d[\d,]*(?:\.\d+)?/g)) {
+    if (want.has(m[0].replace(/,/g, ""))) out.add(m[0]);
+  }
+
+  /*
+   * The same pass the verifier made, listening to what it converted.
+   *
+   * `toLowerCase` because `verifyNarration` lowercases before converting and the
+   * rules are case-sensitive; the phrase is then recovered from the original
+   * text by position-independent match, which is enough for a highlight.
+   */
+  const lower = text.toLowerCase();
+  const hits: string[] = [];
+  spokenToDigits(lower, (original, converted) => {
+    for (const f of want) {
+      if (new RegExp(`(?<![\\d,.])${f}(?![\\d,.])`).test(converted)) {
+        hits.push(original.trim());
+        break;
+      }
+    }
+  });
+
+  /* Recover the original casing so the highlight matches what is displayed. */
+  for (const h of hits) {
+    const at = lower.indexOf(h);
+    out.add(at >= 0 ? text.slice(at, at + h.length) : h);
+  }
+  return [...out];
 }
 
 export function verifyNarration(script: CapeScript, facts: string): string[] {

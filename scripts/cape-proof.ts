@@ -33,6 +33,7 @@ import { db } from "../lib/db";
 import { auctions, capeCountyScripts, capeProductions, counties } from "../lib/db/schema";
 import { capePackageInputs } from "../lib/cape/inputs";
 import { capeInputsHash } from "../lib/cape/components";
+import { figurePhrases } from "../lib/cape/script";
 
 const OUT = (() => {
   const i = process.argv.indexOf("--out");
@@ -69,6 +70,15 @@ interface OutScript {
   /** Why it was held, in the operator's words. */
   heldWhy: string | null;
   flagged: string[];
+  /**
+   * The words behind each flagged figure, as they were written.
+   *
+   * The figure itself is not in the script: "480" is what the parser made of
+   * "four hundred eighty". The page said "highlighted below" and highlighted
+   * nothing, because it searched the narration for digits that were never
+   * spoken — leaving a reviewer with an accusation they could not check.
+   */
+  flaggedPhrases: string[];
   title: string;
   takeaway: string;
   sections: OutSection[];
@@ -180,6 +190,13 @@ async function main() {
       held: (r.figures ?? []).length > 0 || Boolean(r.error),
       heldWhy: r.error ?? null,
       flagged: r.figures ?? [],
+      flaggedPhrases: [
+        ...new Set(
+          (r.figures ?? []).length === 0
+            ? []
+            : s.sections.flatMap((sec) => figurePhrases(sec.narration, r.figures ?? [])),
+        ),
+      ],
       title: s.title,
       takeaway: s.keyTakeaway,
       sections: s.sections.map((sec) => ({

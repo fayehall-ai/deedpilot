@@ -181,22 +181,25 @@
   var esc = function(s){ return String(s == null ? "" : s)
       .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
 
-  // Highlight the exact figures the verifier flagged, wherever they are spoken.
-  function markFigures(text, flagged){
+  /*
+   * Highlight the words that produced the flagged figure.
+   *
+   * This looked for the figure itself plus a handful of single-word spellings,
+   * so it almost never matched: "480" is not in the script, "four hundred
+   * eighty" is. The page promised "highlighted below" and highlighted nothing,
+   * telling a reviewer a script speaks a number they then could not find in it.
+   *
+   * The phrases are computed where the parser lives and shipped with the script,
+   * because deciding which words became which figure is the parser's job, and
+   * re-implementing a guess at it in the browser is how the two drift apart.
+   */
+  function markFigures(text, phrases){
     var out = esc(text);
-    if (!flagged || !flagged.length) return out;
-    var words = {0:"zero",1:"one",2:"two",3:"three",4:"four",5:"five",6:"six",7:"seven",
-                 8:"eight",9:"nine",10:"ten",11:"eleven",12:"twelve",13:"thirteen",
-                 20:"twenty",30:"thirty",40:"forty",50:"fifty",60:"sixty",70:"seventy",
-                 80:"eighty",90:"ninety",100:"hundred"};
-    flagged.forEach(function(f){
-      var n = Number(f);
-      var terms = [f];
-      if (words[n]) terms.push(words[n]);
-      terms.forEach(function(t){
-        out = out.replace(new RegExp("\\b(" + t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + ")\\b","gi"),
-                          "<mark>$1</mark>");
-      });
+    if (!phrases || !phrases.length) return out;
+    /* Longest first, so a phrase that contains another is not half-marked. */
+    phrases.slice().sort(function(a,b){ return b.length - a.length; }).forEach(function(p){
+      var safe = esc(p).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      out = out.replace(new RegExp("(" + safe + ")", "gi"), "<mark>$1</mark>");
     });
     return out;
   }
@@ -321,8 +324,13 @@
         ? '<div class="flagbar"><b>Held for review</b><p>The narration speaks ' +
           d.flagged.map(function(f){ return "<code>" + esc(f) + "</code>"; }).join(", ") +
           ', which ' + (d.flagged.length > 1 ? "do" : "does") +
-          ' not appear in the facts CAPE computed for this sale. Highlighted below. ' +
-          'Usually a figure the model invented — a fee, a count, a date.</p></div>'
+          ' not appear in the facts CAPE computed for this sale' +
+          (d.flaggedPhrases && d.flaggedPhrases.length
+            ? ', spoken as ' + d.flaggedPhrases.map(function(p){
+                return '<code>' + esc(p) + '</code>'; }).join(", ") + ' and marked below'
+            : '') +
+          '. Usually a figure the model invented — a fee, a count, a date. ' +
+          'Sometimes the parser misreading a citation or an address.</p></div>'
         : "") +
       (d.sharedWith > 1 && d.sections.some(function(s){ return s.scope === "county"; })
         ? '<div class="shared"><b>Shared sections</b><p>The sections marked ' +
@@ -343,7 +351,7 @@
               ? (shared ? "every " + d.county + " sale · " + d.sharedWith : "county")
               : "this sale") +
           '</span></div>' +
-          '<p class="nar">' + markFigures(s.narration, d.flagged) + '</p></section>';
+          '<p class="nar">' + markFigures(s.narration, d.flaggedPhrases) + '</p></section>';
       }).join("") +
       (filter === "county" ? "" :
         '<div class="take"><b>Key takeaway</b><p>' + esc(d.takeaway) + '</p></div>') +

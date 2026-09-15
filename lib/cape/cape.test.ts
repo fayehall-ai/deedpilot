@@ -560,6 +560,14 @@ for (const [spoken, want] of [
    */
   ["thirty-four oh four linwood drive", "thirty-four oh four linwood drive"],
   ["sixty-seven five twenty-seven oh one", "sixty-seven five twenty-seven oh one"],
+  /*
+   * Three or more bare digits is somebody reading a number out. The descending
+   * rule caught "seven seven zero" and missed "eight six three" — area codes,
+   * spoken the way a phone number is, each holding a good script.
+   */
+  ["eight six three", "eight six three"],
+  ["seven six five", "seven six five"],
+  ["seven seven zero", "seven seven zero"],
   /* A cue has to be adjacent — a real figure later in the passage still counts. */
   ["the statute applies. the deposit is four thousand dollars",
    "the statute applies. the deposit is 4000 dollars"],
