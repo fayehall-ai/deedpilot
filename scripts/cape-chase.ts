@@ -99,10 +99,38 @@ async function leased(): Promise<number> {
 async function main() {
   const sec = secret();
 
+  /*
+   * A failed poll is not a reason to stop watching.
+   *
+   * This died twice on `ENOTFOUND` and `ECONNRESET` reaching Neon — a laptop
+   * lid, a dropped wifi, a pooler recycling a socket. The work is on Vercel and
+   * carried on regardless both times; the only casualty was the thing watching
+   * it, which is the wrong way round. A watchdog that exits on the first
+   * transient error is worse than none, because its silence reads as "still
+   * running".
+   */
+  let consecutiveFailures = 0;
+
   for (;;) {
-    const { total, done } = await outstanding();
+    let total: number, done: number, busy: number;
+    try {
+      ({ total, done } = await outstanding());
+      busy = await leased();
+      consecutiveFailures = 0;
+    } catch (e) {
+      consecutiveFailures++;
+      const msg = e instanceof Error ? e.message : String(e);
+      console.log(
+        `${new Date().toISOString().slice(11, 19)} poll failed (${consecutiveFailures}): ${msg.slice(0, 80)}`,
+      );
+      if (ONCE) return;
+      /* Back off, but never give up: at twenty minutes apart this still
+         notices a finished backlog within one interval. */
+      await new Promise((r) => setTimeout(r, Math.min(POLL_MS * consecutiveFailures, 20 * 60_000)));
+      continue;
+    }
+
     const left = total - done;
-    const busy = await leased();
     const stamp = new Date().toISOString().slice(11, 19);
 
     if (left === 0) {
