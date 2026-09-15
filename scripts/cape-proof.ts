@@ -129,6 +129,7 @@ async function main() {
 
   const out: OutScript[] = [];
   let skipped = 0;
+  let notUpcoming = 0;
 
   for (const r of rows) {
     const s = r.script as unknown as {
@@ -138,6 +139,21 @@ async function main() {
     } | null;
     if (!s?.sections?.length) {
       skipped++;
+      continue;
+    }
+
+    /*
+     * Only packages the pipeline still considers upcoming.
+     *
+     * 33 stored scripts belong to sales that have passed or that no longer meet
+     * the inventory bar, so nothing will ever rewrite them. Left in, they were
+     * three per cent of the page permanently marked "older fact sheet" — which
+     * meant the rewrite banner could never clear, and a reviewer was being
+     * handed briefings for auctions that already happened. Neither is a thing
+     * to proofread.
+     */
+    if (!wanted.has(r.auctionId)) {
+      notUpcoming++;
       continue;
     }
     const shared = countyText.get(r.fips) ?? new Set<string>();
@@ -182,6 +198,9 @@ async function main() {
 
   console.log(`${out.length} script(s) written to ${OUT}  (${Math.round(html.length / 1024)} KB)`);
   if (skipped) console.log(`  ${skipped} production row(s) had no script yet — omitted`);
+  if (notUpcoming) {
+    console.log(`  ${notUpcoming} script(s) for sales no longer upcoming — omitted`);
+  }
   console.log(`  ${countySections} county-scoped section(s), ${saleSections} sale-scoped`);
   console.log(`  ${halves.length} county half/halves on file`);
   console.log(`  ${words.toLocaleString()} spoken words in total`);
