@@ -59,20 +59,30 @@ interface FlClerk {
  * Verified clerk sources with public lists.
  *
  * "Do not add RealAuction-only counties here" stood at the top of this list, and
- * it was hiding an assumption worth testing: that a county whose auction runs on
- * RealAuction has no public list anywhere. Palm Beach and Duval both do. Their
- * Clerks run TaxSmartWeb portals — `taxdeed.mypalmbeachclerk.com` and
- * `taxdeed.duvalclerk.com` — served unauthenticated, on the same software this
- * adapter already parses for Levy, returning real parcel ids and sale dates.
+ * testing it produced a more useful answer than either accepting or rejecting it.
  *
- * That is exactly what `lib/ingest/policy.ts` says to do about the RealAuction
- * block: "Florida tax deed lists are public records available directly from each
- * county Clerk of Court — ingest those instead." The instruction was there;
- * nobody had gone looking.
+ * Palm Beach and Duval do run public Clerk portals — `taxdeed.mypalmbeachclerk.com`
+ * and `taxdeed.duvalclerk.com`, unauthenticated, on the same TaxSmartWeb software
+ * this adapter already parses for Levy. `GridSearchData` answers with a thousand
+ * rows apiece carrying real parcel ids, sale dates and amounts, which reads at
+ * first glance like the RealAuction block being routed around entirely.
  *
- * So the rule is narrower than it read: do not add a county whose list exists
- * *only* behind RealAuction. Whether that is true of a given county is a
- * question to answer by looking, not to assume from the auction host.
+ * It is not. Measured 2026-09-15: of those thousand rows, sorted by sale date
+ * descending, **none has a future date**. The Clerk publishes what has already
+ * been sold and what was struck off — lands available — and the list of parcels
+ * coming up for sale is not there. Palm Beach's 2026-09-16 and 2026-10-14 sales
+ * return two lands-available parcels between them and nothing scheduled.
+ *
+ * So the original instruction was right about what matters, and for a reason it
+ * did not state: the auction list genuinely lives only on RealAuction. What the
+ * Clerk gives is the public record either side of it. Both counties are kept
+ * here because that record is real and worth having — struck-off inventory is
+ * buyable — but nobody should read their presence as coverage of the sale.
+ *
+ * `lib/ingest/policy.ts` says "Florida tax deed lists are public records
+ * available directly from each county Clerk of Court — ingest those instead."
+ * That holds for completed sales and lands available. It does not deliver the
+ * forthcoming sale list, and the difference is the whole question.
  */
 export const FL_CLERKS: FlClerk[] = [
   {
