@@ -100,3 +100,4 @@ data/leads/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+data/realauction-capture/
