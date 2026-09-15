@@ -100,6 +100,14 @@ Two things not to try, both measured:
   from wherever this session is", so fetching it out of band desynchronises the
   visible page.
 
+**The page changes twice, and only the second one has the parcels.** Clicking
+the pager swaps the container and *then* a second request fills the rows in.
+Harvesting as soon as the container changes reads the frame before it is
+populated: Palm Beach's 14 October sale gave 4 parcels that way and 74 with a
+1.2-second settle after the change. Nothing errored, and 4 is a plausible number
+for a small sale — which is what makes it dangerous. Wait for the change, then
+wait again, then read.
+
 **The site throttles.** After roughly forty requests in a few minutes, every
 RealAuction host served this browser the page shell with no auction area at
 all — no error, just an empty calendar, across hosts. It clears with time. Move
@@ -185,12 +193,16 @@ at a person's pace: one sale at a time, a second between pages.
          const before = root.innerHTML;
          next.click();
          let loaded = false;
-         for (let i = 0; i < 16 && !loaded; i++) {
-           await new Promise((r) => setTimeout(r, 250));
+         for (let i = 0; i < 20 && !loaded; i++) {
+           await new Promise((r) => setTimeout(r, 300));
            loaded = root.innerHTML !== before;
          }
          if (!loaded) break;
-         await new Promise((r) => setTimeout(r, 600));   // be a guest, not a load test
+         /*
+          * The settle is not politeness, it is correctness — see "the page
+          * changes twice" above. 600 ms was not enough for Palm Beach.
+          */
+         await new Promise((r) => setTimeout(r, 1200));
        }
      }
 

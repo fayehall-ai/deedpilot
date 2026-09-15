@@ -134,9 +134,13 @@ const normalize = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
  * Marion's are this shape — vacant subdivision lots, which is much of what a
  * deed buyer is actually looking at.
  */
-const NO_SITUS = /^(?:no\s*situs|0+\s+unassigned\s+location(?:\s+re)?)\b[\s,-]*/i;
+const NO_SITUS =
+  /^(?:no\s*situs|no\s+address|not\s+assigned|0+\s+unassigned\s+location(?:\s+re)?)\b[\s,-]*/i;
 
-function splitAddress(raw: string | undefined): {
+function splitAddress(
+  raw: string | undefined,
+  parcelNumber?: string,
+): {
   addressLine?: string;
   city?: string;
   zip?: string;
@@ -146,6 +150,18 @@ function splitAddress(raw: string | undefined): {
 
   const noSitus = NO_SITUS.test(s);
   s = s.replace(NO_SITUS, "").trim();
+
+  /*
+   * Escambia writes `NO ADDRESS - 061S311301002007`, so the marker is followed
+   * by the parcel number rather than by a city. Stripping the marker and
+   * keeping the rest would file a parcel number as the town. A remainder that
+   * repeats the parcel, or that holds no run of three letters, is not a place
+   * name — Marion's `NO SITUS OCALA` is, and that is the distinction.
+   */
+  if (noSitus) {
+    const bare = (x: string) => x.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!/[A-Za-z]{3}/.test(s) || (parcelNumber && bare(s) === bare(parcelNumber))) return {};
+  }
 
   /*
    * `, FL- 32209`, `, FL 32209`, and Citrus's `, 34453` with no state at all.
@@ -433,7 +449,7 @@ export const realauctionAdapter: SourceAdapter = {
         externalId: parcelNumber,
         parcelNumber,
         caseNumber: r.caseNumber?.trim() || undefined,
-        ...splitAddress(r.addressLine),
+        ...splitAddress(r.addressLine, parcelNumber),
         openingBid: money(r.openingBid),
         assessedValue: money(r.assessedValue),
         status: statusOf(r),

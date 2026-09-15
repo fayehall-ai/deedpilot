@@ -56,7 +56,14 @@ const RULES: { status: LotStatus; pattern: RegExp }[] = [
   },
   {
     status: "withdrawn",
-    pattern: /\b(withdraw\w*|withdrew|pulled|removed|deleted|deferred|postpon\w*)\b/,
+    /*
+     * `reschedul\w*` from Highlands: "Auction to be rescheduled" is the county
+     * saying this parcel leaves today's sale and returns to a later one. That
+     * is a withdrawal from this sale, not a cancellation of the debt — and
+     * without the stem it fell through to `pending`, which would have kept the
+     * parcel on a sale it will not be offered at.
+     */
+    pattern: /\b(withdraw\w*|withdrew|pulled|removed|deleted|deferred|postpon\w*|reschedul\w*)\b/,
   },
 ];
 
