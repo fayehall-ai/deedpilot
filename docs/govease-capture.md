@@ -66,7 +66,45 @@ shelf life of days, not source.
 
    Save the clipboard to `data/govease-capture/registry.html`.
 
-3. For each auction worth ingesting, open its catalog and extract:
+3. For each auction worth ingesting, open its catalog and extract.
+
+   **The catalog URL and its table changed; re-verified 2026-09-15.**
+   `/{state}/{slug}/{id}/browsestandard` now redirects to `/{state}/{slug}/{id}/browse`,
+   and the rows no longer carry an `openstandardparcel` link or a `data-content`
+   owner popover. The columns are headed, and read:
+
+   ```
+   0 (control)  1 Watch  2 Unique #  3 Parcel #  4 Owner Name
+   5 Face Value  6 Parcel Address  7 Auction Name  8 Auction Type
+   ```
+
+   Note 6 — the address sits where `rowToLot` expects a legal description, so
+   the snippet below moves it to index 7 and leaves 6 empty. It also synthesises
+   the anchor the parser keys on, which is the same thing this document has
+   always done: the capture is a working artifact shaped for the parser, not a
+   copy of the page.
+
+   ```js
+   const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                           .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+   const base = location.pathname.replace(/\/browse.*$/, '');
+   const trs = [...document.querySelectorAll('tr')]
+     .filter(r => r.querySelectorAll('td').length >= 6);
+   copy('<table>' + trs.map(r => {
+     const c = [...r.querySelectorAll('td')]
+       .map(td => esc(td.textContent.replace(/\s+/g,' ').trim()));
+     const uid = c[2] || '';
+     return '<tr>' + ['', '',
+       `<a href="${base}/openstandardparcel?uid=${encodeURIComponent(uid)}">${uid}</a>`,
+       c[3] || '', c[4] || '', c[5] || '', '', c[6] || ''
+     ].map(x => `<td>${x}</td>`).join('') + '</tr>';
+   }).join('') + '</table>');
+   ```
+
+   Verified against Marion County, Indiana (auction 1282, sale 2026-10-13): 50
+   rows, e.g. `A1 / 1000187 / JMH COMPANY, LLC / $12,519.16 / 2640 MADISON AV`.
+
+   The superseded snippet, for reference if an older portal is encountered:
 
    ```js
    const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
