@@ -34,6 +34,7 @@ import { dirname } from "node:path";
 import { sql } from "drizzle-orm";
 import { db } from "../lib/db";
 import { buildRegistry, mergeRegistry, prospectCounty, registryCoverage } from "../lib/prospector";
+import { isFreeMailDomain } from "../lib/prospector/discover";
 import type { ProspectResult, SourceRegistry } from "../lib/prospector/types";
 
 const OUT = "data/source-registry.json";
@@ -103,6 +104,35 @@ async function main(): Promise<void> {
       .map(([fips]) => fips),
   );
 
+  /*
+   * Where each county's own mail domain comes from.
+   *
+   * The sale calendar names a person at the county and gives their address, and
+   * the domain of that address is where the county actually publishes — stated
+   * by the county rather than generated from its name. 42 of the counties in
+   * this target set carry `publicrecords.onlinesearches.com` as their source,
+   * which is a records directory that was never one, while holding a contact
+   * like `swhitehead@grantcountyar.com` that names the real domain. No pattern
+   * generator produces `grantcountyar.com` from "Grant County, AR".
+   *
+   * Free addresses are dropped: a clerk using gmail tells us nothing about
+   * where the county publishes.
+   */
+  const contactDomains = new Map<string, string[]>();
+  for (const r of (await db.execute(sql`
+    SELECT county_fips, logistics -> 'contact' ->> 'email' AS email
+    FROM auctions
+    WHERE logistics -> 'contact' ->> 'email' IS NOT NULL
+      AND sale_date >= current_date
+  `)) as unknown as { county_fips: string; email: string }[]) {
+    const domain = r.email.split("@")[1]?.toLowerCase().trim();
+    if (!domain || isFreeMailDomain(domain)) continue;
+    const list = contactDomains.get(r.county_fips) ?? [];
+    if (!list.includes(domain)) list.push(domain);
+    contactDomains.set(r.county_fips, list);
+  }
+  console.log(`${contactDomains.size} county/counties carry a usable contact domain`);
+
   const rows = (await db.execute(sql`
     SELECT a.county_fips,
            c.name  AS county,
@@ -145,7 +175,11 @@ async function main(): Promise<void> {
      */
     let withCandidates = 0;
     for (const t of targets.slice(0, 25)) {
-      const r = await prospectCounty(t.county_fips, { dryRun: true, includePatterns });
+      const r = await prospectCounty(t.county_fips, {
+        dryRun: true,
+        includePatterns,
+        contactDomains: contactDomains.get(t.county_fips),
+      });
       if (!r.isGap) withCandidates++;
       console.log(
         `  ${t.state} ${t.county} (${t.county_fips}, ${t.parcels.toLocaleString()} parcels) — ${r.note.slice(0, 150)}`,
@@ -167,7 +201,11 @@ async function main(): Promise<void> {
   for (const [i, t] of targets.entries()) {
     if (stopping) break;
     try {
-      const r = await prospectCounty(t.county_fips, { useLlm: true, includePatterns });
+      const r = await prospectCounty(t.county_fips, {
+        useLlm: true,
+        includePatterns,
+        contactDomains: contactDomains.get(t.county_fips),
+      });
       found.push(r);
       pending.push(r);
       if (r.isGap) gaps++;

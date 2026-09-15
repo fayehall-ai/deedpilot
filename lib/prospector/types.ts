@@ -26,6 +26,16 @@ export type CandidateOrigin =
   | "atlas"
   /** Derived from a known per-state platform pattern. */
   | "platform_pattern"
+  /**
+   * The domain of a county contact's email address.
+   *
+   * A fact, not a guess. The sale calendar names a person at the county and
+   * gives their address — `swhitehead@grantcountyar.com` — and the domain is
+   * where that county actually publishes, stated by the county itself. That
+   * makes it strictly better evidence than a generated hostname, which is why
+   * it ranks above `platform_pattern`.
+   */
+  | "contact_email"
   /** Followed from a link on an already-verified page. */
   | "link_followed";
 

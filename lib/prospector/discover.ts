@@ -30,6 +30,28 @@ const LINK_FIELDS: { field: keyof CountyRule; label: string }[] = [
 
 import { countyDomainPatterns, statewideCandidatesFor } from "./candidates";
 
+/**
+ * Mail hosts that say nothing about where a county publishes.
+ *
+ * A clerk using a personal address is ordinary — De Baca County, New Mexico
+ * lists one on `live.com` — and turning that into `https://live.com/` puts
+ * Microsoft's homepage at the top of a county's candidate list. Checked as a
+ * suffix so `mail.live.com` and the like are caught too.
+ */
+const FREE_MAIL = [
+  "gmail.com", "yahoo.com", "hotmail.com", "aol.com", "outlook.com", "live.com",
+  "msn.com", "me.com", "icloud.com", "comcast.net", "att.net", "bellsouth.net",
+  "sbcglobal.net", "verizon.net", "cox.net", "charter.net", "windstream.net",
+  "frontier.com", "protonmail.com", "proton.me", "mail.com", "gmx.com",
+  "yandex.com", "zoho.com", "embarqmail.com", "centurylink.net", "earthlink.net",
+];
+
+/** True when a domain is a mail provider rather than an organisation's own. */
+export function isFreeMailDomain(domain: string): boolean {
+  const d = domain.trim().toLowerCase().replace(/^www\./, "");
+  return FREE_MAIL.some((f) => d === f || d.endsWith(`.${f}`));
+}
+
 function isHttp(url: string | undefined): url is string {
   if (!url) return false;
   try {
@@ -51,7 +73,17 @@ function isHttp(url: string | undefined): url is string {
  */
 export function candidatesFor(
   fips: string,
-  opts: { includePatterns?: boolean } = {},
+  opts: {
+    includePatterns?: boolean;
+    /**
+     * Domains taken from a county contact's email address.
+     *
+     * Passed in rather than looked up because they live in the database, on
+     * `auctions.logistics`, and this module is deliberately static — it reads
+     * the atlas and nothing else so it can be exercised without a connection.
+     */
+    contactDomains?: string[];
+  } = {},
 ): SourceCandidate[] {
   const county = getCounty(fips);
   if (!county) return [];
@@ -77,6 +109,24 @@ export function candidatesFor(
     for (const src of rule.sources ?? []) {
       if (isHttp(src)) push(src, "atlas", "county research citation");
     }
+  }
+
+  /*
+   * The county's own mail domain, ahead of anything generated.
+   *
+   * 42 of the counties in this set list `publicrecords.onlinesearches.com` as
+   * their source — a records directory that was never a county source — while
+   * carrying a contact address like `swhitehead@grantcountyar.com` that names
+   * the real domain. The pattern generator cannot produce `grantcountyar.com`
+   * from "Grant County, AR"; the county already told us.
+   */
+  for (const domain of opts.contactDomains ?? []) {
+    const clean = domain.trim().toLowerCase().replace(/^www\./, "");
+    if (!clean || !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(clean)) continue;
+    /* Checked here as well as at the call site: a free host reaching this far
+       would rank a mail provider's homepage above the county's own. */
+    if (isFreeMailDomain(clean)) continue;
+    push(`https://${clean}/`, "contact_email", `domain of a county contact's email`);
   }
 
   // Statewide publishers: one URL serving every county in the state. Highest

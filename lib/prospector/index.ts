@@ -60,6 +60,11 @@ export interface ProspectOptions {
   maxCandidates?: number;
   /** Report intent without fetching anything. */
   dryRun?: boolean;
+  /**
+   * Domains taken from a county contact's email address. See
+   * `CandidateOrigin.contact_email` — evidence from the county, not a guess.
+   */
+  contactDomains?: string[];
 }
 
 /**
@@ -88,6 +93,7 @@ export async function prospectCounty(
 
   const candidates = candidatesFor(fips, {
     includePatterns: opts.includePatterns,
+    contactDomains: opts.contactDomains,
   }).slice(0, opts.maxCandidates ?? 8);
 
   if (opts.dryRun) {
