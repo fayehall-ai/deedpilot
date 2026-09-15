@@ -164,6 +164,20 @@
   var filter = "all";
 
   var $ = function(id){ return document.getElementById(id); };
+
+  /*
+   * What the sale is offering, and how well we know it.
+   *
+   * `parcels` is rows in this database; `announced` is what the county says it
+   * is selling. Most packages have the second and not the first, and rendering
+   * only the first showed "0 parcels" on a sale of seventeen hundred — which
+   * reads as an empty auction rather than a list nobody has fetched yet.
+   */
+  function parcelLabel(d){
+    if (d.parcels > 0) return Number(d.parcels).toLocaleString() + " parcels";
+    if (d.announced > 0) return Number(d.announced).toLocaleString() + " announced, list not crawled";
+    return "no list published";
+  }
   var esc = function(s){ return String(s == null ? "" : s)
       .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
 
@@ -276,8 +290,7 @@
         ' aria-current="' + (current === d.slug) + '">' +
         '<span class="nm">' + esc(d.county) + ' County, ' + esc(d.state) + '</span>' +
         '<span class="dot ' + cls + '"></span>' +
-        '<span class="mt">' + esc(d.saleDate) + ' · ' + Number(d.parcels).toLocaleString() +
-        (d.held ? " announced" : " parcels") +
+        '<span class="mt">' + esc(d.saleDate) + ' · ' + esc(parcelLabel(d)) +
         (d.flagged.length ? ' · flagged ' + esc(d.flagged.join(", ")) : "") +
         (r && r.verdict ? ' · ' + (r.verdict === "ok" ? "cleared" : "needs change") : "") +
         (d.current ? "" : ' · <b class="stale">older</b>') +
@@ -301,7 +314,7 @@
       '<span>sale ' + esc(d.saleDate) + '</span>' +
       '<span>' + esc(d.saleType || "—") + '</span>' +
       '<span>' + esc(d.platform || "—") + '</span>' +
-      '<span>' + Number(d.parcels).toLocaleString() + (d.held ? " announced" : " parcels") + '</span>' +
+      '<span>' + esc(parcelLabel(d)) + '</span>' +
       '<span>' + d.sections.length + ' sections</span>' +
       (d.current ? '' : '<span class="stale">older fact sheet</span>') + '</div>' +
       (d.flagged.length

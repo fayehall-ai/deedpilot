@@ -53,7 +53,17 @@ interface OutScript {
   saleDate: string;
   saleType: string | null;
   platform: string | null;
+  /** Parcel rows this database holds. Zero is ordinary — see `announced`. */
   parcels: number;
+  /**
+   * Parcels the county says it is offering, where nothing has crawled the list.
+   *
+   * 389 of 461 packages are in exactly this state, and showing only `parcels`
+   * rendered every one of them as "0 parcels" — which reads as a sale with
+   * nothing in it, rather than a sale of 1,697 parcels whose list has not been
+   * fetched. The two figures are different claims and the page now makes both.
+   */
+  announced: number | null;
   /** True when the package was held and never went to audio. */
   held: boolean;
   /** Why it was held, in the operator's words. */
@@ -87,6 +97,7 @@ async function main() {
       saleType: auctions.saleType,
       platform: auctions.platform,
       lotCount: auctions.lotCount,
+      announced: auctions.announcedParcelCount,
       script: capeProductions.script,
       figures: capeProductions.unsupportedFigures,
       stage: capeProductions.stage,
@@ -165,6 +176,7 @@ async function main() {
       saleType: r.saleType,
       platform: r.platform,
       parcels: r.lotCount,
+      announced: r.announced,
       held: (r.figures ?? []).length > 0 || Boolean(r.error),
       heldWhy: r.error ?? null,
       flagged: r.figures ?? [],
