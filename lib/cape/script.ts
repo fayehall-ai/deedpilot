@@ -438,7 +438,17 @@ export function spokenToDigits(text: string): string {
        * percentages as whole numbers, and the alternative was flagging every
        * statute this system cites as a fabricated number.
        */
-      if (/\b(?:point|dash)\b/.test(lower)) return run;
+      /*
+       * `oh` belongs with `point` and `dash`: it is how a person reads out an
+       * identifier digit by digit, never how they say a quantity. Nobody says
+       * "thirty-four oh four" meaning a number — they are reading 3404 off a
+       * sign. It appears here in street addresses imported from the sale
+       * calendar ("thirty-four oh four Linwood Drive"), in statute citations
+       * ("sixty-seven five twenty-seven oh one") and in phone numbers, and in
+       * each case the parser was taking a fragment of it as a figure the
+       * narrator had invented.
+       */
+      if (/\b(?:point|dash|oh)\b/.test(lower)) return run;
       /*
        * Space-separated groups are kept distinct from hyphenated ones, because
        * the difference is what distinguishes a year from a count.
@@ -531,7 +541,7 @@ export function spokenToDigits(text: string): string {
        * appears anywhere, so a correct script was held as though the narrator
        * had invented two numbers.
        */
-      `(${NUMBER_WORD.source})(?:[\\s,-]+(?:point|dash)?[\\s,-]*(${NUMBER_WORD.source}))*`,
+      `(${NUMBER_WORD.source})(?:[\\s,-]+(?:point|dash|oh)?[\\s,-]*(${NUMBER_WORD.source}))*`,
       "g",
     ),
     (run, _a, _b, offset: number, whole: string) => {

@@ -553,6 +553,13 @@ for (const [spoken, want] of [
   /* And the comma must not resurrect the date fold. */
   ["september fifteenth, two thousand twenty-six", "september 15, 2026"],
   ["october sixth, two thousand twenty-six", "october 6, 2026"],
+  /*
+   * "oh" is how a person reads an identifier off a sign, never how they say a
+   * quantity: a venue address from the sale calendar, a statute, a phone
+   * number. Fragments of each were being reported as invented figures.
+   */
+  ["thirty-four oh four linwood drive", "thirty-four oh four linwood drive"],
+  ["sixty-seven five twenty-seven oh one", "sixty-seven five twenty-seven oh one"],
   /* A cue has to be adjacent — a real figure later in the passage still counts. */
   ["the statute applies. the deposit is four thousand dollars",
    "the statute applies. the deposit is 4000 dollars"],
