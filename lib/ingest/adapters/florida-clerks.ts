@@ -57,7 +57,22 @@ interface FlClerk {
 
 /**
  * Verified clerk sources with public lists.
- * Do not add RealAuction-only counties here.
+ *
+ * "Do not add RealAuction-only counties here" stood at the top of this list, and
+ * it was hiding an assumption worth testing: that a county whose auction runs on
+ * RealAuction has no public list anywhere. Palm Beach and Duval both do. Their
+ * Clerks run TaxSmartWeb portals — `taxdeed.mypalmbeachclerk.com` and
+ * `taxdeed.duvalclerk.com` — served unauthenticated, on the same software this
+ * adapter already parses for Levy, returning real parcel ids and sale dates.
+ *
+ * That is exactly what `lib/ingest/policy.ts` says to do about the RealAuction
+ * block: "Florida tax deed lists are public records available directly from each
+ * county Clerk of Court — ingest those instead." The instruction was there;
+ * nobody had gone looking.
+ *
+ * So the rule is narrower than it read: do not add a county whose list exists
+ * *only* behind RealAuction. Whether that is true of a given county is a
+ * question to answer by looking, not to assume from the auction host.
  */
 export const FL_CLERKS: FlClerk[] = [
   {
@@ -113,6 +128,26 @@ export const FL_CLERKS: FlClerk[] = [
     indexUrl: "https://calhounclerk.com/court-services/property-sales/tax-deed-sales/",
     pattern: "wpTaxdeeds",
     title: "Calhoun County FL tax deed sales",
+  },
+  {
+    name: "Palm Beach",
+    // RealAuction runs the auction; the Clerk publishes the record. Verified
+    // 2026-09-15: GridSearchData returns 1,000 tax-deed rows with parcel ids.
+    indexUrl: "https://taxdeed.mypalmbeachclerk.com/",
+    pattern: "taxSmartWeb",
+    taxSmartSearchType: "Lands Available",
+    inventorySaleDate: "2026-09-16",
+    title: "Palm Beach County FL lands available for taxes",
+  },
+  {
+    name: "Duval",
+    // Same shape as Palm Beach, found by probing the Clerk rather than the
+    // auction host. Verified 2026-09-15.
+    indexUrl: "https://taxdeed.duvalclerk.com/",
+    pattern: "taxSmartWeb",
+    taxSmartSearchType: "Lands Available",
+    inventorySaleDate: "2026-09-16",
+    title: "Duval County FL lands available for taxes",
   },
   {
     name: "Levy",
