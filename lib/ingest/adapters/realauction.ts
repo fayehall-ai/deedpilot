@@ -76,6 +76,17 @@ interface CaptureRow {
   assessedValue?: string;
   /** The page's own "Auction Type" — TAXDEED, TAXLIEN, FORECLOSURE. */
   auctionType?: string;
+  /** The sale's own start hour, e.g. "10/14/2026 09:00 AM ET". */
+  startsAt?: string;
+  /**
+   * Which of the page's three lists the parcel sat in — W, C or R.
+   *
+   * Not decoration. A parcel under "Auctions Closed or Canceled" with no status
+   * text is still an assertion by the county, made structurally rather than in
+   * words, and without this the capture flattens it into an ordinary scheduled
+   * parcel. See `statusOf`.
+   */
+  area?: string;
 }
 
 interface Capture {
@@ -202,6 +213,43 @@ function saleTypeOf(capture: Capture, fips: string): SaleType | null {
   return resolveCountyRule(fips)?.saleType ?? "Tax Deed";
 }
 
+/**
+ * What happened to a parcel, reading the page's grouping as well as its words.
+ *
+ * `parseLotStatus` is right to return `pending` for empty text: an unreadable
+ * status means the parcel is still listed as far as anyone can tell. But on a
+ * RealAuction page the county says something without words — it files the
+ * parcel under "Auctions Waiting" or under "Auctions Closed or Canceled", and
+ * Charlotte's 29 September sale has thirteen parcels in the closed list with no
+ * status text at all.
+ *
+ * Reading only the words would publish those thirteen as inventory for a sale
+ * that will not offer them. The sale has not happened yet, so nothing in that
+ * list can have closed; what is left is cancelled.
+ */
+function statusOf(row: CaptureRow) {
+  const said = parseLotStatus(row.status);
+  if (said !== "pending") return said;
+  return row.area === "C" ? ("cancelled" as const) : said;
+}
+
+/**
+ * The hour the sale opens, as the county states it.
+ *
+ * Every parcel in a sale carries the same "10/14/2026 09:00 AM ET", so the
+ * first one that has it speaks for the sale. Kept verbatim rather than parsed
+ * into a timestamp: the zone abbreviation is the county's own wording, and
+ * `AuctionLogistics` reads better with the county's words in it than with a
+ * time we converted and might have converted wrongly.
+ */
+function startTimeOf(capture: Capture): string | undefined {
+  for (const r of capture.rows) {
+    const s = (r.startsAt ?? "").trim();
+    if (s) return s.replace(/^\d{1,2}\/\d{1,2}\/\d{4}\s*/, "").trim() || undefined;
+  }
+  return undefined;
+}
+
 const saleUrl = (host: string, saleDate: string) => {
   const [y, m, d] = saleDate.split("-");
   return `https://www.${host}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=${m}/${d}/${y}`;
@@ -274,6 +322,7 @@ export const realauctionAdapter: SourceAdapter = {
         /* The date came off the county's own auction calendar, in the URL. */
         saleDateConfirmed: true,
         listingKind: "sale_list",
+        startTime: startTimeOf(c),
         /*
          * `countyLabel` rather than "County", because RealAuction also runs
          * Newark and Hardyston in New Jersey, which are a city and a township.
@@ -323,9 +372,9 @@ export const realauctionAdapter: SourceAdapter = {
         addressLine: r.addressLine?.replace(/,?\s*([A-Z]{2})-\s*(\d{5})\s*$/, ", $1 $2").trim() || undefined,
         openingBid: money(r.openingBid),
         assessedValue: money(r.assessedValue),
-        status: parseLotStatus(r.status),
+        status: statusOf(r),
         sourceUrl: auction.sourceUrl,
-        raw: { certificate: r.certificate, auctionType: r.auctionType, status: r.status },
+        raw: { certificate: r.certificate, auctionType: r.auctionType, status: r.status, area: r.area },
       });
     }
 

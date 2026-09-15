@@ -54,8 +54,23 @@ running text:
     td.AD_LBL  "Certificate #:"      td.AD_DTA  "08330-2016"
 
 An **empty label continues the previous one** — that is how the address gets
-its second line. Status lives outside the table, in `.ASTAT_MSGB`: empty while
-scheduled, `Redeemed` once the owner has paid.
+its second line.
+
+Status lives outside the table, and the slot holds two different things:
+
+    .ASTAT_MSGA  "Auction Starts"   .ASTAT_MSGB  "10/14/2026 09:00 AM ET"
+    .ASTAT_MSGA  "Auction Status"   .ASTAT_MSGB  "Redeemed"
+
+Only the label says which. Reading `.ASTAT_MSGB` on its own gives every
+scheduled parcel a start time where its status should be — and a start time is
+not nothing, it is the sale's own hour, so the capture records both.
+
+**The grouping is a claim, so the area is captured too.** Thirteen of the
+fifty-two parcels in Charlotte's 29 September sale sit in the closed list with
+no status text whatsoever — `.ASTAT_MSGA` is empty, not "Auction Status". Read
+by its words alone each is `pending`, which would publish it as inventory for a
+sale that will not offer it. The sale has not happened yet, so nothing in that
+list can have closed; the adapter reads them as cancelled.
 
 **`Auction Type` is why the capture records it.** Counties like Charlotte and
 Manatee run their tax deed sale and their mortgage foreclosure sale on one
@@ -106,7 +121,8 @@ at a person's pace: one sale at a time, a second between pages.
      const TOKEN = "PASTE_YOUR_DEEDPILOT_ADMIN_TOKEN";
      const ENDPOINT = "http://localhost:3000/api/admin/realauction-capture";
 
-     const cl = (s) => (s || "").replace(/\s+/g, " ").trim();
+     const cl = (s) => (s || "").replace(/[\s\u00a0]+/g, " ").trim();
+     const label = (it) => cl(it.querySelector(".ASTAT_MSGA")?.textContent);
 
      /* Label/value pairs; an empty label continues the previous one. */
      const parse = (it) => {
@@ -126,11 +142,19 @@ at a person's pace: one sale at a time, a second between pages.
          caseNumber: f["Case #"] || "",
          assessedValue: f["Assessed Value"] || "",
          auctionType: f["Auction Type"] || "",
-         status: cl(it.querySelector(".ASTAT_MSGB")?.textContent),
+         /*
+          * One slot, two meanings, and the label is the only thing that says
+          * which. `ASTAT_MSGA` reads "Auction Starts" on a scheduled parcel and
+          * "Auction Status" on a settled one — so reading `ASTAT_MSGB` blind
+          * files every scheduled parcel with a start time as its status.
+          */
+         status: /Status/i.test(label(it)) ? cl(it.querySelector(".ASTAT_MSGB")?.textContent) : "",
+         startsAt: /Starts/i.test(label(it)) ? cl(it.querySelector(".ASTAT_MSGB")?.textContent) : "",
        };
      };
 
      const rows = [], seen = new Set();
+     /* The area is captured with each parcel: see "the grouping is a claim". */
      for (const area of ["W", "C", "R"]) {
        const root = document.querySelector("#Area_" + area);
        if (!root) continue;
@@ -138,7 +162,7 @@ at a person's pace: one sale at a time, a second between pages.
        for (let page = 1; ; page++) {
          for (const it of root.querySelectorAll(".AUCTION_ITEM")) {
            if (/SPACER/.test(it.className)) continue;          // spacers are not parcels
-           const r = parse(it);
+           const r = { ...parse(it), area };
            if (r.parcelNumber && !seen.has(area + r.parcelNumber)) {
              seen.add(area + r.parcelNumber);
              rows.push(r);

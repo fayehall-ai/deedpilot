@@ -63,6 +63,10 @@ interface CaptureRow {
    * foreclosure sale on one realforeclose host, separated only by the date.
    * Without it the adapter cannot tell which one a capture holds. */
   auctionType?: string;
+  /** The sale's own start hour, e.g. "10/14/2026 09:00 AM ET". */
+  startsAt?: string;
+  /** Which list the parcel sat in: W waiting, C closed or canceled, R running. */
+  area?: string;
 }
 
 export async function POST(req: NextRequest) {

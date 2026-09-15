@@ -73,7 +73,57 @@ function toNumeric(v: number | undefined): string | null {
   return v === undefined ? null : String(v);
 }
 
+/**
+ * Take over a placeholder rather than sitting beside it.
+ *
+ * Calendars are discovered before catalogs are. A county's own sale calendar
+ * gives a date and a link and nothing stable to key on, so it lands as an
+ * auction row with no parcels and a made-up `externalId`. When the catalog for
+ * that same sale arrives later — a crawl, or a capture read in a browser — it
+ * carries a different id, the `(county, platform, externalId)` target misses,
+ * and the table ends up with two rows for one sale. Forty-four such pairs were
+ * already there before this was written, and a county listed twice reads to a
+ * bidder as two sales.
+ *
+ * Adoption is deliberately narrow. Same county, same platform, same sale type,
+ * same date — and the row being adopted must hold no parcels. Two *populated*
+ * lists for one day are not a placeholder and a catalog, they are a
+ * disagreement, and merging them is not this function's business. One row is
+ * re-keyed at most, so a county with several empty placeholders loses them one
+ * run at a time rather than colliding on the unique index.
+ *
+ * This prevents duplicates; it does not clean up ones that already exist. Once
+ * a populated row holds the incoming id there is nothing to adopt — the empty
+ * sibling beside it can only be resolved by deleting a row, and a row a user
+ * may have built a bid sheet against is not something an ingest run should
+ * delete on its own initiative.
+ */
+async function adoptPlaceholder(a: DiscoveredAuction): Promise<void> {
+  await db.execute(sql`
+    update auctions set external_id = ${a.externalId}
+    where id = (
+      select p.id from auctions p
+      where p.county_fips = ${a.countyFips}
+        and p.platform = ${a.platform}::platform
+        and p.sale_type = ${a.saleType}::sale_type
+        and p.sale_date = ${a.saleDate}::date
+        and p.external_id <> ${a.externalId}
+        and not exists (select 1 from lots l where l.auction_id = p.id)
+        -- Nothing to adopt once a row already carries the incoming id.
+        and not exists (
+          select 1 from auctions x
+          where x.county_fips = ${a.countyFips}
+            and x.platform = ${a.platform}::platform
+            and x.external_id = ${a.externalId}
+        )
+      order by p.first_seen_at
+      limit 1
+    )
+  `);
+}
+
 async function upsertAuction(a: DiscoveredAuction): Promise<string> {
+  await adoptPlaceholder(a);
   const [row] = await db
     .insert(auctions)
     .values({
