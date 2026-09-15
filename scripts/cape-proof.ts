@@ -28,12 +28,15 @@
 import "../lib/env";
 import { writeFileSync, readFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { db } from "../lib/db";
 import { auctions, capeCountyScripts, capeProductions, counties } from "../lib/db/schema";
 import { capePackageInputs } from "../lib/cape/inputs";
 import { capeInputsHash } from "../lib/cape/components";
 import { figurePhrases } from "../lib/cape/script";
+import { policyFor } from "../lib/ingest/policy";
+import { loadRegistry } from "../lib/ingest/adapters/generic";
+import { ingestRuns } from "../lib/db/schema";
 
 const OUT = (() => {
   const i = process.argv.indexOf("--out");
@@ -65,6 +68,17 @@ interface OutScript {
    * fetched. The two figures are different claims and the page now makes both.
    */
   announced: number | null;
+  /**
+   * Why this sale has no parcel list, in the reviewer's words.
+   *
+   * "List not crawled" is true of 90% of packages and tells a reader nothing
+   * they can act on. The reasons behind it are completely different problems —
+   * a platform we are contractually barred from, a county nobody has located a
+   * source for, a source located and never tried, and a county page that simply
+   * does not publish a parcel list — and only the reader can judge whether a
+   * briefing is worth recording given which one applies.
+   */
+  whyNoList: string | null;
   /** True when the package was held and never went to audio. */
   held: boolean;
   /** Why it was held, in the operator's words. */
@@ -108,6 +122,7 @@ async function main() {
       platform: auctions.platform,
       lotCount: auctions.lotCount,
       announced: auctions.announcedParcelCount,
+      sourceUrl: auctions.sourceUrl,
       script: capeProductions.script,
       figures: capeProductions.unsupportedFigures,
       stage: capeProductions.stage,
@@ -132,6 +147,59 @@ async function main() {
   /* What the fact sheet in force would hash to, per package. */
   const inputs = await capePackageInputs();
   const wanted = new Map(inputs.map((i) => [i.auctionId, capeInputsHash(i)]));
+
+  /* Everything needed to say why a list is missing, read once. */
+  const registry = loadRegistry();
+  const crawlHistory = new Map<string, { runs: number; lots: number }>();
+  for (const r of (await db
+    .select({
+      fips: ingestRuns.countyFips,
+      runs: sql<number>`count(*)::int`,
+      lots: sql<number>`coalesce(sum(${ingestRuns.lotsFound}), 0)::int`,
+    })
+    .from(ingestRuns)
+    .groupBy(ingestRuns.countyFips)) as { fips: string | null; runs: number; lots: number }[]) {
+    if (r.fips) crawlHistory.set(r.fips, { runs: r.runs, lots: r.lots });
+  }
+
+  const hostOf = (u: string | null) => {
+    try {
+      return u ? new URL(u).hostname.replace(/^www\./, "") : "";
+    } catch {
+      return "";
+    }
+  };
+
+  /**
+   * One sentence naming the actual obstacle.
+   *
+   * Ordered by which fact settles the question. A policy block settles it
+   * whatever else is true; after that, whether anyone has located a source;
+   * then whether it was ever tried; then what trying produced.
+   */
+  function whyNoList(fips: string, platform: string | null, sourceUrl: string | null): string {
+    const host = hostOf(sourceUrl);
+    const policy = host ? policyFor(host) : null;
+    if (policy && policy.decision !== "allow") {
+      return `${host} needs a data agreement before it can be read — the sale is real, the list is behind a platform we do not crawl`;
+    }
+
+    const entry = registry?.counties?.[fips];
+    if (!entry || entry.isGap) {
+      return /onlinesearches|publicrecords/i.test(host)
+        ? `no county source has been located — the address on file is a records directory, not the county's own list`
+        : `no county source has been located yet; nothing knows where this county publishes its list`;
+    }
+
+    const history = crawlHistory.get(fips);
+    if (!history || history.runs === 0) {
+      return `a source is on file and has never been fetched — this county has not been crawled yet`;
+    }
+    if (history.lots === 0) {
+      return `crawled ${history.runs} time(s); the county page names the sale but publishes no parcel list a parser can read`;
+    }
+    return `crawled ${history.runs} time(s) and has yielded parcels before, but nothing for this sale yet`;
+  }
 
   const halves = await db.select().from(capeCountyScripts);
   const countyText = new Map<string, Set<string>>();
@@ -211,6 +279,7 @@ async function main() {
       platform: r.platform,
       parcels: r.lotCount,
       announced: r.announced,
+      whyNoList: r.lotCount > 0 ? null : whyNoList(r.fips, r.platform, r.sourceUrl),
       held: (r.figures ?? []).length > 0 || Boolean(r.error),
       heldWhy: r.error ?? null,
       flagged: r.figures ?? [],

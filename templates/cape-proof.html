@@ -94,6 +94,10 @@
   .bar i{display:block;height:100%;background:var(--flag);border-radius:999px}
   .stale{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
          color:var(--flag)}
+  .nolist{margin-top:14px;background:var(--surface);border-left:3px solid var(--muted);
+          padding:11px 14px;border-radius:0 7px 7px 0}
+  .nolist b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .nolist p{margin:5px 0 0;font-size:14.5px;line-height:1.55;max-width:78ch}
   .shared{margin-top:14px;background:var(--accent-soft);border-left:3px solid var(--accent);
           padding:11px 14px;border-radius:0 7px 7px 0}
   .shared b{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
@@ -172,7 +176,7 @@
    */
   function parcelLabel(d){
     if (d.parcels > 0) return Number(d.parcels).toLocaleString() + " parcels";
-    if (d.announced > 0) return Number(d.announced).toLocaleString() + " announced, list not crawled";
+    if (d.announced > 0) return Number(d.announced).toLocaleString() + " announced, no list";
     return "no list published";
   }
   var esc = function(s){ return String(s == null ? "" : s)
@@ -281,6 +285,10 @@
       '<span>' + esc(parcelLabel(d)) + '</span>' +
       '<span>' + d.sections.length + ' sections</span>' +
       (d.current ? '' : '<span class="stale">older fact sheet</span>') + '</div>' +
+      (d.whyNoList
+        ? '<div class="nolist"><b>No parcel list, because</b><p>' + esc(d.whyNoList) +
+          '. The briefing says so rather than describing an inventory it does not have.</p></div>'
+        : "") +
       (d.sharedWith > 1 && d.sections.some(function(s){ return s.scope === "county"; })
         ? '<div class="shared"><b>Shared sections</b><p>The sections marked ' +
           '<em>every ' + esc(d.county) + ' sale</em> are spoken word for word in ' +
