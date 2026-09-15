@@ -38,7 +38,7 @@
   .stats{display:flex;gap:22px;margin-left:auto;flex-wrap:wrap}
   .stat b{display:block;font-family:var(--mono);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
   .stat span{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
-  .stat.flagged b{color:var(--flag)} .stat.done b{color:var(--ok)}
+  .stat.done b{color:var(--ok)}
   .desk{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:26px;align-items:start}
   @media(max-width:900px){.desk{grid-template-columns:1fr}}
   .rail{position:sticky;top:18px;display:flex;flex-direction:column;gap:12px;
@@ -128,7 +128,6 @@
     </div>
     <div class="stats">
       <div class="stat"><b id="s-total">—</b><span>scripts</span></div>
-      <div class="stat flagged"><b id="s-flag">—</b><span>flagged</span></div>
       <div class="stat done"><b id="s-done">—</b><span>reviewed</span></div>
       <div class="stat"><b id="s-counties">—</b><span>counties</span></div>
       <div class="stat"><b id="s-words">—</b><span>words</span></div>
@@ -143,10 +142,8 @@
         <input type="search" id="q" placeholder="county, state, date…" autocomplete="off">
         <div class="chips">
           <button class="chip" id="f-all" aria-pressed="true">all</button>
-          <button class="chip flag" id="f-flag" aria-pressed="false">flagged</button>
           <button class="chip" id="f-todo" aria-pressed="false">unreviewed</button>
           <button class="chip ok" id="f-ok" aria-pressed="false">cleared</button>
-          <button class="chip" id="f-county" aria-pressed="false">county material</button>
         </div>
       </div>
       <div class="list" id="list" role="listbox" aria-label="Scripts"></div>
@@ -181,64 +178,31 @@
   var esc = function(s){ return String(s == null ? "" : s)
       .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
 
-  /*
-   * Highlight the words that produced the flagged figure.
-   *
-   * This looked for the figure itself plus a handful of single-word spellings,
-   * so it almost never matched: "480" is not in the script, "four hundred
-   * eighty" is. The page promised "highlighted below" and highlighted nothing,
-   * telling a reviewer a script speaks a number they then could not find in it.
-   *
-   * The phrases are computed where the parser lives and shipped with the script,
-   * because deciding which words became which figure is the parser's job, and
-   * re-implementing a guess at it in the browser is how the two drift apart.
-   */
-  function markFigures(text, phrases){
-    var out = esc(text);
-    if (!phrases || !phrases.length) return out;
-    /* Longest first, so a phrase that contains another is not half-marked. */
-    phrases.slice().sort(function(a,b){ return b.length - a.length; }).forEach(function(p){
-      var safe = esc(p).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      out = out.replace(new RegExp("(" + safe + ")", "gi"), "<mark>$1</mark>");
-    });
-    return out;
-  }
-
   function counts(){
     var done = 0;
     for (var k in reviews) if (reviews[k] && reviews[k].verdict) done++;
-    return { total: DATA.length,
-             flag: DATA.filter(function(d){ return d.flagged.length; }).length,
-             done: done };
+    return { total: DATA.length, done: done };
   }
 
   /*
-   * In "county material" the list collapses to one sale per county.
+   * No "county material" view any more.
    *
-   * The statute, redemption, deed and submarket sections are written once per
-   * county and spoken verbatim in every sale it holds — nineteen of them in
-   * Monmouth. Listing all nineteen asks a reader to check identical paragraphs
-   * eighteen times and buries the four sections that actually differ. One entry
-   * per county, showing only the shared half, is the same review for a
-   * nineteenth of the reading.
+   * It collapsed the list to one entry per county and showed only the shared
+   * half, which was worth a great deal when Monmouth had nineteen sales on the
+   * page. The 20-parcel threshold cut that to six, and across 245 scripts there
+   * are 206 distinct counties with only 19 holding more than one sale — so for
+   * 187 of them the view showed exactly what the ordinary list already shows.
+   * A control that does nothing on nine pages in ten is one more thing to
+   * explain.
+   *
+   * What made it useful survives where it costs nothing: every section still
+   * carries its scope, a shared one still says how many sales speak it, and the
+   * banner still tells a reviewer that correcting it corrects all of them.
    */
-  function oncePerCounty(list){
-    var seen = Object.create(null);
-    return list.filter(function(d){
-      var k = d.state + "|" + d.county;
-      if (seen[k]) return false;
-      if (!d.sections.some(function(s){ return s.scope === "county"; })) return false;
-      seen[k] = 1;
-      return true;
-    });
-  }
-
   function visible(){
     var q = ($("q").value || "").trim().toLowerCase();
-    var base = filter === "county" ? oncePerCounty(DATA) : DATA;
-    return base.filter(function(d){
+    return DATA.filter(function(d){
       var r = reviews[d.slug];
-      if (filter === "flag" && !d.flagged.length) return false;
       if (filter === "todo" && r && r.verdict) return false;
       if (filter === "ok" && !(r && r.verdict === "ok")) return false;
       if (!q) return true;
@@ -271,7 +235,6 @@
   function renderStats(){
     var c = counts();
     $("s-total").textContent = c.total;
-    $("s-flag").textContent = c.flag;
     $("s-done").textContent = c.done;
     var seen = Object.create(null);
     DATA.forEach(function(d){ seen[d.state + "|" + d.county] = 1; });
@@ -279,22 +242,20 @@
     var w = DATA.reduce(function(n,d){
       return n + d.sections.reduce(function(m,s){ return m + s.narration.split(/\s+/).length; }, 0); }, 0);
     $("s-words").textContent = w >= 1000 ? Math.round(w/1000) + "k" : w;
-    $("subline").textContent = filter === "county"
-      ? "One briefing per county · the standing sections, spoken in every sale that county holds"
-      : "CAPE narration · every upcoming county sale · read for accuracy before it is spoken";
+    $("subline").textContent =
+      "CAPE narration · every upcoming county sale · read for accuracy before it is spoken";
   }
 
   function renderList(){
     var rows = visible();
     $("list").innerHTML = rows.map(function(d){
       var r = reviews[d.slug];
-      var cls = r && r.verdict === "ok" ? "o" : (d.flagged.length ? "f" : "n");
+      var cls = r && r.verdict === "ok" ? "o" : (r && r.verdict === "fix" ? "f" : "n");
       return '<button class="row" role="option" data-slug="' + esc(d.slug) + '"' +
         ' aria-current="' + (current === d.slug) + '">' +
         '<span class="nm">' + esc(d.county) + ' County, ' + esc(d.state) + '</span>' +
         '<span class="dot ' + cls + '"></span>' +
         '<span class="mt">' + esc(d.saleDate) + ' · ' + esc(parcelLabel(d)) +
-        (d.flagged.length ? ' · flagged ' + esc(d.flagged.join(", ")) : "") +
         (r && r.verdict ? ' · ' + (r.verdict === "ok" ? "cleared" : "needs change") : "") +
         (d.current ? "" : ' · <b class="stale">older</b>') +
         '</span></button>';
@@ -320,18 +281,6 @@
       '<span>' + esc(parcelLabel(d)) + '</span>' +
       '<span>' + d.sections.length + ' sections</span>' +
       (d.current ? '' : '<span class="stale">older fact sheet</span>') + '</div>' +
-      (d.flagged.length
-        ? '<div class="flagbar"><b>Held for review</b><p>The narration speaks ' +
-          d.flagged.map(function(f){ return "<code>" + esc(f) + "</code>"; }).join(", ") +
-          ', which ' + (d.flagged.length > 1 ? "do" : "does") +
-          ' not appear in the facts CAPE computed for this sale' +
-          (d.flaggedPhrases && d.flaggedPhrases.length
-            ? ', spoken as ' + d.flaggedPhrases.map(function(p){
-                return '<code>' + esc(p) + '</code>'; }).join(", ") + ' and marked below'
-            : '') +
-          '. Usually a figure the model invented — a fee, a count, a date. ' +
-          'Sometimes the parser misreading a citation or an address.</p></div>'
-        : "") +
       (d.sharedWith > 1 && d.sections.some(function(s){ return s.scope === "county"; })
         ? '<div class="shared"><b>Shared sections</b><p>The sections marked ' +
           '<em>every ' + esc(d.county) + ' sale</em> are spoken word for word in ' +
@@ -339,9 +288,7 @@
           'them is a correction to all ' + d.sharedWith + '.</p></div>'
         : "") +
       '</div>' +
-      d.sections.filter(function(s){
-        return filter !== "county" || s.scope === "county";
-      }).map(function(s, i){
+      d.sections.map(function(s, i){
         var shared = s.scope === "county" && d.sharedWith > 1;
         return '<section class="sec' + (s.scope === "county" ? " county" : "") + '">' +
           '<div class="sh"><span class="sn">' + (i+1) + '</span>' +
@@ -351,10 +298,9 @@
               ? (shared ? "every " + d.county + " sale · " + d.sharedWith : "county")
               : "this sale") +
           '</span></div>' +
-          '<p class="nar">' + markFigures(s.narration, d.flaggedPhrases) + '</p></section>';
+          '<p class="nar">' + esc(s.narration) + '</p></section>';
       }).join("") +
-      (filter === "county" ? "" :
-        '<div class="take"><b>Key takeaway</b><p>' + esc(d.takeaway) + '</p></div>') +
+      '<div class="take"><b>Key takeaway</b><p>' + esc(d.takeaway) + '</p></div>' +
       '<div class="verdict">' +
         '<button class="vb' + (r.verdict === "ok" ? " on-ok" : "") + '" id="v-ok">Reads correctly</button>' +
         '<button class="vb' + (r.verdict === "fix" ? " on-fix" : "") + '" id="v-fix">Needs a change</button>' +
@@ -392,10 +338,10 @@
     var b = e.target.closest(".row"); if (b) show(b.dataset.slug);
   });
   $("q").addEventListener("input", renderList);
-  [["f-all","all"],["f-flag","flag"],["f-todo","todo"],["f-ok","ok"],["f-county","county"]].forEach(function(p){
+  [["f-all","all"],["f-todo","todo"],["f-ok","ok"]].forEach(function(p){
     $(p[0]).addEventListener("click", function(){
       filter = p[1];
-      ["f-all","f-flag","f-todo","f-ok","f-county"].forEach(function(id){
+      ["f-all","f-todo","f-ok"].forEach(function(id){
         $(id).setAttribute("aria-pressed", String(id === p[0]));
       });
       renderStats();
@@ -404,9 +350,17 @@
     });
   });
 
-  // Open on the first flagged script — those are the ones that need an expert.
-  var firstFlagged = DATA.filter(function(d){ return d.flagged.length; })[0];
-  current = (firstFlagged || DATA[0] || {}).slug || null;
+  /*
+   * Open on the first unreviewed script.
+   *
+   * It used to open on the first flagged one, on the reasoning that those most
+   * needed an expert. They do not: a flag means the narration speaks a figure
+   * the verifier could not find in the facts, and resolving that is a question
+   * about this system's sources, not about whether the copy is right. Held
+   * scripts no longer reach this page at all.
+   */
+  var firstUnread = DATA.filter(function(d){ return !reviews[d.slug]; })[0];
+  current = (firstUnread || DATA[0] || {}).slug || null;
   renderRebuild(); renderStats(); renderList(); if (current) show(current);
 
   if (window.claude && window.claude.use) {

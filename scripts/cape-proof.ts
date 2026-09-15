@@ -151,6 +151,8 @@ async function main() {
   const out: OutScript[] = [];
   let skipped = 0;
   let notUpcoming = 0;
+  let heldBack = 0;
+  const heldNames: string[] = [];
 
   for (const r of rows) {
     const s = r.script as unknown as {
@@ -175,6 +177,28 @@ async function main() {
      */
     if (!wanted.has(r.auctionId)) {
       notUpcoming++;
+      continue;
+    }
+
+    /*
+     * A held script does not go to the reviewer.
+     *
+     * Held means the narration speaks a figure that is not in the computed
+     * facts, and every such flag in this run turned out to be the verifier
+     * failing to recognise a fact written one way and spoken another — a price
+     * as "$110.25", deposit tiers as "$2k/$5k/$10k", a borough named Forty Fort.
+     * Handing those to a proofreader spends an expert's afternoon confirming
+     * that a number he can see in the source is in the source.
+     *
+     * The ones that are not false positives are worse to send: a held script is
+     * blocked from production, so a reviewer would be correcting copy that
+     * cannot ship until someone here has dealt with it anyway. Either way it is
+     * this system's problem before it is his. The count is printed loudly so
+     * nobody has to remember to look.
+     */
+    if ((r.figures ?? []).length > 0 || r.error) {
+      heldBack++;
+      if (heldNames.length < 10) heldNames.push(`${r.county}, ${r.state} ${r.saleDate}`);
       continue;
     }
     const shared = countyText.get(r.fips) ?? new Set<string>();
@@ -230,11 +254,16 @@ async function main() {
   if (notUpcoming) {
     console.log(`  ${notUpcoming} script(s) for sales no longer upcoming — omitted`);
   }
+  if (heldBack) {
+    console.log(`\n  ${heldBack} HELD and withheld from review — deal with these before publishing:`);
+    for (const n of heldNames) console.log(`    ${n}`);
+    if (heldBack > heldNames.length) console.log(`    …and ${heldBack - heldNames.length} more`);
+  }
   console.log(`  ${countySections} county-scoped section(s), ${saleSections} sale-scoped`);
   console.log(`  ${halves.length} county half/halves on file`);
   console.log(`  ${words.toLocaleString()} spoken words in total`);
   const fresh = out.filter((d) => d.current).length;
-  console.log(`  ${out.filter((d) => d.held).length} held (unsupported figure or wrong county)`);
+
   console.log(`  ${fresh} of ${out.length} written from the fact sheet now in force`);
 }
 
