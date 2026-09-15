@@ -10,6 +10,7 @@ import { and, asc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { auctions, capeProductions, counties, lots } from "@/lib/db/schema";
 import { hasParcels, isConfirmedInventory } from "@/lib/db/inventory";
+import { sql as rawSql } from "drizzle-orm";
 import { getCounty, resolveCountyRule } from "@/lib/atlas";
 import { statuteFor } from "@/lib/deal/statute";
 import { pickLink, type CountyDirectory, type OfficeKind } from "@/lib/directory/onlinesearches";
@@ -25,6 +26,14 @@ import type { PackageInput, CapeProductionState } from "./components";
  * the narration was written from, and nobody would be able to tell which was
  * right.
  */
+/**
+ * The smallest sale that earns a briefing video.
+ *
+ * Counted on the best available figure — parcels crawled, or the count the
+ * county announced. See the note at the call site.
+ */
+export const MIN_PARCELS = 20;
+
 export async function capePackageInputs(opts: { auctionId?: string; today?: string } = {}): Promise<
   (PackageInput & { countyFips: string })[]
 > {
@@ -46,9 +55,38 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
    * real deadline, and Component Two exists precisely to say the list has not
    * been read yet.
    */
+  /*
+   * A briefing needs a sale worth briefing on.
+   *
+   * 43 upcoming sales offer a single parcel and 96 offer four or fewer. A
+   * five-minute video explaining a state's redemption statute, the county's
+   * submarkets and what a deed conveys is the same length and the same cost
+   * whether the auction has one parcel or seventeen hundred, and at one parcel
+   * nobody watches it — including the bidder, who has already decided.
+   *
+   * Measured against `greatest(lot_count, announced_parcel_count)`, which is the
+   * best figure available rather than the one we happen to hold. 389 of 454
+   * packages are sales whose list nothing has crawled yet, so a threshold on
+   * `lot_count` alone would admit 22 of them and silently retire the rest —
+   * judging the county's auction by our own crawl coverage rather than by its
+   * size. The county's announced count is a claim about the sale; ours is a
+   * claim about this database, and the sale is what is being briefed.
+   *
+   * Deliberately not in `lib/db/inventory.ts`: that file defines what the *site*
+   * counts as inventory, and a one-parcel sale is perfectly real and belongs on
+   * the map. This is only about whether it earns a video.
+   *
+   * `--auction <id>` bypasses it, so a small sale can still be produced on
+   * purpose.
+   */
   const where = opts.auctionId
     ? eq(auctions.id, opts.auctionId)
-    : and(gte(auctions.saleDate, today), hasParcels(), isConfirmedInventory());
+    : and(
+        gte(auctions.saleDate, today),
+        hasParcels(),
+        isConfirmedInventory(),
+        rawSql`greatest(${auctions.lotCount}, coalesce(${auctions.announcedParcelCount}, 0)) >= ${MIN_PARCELS}`,
+      );
 
   const rows = await db
     .select({
