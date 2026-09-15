@@ -1,0 +1,322 @@
+<title>Statutory Ground</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#EEF0EC; --surface:#F7F8F5; --raised:#FFFFFF;
+    --ink:#171C19; --muted:#6E766E; --line:#D6DAD4;
+    --accent:#2F5D50; --accent-soft:#DCE7E1;
+    --shadow:0 1px 2px rgba(23,28,25,.06),0 8px 24px rgba(23,28,25,.05);
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --lien:#2f6f4f; --deed:#8a3b2f; --redeem:#b8842f; --hybrid:#3f5c8a;
+  }
+  :root:not([data-theme="light"]){ @media (prefers-color-scheme:dark){
+    --ground:#12150F; --surface:#191D17; --raised:#1F241D;
+    --ink:#E7EBE3; --muted:#949C92; --line:#2C3229;
+    --accent:#83C4AB; --accent-soft:#23302A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+    --lien:#7FBF9B; --deed:#DD8A76; --redeem:#E4BE7C; --hybrid:#8FAAD6;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#12150F; --surface:#191D17; --raised:#1F241D;
+    --ink:#E7EBE3; --muted:#949C92; --line:#2C3229;
+    --accent:#83C4AB; --accent-soft:#23302A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+    --lien:#7FBF9B; --deed:#DD8A76; --redeem:#E4BE7C; --hybrid:#8FAAD6;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--serif);margin:0;
+       -webkit-font-smoothing:antialiased}
+  .wrap{padding-inline:20px;padding-block:26px 64px;max-width:1180px;margin:0 auto}
+
+  header.top{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:22px}
+  h1{font-size:clamp(27px,4vw,40px);font-weight:600;margin:0 0 6px;letter-spacing:-.018em;text-wrap:balance}
+  .sub{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .lede{margin:14px 0 0;font-size:17px;line-height:1.62;max-width:68ch;color:var(--ink)}
+  .lede b{font-weight:600}
+
+  .stats{display:flex;gap:26px;flex-wrap:wrap;margin-top:20px}
+  .stat b{display:block;font-family:var(--mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+  .stat span{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+
+  .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin:24px 0}
+  .kind{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--c);
+        border-radius:0 9px 9px 0;padding:12px 14px}
+  .kind h3{margin:0 0 5px;font-family:var(--mono);font-size:11px;letter-spacing:.07em;
+           text-transform:uppercase;color:var(--c);font-weight:600}
+  .kind p{margin:0;font-size:13.5px;line-height:1.5;color:var(--muted)}
+  .kind .n{font-family:var(--mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+  input[type=search]{flex:1;min-width:210px;font-family:var(--mono);font-size:13px;padding:10px 12px;
+    border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
+  .chip{font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:7px 12px;border-radius:999px;
+        border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+  .chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--ground)}
+
+  .state{background:var(--raised);border:1px solid var(--line);border-radius:12px;
+         box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+  .sh{width:100%;text-align:left;background:none;border:0;color:inherit;font:inherit;
+      cursor:pointer;padding:16px 18px;display:grid;
+      grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:baseline}
+  .sh:hover{background:var(--accent-soft)}
+  .sh h2{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em}
+  .sh .abbr{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+         padding:3px 8px;border-radius:999px;color:#fff;background:var(--c);white-space:nowrap}
+  .cov{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-top:8px}
+  .bar{flex:1;height:5px;border-radius:999px;background:var(--line);overflow:hidden;min-width:60px}
+  .bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+  .cov span{font-family:var(--mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;
+            white-space:nowrap}
+  .cov .live{color:var(--accent);font-weight:600}
+  @media(max-width:620px){ .cov span{white-space:normal} }
+
+  .body{border-top:1px solid var(--line);padding:16px 18px 20px;background:var(--surface)}
+  .rule{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin-bottom:6px}
+  .fld .k{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+          color:var(--muted);display:block;margin-bottom:3px}
+  .fld .v{font-size:14.5px;line-height:1.55}
+  .note{margin:14px 0 0;font-size:14.5px;line-height:1.6;max-width:72ch;color:var(--muted)}
+
+  .clist{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+  .county{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:4px 10px;
+          padding:8px 0;border-bottom:1px solid var(--line);scroll-margin-top:16px}
+  .county.pin{background:var(--accent-soft);border-radius:8px;
+              padding-inline:10px;margin-inline:-10px}
+  .permalink{grid-column:2/-1;margin-top:6px}
+  .permalink button{font-family:var(--mono);font-size:10px;letter-spacing:.05em;
+    text-transform:uppercase;padding:4px 9px;border-radius:999px;border:1px solid var(--line);
+    background:var(--raised);color:var(--muted);cursor:pointer}
+  .permalink button:hover{color:var(--accent);border-color:var(--accent)}
+  .county:last-child{border-bottom:0}
+  .dot{width:8px;height:8px;border-radius:999px;margin-top:7px;background:var(--line)}
+  .dot.r{background:var(--accent)}
+  .cn{font-size:15px;font-weight:500}
+  .cmeta{font-family:var(--mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;
+         text-align:right;white-space:nowrap}
+  .over{grid-column:2/-1;margin-top:5px;display:grid;gap:6px}
+  .over div{font-size:13.5px;line-height:1.5}
+  .over em{font-family:var(--mono);font-style:normal;font-size:10px;letter-spacing:.06em;
+           text-transform:uppercase;color:var(--accent);margin-right:6px}
+  .inherit{grid-column:2/-1;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px}
+
+  .empty{padding:26px 18px;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);
+         font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.8}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media(max-width:560px){ .sh{grid-template-columns:1fr} .cmeta{text-align:left} }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="sub">Deedpilot · tax sale reference</div>
+    <h1>Statutory Ground</h1>
+    <p class="lede">What law a county briefing stands on. Every one of the <b>3,142</b> counties
+    has a rule, because every state has one — the question this page answers is whether that rule
+    was <b>verified for the county</b> or <b>inherited from the state</b>, and the difference is
+    what a reader should weigh before acting on a briefing.</p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="controls">
+    <input type="search" id="q" placeholder="county or state…" autocomplete="off">
+    <button class="chip" id="f-all" aria-pressed="true">all states</button>
+    <button class="chip" id="f-res" aria-pressed="false">county-verified only</button>
+    <button class="chip" id="f-sale" aria-pressed="false">has an upcoming sale</button>
+  </div>
+
+  <div id="list"></div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script id="d" type="application/json">__DATA__</script>
+<script>
+(function(){
+  var D = JSON.parse(document.getElementById("d").textContent);
+  var S = D.states;
+  var COLOR = { "Tax Lien":"var(--lien)", "Tax Deed":"var(--deed)",
+                "Redeemable Deed":"var(--redeem)", "Hybrid":"var(--hybrid)" };
+  var $ = function(id){ return document.getElementById(id); };
+  var esc = function(s){ return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
+  var num = function(n){ return Number(n).toLocaleString(); };
+
+  var abbrs = Object.keys(S).sort(function(a,b){ return S[a].name.localeCompare(S[b].name); });
+  var all = [];
+  abbrs.forEach(function(a){ S[a].counties.forEach(function(c){ c.s = a; all.push(c); }); });
+
+  var open = Object.create(null);
+  var filter = "all";
+
+  /*
+   * A county is addressable by its FIPS, because a FIPS is the only name for a
+   * county that is unambiguous — there are thirty-one Washingtons and three
+   * Bristols, and "the statute for Washington County" is not a question anyone
+   * can answer. `#c12031` opens Duval and nothing else.
+   */
+  var pinned = (location.hash.match(/^#c?(\d{5})$/) || [])[1] || null;
+
+  /*
+   * The four buckets are the page's spine, so they are counted rather than
+   * merely listed — a legend that says what Tax Lien means and not how much of
+   * the country is one is decoration.
+   */
+  function renderLegend(){
+    var byKind = {};
+    all.forEach(function(c){ byKind[c.b] = (byKind[c.b] || 0) + 1; });
+    $("legend").innerHTML = Object.keys(D.typeDescriptions).map(function(k){
+      return '<div class="kind" style="--c:' + COLOR[k] + '">' +
+        '<h3>' + esc(k) + '</h3>' +
+        '<p>' + esc(D.typeDescriptions[k]) + '</p>' +
+        '<p class="n">' + num(byKind[k] || 0) + ' counties</p></div>';
+    }).join("");
+  }
+
+  function renderStats(){
+    var res = all.filter(function(c){ return c.r; }).length;
+    var sale = all.filter(function(c){ return c.u; }).length;
+    var lots = all.reduce(function(n,c){ return n + (c.ul || 0); }, 0);
+    $("stats").innerHTML =
+      stat(num(all.length), "counties") +
+      stat(num(res), "county-verified") +
+      stat(num(all.length - res), "state rule inherited") +
+      stat(abbrs.length, "states + DC") +
+      stat(num(sale), "with a sale ahead") +
+      stat(num(lots), "parcels listed");
+  }
+  function stat(b, s){ return '<div class="stat"><b>' + b + '</b><span>' + s + '</span></div>'; }
+
+  function matches(c, a, q){
+    if (filter === "res" && !c.r) return false;
+    if (filter === "sale" && !c.u) return false;
+    if (!q) return true;
+    return (c.n + " " + a + " " + S[a].name).toLowerCase().indexOf(q) > -1;
+  }
+
+  function fld(k, v){
+    return '<div class="fld"><span class="k">' + esc(k) + '</span>' +
+           '<span class="v">' + esc(v) + '</span></div>';
+  }
+
+  function renderCounty(c){
+    var over = [];
+    if (c.t)  over.push(["county sale type", c.t]);
+    if (c.rd) over.push(["redemption", c.rd]);
+    if (c.rt) over.push(["return", c.rt]);
+    if (c.st) over.push(["statute", c.st]);
+    if (c.sl) over.push(["surviving liens", c.sl]);
+    if (c.qt) over.push(["quiet title", c.qt]);
+    var meta = [];
+    if (c.u)  meta.push(c.u + (c.u === 1 ? " sale" : " sales") + " ahead");
+    if (c.ul) meta.push(num(c.ul) + " parcels");
+    if (c.as) meta.push("verified " + c.as);
+    return '<div class="county' + (pinned === c.f ? " pin" : "") + '" id="c' + c.f + '">' +
+      '<span class="dot ' + (c.r ? "r" : "") + '" title="' +
+        (c.r ? "county-verified" : "inherits the state rule") + '"></span>' +
+      '<span class="cn">' + esc(c.n) + '</span>' +
+      '<span class="cmeta">' + esc(meta.join(" · ")) + '</span>' +
+      (over.length
+        ? '<div class="over">' + over.map(function(o){
+            return '<div><em>' + esc(o[0]) + '</em>' + esc(o[1]) + '</div>'; }).join("") + '</div>'
+        : (c.r ? '<div class="inherit">verified; matches the state rule</div>' : "")) +
+      '<div class="permalink"><button data-link="' + c.f + '">copy link to this county</button></div>' +
+      '</div>';
+  }
+
+  function render(){
+    var q = ($("q").value || "").trim().toLowerCase();
+    var out = abbrs.map(function(a){
+      var st = S[a];
+      var cs = st.counties.filter(function(c){ return matches(c, a, q); });
+      if (!cs.length) return "";
+      var res = st.counties.filter(function(c){ return c.r; }).length;
+      var pct = Math.round(100 * res / st.counties.length);
+      /*
+       * Sales ahead belongs on the collapsed row, not only inside it.
+       * Coverage says what we could write about this state; sales say whether
+       * anyone needs us to this month, and a reader scanning fifty-one states
+       * is almost always asking the second question first.
+       */
+      var live = st.counties.filter(function(c){ return c.u; });
+      var liveLots = live.reduce(function(n,c){ return n + (c.ul || 0); }, 0);
+      var isOpen = open[a] || (q && cs.length <= 40) ||
+                   (pinned && cs.some(function(c){ return c.f === pinned; }));
+      return '<section class="state">' +
+        '<button class="sh" data-a="' + a + '" aria-expanded="' + !!isOpen + '">' +
+          '<span><h2>' + esc(st.name) + ' <span class="abbr">' + esc(a) + '</span></h2></span>' +
+          '<span class="badge" style="--c:' + COLOR[st.type] + '">' + esc(st.type) + '</span>' +
+          '<span class="cov"><span class="bar"><i style="width:' + Math.max(pct,1.5) + '%"></i></span>' +
+            '<span>' + res + ' of ' + st.counties.length + ' verified' +
+            (live.length
+              ? ' · <b class="live">' + live.length + ' with a sale ahead' +
+                (liveLots ? ", " + num(liveLots) + " parcels" : "") + '</b>'
+              : "") +
+            (q ? " · " + cs.length + " shown" : "") + '</span></span>' +
+        '</button>' +
+        (isOpen
+          ? '<div class="body">' +
+              '<div class="rule">' +
+                fld("redemption", st.redemption) +
+                fld("investor return", st.returns) +
+                fld("statute", st.statute) +
+              '</div>' +
+              (st.notes ? '<p class="note">' + esc(st.notes) + '</p>' : "") +
+              '<div class="clist">' + cs.map(renderCounty).join("") + '</div>' +
+            '</div>'
+          : "") +
+        '</section>';
+    }).join("");
+    $("list").innerHTML = out ||
+      '<div class="empty">No county or state matches that.</div>';
+  }
+
+  $("list").addEventListener("click", function(e){
+    var link = e.target.closest("[data-link]");
+    if (link) {
+      var url = location.origin + location.pathname + "#c" + link.getAttribute("data-link");
+      var done = function(){ link.textContent = "link copied";
+        setTimeout(function(){ link.textContent = "copy link to this county"; }, 1800); };
+      if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, done);
+      else { location.hash = "#c" + link.getAttribute("data-link"); done(); }
+      return;
+    }
+    var b = e.target.closest(".sh"); if (!b) return;
+    var a = b.getAttribute("data-a");
+    open[a] = !open[a];
+    render();
+  });
+  $("q").addEventListener("input", render);
+  [["f-all","all"],["f-res","res"],["f-sale","sale"]].forEach(function(p){
+    $(p[0]).addEventListener("click", function(){
+      filter = p[1];
+      ["f-all","f-res","f-sale"].forEach(function(id){
+        $(id).setAttribute("aria-pressed", String(id === p[0])); });
+      render();
+    });
+  });
+
+  $("foot").innerHTML =
+    "Generated " + esc(D.generated) + " from the project atlas. " +
+    "State rules cover all 50 states and DC; county research is layered on top and " +
+    "overrides only what has actually been verified.<br>" +
+    "A hollow marker means the county inherits its state's rule — that is a real answer, " +
+    "not a gap, but it has not been checked against that county's own practice.";
+
+  renderLegend(); renderStats(); render();
+
+  if (pinned) {
+    var el = $("c" + pinned);
+    if (el) el.scrollIntoView({ block: "center" });
+  }
+  window.addEventListener("hashchange", function(){
+    pinned = (location.hash.match(/^#c?(\d{5})$/) || [])[1] || null;
+    render();
+    if (pinned) { var e2 = $("c" + pinned); if (e2) e2.scrollIntoView({ block: "center" }); }
+  });
+})();
+</script>

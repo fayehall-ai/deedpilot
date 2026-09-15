@@ -17,6 +17,7 @@
     "queue:status": "tsx scripts/drain-queue.ts --status",
     "repair:delisting": "tsx scripts/repair-imported-delisting.ts",
     "repair:shadowed": "tsx scripts/repair-shadowed-auctions.ts",
+    "statutory:page": "tsx scripts/statutory-page.ts",
     "export:atlas": "tsx scripts/export-atlas-for-copilot.ts",
     "scout": "tsx scripts/scout.ts",
     "prospect": "tsx scripts/prospect.ts",
