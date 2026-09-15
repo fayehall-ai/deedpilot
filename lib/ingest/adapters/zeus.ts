@@ -42,6 +42,44 @@
  * Items, Total Face Amount, and a link to `publicsale.php?idSale=N`. The sale
  * page repeats that header and then lists every item inline — 4MB of HTML for
  * a seven-thousand-parcel sale, no pagination and no XHR. One fetch per sale.
+ *
+ * ## That description is out of date, and the adapter has never run
+ *
+ * Re-checked 2026-09-15, in a browser as well as from the server, because
+ * `ingest_runs` holds not one row for this adapter:
+ *
+ *  - `publicauctions.php` still returns 200 and 80KB, but its `<tbody>` is
+ *    empty. The rows are fetched by DataTables from
+ *    `methods/salelistresults.php`, which does still serve them: 81 sales,
+ *    with the county in the sale title — "2026 Dekalb County Indiana Tax Lien
+ *    Sale", 10/6/2026, Items: 93. So `discoverCounties` can be rebuilt on that
+ *    endpoint and would work.
+ *  - `publicsale.php?idSale=N` no longer exists. It 302s to the index, which is
+ *    why a server fetch of it returns exactly the index's 79,953 bytes. The
+ *    link in each row now points at `auctionsale.php?idSale=N`.
+ *  - `auctionsale.php?idSale=N` renders an empty shell. In a real browser the
+ *    body is the words "Skip to main content", there is no `#AuctionItemsResults`
+ *    container, no `dosearch` function, and — decisively — the page issues no
+ *    request for items at all.
+ *  - `methods/auctionitemsresults.php` answers 500 to every shape tried: with a
+ *    PHP session, with the `timezone.php` handshake replayed, with a referer,
+ *    with `x-requested-with`, and with all fourteen parameters the public
+ *    `dosearch` used to send. The 500 body renders the item table's header and
+ *    then dies.
+ *
+ * The other tell is in the row markup itself: beside "view" sits "manage
+ * batches / load files", which is a collector's action, not a bidder's. The
+ * list endpoint is serving an operator template to an unauthenticated caller.
+ *
+ * Read together: Zeus has withdrawn the public per-sale item view. The index is
+ * still public and still useful — it is how a county, a confirmed sale date and
+ * an item count can be had — but the parcels behind it are not reachable without
+ * an account, and an account is a different question from a public page.
+ *
+ * What NOT to do, since it is the obvious next thought: the index rows are
+ * already in the database from the operator's sale calendar, under different
+ * external ids. Rebuilding `discoverCounties` on `salelistresults.php` without
+ * reconciling those would duplicate every Indiana sale rather than enrich it.
  */
 
 import { politeFetch } from "../fetch";
