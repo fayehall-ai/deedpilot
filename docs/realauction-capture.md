@@ -108,7 +108,11 @@ at a person's pace: one sale at a time, a second between pages.
 
 2. Open the sale's PREVIEW page in Chrome, e.g.
 
-       https://www.duval.realtaxdeed.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=10/14/2026
+       https://duval.realtaxdeed.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=10/14/2026
+
+   Without the `www.` — the certificate on `www.putnam.realtaxdeed.com` and
+   `www.bay.realtaxdeed.com` does not cover the name, and the browser refuses
+   the page. The bare host works on every RealAuction host.
 
    Wait for the parcels to render. An empty calendar means the throttle above,
    not an empty sale — come back later rather than reloading.

@@ -448,9 +448,15 @@ export async function runAdapter(
       log(`[${adapter.name}] ${binding.countyFips} ${result.status}: ${result.error}`);
     }
 
-    if (countyCutoff) {
+    /*
+     * `enumeratesCalendar === false` means this adapter saw only the sales
+     * somebody captured, not the county's calendar, so an absence here is our
+     * own gap rather than the county's. See the field's note in `types.ts`.
+     */
+    if (countyCutoff && adapter.enumeratesCalendar !== false) {
       const cal = await reconcileCountyAuctions({
         countyFips: binding.countyFips,
+        platform: adapter.platform,
         cutoff: countyCutoff,
         seenAuctions: result.auctionsFound,
         status: result.status,

@@ -158,6 +158,8 @@ export const bid4assetsAdapter: SourceAdapter = {
     "Bid4Assets county tax and foreclosure sales, read from browser captures in " +
     "data/bid4assets-capture/. The listings do not appear in the pages and the host answers this " +
     "project's user agent with 403, so nothing here fetches.",
+  /* Captures, not a calendar crawl — see the field's note in types.ts. */
+  enumeratesCalendar: false,
 
   async discoverCounties(): Promise<CountyBinding[]> {
     const captures = await loadCaptures();

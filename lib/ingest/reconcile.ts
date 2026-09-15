@@ -38,6 +38,7 @@
 
 import { and, eq, gte, isNotNull, isNull, lt, notLike, sql } from "drizzle-orm";
 import { IMPORT_ID_SQL_PATTERN } from "../import/provenance";
+import type { Platform } from "./types";
 
 /*
  * `db` and the schema are imported lazily inside the functions that touch them.
@@ -173,9 +174,20 @@ export async function withdrawAbsent(auctionId: string, cutoff: Date): Promise<n
  *   imported sales as delisted on the first pass — every one still scheduled.
  *   This column means the county published an absence; there was no county and
  *   no absence, so imported rows are excluded outright.
+ * - **Another platform's sales.** Scoped by county alone, a run of one adapter
+ *   delisted sales it had never looked at: a RealAuction capture of Marion's 16
+ *   September sale marked the county's own `county_site` sale delisted, because
+ *   nothing in that crawl had touched it. An adapter can only report an absence
+ *   from the source it actually reads, so `platform` narrows this to that
+ *   source. A county that genuinely moves platform stops being delisted here,
+ *   which is the right trade: the new platform's rows appear, and a sale that
+ *   really has gone is a person's call rather than an inference from a crawl
+ *   that was never watching it.
  */
 export async function reconcileCountyAuctions(opts: {
   countyFips: string;
+  /** Only this source's sales. See the header. */
+  platform: Platform;
   cutoff: Date;
   seenAuctions: number;
   status: "ok" | "partial" | "failed" | "blocked";
@@ -208,6 +220,7 @@ export async function reconcileCountyAuctions(opts: {
     .where(
       and(
         eq(auctions.countyFips, opts.countyFips),
+        eq(auctions.platform, opts.platform),
         gte(auctions.saleDate, today),
         lt(auctions.lastSeenAt, opts.cutoff),
         isNull(auctions.delistedAt),
@@ -225,6 +238,7 @@ export async function reconcileCountyAuctions(opts: {
     .where(
       and(
         eq(auctions.countyFips, opts.countyFips),
+        eq(auctions.platform, opts.platform),
         gte(auctions.lastSeenAt, opts.cutoff),
         isNotNull(auctions.delistedAt),
         notLike(auctions.externalId, IMPORT_ID_SQL_PATTERN),

@@ -314,6 +314,8 @@ export const goveaseAdapter: SourceAdapter = {
   description:
     "GovEase public auction portal — county tax lien and tax deed sales across " +
     "13 states. Catalogs publish shortly before each sale, so re-run as dates approach.",
+  /* Captures, not a calendar crawl — see the field's note in types.ts. */
+  enumeratesCalendar: false,
 
   async discoverCounties(): Promise<CountyBinding[]> {
     const html = await readCapture(REGISTRY_FILE);

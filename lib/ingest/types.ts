@@ -130,6 +130,21 @@ export interface SourceAdapter {
   platform: Platform;
   /** Human-readable note on what this source is and where its data comes from. */
   description: string;
+  /**
+   * Does `listAuctions` return the county's whole calendar, or only part of it?
+   *
+   * Default true, which is what a crawler does: it opens the county's calendar
+   * page and reports every sale on it, so a sale that is missing is a sale the
+   * county has stopped publishing, and `reconcileCountyAuctions` may flag it.
+   *
+   * A capture-based adapter cannot say that. It returns the sales somebody
+   * happened to open in a browser, so every sale nobody has got to yet looks
+   * delisted — capturing Marion's 16 September sale delisted the county's other
+   * future sale on the first run. Set this false and the calendar is left
+   * alone. The parcels inside a captured sale are still reconciled, because
+   * that sale *was* read in full.
+   */
+  enumeratesCalendar?: boolean;
 
   /**
    * Which counties this adapter serves. Adapters that cover a fixed list can

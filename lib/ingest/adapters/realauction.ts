@@ -115,6 +115,51 @@ function money(raw: string | undefined): number | undefined {
 
 const normalize = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
 
+/**
+ * Split what the platform prints into the fields that exist for it.
+ *
+ * The line is `1982 W 16TH ST JACKSONVILLE, FL- 32209` — street, city, then
+ * the platform's own hyphen before the ZIP. The comma separates city from
+ * state reliably, so state and ZIP come off cleanly; street from city does not,
+ * because `PORT CHARLOTTE` and `PUNTA GORDA` have no delimiter before them.
+ * Street and city therefore stay together in `addressLine`, which is the honest
+ * division rather than a guess that would cut `PUNTA` from `GORDA`.
+ *
+ * Two counties print a marker where the street would be, for a parcel with no
+ * situs address — Marion writes `NO SITUS OCALA, FL- 34482` and Putnam writes
+ * `00 UNASSIGNED LOCATION RE`. That is the one case where the split IS
+ * unambiguous: with no street, everything before the comma is the city. So the
+ * marker yields a city and no address line, rather than a sentence in the field
+ * a map pin reads from. Twenty-two of Putnam's sixty-seven parcels and most of
+ * Marion's are this shape — vacant subdivision lots, which is much of what a
+ * deed buyer is actually looking at.
+ */
+const NO_SITUS = /^(?:no\s*situs|0+\s+unassigned\s+location(?:\s+re)?)\b[\s,-]*/i;
+
+function splitAddress(raw: string | undefined): {
+  addressLine?: string;
+  city?: string;
+  zip?: string;
+} {
+  let s = (raw ?? "").trim();
+  if (!s || /^0+$/.test(s)) return {};
+
+  const noSitus = NO_SITUS.test(s);
+  s = s.replace(NO_SITUS, "").trim();
+
+  /* `, FL- 32209`, `, FL 32209`, or the same without the comma. */
+  let zip: string | undefined;
+  const tail = /,?\s*[A-Z]{2}\s*-?\s*(\d{5})(?:-\d{4})?\s*$/.exec(s);
+  if (tail) {
+    zip = tail[1];
+    s = s.slice(0, tail.index).replace(/[\s,]+$/, "");
+  }
+
+  /* With no street, what is left before the comma is the city and nothing else. */
+  if (noSitus) return { city: s || undefined, zip };
+  return { addressLine: s || undefined, zip };
+}
+
 /** host -> fips, from the directory, and only where exactly one county claims it. */
 let directoryIndex: Map<string, string> | null = null;
 async function hostDirectory(): Promise<Map<string, string>> {
@@ -250,9 +295,20 @@ function startTimeOf(capture: Capture): string | undefined {
   return undefined;
 }
 
+/**
+ * The sale's own preview URL.
+ *
+ * No `www.`, and that is measured rather than stylistic: the certificate on
+ * `www.putnam.realtaxdeed.com` and `www.bay.realtaxdeed.com` does not cover the
+ * name, so a browser refuses the page outright with a privacy error. The bare
+ * host serves TLS on every RealAuction host tried — realtaxdeed, realforeclose
+ * and the El Paso treasurer's — and answers our own agent with the familiar
+ * 403, which is proof it resolved. `data/county-directory.json` writes the
+ * `www.` form throughout, so this is the one place not to copy it.
+ */
 const saleUrl = (host: string, saleDate: string) => {
   const [y, m, d] = saleDate.split("-");
-  return `https://www.${host}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=${m}/${d}/${y}`;
+  return `https://${host}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=${m}/${d}/${y}`;
 };
 
 export const realauctionAdapter: SourceAdapter = {
@@ -261,6 +317,8 @@ export const realauctionAdapter: SourceAdapter = {
   description:
     "RealAuction tax deed and tax lien sales (realtaxdeed / realforeclose), read from " +
     "captures taken in the operator's browser. See docs/realauction-capture.md.",
+  /* Captures, not a calendar crawl — see the field's note in types.ts. */
+  enumeratesCalendar: false,
 
   async discoverCounties(): Promise<CountyBinding[]> {
     const captures = await readCaptures();
@@ -368,8 +426,7 @@ export const realauctionAdapter: SourceAdapter = {
         externalId: parcelNumber,
         parcelNumber,
         caseNumber: r.caseNumber?.trim() || undefined,
-        /* "…JACKSONVILLE, FL- 32209" — the platform's own hyphen before the ZIP. */
-        addressLine: r.addressLine?.replace(/,?\s*([A-Z]{2})-\s*(\d{5})\s*$/, ", $1 $2").trim() || undefined,
+        ...splitAddress(r.addressLine),
         openingBid: money(r.openingBid),
         assessedValue: money(r.assessedValue),
         status: statusOf(r),
