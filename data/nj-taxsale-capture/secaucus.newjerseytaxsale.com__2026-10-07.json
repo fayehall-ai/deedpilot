@@ -1,0 +1,128 @@
+{
+ "host": "secaucus.newjerseytaxsale.com",
+ "municipality": "Secaucus Town",
+ "countyFips": "34017",
+ "saleDate": "2026-10-07",
+ "startTime": "08:30 AM",
+ "announced": 13,
+ "capturedAt": "2026-09-15T00:00:00.000Z",
+ "rows": [
+  {
+   "advNum": "0001",
+   "taxYear": "2025",
+   "parcelNumber": "21 - 15 - -C0304",
+   "ownerName": "SHEA, DONNA LYNN",
+   "chargeType": "T",
+   "faceAmount": "$3,539.33",
+   "status": "Active"
+  },
+  {
+   "advNum": "0002",
+   "taxYear": "2025",
+   "parcelNumber": "21 - 15 - -C0306",
+   "ownerName": "AKUNURI, SIREESHA",
+   "chargeType": "T",
+   "faceAmount": "$3,063.64",
+   "status": "Active"
+  },
+  {
+   "advNum": "0003",
+   "taxYear": "2025",
+   "parcelNumber": "21 - 15 - -C0325",
+   "ownerName": "OMISOLA, ABIDEEN",
+   "chargeType": "T",
+   "faceAmount": "$4,491.69",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0004",
+   "taxYear": "2025",
+   "parcelNumber": "21 - 15 - -C0417",
+   "ownerName": "GANESH-PERSAUD,M ETALS",
+   "chargeType": "T",
+   "faceAmount": "$4,557.71",
+   "status": "Active"
+  },
+  {
+   "advNum": "0005",
+   "taxYear": "2025",
+   "parcelNumber": "21 - 15 - -C0840",
+   "ownerName": "MESKOOB, BAHMAN",
+   "chargeType": "T",
+   "faceAmount": "$1,885.52",
+   "status": "Active"
+  },
+  {
+   "advNum": "0006",
+   "taxYear": "2025",
+   "parcelNumber": "21 - 15 - -C1335",
+   "ownerName": "SENGUPTA, SURAJIT",
+   "chargeType": "T",
+   "faceAmount": "$5,494.94",
+   "status": "Active"
+  },
+  {
+   "advNum": "0007",
+   "taxYear": "2025",
+   "parcelNumber": "65 - 15",
+   "ownerName": "REINKE, EDITH ( EST OF )",
+   "chargeType": "T",
+   "faceAmount": "$9,236.60",
+   "status": "Active"
+  },
+  {
+   "advNum": "0008",
+   "taxYear": "2025",
+   "parcelNumber": "85 - 9",
+   "ownerName": "OTERO, JORGE",
+   "chargeType": "T",
+   "faceAmount": "$3,883.65",
+   "status": "Active"
+  },
+  {
+   "advNum": "0009",
+   "taxYear": "2025",
+   "parcelNumber": "134 - 12",
+   "ownerName": "LEE, ANNE % JOHN LEE",
+   "chargeType": "T",
+   "faceAmount": "$18,080.11",
+   "status": "Active"
+  },
+  {
+   "advNum": "0010",
+   "taxYear": "2025",
+   "parcelNumber": "174 - 19",
+   "ownerName": "PIKEVIEW REALTY LLC",
+   "chargeType": "T",
+   "faceAmount": "$2,209.09",
+   "status": "Active"
+  },
+  {
+   "advNum": "0011",
+   "taxYear": "2025",
+   "parcelNumber": "178 - 20",
+   "ownerName": "GIZZI, BERNICE",
+   "chargeType": "T",
+   "faceAmount": "$7,883.84",
+   "status": "Active"
+  },
+  {
+   "advNum": "0012",
+   "taxYear": "2025",
+   "parcelNumber": "203 - 6",
+   "ownerName": "188 REAR MEADOW LANE LLC",
+   "chargeType": "T",
+   "faceAmount": "$1,274.49",
+   "status": "Active"
+  },
+  {
+   "advNum": "0013",
+   "taxYear": "2025",
+   "parcelNumber": "203 - 33",
+   "ownerName": "BINETTI, VINCENT",
+   "chargeType": "T",
+   "faceAmount": "$8,213.15",
+   "status": "Active"
+  }
+ ]
+}

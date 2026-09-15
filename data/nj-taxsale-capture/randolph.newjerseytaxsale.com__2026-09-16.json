@@ -1,0 +1,353 @@
+{
+ "host": "randolph.newjerseytaxsale.com",
+ "municipality": "Randolph Township",
+ "countyFips": "34027",
+ "saleDate": "2026-09-16",
+ "startTime": "08:30 AM",
+ "announced": 38,
+ "capturedAt": "2026-09-15T00:00:00.000Z",
+ "rows": [
+  {
+   "advNum": "0001",
+   "taxYear": "2025",
+   "parcelNumber": "12 - 2.04",
+   "ownerName": "TEAMA LEGACY GROUP LLC",
+   "chargeType": "T",
+   "faceAmount": "$2,799.34",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0002",
+   "taxYear": "2025",
+   "parcelNumber": "27 - 9",
+   "ownerName": "MAROTTO,LORETTA SARACINO",
+   "chargeType": "W",
+   "faceAmount": "$81.22",
+   "status": "Active"
+  },
+  {
+   "advNum": "0003",
+   "taxYear": "2025",
+   "parcelNumber": "36 - 1",
+   "ownerName": "WUESTHOFF, GEORGE",
+   "chargeType": "T",
+   "faceAmount": "$9,684.23",
+   "status": "Active"
+  },
+  {
+   "advNum": "0004",
+   "taxYear": "2025",
+   "parcelNumber": "42 - 101",
+   "ownerName": "ERDEMIR, ZIYA/SELVER",
+   "chargeType": "S",
+   "faceAmount": "$189.53",
+   "status": "Active"
+  },
+  {
+   "advNum": "0005",
+   "taxYear": "2025",
+   "parcelNumber": "42 - 122.87",
+   "ownerName": "ROQUETTI, DESIREE/JOAO",
+   "chargeType": "O",
+   "faceAmount": "$59.01",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0006",
+   "taxYear": "2025",
+   "parcelNumber": "42 - 122.89",
+   "ownerName": "SCANZERA, CHRISTOPHER",
+   "chargeType": "W S",
+   "faceAmount": "$432.18",
+   "status": "Active"
+  },
+  {
+   "advNum": "0007",
+   "taxYear": "2025",
+   "parcelNumber": "46 - 11",
+   "ownerName": "INCHIAPPA, GIUSEPPE/ROSARIA",
+   "chargeType": "W",
+   "faceAmount": "$176.92",
+   "status": "Active"
+  },
+  {
+   "advNum": "0008",
+   "taxYear": "2025",
+   "parcelNumber": "47 - 7.14",
+   "ownerName": "REYES,BRET S/ELENA M",
+   "chargeType": "W",
+   "faceAmount": "$419.31",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0009",
+   "taxYear": "2025",
+   "parcelNumber": "51 - 10.07",
+   "ownerName": "LUBRANO, JOSEPH/CLAUDIA",
+   "chargeType": "W",
+   "faceAmount": "$61.58",
+   "status": "Active"
+  },
+  {
+   "advNum": "0010",
+   "taxYear": "2025",
+   "parcelNumber": "52 - 1.02",
+   "ownerName": "JOHNSON, MONIQUE",
+   "chargeType": "T",
+   "faceAmount": "$702.88",
+   "status": "Active"
+  },
+  {
+   "advNum": "0011",
+   "taxYear": "2025",
+   "parcelNumber": "57 - 11",
+   "ownerName": "HERNANDEZ, MARIO/JEANETTE",
+   "chargeType": "W S",
+   "faceAmount": "$356.17",
+   "status": "Active"
+  },
+  {
+   "advNum": "0012",
+   "taxYear": "2025",
+   "parcelNumber": "73 - 37",
+   "ownerName": "GSELL, JEFFREY & KATHLEEN",
+   "chargeType": "T W S",
+   "faceAmount": "$6,468.73",
+   "status": "Active"
+  },
+  {
+   "advNum": "0013",
+   "taxYear": "2025",
+   "parcelNumber": "81.04 - 7",
+   "ownerName": "OLIVEIRA, EDWARD E/CRUZ, JASMIN I",
+   "chargeType": "W",
+   "faceAmount": "$284.77",
+   "status": "Active"
+  },
+  {
+   "advNum": "0014",
+   "taxYear": "2025",
+   "parcelNumber": "81.04 - 20",
+   "ownerName": "RAGHUNATHAN, SUNANDH C/SATHIYAM, S",
+   "chargeType": "W",
+   "faceAmount": "$173.64",
+   "status": "Active"
+  },
+  {
+   "advNum": "0015",
+   "taxYear": "2025",
+   "parcelNumber": "84 - 1",
+   "ownerName": "VAN HISE, JANICE",
+   "chargeType": "T",
+   "faceAmount": "$2,743.38",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0016",
+   "taxYear": "2025",
+   "parcelNumber": "112 - 17.01",
+   "ownerName": "MARTIN, MATTHEW JOSEPH/COLLEEN FARR",
+   "chargeType": "O",
+   "faceAmount": "$58.59",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0017",
+   "taxYear": "2025",
+   "parcelNumber": "119 - 110.79",
+   "ownerName": "GREENBERGER, NATHAN SCOTT",
+   "chargeType": "W S",
+   "faceAmount": "$422.21",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0018",
+   "taxYear": "2025",
+   "parcelNumber": "120 - 115",
+   "ownerName": "FREEDOM HOLDINGS, LLC",
+   "chargeType": "T",
+   "faceAmount": "$9,233.56",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0019",
+   "taxYear": "2025",
+   "parcelNumber": "121 - 68.14",
+   "ownerName": "GALLAGHER, JOHN/COPPOLA, RENEE",
+   "chargeType": "O",
+   "faceAmount": "$36.60",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0020",
+   "taxYear": "2025",
+   "parcelNumber": "125 - 11",
+   "ownerName": "FRANKFAR LTD%FIRST NAT'L ACQUSITION",
+   "chargeType": "T",
+   "faceAmount": "$3,186.89",
+   "status": "Active"
+  },
+  {
+   "advNum": "0021",
+   "taxYear": "2025",
+   "parcelNumber": "125 - 12",
+   "ownerName": "FRANKFAR LTD% FIRST NAT'L ACQUISTIO",
+   "chargeType": "T",
+   "faceAmount": "$3,192.38",
+   "status": "Active"
+  },
+  {
+   "advNum": "0022",
+   "taxYear": "2025",
+   "parcelNumber": "131 - 52",
+   "ownerName": "ECHEVARRIA, MARTHA",
+   "chargeType": "S",
+   "faceAmount": "$733.12",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0023",
+   "taxYear": "2025",
+   "parcelNumber": "131.01 - 71",
+   "ownerName": "VEGA, GIOVANNI/EVELYN",
+   "chargeType": "S",
+   "faceAmount": "$181.35",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0024",
+   "taxYear": "2025",
+   "parcelNumber": "135 - 18",
+   "ownerName": "CERRATO, CARLOS",
+   "chargeType": "S",
+   "faceAmount": "$189.53",
+   "status": "Active"
+  },
+  {
+   "advNum": "0025",
+   "taxYear": "2025",
+   "parcelNumber": "146 - 57.01",
+   "ownerName": "BEHSON, PETER III",
+   "chargeType": "T",
+   "faceAmount": "$3,957.59",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0026",
+   "taxYear": "2025",
+   "parcelNumber": "146 - 57.02",
+   "ownerName": "BEHSON, PETER III",
+   "chargeType": "T",
+   "faceAmount": "$8,723.28",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0027",
+   "taxYear": "2025",
+   "parcelNumber": "146 - 57.03",
+   "ownerName": "BEHSON, PETER III",
+   "chargeType": "T",
+   "faceAmount": "$3,957.59",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0028",
+   "taxYear": "2025",
+   "parcelNumber": "176 - 63",
+   "ownerName": "ZYTO, ADAM/ANA",
+   "chargeType": "W S",
+   "faceAmount": "$301.91",
+   "status": "Active"
+  },
+  {
+   "advNum": "0029",
+   "taxYear": "2025",
+   "parcelNumber": "182 - 3",
+   "ownerName": "ROTH, KARL/GRETCHEN",
+   "chargeType": "T",
+   "faceAmount": "$2,260.00",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0030",
+   "taxYear": "2025",
+   "parcelNumber": "184 - 1.07",
+   "ownerName": "HLADUN, AMANDA AEMISEGEO",
+   "chargeType": "S",
+   "faceAmount": "$482.92",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0031",
+   "taxYear": "2025",
+   "parcelNumber": "184 - 3.03",
+   "ownerName": "GUNDAPPA, RAMESH",
+   "chargeType": "S",
+   "faceAmount": "$281.22",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0032",
+   "taxYear": "2025",
+   "parcelNumber": "184 - 3.07",
+   "ownerName": "CHU, YU-SHEUNG K",
+   "chargeType": "S",
+   "faceAmount": "$147.22",
+   "status": "Active"
+  },
+  {
+   "advNum": "0033",
+   "taxYear": "2025",
+   "parcelNumber": "192 - 2",
+   "ownerName": "WISNIEWSKI FRANK",
+   "chargeType": "T",
+   "faceAmount": "$180.77",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0034",
+   "taxYear": "2025",
+   "parcelNumber": "195 - 6",
+   "ownerName": "WHITE, ROSA C/O SHERI AIKEN",
+   "chargeType": "T",
+   "faceAmount": "$8,278.10",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0035",
+   "taxYear": "2025",
+   "parcelNumber": "199 - 36.05",
+   "ownerName": "ALIASGHARPOUR, MOHAMAD F/ETAL",
+   "chargeType": "T",
+   "faceAmount": "$4,957.82",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0036",
+   "taxYear": "2025",
+   "parcelNumber": "212 - 5",
+   "ownerName": "SUDIT, ALECSANDER",
+   "chargeType": "T",
+   "faceAmount": "$3,370.94",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0037",
+   "taxYear": "2025",
+   "parcelNumber": "215 - 74.04",
+   "ownerName": "KEKOVSKI, MICHAEL/JESSICA ROSE",
+   "chargeType": "S",
+   "faceAmount": "$189.53",
+   "status": "Unavailable"
+  },
+  {
+   "advNum": "0038",
+   "taxYear": "2025",
+   "parcelNumber": "226 - 64",
+   "ownerName": "OLEJAR, ROBERT & LINDA",
+   "chargeType": "T",
+   "faceAmount": "$22,715.37",
+   "status": "Unavailable"
+  }
+ ]
+}

@@ -13,6 +13,7 @@ import { floridaAdapter, floridaClerksAdapter } from "./florida";
 import { clarkNvAdapter } from "./clark-nv";
 import { zeusAdapter } from "./zeus";
 import { realauctionAdapter } from "./realauction";
+import { njTaxSaleAdapter } from "./nj-taxsale";
 import { bid4assetsAdapter } from "./bid4assets";
 
 /**
@@ -33,6 +34,7 @@ export const ADAPTERS: SourceAdapter[] = [
   zeusAdapter,
   bid4assetsAdapter,
   realauctionAdapter,
+  njTaxSaleAdapter,
   genericAdapter,
 ];
 
@@ -59,5 +61,6 @@ export {
   zeusAdapter,
   bid4assetsAdapter,
   realauctionAdapter,
+  njTaxSaleAdapter,
   genericAdapter,
 };
