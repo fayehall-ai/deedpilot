@@ -1,8 +1,8 @@
 {
-  "builtAt": "2026-08-20T18:02:43.276Z",
-  "nCounties": 1583,
-  "nVerified": 991,
-  "nGaps": 808,
+  "builtAt": "2026-09-15T17:33:11.806Z",
+  "nCounties": 1605,
+  "nVerified": 999,
+  "nGaps": 824,
   "counties": {
     "10001": {
       "state": "DE",
@@ -619,8 +619,25 @@
     "12063": {
       "state": "FL",
       "county": "Jackson",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "12063",
+          "state": "FL",
+          "url": "https://jacksonclerk.com/",
+          "host": "jacksonclerk.com",
+          "origin": "contact_email",
+          "kind": "unknown",
+          "isGovernment": false,
+          "confidence": 0.53,
+          "signals": [
+            "tax deed sale",
+            "foreclosure auction"
+          ],
+          "verifiedOn": "2026-09-15",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "12069": {
       "state": "FL",
@@ -3577,6 +3594,18 @@
       ],
       "isGap": false
     },
+    "18021": {
+      "state": "IN",
+      "county": "Clay",
+      "sources": [],
+      "isGap": true
+    },
+    "18027": {
+      "state": "IN",
+      "county": "Daviess",
+      "sources": [],
+      "isGap": true
+    },
     "18029": {
       "state": "IN",
       "county": "Dearborn",
@@ -3644,6 +3673,12 @@
     "18039": {
       "state": "IN",
       "county": "Elkhart",
+      "sources": [],
+      "isGap": true
+    },
+    "18041": {
+      "state": "IN",
+      "county": "Fayette",
       "sources": [],
       "isGap": true
     },
@@ -3755,6 +3790,12 @@
       ],
       "isGap": false
     },
+    "18065": {
+      "state": "IN",
+      "county": "Henry",
+      "sources": [],
+      "isGap": true
+    },
     "18067": {
       "state": "IN",
       "county": "Howard",
@@ -3821,6 +3862,12 @@
       ],
       "isGap": false
     },
+    "18087": {
+      "state": "IN",
+      "county": "LaGrange",
+      "sources": [],
+      "isGap": true
+    },
     "18089": {
       "state": "IN",
       "county": "Lake",
@@ -3879,6 +3926,18 @@
       "sources": [],
       "isGap": true
     },
+    "18099": {
+      "state": "IN",
+      "county": "Marshall",
+      "sources": [],
+      "isGap": true
+    },
+    "18101": {
+      "state": "IN",
+      "county": "Martin",
+      "sources": [],
+      "isGap": true
+    },
     "18103": {
       "state": "IN",
       "county": "Miami",
@@ -3908,9 +3967,45 @@
       ],
       "isGap": false
     },
+    "18107": {
+      "state": "IN",
+      "county": "Montgomery",
+      "sources": [],
+      "isGap": true
+    },
     "18109": {
       "state": "IN",
       "county": "Morgan",
+      "sources": [],
+      "isGap": true
+    },
+    "18115": {
+      "state": "IN",
+      "county": "Ohio",
+      "sources": [
+        {
+          "fips": "18115",
+          "state": "IN",
+          "url": "http://ohiocountyin.gov/treasurer/",
+          "host": "ohiocountyin.gov",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax sale",
+            "sheriff sale",
+            "parcel id"
+          ],
+          "verifiedOn": "2026-09-15",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "18117": {
+      "state": "IN",
+      "county": "Orange",
       "sources": [],
       "isGap": true
     },
@@ -3938,6 +4033,12 @@
       "sources": [],
       "isGap": true
     },
+    "18131": {
+      "state": "IN",
+      "county": "Pulaski",
+      "sources": [],
+      "isGap": true
+    },
     "18141": {
       "state": "IN",
       "county": "St. Joseph",
@@ -3947,6 +4048,18 @@
     "18143": {
       "state": "IN",
       "county": "Scott",
+      "sources": [],
+      "isGap": true
+    },
+    "18151": {
+      "state": "IN",
+      "county": "Steuben",
+      "sources": [],
+      "isGap": true
+    },
+    "18155": {
+      "state": "IN",
+      "county": "Switzerland",
       "sources": [],
       "isGap": true
     },
@@ -7716,6 +7829,12 @@
       "sources": [],
       "isGap": true
     },
+    "27033": {
+      "state": "MN",
+      "county": "Cottonwood",
+      "sources": [],
+      "isGap": true
+    },
     "27035": {
       "state": "MN",
       "county": "Crow Wing",
@@ -7762,6 +7881,12 @@
         }
       ],
       "isGap": false
+    },
+    "27049": {
+      "state": "MN",
+      "county": "Goodhue",
+      "sources": [],
+      "isGap": true
     },
     "27053": {
       "state": "MN",
@@ -10983,8 +11108,43 @@
     "34011": {
       "state": "NJ",
       "county": "Cumberland",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "34011",
+          "state": "NJ",
+          "url": "https://www.tctanj.org/cn/webpage.cfm?tpid=14659",
+          "host": "www.tctanj.org",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "scheduleHint": "Delaware Twp: Tuesday, September 22, 2026, 10 am; Randolph: Wednesday, September 16, 2026, 8:30 am; South Orange: September 23, 2026; Vineland: September 17, 2026; Willingboro: October 14, 2026; Maplewood & Jefferson: October 22, 2026",
+          "verifiedOn": "2026-09-15",
+          "httpStatus": 200
+        },
+        {
+          "fips": "34011",
+          "state": "NJ",
+          "url": "https://www.tctanj.org/cn/webpage.cfm?tpid=14659",
+          "host": "www.tctanj.org",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "scheduleHint": "Delaware Twp Tue Sep 22 2026 10am; Randolph Wed Sep 16 2026 8:30am; South Orange Sep 23 2026; Vineland Sep 17 2026; Willingboro Oct 14 2026; Maplewood Oct 21 2026; Jefferson Thu Oct 22 2026 10am; Woodcliff Lake Oct 22 2026 10am",
+          "verifiedOn": "2026-09-15",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "34013": {
       "state": "NJ",
@@ -11062,8 +11222,42 @@
     "34025": {
       "state": "NJ",
       "county": "Monmouth",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "34025",
+          "state": "NJ",
+          "url": "https://www.tctanj.org/cn/webpage.cfm?tpid=14659",
+          "host": "www.tctanj.org",
+          "origin": "atlas",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.45,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "verifiedOn": "2026-09-15",
+          "httpStatus": 200
+        },
+        {
+          "fips": "34025",
+          "state": "NJ",
+          "url": "https://www.tctanj.org/cn/webpage.cfm?tpid=14659",
+          "host": "www.tctanj.org",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "scheduleHint": "Delaware Twp Tue Sep 22 2026 10am; Randolph electronic Wed Sep 16 2026 8:30am; South Orange Sep 23 2026; Vineland Sep 17 2026; Willingboro Oct 14 2026; Maplewood Oct 21 2026; Jefferson Thu Oct 22 2026 10am; Woodcliff Lake Oct 22 2026 10am",
+          "verifiedOn": "2026-09-15",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "34027": {
       "state": "NJ",
@@ -11129,8 +11323,26 @@
     "34035": {
       "state": "NJ",
       "county": "Somerset",
-      "sources": [],
-      "isGap": true
+      "sources": [
+        {
+          "fips": "34035",
+          "state": "NJ",
+          "url": "https://www.tctanj.org/cn/webpage.cfm?tpid=14659",
+          "host": "www.tctanj.org",
+          "origin": "link_followed",
+          "kind": "listing",
+          "isGovernment": false,
+          "confidence": 0.4,
+          "signals": [
+            "delinquent tax",
+            "tax sale"
+          ],
+          "scheduleHint": "Delaware Twp: Tue Sep 22 2026 10am; Randolph: Wed Sep 16 2026 8:30am; South Orange: Sep 23 2026; Vineland: Sep 17 2026; Willingboro: Oct 14 2026; Maplewood: Oct 21 2026; Jefferson: Thu Oct 22 2026 10am; Woodcliff Lake: Oct 22 2026 10am",
+          "verifiedOn": "2026-09-15",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
     },
     "34037": {
       "state": "NJ",
@@ -16557,6 +16769,12 @@
       ],
       "isGap": false
     },
+    "42047": {
+      "state": "PA",
+      "county": "Elk",
+      "sources": [],
+      "isGap": true
+    },
     "42049": {
       "state": "PA",
       "county": "Erie",
@@ -17382,6 +17600,12 @@
       ],
       "isGap": false
     },
+    "42115": {
+      "state": "PA",
+      "county": "Susquehanna",
+      "sources": [],
+      "isGap": true
+    },
     "42117": {
       "state": "PA",
       "county": "Tioga",
@@ -17460,6 +17684,30 @@
             "tax sale"
           ],
           "verifiedOn": "2026-08-10",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "42131": {
+      "state": "PA",
+      "county": "Wyoming",
+      "sources": [
+        {
+          "fips": "42131",
+          "state": "PA",
+          "url": "https://wyomingcountypa.gov/",
+          "host": "wyomingcountypa.gov",
+          "origin": "platform_pattern",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.85,
+          "signals": [
+            "delinquent tax",
+            "tax sale",
+            "sheriff sale"
+          ],
+          "verifiedOn": "2026-09-15",
           "httpStatus": 200
         }
       ],
@@ -21140,6 +21388,12 @@
       "sources": [],
       "isGap": true
     },
+    "50025": {
+      "state": "VT",
+      "county": "Windham",
+      "sources": [],
+      "isGap": true
+    },
     "50027": {
       "state": "VT",
       "county": "Windsor",
@@ -21289,6 +21543,12 @@
     "51031": {
       "state": "VA",
       "county": "Campbell",
+      "sources": [],
+      "isGap": true
+    },
+    "51035": {
+      "state": "VA",
+      "county": "Carroll",
       "sources": [],
       "isGap": true
     },
@@ -27041,6 +27301,36 @@
     "08055": {
       "state": "CO",
       "county": "Huerfano",
+      "sources": [
+        {
+          "fips": "08055",
+          "state": "CO",
+          "url": "https://huerfano.us/treasurer/",
+          "host": "huerfano.us",
+          "origin": "link_followed",
+          "kind": "unknown",
+          "isGovernment": true,
+          "confidence": 0.73,
+          "signals": [
+            "tax lien sale",
+            "delinquent tax"
+          ],
+          "scheduleHint": "annual tax lien sale",
+          "verifiedOn": "2026-09-15",
+          "httpStatus": 200
+        }
+      ],
+      "isGap": false
+    },
+    "08057": {
+      "state": "CO",
+      "county": "Jackson",
+      "sources": [],
+      "isGap": true
+    },
+    "08025": {
+      "state": "CO",
+      "county": "Crowley",
       "sources": [],
       "isGap": true
     }
