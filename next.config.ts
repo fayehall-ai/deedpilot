@@ -38,6 +38,25 @@ const nextConfig: NextConfig = {
    * sales.
    */
   serverExternalPackages: ["pdf-parse"],
+  /**
+   * Data the server reads at runtime by path, which tracing cannot infer.
+   *
+   * `lib/ingest/adapters/generic.ts` reads `data/source-registry.json` — 1,583
+   * county bindings, the Prospector's whole output — with `readFileSync` on a
+   * string path. Nothing imports it, so Next's file tracing has no way to know
+   * it is needed and does not include it in the function bundle. The read then
+   * fails inside a `catch` that returns null, `discoverCounties` returns an
+   * empty list, and every crawl job completes in twelve milliseconds reporting
+   * `counties: 0` and no error.
+   *
+   * That is what 869 "successful" crawl jobs did on the first afternoon the
+   * dispatcher ran: drained a queue perfectly and fetched nothing. Locally the
+   * same adapter binds 774 counties, which is why it had never shown up.
+   */
+  outputFileTracingIncludes: {
+    "/api/cron/**": ["./data/source-registry.json", "./data/*.json"],
+    "/admin/**": ["./data/source-registry.json"],
+  },
 
   /**
    * `/admin` must never be stored by a shared cache.

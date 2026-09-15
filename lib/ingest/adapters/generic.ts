@@ -106,7 +106,27 @@ export const genericAdapter: SourceAdapter = {
    */
   async discoverCounties(): Promise<CountyBinding[]> {
     const registry = loadRegistry();
-    if (!registry) return [];
+    /*
+     * A missing registry is a failure, not an empty result.
+     *
+     * Returning `[]` here made the deployed crawler silent: with the file
+     * absent from the function bundle, every job finished in twelve
+     * milliseconds reporting `counties: 0` and no error, so the queue drained
+     * and nothing was fetched. An adapter whose entire binding source cannot be
+     * read has not found zero counties, it has failed to look — and the queue
+     * records a failure where it records nothing about a zero.
+     *
+     * `registryOverridden` is the exception: a caller that deliberately
+     * supplied no registry means it, and the tests depend on that path.
+     */
+    if (!registry) {
+      if (registryOverridden) return [];
+      throw new Error(
+        `[generic-county] cannot read ${DEFAULT_REGISTRY_PATH} from ${process.cwd()} — ` +
+          `the Prospector's registry is missing from this deployment. See ` +
+          `outputFileTracingIncludes in next.config.ts.`,
+      );
+    }
 
     const bindings: CountyBinding[] = [];
 
