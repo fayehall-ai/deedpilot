@@ -40,6 +40,7 @@
 import "../lib/env";
 import { readFileSync, writeFileSync } from "node:fs";
 import { ALL_COUNTIES } from "../lib/atlas";
+import { STATEWIDE_SOURCES } from "../lib/prospector/candidates";
 
 const APPLY = process.argv.includes("--apply");
 const PATH = "data/source-registry.json";
@@ -148,6 +149,50 @@ function main() {
     owner.set(host, claimed);
   }
 
+  /*
+   * One identical URL recorded for many counties is a directory — unless the
+   * registry already knows it as a statewide publisher.
+   *
+   * That distinction is the whole difficulty. `cosl.org` genuinely is one page
+   * serving 46 Arkansas counties, and `tax.newmexico.gov` 32, so "same URL,
+   * many counties" cannot condemn on its own. What separates them is that the
+   * real ones are declared: `STATEWIDE_SOURCES` lists them per state, because
+   * somebody established that the state sells centrally. Anything else reaching
+   * the same shape got there by being followed from several counties at once,
+   * which is how `publicrecords.onlinesearches.com` became 42 counties' source.
+   *
+   * `tctanj.org` looks exactly like that case and is not: the New Jersey tax
+   * collectors' association is *declared*, `coversAllCounties: true`, because
+   * New Jersey sells at municipal level and has no county page to find. The
+   * declaration is what tells the two apart, and it is the reason this test
+   * reads the list rather than counting.
+   */
+  const declaredStatewide = new Set<string>();
+  for (const sources of Object.values(STATEWIDE_SOURCES)) {
+    for (const s of sources) {
+      try { declaredStatewide.add(new URL(s.url).hostname.toLowerCase().replace(/^www\./, "")); }
+      catch { /* a malformed entry is not a host */ }
+    }
+  }
+
+  const urlToFips = new Map<string, Set<string>>();
+  for (const [fips, e] of Object.entries(reg.counties)) {
+    for (const s of e.sources ?? []) {
+      if (!urlToFips.has(s.url)) urlToFips.set(s.url, new Set());
+      urlToFips.get(s.url)!.add(fips);
+    }
+  }
+  /** Identical URLs serving 3+ counties that nobody declared statewide. */
+  const directoryUrls = new Set(
+    [...urlToFips]
+      .filter(([url, fipsSet]) => {
+        if (fipsSet.size < 3) return false;
+        try { return !declaredStatewide.has(new URL(url).hostname.toLowerCase().replace(/^www\./, "")); }
+        catch { return false; }
+      })
+      .map(([url]) => url),
+  );
+
   let dropped = 0, deduped = 0, touched = 0, newGaps = 0;
   const lines: string[] = [];
 
@@ -166,6 +211,12 @@ function main() {
 
       if (h && NEVER_A_SOURCE.some((bad) => h === bad || h.endsWith(`.${bad}`))) {
         lines.push(`  ${e.county}, ${e.state}  drop ${h}  — never a county sale list`);
+        dropped++;
+        continue;
+      }
+
+      if (directoryUrls.has(s.url)) {
+        lines.push(`  ${e.county}, ${e.state}  drop ${h}  — one page recorded for ${urlToFips.get(s.url)!.size} counties`);
         dropped++;
         continue;
       }

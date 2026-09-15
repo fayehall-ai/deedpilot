@@ -13,6 +13,7 @@
 
 import { getCounty } from "../atlas";
 import { candidatesFor, countiesWithAtlasLinks } from "./discover";
+import { STATEWIDE_SOURCES } from "./candidates";
 import type {
   ProspectResult,
   RejectedCandidate,
@@ -210,6 +211,18 @@ export function buildRegistry(results: ProspectResult[]): SourceRegistry {
  * New results win for the same FIPS (they are fresher). Untouched FIPS keep
  * their previous sources.
  */
+/**
+ * Counties beyond which one identical URL is a directory, not a source.
+ *
+ * Two is a coincidence — a genuinely shared clerk's page, a county that changed
+ * name. Three is a pattern, and the pattern is always the same: a page that
+ * lists many counties gets followed from each of them and recorded as though it
+ * were each one's own. `publicrecords.onlinesearches.com` became 42 counties'
+ * source that way, and in one run `tctanj.org` — the New Jersey tax collectors'
+ * association — was recorded for six.
+ */
+const DIRECTORY_AT = 3;
+
 export function mergeRegistry(
   base: SourceRegistry | null,
   patch: SourceRegistry,
@@ -218,6 +231,48 @@ export function mergeRegistry(
     ...(base?.counties ?? {}),
     ...patch.counties,
   };
+
+  /*
+   * Drop a URL that has spread across counties, unless it was declared as a
+   * statewide publisher.
+   *
+   * The distinction cannot be made by counting alone: Arkansas really does sell
+   * through one page for 46 counties, and New Mexico for 32. What separates
+   * them is that those are declared in `STATEWIDE_SOURCES`, by somebody who
+   * established that the state sells centrally. A URL that reaches the same
+   * shape without being declared got there by being followed from several
+   * counties at once, which is a different thing wearing the same numbers.
+   *
+   * Enforced here rather than in a cleanup script because this is the choke
+   * point every source passes through on its way to disk. A mop-up afterwards
+   * loses a race it cannot win: the writer holds the registry in memory and
+   * flushes periodically, so a file cleaned while a run is in progress is
+   * simply overwritten by the run's stale copy.
+   */
+  const declared = new Set<string>();
+  for (const sources of Object.values(STATEWIDE_SOURCES)) {
+    for (const s of sources) {
+      try { declared.add(new URL(s.url).hostname.toLowerCase().replace(/^www\./, "")); }
+      catch { /* a malformed entry is not a host */ }
+    }
+  }
+
+  const spread = new Map<string, number>();
+  for (const entry of Object.values(counties)) {
+    for (const src of entry.sources) spread.set(src.url, (spread.get(src.url) ?? 0) + 1);
+  }
+
+  for (const entry of Object.values(counties)) {
+    entry.sources = entry.sources.filter((src) => {
+      if ((spread.get(src.url) ?? 0) < DIRECTORY_AT) return true;
+      try {
+        return declared.has(new URL(src.url).hostname.toLowerCase().replace(/^www\./, ""));
+      } catch {
+        return false;
+      }
+    });
+    if (entry.sources.length === 0) entry.isGap = true;
+  }
   let nVerified = 0;
   let nGaps = 0;
   for (const entry of Object.values(counties)) {
