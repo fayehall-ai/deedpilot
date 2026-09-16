@@ -97,6 +97,17 @@ export interface BookEntry { fips: string; framework: Framework }
 /**
  * Every framework in one page.
  *
+ * ## The client script is built inside a template literal, so escapes double
+ *
+ * The template literal eats one level of backslash before the browser sees it.
+ * A plain "backslash-d" written below arrives in the page as a bare "d", and
+ * an escaped forward slash arrives unescaped. The first cut shipped a FIPS
+ * regex and a URL regex written the ordinary way; they reached the browser as
+ * a character class with no digits and an unterminated group. The page
+ * rendered its header, threw on the first of them, and showed an empty list
+ * with no visible error — which is the dangerous part, because nothing on
+ * screen said anything was wrong. Double every backslash in the script.
+ *
  * A folder of 485 documents is shareable only as a folder. This is shareable as
  * a link, which is what anyone actually sends — and it stays under the artifact
  * host's 255-file ceiling, which 485 separate pages would not.
@@ -237,11 +248,11 @@ export function frameworkBook(entries: BookEntry[]): string {
   var $ = function(id){ return document.getElementById(id); };
   var esc = function(s){ return String(s == null ? "" : s)
     .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
-  var link = function(s){ return esc(s).replace(/(https?:\/\/[^\s<)]+)/g,
+  var link = function(s){ return esc(s).replace(/(https?:\\/\\/[^\\s<)]+)/g,
     '<a href="$1" rel="noopener">$1</a>'); };
   var MON = ["January","February","March","April","May","June","July",
              "August","September","October","November","December"];
-  var current = (location.hash.match(/^#c?(\d{5})$/) || [])[1] || (D[0] && D[0].fips);
+  var current = (location.hash.match(/^#c?(\\d{5})$/) || [])[1] || (D[0] && D[0].fips);
 
   function visible(){
     var q = ($("q").value || "").trim().toLowerCase();
@@ -321,7 +332,7 @@ export function frameworkBook(entries: BookEntry[]): string {
   });
   $("q").addEventListener("input", renderList);
   window.addEventListener("hashchange", function(){
-    var m = (location.hash.match(/^#c?(\d{5})$/) || [])[1];
+    var m = (location.hash.match(/^#c?(\\d{5})$/) || [])[1];
     if (m) { show(m); renderList(); }
   });
 
