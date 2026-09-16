@@ -102,3 +102,4 @@ __pycache__/
 .pytest_cache/
 data/realauction-capture/
 artifacts/frameworks/
+artifacts/cape-videos/
