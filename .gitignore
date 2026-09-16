@@ -101,3 +101,4 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 data/realauction-capture/
+artifacts/frameworks/

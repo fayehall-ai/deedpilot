@@ -68,6 +68,10 @@ export interface Framework {
   /** Fields taken from the state's general rule rather than county research. */
   inherited: string[];
   generated: string;
+  /** ISO sale date — what a list of frameworks is ordered by. */
+  sortKey: string;
+  /** Parcels this system holds for the sale, for the list's metadata line. */
+  lotCount: number;
 }
 
 const MONTHS = ["January","February","March","April","May","June",
@@ -298,5 +302,7 @@ export function buildFramework(fips: string, a: FrameworkAuction): Framework {
     asOf: (rule as any).asOf ?? null,
     inherited,
     generated: new Date().toISOString().slice(0, 10),
+    sortKey: a.saleDate,
+    lotCount: a.lotCount,
   };
 }
