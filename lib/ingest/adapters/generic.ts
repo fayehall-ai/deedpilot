@@ -36,6 +36,7 @@ import { extractLots, NoProviderAvailableError } from "../extract";
 import { politeFetch } from "../fetch";
 import {
   classifiedPdfLinks,
+  documentLinks,
   listPageLinks,
   parseHtmlTable,
   parseStructuredPdfText,
@@ -45,6 +46,7 @@ import type {
   CountyBinding,
   DiscoveredAuction,
   DiscoveredLot,
+  ListingKind,
   SourceAdapter,
 } from "../types";
 
@@ -210,26 +212,35 @@ export const genericAdapter: SourceAdapter = {
     const fromTable = parseHtmlTable($, auction.sourceUrl);
     if (fromTable?.length) return fromTable;
 
-    // 2. Linked PDFs, decoys already filtered and sale lists ranked first.
-    for (const { url: pdf, kind } of classifiedPdfLinks($, auction.sourceUrl).slice(0, 3)) {
+    /**
+     * Read one document, wherever it was found.
+     *
+     * Extracted so the deeper hops can use it: the list is as often two clicks
+     * in as it is on the page the registry points at, and a reader that only
+     * works at depth zero finds the landing page and calls the county empty.
+     */
+    const lotsFromDocument = async (
+      doc: string,
+      kind: ListingKind,
+    ): Promise<DiscoveredLot[] | null> => {
       let text: string;
       try {
-        text = await pdfToText(pdf);
+        text = await pdfToText(doc);
       } catch (e) {
-        console.warn(`[generic-county] ${pdf}: ${e instanceof Error ? e.message : e}`);
-        continue;
+        console.warn(`[generic-county] ${doc}: ${e instanceof Error ? e.message : e}`);
+        return null;
       }
       // Free path: structured sealed-bid / list PDFs (no LLM, no credits).
-      const structured = parseStructuredPdfText(text, pdf);
+      const structured = parseStructuredPdfText(text, doc);
       if (structured?.length) {
         auction.listingKind = kind;
         console.log(
-          `[generic-county] ${pdf}: structured PDF parse → ${structured.length} lot(s) [${kind}]`,
+          `[generic-county] ${doc}: structured PDF parse → ${structured.length} lot(s) [${kind}]`,
         );
         return structured;
       }
       try {
-        const result = await extractLots(text, { ...context, sourceUrl: pdf });
+        const result = await extractLots(text, { ...context, sourceUrl: doc });
         if (result.containsParcelList && result.lots.length) {
           auction.listingKind = kind;
           return result.lots;
@@ -240,26 +251,69 @@ export const genericAdapter: SourceAdapter = {
           // would mark the county as having no inventory, which reads as a
           // fact and stops anyone investigating.
           throw new Error(
-            `${pdf} needs LLM extraction — ${e.message} — ` +
+            `${doc} needs LLM extraction — ${e.message} — ` +
               `${context.countyName} left unresolved rather than recorded as empty`,
           );
         }
         throw e;
       }
+      return null;
+    };
+
+    // 2. Documents on the page itself, decoys filtered and sale lists first.
+    for (const { url: doc, kind } of documentLinks($, auction.sourceUrl).slice(0, 4)) {
+      const lots = await lotsFromDocument(doc, kind);
+      if (lots?.length) return lots;
     }
 
-    // 3. One hop to a linked "current tax sale list" page. Many landing pages
-    //    carry no parcels themselves, and following one link finds the list
-    //    without a hand-written rule per jurisdiction.
-    for (const link of listPageLinks($, auction.sourceUrl).slice(0, 2)) {
-      try {
-        const sub = await politeFetch(link);
-        const $sub = cheerio.load(sub.body);
-        const subTable = parseHtmlTable($sub, link);
-        if (subTable?.length) return subTable;
-      } catch (e) {
-        console.warn(`[generic-county] ${link}: ${e instanceof Error ? e.message : e}`);
+    /*
+     * 3. Dig. Many landing pages carry no parcels themselves and no document
+     *    either — the list is one or two clicks further in, behind "2026 Tax
+     *    Sale" or "Current Listings".
+     *
+     *    The hop used to try only HTML tables on the linked page, which meant
+     *    a county whose landing page links to a sale page that links to a PDF
+     *    was unreachable — and that is the ordinary shape, not an exotic one.
+     *    Each hop now tries the table AND the documents, and there are two
+     *    hops rather than one.
+     *
+     *    Depth is capped at two deliberately. A third hop reaches the whole
+     *    county website, where "Sheriff's Sales" and "Surplus Property" live,
+     *    and the cost of opening the wrong list is not a wasted request — it
+     *    is a delinquent roll in the database wearing a sale's name.
+     */
+    const visited = new Set<string>([auction.sourceUrl]);
+    let frontier = listPageLinks($, auction.sourceUrl).slice(0, 3);
+
+    for (let hop = 0; hop < 2 && frontier.length; hop++) {
+      const next: string[] = [];
+      for (const link of frontier.slice(0, 3)) {
+        if (visited.has(link)) continue;
+        visited.add(link);
+        try {
+          const sub = await politeFetch(link);
+          const $sub = cheerio.load(sub.body);
+
+          const subTable = parseHtmlTable($sub, link);
+          if (subTable?.length) return subTable;
+
+          for (const { url: doc, kind } of documentLinks($sub, link).slice(0, 3)) {
+            if (visited.has(doc)) continue;
+            visited.add(doc);
+            try {
+              const lots = await lotsFromDocument(doc, kind);
+              if (lots?.length) return lots;
+            } catch (e) {
+              console.warn(`[generic-county] ${doc}: ${e instanceof Error ? e.message : e}`);
+            }
+          }
+
+          if (hop === 0) next.push(...listPageLinks($sub, link).slice(0, 3));
+        } catch (e) {
+          console.warn(`[generic-county] ${link}: ${e instanceof Error ? e.message : e}`);
+        }
       }
+      frontier = next;
     }
 
     // 4. Nothing published. Legitimate and common — not every county holds a

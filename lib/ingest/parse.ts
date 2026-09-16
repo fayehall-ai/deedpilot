@@ -208,6 +208,64 @@ export interface ClassifiedPdfLink {
  * publishes a delinquent list, that fact survives into the database instead of
  * being flattened into "an auction".
  */
+/**
+ * Document routes that serve a PDF without saying so in the URL.
+ *
+ * `a[href*=".pdf"]` is how this file found documents, and it is why Bryan
+ * County, Georgia reads as publishing nothing. Its sale list is at
+ * `/home/showpublisheddocument/15816/639245484317730000` — a CivicPlus route
+ * with no extension anywhere in it. CivicPlus, Granicus and Revize between
+ * them run a large share of US county sites and all three serve documents by
+ * id, so the extension test was not a narrow miss; it was blind to a whole
+ * class of county website.
+ *
+ * These are candidates, not conclusions. A URL matching one of these is
+ * fetched and believed only if it comes back as a PDF — see `isPdfResponse`.
+ */
+const DOC_ROUTE =
+  /(showpublisheddocument|documentcenter\/view|\/download\b|[?&](file|doc|document)(id|_id)?=|\/media\/|attachment|viewdocument|getdocument)/i;
+
+/** A response is a PDF if it says so, or if its first bytes say so. */
+export function isPdfResponse(contentType: string | null, head: string): boolean {
+  if (/application\/pdf/i.test(contentType ?? "")) return true;
+  return head.startsWith("%PDF-");
+}
+
+/**
+ * Links that might be a document, whether or not the URL admits it.
+ *
+ * Returned in the same ranked order as `classifiedPdfLinks`, with the ones
+ * that name a `.pdf` first — those need no verification, and trying them
+ * before the id-routes means the common case costs no extra requests.
+ */
+export function documentLinks(
+  $: cheerio.CheerioAPI,
+  pageUrl: string,
+): ClassifiedPdfLink[] {
+  const named = classifiedPdfLinks($, pageUrl);
+  const seen = new Set(named.map((l) => l.url));
+  const extra: { url: string; score: number; kind: ListingKind }[] = [];
+
+  $("a[href]").each((_, a) => {
+    const href = $(a).attr("href");
+    if (!href || /\.pdf($|[?#])/i.test(href)) return;
+    if (!DOC_ROUTE.test(href)) return;
+    const label = `${$(a).text()} ${href}`;
+    if (EXCLUDE_LINKS.test(label)) return;
+    try {
+      const url = new URL(href, pageUrl).toString();
+      if (seen.has(url)) return;
+      seen.add(url);
+      extra.push({ url, score: linkScore(label), kind: classifyListingLink(label) });
+    } catch {
+      /* malformed href — skip */
+    }
+  });
+
+  extra.sort((a, b) => b.score - a.score);
+  return [...named, ...extra.map((e) => ({ url: e.url, kind: e.kind }))];
+}
+
 export function classifiedPdfLinks(
   $: cheerio.CheerioAPI,
   pageUrl: string,

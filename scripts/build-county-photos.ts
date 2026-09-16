@@ -74,14 +74,47 @@ function toEntry(p: Record<string, unknown>, source: Entry["source"]): Entry | n
   };
 }
 
+/**
+ * Counties where Commons refused to answer, as distinct from counties with
+ * nothing to find. Reported at the end so a throttled run can never again be
+ * read as an empty one.
+ */
+const refused: string[] = [];
+
 async function fallback(county: string, state: string): Promise<Entry[]> {
   const q = `${county} County ${state} courthouse`;
   const url =
     "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search" +
     `&gsrsearch=${encodeURIComponent(q)}&gsrnamespace=6&gsrlimit=25` +
     "&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1920";
-  const res = await fetch(url, { headers: UA });
-  if (!res.ok) return [];
+
+  /*
+   * Retry, and say so when it still fails.
+   *
+   * This file's header already recorded that Commons throttles a fast run —
+   * 87 hits in 3,146 attempts — and the response was to slow down. That was
+   * not enough: a 192-county pass at 400ms found 16, and every one of the 176
+   * misses looked identical to a county with no photograph. Shawnee, Harris
+   * and Brevard all shipped a briefing with no imagery on that basis, and all
+   * three have a safely-licensed courthouse photo that the same request
+   * returns on the next try.
+   *
+   * A refusal and an absence are different facts. Retrying turns most refusals
+   * into answers; recording the rest stops the remainder being mistaken for
+   * absence.
+   */
+  let res: Response | null = null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    res = await fetch(url, { headers: UA });
+    if (res.ok) break;
+    /* 429 and 5xx are worth waiting out; a 404 is not. */
+    if (res.status !== 429 && res.status < 500) break;
+    await new Promise((r) => setTimeout(r, 1500 * 2 ** attempt));
+  }
+  if (!res || !res.ok) {
+    refused.push(`${county}, ${state}${res ? ` (HTTP ${res.status})` : ""}`);
+    return [];
+  }
   const d = (await res.json()) as { query?: { pages?: Record<string, Record<string, unknown>> } };
   const pages = Object.values(d.query?.pages ?? {});
   /*
@@ -183,9 +216,16 @@ async function main() {
       found++;
     }
     if (n % 25 === 0) process.stdout.write(`  fallback ${n}/${needFallback.length} (found ${found})\r`);
-    await new Promise((r) => setTimeout(r, 400)); // polite to Commons, and not throttled
+    await new Promise((r) => setTimeout(r, 900)); // Commons throttles below about this
   }
   console.log(`\nfallback found: ${found}`);
+  if (refused.length) {
+    console.log(
+      `\n${refused.length} county(s) were REFUSED by Commons, not found empty — ` +
+      `re-run to pick them up:`);
+    for (const r of refused.slice(0, 12)) console.log(`  ${r}`);
+    if (refused.length > 12) console.log(`  …and ${refused.length - 12} more`);
+  }
   writeFileSync("data/county-photos.json", JSON.stringify(out));
   const total = Object.values(out).reduce((n, v) => n + v.length, 0);
   console.log(`counties with a safe photo: ${Object.keys(out).length}   photographs: ${total}`);
