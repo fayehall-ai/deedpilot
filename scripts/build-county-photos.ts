@@ -39,6 +39,41 @@ const SAFE = /^(public domain|cc0|cc by [0-9.]+|no restrictions|copyrighted free
 /* Commons holds books and scans in the same namespace; only bitmaps are usable. */
 const IS_PHOTO = /\.(jpe?g|png)$/i;
 
+/**
+ * Safely licensed, of the right building, and still the wrong image.
+ *
+ * Shawnee County's first pick was "Shawnee County Courthouse, by Leonard &
+ * Martin" — public domain, correctly named, genuinely the courthouse, and a
+ * Victorian stereoscopic card: the same building printed twice side by side
+ * with the mount's yellowed border in frame. It went into a 2026 briefing.
+ *
+ * Nothing in the filename says so. The signal is in the metadata Commons
+ * already returns — the file sits in "Robert N. Dennis collection of
+ * stereoscopic views" and "Topeka, Kansas, in the 19th century", is catalogued
+ * as an artwork rather than a photograph, and carries a PD-scan tag and a date
+ * of "1869?-1880?".
+ *
+ * So the test is over everything Commons says about the file, not just its
+ * name. A scan of a physical artefact, an engraving, a postcard or a
+ * nineteenth-century view is a fine thing and not what belongs behind a title
+ * card about next month's auction.
+ */
+const NOT_A_USABLE_PHOTO =
+  /stereo(scop|graph|view)|lithograph|engrav|woodcut|etching|\bdrawing\b|\bsketch\b|\bpainting\b|postcard|\bplate\b|illustration|pd-scan|artworks?\b|19th century|18[0-9]{2}s?\b|\bmap\b|\bseal\b|\bflag\b|coat of arms|\blogo\b/i;
+
+/** Everything Commons will tell us about a file, as one string to test. */
+function provenance(meta: Record<string, { value?: string }>, title: string): string {
+  const field = (k: string) => String(meta[k]?.value ?? "").replace(/<[^>]+>/g, " ");
+  return [
+    title,
+    field("Categories"),
+    field("ObjectName"),
+    field("ImageDescription"),
+    field("DateTimeOriginal"),
+    field("Credit"),
+  ].join(" ");
+}
+
 interface Entry { file: string; url: string; licence: string; credit: string; source: "wikidata" | "commons"; }
 
 /** How many photographs are worth keeping for one county. */
@@ -64,6 +99,8 @@ function toEntry(p: Record<string, unknown>, source: Entry["source"]): Entry | n
   if (!SAFE.test(licence)) return null;
   const title = String(p.title ?? "");
   if (!IS_PHOTO.test(title)) return null;
+  /* Right building, wrong artefact — see NOT_A_USABLE_PHOTO. */
+  if (NOT_A_USABLE_PHOTO.test(provenance(meta, title))) return null;
   const artist = strip(meta.Artist?.value ?? "") || "Wikimedia Commons";
   return {
     file: title.replace(/^File:/, ""),
@@ -80,6 +117,67 @@ function toEntry(p: Record<string, unknown>, source: Entry["source"]): Entry | n
  * read as an empty one.
  */
 const refused: string[] = [];
+
+/**
+ * The county seat, when the courthouse search comes back empty.
+ *
+ * Shawnee County, Kansas has exactly one usable modern photograph of its
+ * courthouse on Commons and it is CC BY-SA, which this file refuses. What is
+ * left is a Victorian stereoscopic card. Neither is what belongs behind a title
+ * card, and "no image" was the honest third option until it was clear that
+ * Topeka — the county seat, and a real city with a skyline — is photographed
+ * plentifully and freely.
+ *
+ * A picture of the seat is not a picture of the courthouse, and that is fine:
+ * the slide's job is to say where this sale is, and the county seat says it.
+ *
+ * Kept as a fallback rather than a peer, because the courthouse is the better
+ * answer when it exists — it is the building the sale is usually held at.
+ */
+async function seatFallback(seat: string, state: string): Promise<Entry[]> {
+  const out: Entry[] = [];
+  for (const q of [`${seat} ${state} downtown`, `${seat} ${state} skyline`, `${seat} ${state}`]) {
+    for (const e of await searchCommons(q, seat)) {
+      if (!out.some((x) => x.file === e.file)) out.push(e);
+      if (out.length >= PER_COUNTY) return out;
+    }
+    await new Promise((r) => setTimeout(r, 900));
+  }
+  return out;
+}
+
+/** One Commons search, filtered. Shared by the courthouse and seat passes. */
+async function searchCommons(q: string, mustName: string): Promise<Entry[]> {
+  const url =
+    "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search" +
+    `&gsrsearch=${encodeURIComponent(q)}&gsrnamespace=6&gsrlimit=25` +
+    "&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1920";
+  let res: Response | null = null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    res = await fetch(url, { headers: UA });
+    if (res.ok) break;
+    if (res.status !== 429 && res.status < 500) break;
+    await new Promise((r) => setTimeout(r, 1500 * 2 ** attempt));
+  }
+  if (!res || !res.ok) { refused.push(`${q}${res ? ` (HTTP ${res.status})` : ""}`); return []; }
+  const d = (await res.json()) as { query?: { pages?: Record<string, Record<string, unknown>> } };
+  const pages = Object.values(d.query?.pages ?? {});
+  /*
+   * Insist the file names the place. "Topeka Kansas courthouse" returns a
+   * Wabaunsee County courthouse, and a briefing that opens on the wrong
+   * county's building is worse than one that opens on type.
+   */
+  const named = pages.filter((p) =>
+    String(p.title ?? "").toLowerCase().includes(mustName.toLowerCase()));
+  const out: Entry[] = [];
+  const seen = new Set<string>();
+  for (const p of named) {
+    const e = toEntry(p, "commons");
+    if (e && !seen.has(e.file)) { seen.add(e.file); out.push(e); }
+    if (out.length >= PER_COUNTY) break;
+  }
+  return out;
+}
 
 async function fallback(county: string, state: string): Promise<Entry[]> {
   const q = `${county} County ${state} courthouse`;
@@ -208,7 +306,15 @@ async function main() {
   for (const [n, f] of needFallback.entries()) {
     const { county, state } = primary.get(f)!;
     if (!county || !state) continue;
-    const found_ = await fallback(county, state);
+    let found_ = await fallback(county, state);
+    if (!found_.length) {
+      const seat = seats[f]?.seat;
+      if (seat) {
+        await new Promise((r) => setTimeout(r, 900));
+        found_ = await seatFallback(seat, state);
+        if (found_.length) console.log(`\n  ${county}, ${state}: no usable courthouse photo — used ${seat}`);
+      }
+    }
     if (found_.length) {
       const merged = [...(out[f] ?? [])];
       for (const e of found_) if (!merged.some((x) => x.file === e.file)) merged.push(e);
