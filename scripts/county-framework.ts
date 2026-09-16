@@ -11,7 +11,7 @@
  * and inventory all change between them and those are the first eight rows of
  * the page. The statutory half is stable; the sale half is not.
  *
- * ## Why "all counties" means the 485 with a sale, not 3,142
+ * ## Why "all counties" means the ones with a sale in the window, not 3,142
  *
  * The document is anchored to an auction: its first eight rows are that sale's
  * date, venue, check-in window and format. A county with nothing scheduled has
@@ -19,6 +19,20 @@
  * shorter document, it is a misleading one. The statutory half of every county
  * — all 3,142 — already has a home on the Statutory Ground page; this is the
  * half that only exists when a sale does.
+ *
+ * ## The window: a week out, eight weeks wide
+ *
+ * `LEAD_DAYS` exists because a framework is a research instrument, and research
+ * needs time to be done. A document for a sale three days away cannot change
+ * what anybody does: the title search will not come back, the site visit will
+ * not happen, and the deposit is already late. Seven days is the same floor
+ * CAPE production uses for the same reason.
+ *
+ * `WEEKS` exists because the far end goes stale. A county can move a sale date,
+ * pull the list, or publish a venue two months out, and a framework written
+ * today for a sale in March asserts things nobody has checked recently. Eight
+ * weeks is far enough to plan a season and near enough that the sale notice it
+ * quotes is the one that will run.
  */
 import "../lib/env";
 import { db } from "../lib/db";
@@ -33,6 +47,11 @@ import { frameworkHtml, frameworkBook } from "../lib/framework/html";
 const arg = (n: string) => { const i = process.argv.indexOf(`--${n}`); return i !== -1 ? process.argv[i + 1] : undefined; };
 const flag = (n: string) => process.argv.includes(`--${n}`);
 const OUT = arg("out") ?? path.join("artifacts", "frameworks");
+
+/** Nearest a sale can be and still leave time to act on the document. */
+const LEAD_DAYS = Number(arg("lead") ?? 7);
+/** How far ahead to look, from the lead date. */
+const WEEKS = Number(arg("weeks") ?? 8);
 
 async function main() {
   const fips = arg("county");
@@ -52,16 +71,27 @@ async function main() {
     from auctions a
     join counties c on c.fips = a.county_fips
     where a.delisted_at is null
-      and a.sale_date >= current_date
+      ${date
+        /* A named date is an instruction, not a suggestion — the window does not apply. */
+        ? sql`and a.sale_date = ${date}::date`
+        /* Cast the bounds: `current_date + $1` on an untyped bind is ambiguous to Postgres. */
+        : sql`and a.sale_date >= current_date + (${LEAD_DAYS})::int
+              and a.sale_date <= current_date + (${LEAD_DAYS + WEEKS * 7})::int`}
       ${fips ? sql`and a.county_fips = ${fips}` : sql``}
       ${state ? sql`and c.state = ${state}` : sql``}
-      ${date ? sql`and a.sale_date = ${date}::date` : sql``}
     order by a.sale_date
   `)) as unknown as any[];
 
   if (rows.length === 0) {
-    console.error("No upcoming sale matches that.");
+    console.error(
+      date ? `No sale on ${date} matches that.`
+           : `No sale between ${LEAD_DAYS} and ${LEAD_DAYS + WEEKS * 7} days out matches that.`);
     process.exit(1);
+  }
+
+  if (!date) {
+    console.log(`Window: sales ${LEAD_DAYS} to ${LEAD_DAYS + WEEKS * 7} days out ` +
+                `(a week from now, ${WEEKS} weeks wide) — ${rows.length} sales\n`);
   }
 
   /*
