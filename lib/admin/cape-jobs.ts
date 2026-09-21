@@ -39,7 +39,7 @@ import { db } from "@/lib/db";
 import { capeProductions, runJobs } from "@/lib/db/schema";
 import { capePackageInputs } from "@/lib/cape/inputs";
 import { capeInputsHash } from "@/lib/cape/components";
-import { enqueue } from "./queue";
+import { enqueue, liveJob } from "./queue";
 
 export const CAPE_PREFIX = "cape-script:";
 
@@ -112,20 +112,14 @@ export async function enqueueCapeScripts(
     .filter((i) => currentFor.get(i.auctionId) !== wanted.get(i.auctionId))
     .map((i) => i.auctionId);
 
-  /*
-   * Live rows, so a job mid-flight is not queued a second time. `attempts` is
-   * checked too: a job that has exhausted its retries is finished with, and
-   * leaving it out of this set lets a later tick queue a fresh one rather than
-   * the package being stuck behind a dead row forever.
-   */
+  /* Live rows, so a job mid-flight is not queued a second time. See `liveJob`. */
   const live = await db
     .select({ adapter: runJobs.adapter })
     .from(runJobs)
     .where(
       and(
         sql`${runJobs.adapter} LIKE ${CAPE_PREFIX + "%"}`,
-        inArray(runJobs.status, ["queued", "leased"]),
-        sql`${runJobs.attempts} < 3`,
+        liveJob,
       ),
     );
   const busy = new Set(live.map((r) => capeAuctionId(r.adapter)));

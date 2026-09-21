@@ -57,8 +57,8 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { waitUntil } from "@vercel/functions";
-import { claimNext, completeJob, failJob } from "@/lib/admin/queue";
-import { capeAuctionId, enqueueCapeScripts, isCapeJob } from "@/lib/admin/cape-jobs";
+import { claimNext, completeJob, failJob, LANES, reapDeadJobs } from "@/lib/admin/queue";
+import { capeAuctionId, enqueueCapeScripts } from "@/lib/admin/cape-jobs";
 import { tokenMatches } from "@/lib/admin/token";
 import { capePackageInputs } from "@/lib/cape/inputs";
 import { produceCapePackage } from "@/lib/cape/produce";
@@ -177,6 +177,7 @@ export async function GET(req: NextRequest) {
   const link = Number(req.nextUrl.searchParams.get("link") ?? "0") || 0;
   const lane = req.nextUrl.searchParams.get("lane") ?? "1";
 
+  await reapDeadJobs();
   const fill = await enqueueCapeScripts();
 
   const wrote: string[] = [];
@@ -195,20 +196,8 @@ export async function GET(req: NextRequest) {
 
   async function worker() {
     while (left() > RESERVE_MS) {
-      const job = await claimNext();
+      const job = await claimNext(new Date(), LANES.cape);
       if (!job) return;
-
-      if (!isCapeJob(job.adapter)) {
-        /*
-         * Someone else's job, claimed because the queue is shared.
-         *
-         * Failing it would burn an attempt on work this route is not equipped
-         * to do and would eventually retire a perfectly good crawl. The lease
-         * is simply allowed to lapse — ten minutes later `/api/cron/dispatch`
-         * finds it exactly as it was.
-         */
-        return;
-      }
 
       const auctionId = capeAuctionId(job.adapter);
       try {

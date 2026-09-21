@@ -35,7 +35,10 @@
  */
 
 import "server-only";
-import { enqueue } from "./queue";
+import { and, sql } from "drizzle-orm";
+import { db } from "../db";
+import { runJobs } from "../db/schema";
+import { enqueue, liveJob } from "./queue";
 import { planIntelWork } from "@/lib/property/signals/scheduler";
 
 export const INTEL_PREFIX = "site-intel:";
@@ -50,35 +53,49 @@ export const INTEL_PRIORITY = -5;
 /**
  * Queue the most valuable enrichment fetches available right now.
  *
- * The cap is small on purpose. `enqueue` does not deduplicate across days, and
- * a daily tick that queues more than it can drain grows the queue forever —
- * the same trap `enqueuePlan` documents for county crawls. Tasks come back
- * priority-sorted, so a small cap takes the most perishable work and genuinely
- * leaves the rest: a parcel enriched today drops out of tomorrow's plan under
- * its source TTL, so the queue rotates rather than starving a fixed tail.
+ * The cap is small on purpose, and a fetch already waiting is not queued again.
+ * The dispatcher ticks every five minutes; before this check each tick added
+ * another ten jobs for the same top-ranked parcels, because a queued fetch has
+ * not run yet and so the planner still ranks its parcel first. Tasks come back
+ * priority-sorted, so the cap takes the most perishable work and leaves the
+ * rest: a parcel enriched today drops out of the plan under its source TTL, and
+ * the queue rotates rather than starving a fixed tail.
  */
 export async function enqueueIntel(opts: { maxTasks?: number } = {}): Promise<{
   enqueued: number;
   planned: number;
 }> {
   const maxTasks = opts.maxTasks ?? 10;
-  const tasks = await planIntelWork({ limit: maxTasks });
+  /* Plan past the cap, so parcels already waiting do not use up the whole of it. */
+  const tasks = await planIntelWork({ limit: maxTasks * 4 });
 
+  const waiting = await db
+    .select({ adapter: runJobs.adapter, requestedBy: runJobs.requestedBy })
+    .from(runJobs)
+    .where(and(sql`${runJobs.adapter} LIKE ${INTEL_PREFIX + "%"}`, liveJob));
+  const busy = new Set(waiting.map((w) => `${w.adapter}|${w.requestedBy}`));
+
+  let enqueued = 0;
   for (const task of tasks) {
+    if (enqueued >= maxTasks) break;
+    const adapter = intelAdapter(task.source);
+    const requestedBy = `intel:${task.lotId}`;
+    if (busy.has(`${adapter}|${requestedBy}`)) continue;
     await enqueue({
-      adapter: intelAdapter(task.source),
+      adapter,
       /*
        * The lot id rides in `requestedBy` rather than `countyFips`, which has a
        * foreign key to `counties` and would reject it. Not elegant, and the
        * alternative is a migration to add a nullable `lot_id` to a table that
        * is otherwise entirely about county-scoped crawls.
        */
-      requestedBy: `intel:${task.lotId}`,
+      requestedBy,
       priority: INTEL_PRIORITY,
     });
+    enqueued++;
   }
 
-  return { enqueued: tasks.length, planned: tasks.length };
+  return { enqueued, planned: tasks.length };
 }
 
 /** The lot id an intel job carries, or null when the row is malformed. */

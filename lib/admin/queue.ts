@@ -39,6 +39,62 @@ export const LEASE_MS = 10 * 60 * 1000;
 /** Give up after this many failed attempts rather than retrying forever. */
 export const MAX_ATTEMPTS = 3;
 
+/**
+ * Which kinds of job a worker may claim, by `adapter` prefix.
+ *
+ * One table, several workers, and each can only run some of what is in it. A
+ * worker used to claim the head of the queue whatever it was and then decide:
+ * the CAPE worker let a crawl's lease lapse (burning one of its three attempts
+ * and parking it for ten minutes), the dispatcher failed CAPE jobs as "unknown
+ * adapter", and the terminal drain failed research and intel jobs the same way.
+ * A lane is decided in the claim itself, so a worker never holds a job it
+ * cannot run.
+ */
+export interface Lane {
+  /** Claim only jobs whose adapter starts with one of these. */
+  only?: readonly string[];
+  /** Never claim jobs whose adapter starts with one of these. */
+  except?: readonly string[];
+}
+
+/* The job kinds with a worker of their own. Everything else is a county crawl. */
+const CAPE_SCRIPT = "cape-script:";
+const CAPE_VIDEO = "cape-video:";
+const RESEARCH = "auction-scout:";
+const INTEL = "site-intel:";
+
+export const LANES = {
+  /** `/api/cron/cape`: script writing, six at a time. */
+  cape: { only: [CAPE_SCRIPT] },
+  /** `/api/cron/render`: narration, slides and encode, one at a time. */
+  render: { only: [CAPE_VIDEO] },
+  /** `/api/cron/dispatch` and the console: crawls, research and site intel. */
+  dispatch: { except: [CAPE_SCRIPT, CAPE_VIDEO] },
+  /** The terminal drain, which can run a county crawl and nothing else. */
+  crawl: { except: [CAPE_SCRIPT, CAPE_VIDEO, RESEARCH, INTEL] },
+} as const satisfies Record<string, Lane>;
+
+function laneFilter(lane: Lane) {
+  const like = (prefixes: readonly string[]) =>
+    sql.join(prefixes.map((p) => sql`adapter LIKE ${p + "%"}`), sql` OR `);
+  return sql`${lane.only?.length ? sql`AND (${like(lane.only)})` : sql``}
+             ${lane.except?.length ? sql`AND NOT (${like(lane.except)})` : sql``}`;
+}
+
+/**
+ * Work that is still going to happen: queued, or leased and either within its
+ * lease or with a retry left.
+ *
+ * The "already queued?" checks used to read any `queued` or `leased` row as
+ * busy. A job killed by the platform on its third attempt stays `leased`
+ * forever — `claimNext` will not take it and nothing marks it failed — so its
+ * county was busy forever and never crawled again. `reapDeadJobs` now retires
+ * those rows; this predicate stops them blocking anything in the meantime.
+ */
+export const liveJob = sql`(${runJobs.status} = 'queued'
+  OR (${runJobs.status} = 'leased'
+      AND (${runJobs.leaseExpiresAt} > now() OR ${runJobs.attempts} < ${MAX_ATTEMPTS})))`;
+
 export interface EnqueueInput {
   adapter: string;
   countyFips?: string | null;
@@ -79,7 +135,7 @@ export async function enqueue(input: EnqueueInput): Promise<RunJob> {
  * has expired — the second case is a worker that died. Both are folded into
  * one statement so there is no window between deciding and claiming.
  */
-export async function claimNext(now = new Date()): Promise<RunJob | null> {
+export async function claimNext(now = new Date(), lane: Lane = {}): Promise<RunJob | null> {
   /*
    * Timestamps are bound as ISO strings with an explicit cast: the postgres
    * driver will not bind a JS Date inside a raw template and fails at encode
@@ -95,6 +151,7 @@ export async function claimNext(now = new Date()): Promise<RunJob | null> {
              OR (status = 'leased' AND lease_expires_at IS NOT NULL
                  AND lease_expires_at < ${nowIso}::timestamptz))
         AND attempts < ${MAX_ATTEMPTS}
+        ${laneFilter(lane)}
       ORDER BY priority DESC, created_at ASC
       FOR UPDATE SKIP LOCKED
       LIMIT 1
@@ -245,6 +302,29 @@ export async function getQueue(limit = 25): Promise<QueueView> {
 
 export async function getSchedules() {
   return db.select().from(runSchedules).orderBy(asc(runSchedules.adapter));
+}
+
+/**
+ * Retire jobs whose worker died on every attempt.
+ *
+ * A job the platform kills never reaches `failJob`: it stays `leased`, and once
+ * its third lease lapses `claimNext` will not take it again. Without this it
+ * sits there for good, unclaimable and unfailed, invisible on the console's
+ * failed count and — until `liveJob` — blocking its county from ever being
+ * queued again.
+ */
+export async function reapDeadJobs(): Promise<number> {
+  const rows = (await db.execute(sql`
+    UPDATE run_jobs
+       SET status = 'failed',
+           finished_at = now(),
+           last_error = COALESCE(last_error || ' — ', '') || 'worker died on every attempt'
+     WHERE status = 'leased'
+       AND attempts >= ${MAX_ATTEMPTS}
+       AND lease_expires_at < now()
+     RETURNING id
+  `)) as unknown as { id: string }[];
+  return rows.length;
 }
 
 /**

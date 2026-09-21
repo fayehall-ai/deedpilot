@@ -39,7 +39,7 @@ import "../lib/env";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../lib/db";
 import { runJobs } from "../lib/db/schema";
-import { claimNext, completeJob, failJob, reapStuckRuns } from "../lib/admin/queue";
+import { claimNext, completeJob, failJob, LANES, reapDeadJobs, reapStuckRuns } from "../lib/admin/queue";
 import { getAdapter } from "../lib/ingest/adapters";
 import { runAdapter } from "../lib/ingest/runner";
 import { loadPolicyOverrides } from "../lib/admin/policy-load";
@@ -160,6 +160,8 @@ async function main(): Promise<void> {
   }
   const reaped = await reapStuckRuns();
   if (reaped) console.log(`reaped ${reaped} stuck run(s)`);
+  const dead = await reapDeadJobs();
+  if (dead) console.log(`retired ${dead} job(s) whose worker died on every attempt`);
 
   const [{ n: queued }] = await db
     .select({ n: sql<number>`count(*)::int` })
@@ -173,7 +175,7 @@ async function main(): Promise<void> {
   const started = Date.now();
 
   while (!stopping && done < max) {
-    const job = await claimNext();
+    const job = await claimNext(new Date(), LANES.crawl);
 
     if (!job) {
       if (!follow) break;

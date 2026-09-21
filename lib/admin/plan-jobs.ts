@@ -11,7 +11,7 @@ import { runJobs } from "@/lib/db/schema";
 import { ALL_COUNTIES } from "@/lib/atlas";
 import { loadRegistry } from "@/lib/ingest/adapters/generic";
 import { planScoutRun, type CountyHealth, type ScoutPlan } from "@/lib/scout";
-import { enqueue } from "./queue";
+import { enqueue, liveJob } from "./queue";
 import { asDeskDay, deskDate } from "../desk-time";
 
 /**
@@ -122,10 +122,7 @@ export async function enqueuePlan(opts: { maxTasks?: number; on?: Date } = {}): 
     .select({ countyFips: runJobs.countyFips })
     .from(runJobs)
     .where(
-      and(
-        inArray(runJobs.status, ["queued", "leased"]),
-        inArray(runJobs.countyFips, fipsList),
-      ),
+      and(liveJob, inArray(runJobs.countyFips, fipsList)),
     );
   const busy = new Set(live.map((r) => r.countyFips).filter(Boolean) as string[]);
 

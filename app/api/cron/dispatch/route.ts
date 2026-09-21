@@ -27,27 +27,23 @@
  * a Pro plan.
  */
 import { NextResponse, type NextRequest } from "next/server";
-import { getAdapter } from "@/lib/ingest/adapters";
-import { runAdapter } from "@/lib/ingest/runner";
 import {
   claimNext,
-  completeJob,
   enqueueDueSchedules,
-  failJob,
+  LANES,
+  reapDeadJobs,
   reapStuckRuns,
 } from "@/lib/admin/queue";
+import { runQueuedJob } from "@/lib/admin/run-job";
 import { tokenMatches } from "@/lib/admin/token";
 import { loadPolicyOverrides } from "@/lib/admin/policy-load";
-import { enqueueWeeklyResearch, isScoutJob, scoutState } from "@/lib/admin/scout-jobs";
+import { enqueueWeeklyResearch } from "@/lib/admin/scout-jobs";
 import { enqueuePlan, planGaps } from "@/lib/admin/plan-jobs";
-import { enqueueIntel, intelLotId, intelSource, isIntelJob } from "@/lib/admin/intel-jobs";
-import { configuredSignalSources, enrichLotIntel } from "@/lib/property/signals";
+import { enqueueIntel } from "@/lib/admin/intel-jobs";
 import { getPipelineConfig } from "@/lib/admin/pipeline-settings";
 
 /** Thrown to skip planning without logging it as a fault. */
 class SkipPlanning extends Error {}
-import { getScoutPrompt } from "@/lib/admin/scout-prompt";
-import { scoutState as researchState } from "@/lib/ai/scout-report";
 
 /*
  * Fluid Compute allows far longer than the old 60s ceiling. The budget below
@@ -99,6 +95,8 @@ export async function GET(req: NextRequest) {
 
   const reaped = await reapStuckRuns(60);
   if (reaped > 0) log.push(`reaped ${reaped} abandoned ingest_runs`);
+  const dead = await reapDeadJobs();
+  if (dead > 0) log.push(`retired ${dead} job(s) whose worker died on every attempt`);
   const promoted = await enqueueDueSchedules();
   if (promoted > 0) log.push(`enqueued ${promoted} due schedule(s)`);
 
@@ -176,94 +174,11 @@ export async function GET(req: NextRequest) {
   }
 
   while (Date.now() - started < BUDGET_MS - RESERVE_MS) {
-    const job = await claimNext();
+    const job = await claimNext(new Date(), LANES.dispatch);
     if (!job) break;
-
-    /*
-     * Auction Scout research runs, which are not adapters and have no county
-     * to crawl — the state is carried in the job name. Handled before the
-     * adapter lookup because `getAdapter` would reject them as unknown and
-     * fail a job that is perfectly well formed.
-     *
-     * Errors are NOT swallowed into an empty report. A searched call that
-     * cannot reach a browsing provider must fail the job loudly, because the
-     * alternative is a report that looks complete and is simply blank for
-     * that state — the one outcome nobody would think to question.
-     */
-    if (isScoutJob(job.adapter)) {
-      const state = scoutState(job.adapter);
-      try {
-        // The edited brief, read per job rather than per tick, so a prompt
-        // saved while the queue is draining takes effect on the next state.
-        const { template } = await getScoutPrompt();
-        const result = await researchState(state, { template });
-        await completeJob(job.id, result as unknown as Record<string, unknown>);
-        log.push(
-          `${job.adapter}: ${result.report.rows.length} rows from ${result.searchCount} searches ` +
-            `across ${result.report.countiesChecked} counties`,
-        );
-        done.push({ job: job.id, adapter: job.adapter, rows: result.report.rows.length });
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        await failJob(job.id, msg);
-        log.push(`${job.adapter}: ${msg}`);
-        done.push({ job: job.id, adapter: job.adapter, error: msg });
-      }
-      continue;
-    }
-
-    /*
-     * Site-intel fetches, which are not adapters and have no county to crawl.
-     * Handled before the adapter lookup for the same reason scout jobs are:
-     * `getAdapter` would reject a perfectly well-formed job as unknown.
-     */
-    if (isIntelJob(job.adapter)) {
-      const lotId = intelLotId(job.requestedBy);
-      const source = intelSource(job.adapter);
-      if (!lotId) {
-        await failJob(job.id, `intel job carries no lot id: ${job.requestedBy}`);
-        continue;
-      }
-      try {
-        const sources = configuredSignalSources().filter((s) => s.name === source);
-        const result = await enrichLotIntel(lotId, { sources });
-        await completeJob(job.id, result as unknown as Record<string, unknown>);
-        log.push(`${job.adapter}: ${result.totalSignals} signal(s) for ${lotId.slice(0, 8)}`);
-        done.push({ job: job.id, adapter: job.adapter, signals: result.totalSignals });
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        await failJob(job.id, msg);
-        log.push(`${job.adapter}: ${msg}`);
-        done.push({ job: job.id, adapter: job.adapter, error: msg });
-      }
-      continue;
-    }
-
-    const adapter = getAdapter(job.adapter);
-    if (!adapter) {
-      await failJob(job.id, `unknown adapter: ${job.adapter}`);
-      log.push(`${job.adapter}: unknown adapter`);
-      continue;
-    }
-
-    try {
-      const summary = await runAdapter(adapter, {
-        countyFips: job.countyFips ?? undefined,
-        limit: job.limit ?? undefined,
-        dryRun: job.dryRun,
-        onProgress: (m) => log.push(m),
-      });
-      await completeJob(job.id, {
-        counties: summary.counties.length,
-        ...summary.totals,
-      });
-      done.push({ job: job.id, adapter: job.adapter, lots: summary.totals.lots });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      await failJob(job.id, msg);
-      log.push(`${job.adapter}: ${msg}`);
-      done.push({ job: job.id, adapter: job.adapter, error: msg });
-    }
+    const outcome = await runQueuedJob(job, { onProgress: (m) => log.push(m) });
+    log.push(outcome.line);
+    done.push({ job: outcome.job, adapter: outcome.adapter, ...outcome.detail });
   }
 
   return NextResponse.json({

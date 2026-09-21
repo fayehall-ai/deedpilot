@@ -15,8 +15,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { runSchedules, sourceOverrides, policyOverrides } from "@/lib/db/schema";
 import { currentActor, isAdmin } from "@/lib/admin/auth";
-import { audit, cancelJob, claimNext, completeJob, enqueue, failJob, inFlightFor } from "@/lib/admin/queue";
-import { runAdapter } from "@/lib/ingest/runner";
+import { audit, cancelJob, claimNext, enqueue, inFlightFor, LANES } from "@/lib/admin/queue";
+import { runQueuedJob } from "@/lib/admin/run-job";
 import { getAdapter } from "@/lib/ingest/adapters";
 import { clearOverrides, isOverridable, setOverrides } from "@/lib/admin/auction-overrides";
 import { backlogStates, buildPlan, enqueuePlan } from "@/lib/admin/plan-jobs";
@@ -361,26 +361,11 @@ export async function drainQueueNow(): Promise<void> {
   let failed = 0;
 
   while (ran + failed < DRAIN_MAX_JOBS && Date.now() - started < DRAIN_BUDGET_MS) {
-    const job = await claimNext();
+    const job = await claimNext(new Date(), LANES.dispatch);
     if (!job) break;
-    try {
-      const adapter = getAdapter(job.adapter);
-      if (!adapter) {
-        await failJob(job.id, `unknown adapter ${job.adapter}`);
-        failed++;
-        continue;
-      }
-      const summary = await runAdapter(adapter, {
-        countyFips: job.countyFips ?? undefined,
-        limit: job.limit ?? undefined,
-        dryRun: job.dryRun,
-      });
-      await completeJob(job.id, summary as unknown as Record<string, unknown>);
-      ran++;
-    } catch (e) {
-      await failJob(job.id, e instanceof Error ? e.message : String(e));
-      failed++;
-    }
+    const outcome = await runQueuedJob(job);
+    if (outcome.ok) ran++;
+    else failed++;
   }
 
   await auditAs("queue.drain_now", null, { ran, failed, ms: Date.now() - started });

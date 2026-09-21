@@ -3,7 +3,7 @@ import { db } from "../db";
 import { auctions, runJobs } from "../db/schema";
 import { buildAdapterIndex, sourceIndexFromRegistry } from "../scout";
 import { loadRegistry } from "../ingest/adapters/generic";
-import { enqueue } from "../admin/queue";
+import { enqueue, liveJob } from "../admin/queue";
 
 /**
  * Filling in what an imported sale calendar does not contain.
@@ -124,7 +124,7 @@ export async function enqueueImportEnrichment(
     .from(runJobs)
     .where(
       and(
-        inArray(runJobs.status, ["queued", "leased"]),
+        liveJob,
         inArray(
           runJobs.countyFips,
           pending.map((p) => p.countyFips),

@@ -30,7 +30,9 @@
 import "../env";
 import { sql } from "drizzle-orm";
 import { db } from "../db";
-import { claimNext, completeJob, enqueue, failJob, getQueue, MAX_ATTEMPTS } from "./queue";
+import { claimNext, completeJob, enqueue, failJob, getQueue, LANES, liveJob, MAX_ATTEMPTS, reapDeadJobs } from "./queue";
+import { runJobs } from "../db/schema";
+import { and, eq as same } from "drizzle-orm";
 
 let passed = 0;
 function assert(cond: unknown, msg: string) {
@@ -124,6 +126,46 @@ async function main() {
 
   const q = await getQueue(5);
   assert(q.failed >= 1, "the exhausted job is recorded as failed");
+
+  // --- a worker only claims its own lane -------------------------------------
+
+  /* Release a claim that is not one of ours, as `claimIsOurs` does. */
+  const release = async (c: { id: string; requestedBy: string } | null) => {
+    if (c && c.requestedBy !== TAG) {
+      await db.execute(
+        sql`UPDATE run_jobs SET status = 'queued', lease_expires_at = NULL,
+            attempts = greatest(attempts - 1, 0) WHERE id = ${c.id}`,
+      );
+    }
+  };
+  const script = await enqueue({ adapter: "cape-script:00000000-test", requestedBy: TAG, priority: 10_000 });
+  const crawlClaim = await claimNext(new Date(), LANES.dispatch);
+  assert(crawlClaim?.id !== script.id, "the dispatch lane does not claim a CAPE script job");
+  await release(crawlClaim);
+  const capeClaim = await claimNext(new Date(), LANES.cape);
+  assert(capeClaim?.id === script.id, "the CAPE lane claims it");
+
+  const crawlJob = await enqueue({ adapter: "ga-counties", requestedBy: TAG, priority: 10_000 });
+  const capeWrong = await claimNext(new Date(), LANES.cape);
+  assert(capeWrong?.id !== crawlJob.id, "the CAPE lane does not claim a crawl");
+  await release(capeWrong);
+  const research = await enqueue({ adapter: "auction-scout:ZZ", requestedBy: TAG, priority: 20_000 });
+  const terminal = await claimNext(new Date(), LANES.crawl);
+  assert(terminal?.id !== research.id, "the terminal crawl lane does not claim research");
+  assert(terminal?.id === crawlJob.id, "it claims the crawl instead");
+
+  // --- a job whose worker died on every attempt is retired -------------------
+
+  const ghost = await enqueue({ adapter: "ga-counties", requestedBy: TAG, priority: 10_000 });
+  await db.execute(
+    sql`UPDATE run_jobs SET status = 'leased', attempts = ${MAX_ATTEMPTS},
+        lease_expires_at = now() - interval '1 minute' WHERE id = ${ghost.id}`,
+  );
+  const [ghostLive] = await db.select({ id: runJobs.id }).from(runJobs).where(and(same(runJobs.id, ghost.id), liveJob));
+  assert(!ghostLive, "a dead job is not counted as live work");
+  assert((await reapDeadJobs()) >= 1, "the reaper retires it");
+  const [ghostAfter] = await db.select({ status: runJobs.status }).from(runJobs).where(same(runJobs.id, ghost.id));
+  eq(ghostAfter.status, "failed", "and records it as failed");
 
   await db.execute(sql`DELETE FROM run_jobs WHERE requested_by = ${TAG}`);
   console.log(`queue.test.ts — ${passed} assertions passed`);
