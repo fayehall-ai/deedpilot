@@ -32,11 +32,17 @@ crawl sources and queues crawls. Anything it could not confirm waits for you.
 3. **Scout findings.** On the same page, *Scout findings waiting for you* lists
    sales the research could not confirm. **Approve** adds or fills the sale.
    **Dismiss** hides it for good.
-4. **Read the briefings** at **/cape/review**. If one is wrong, choose *Needs a
+4. **Missing parcels?** If a sale shows no parcels but the county publishes its
+   list on its own site (a page or a PDF), paste it into *Point the crawler at a
+   county's list* on the same page, as "Clayton, GA" plus the URL. The crawler
+   reads it within five minutes and every week after. It works for any county
+   no dedicated adapter covers. For one that is covered, the box tells you
+   which adapter owns it.
+5. **Read the briefings** at **/cape/review**. If one is wrong, choose *Needs a
    change* and say what it should say. Within the hour the script is rewritten
    with your note, and its video is re-rendered and replaced in Drive under the
    same name.
-5. **Drive.** The week's videos and frameworks are in CAPE/Video and
+6. **Drive.** The week's videos and frameworks are in CAPE/Video and
    CAPE/Framework, named as before. Attaching them to the GHL course is still
    done by hand.
 
@@ -77,8 +83,10 @@ Rough figures per item:
 - **Auction Scout findings waiting.** Approve or dismiss them (step 3 above).
 - **This week's enrichment budget is spent.** Paid lookups resume Monday. Raise
   the budget if the week needs more.
-- **Jobs failed this week.** A county site moved or a parser broke. *Recent runs*
-  carries the error. A developer fixes these.
+- **Jobs failed this week.** A county site moved, a parser broke, or a sale list
+  would not read. *Recent runs* carries the error. A list that will not read is
+  now reported as a failure rather than as an empty county. A developer fixes
+  these.
 - **Jobs never finished.** A job ran out of time on every attempt, usually one
   oversized county or state.
 - **Parcels still listed after their sale date.** These clear when the county is
