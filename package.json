@@ -48,7 +48,8 @@
     "intel:locate": "tsx scripts/backfill-parcel-geometry.ts",
     "cape:plan": "tsx scripts/cape-produce.ts --plan",
     "cape:produce": "tsx scripts/cape-produce.ts",
-    "export:statute": "tsx scripts/export-statute-json.ts"
+    "export:statute": "tsx scripts/export-statute-json.ts",
+    "scout:ingest": "tsx scripts/ingest-auction-scout.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
@@ -61,6 +62,7 @@
     "docx": "^9.7.1",
     "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
+    "jszip": "^3.10.2",
     "lucide-react": "^1.27.0",
     "next": "16.2.12",
     "openai": "^7.0.0",
