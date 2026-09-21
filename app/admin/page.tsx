@@ -210,7 +210,7 @@ async function Body({
         inventory, live inventory by state, and the operational detail the
         public page never showed.
       */}
-      <Collapsed label="Coverage and data health" defaultOpen={false}>
+      <Collapsed label="Coverage and data health" count={1}>
         <Suspense fallback={<TableSkeleton />}>
           <CoverageReport />
         </Suspense>
