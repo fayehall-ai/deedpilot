@@ -49,7 +49,8 @@
     "cape:plan": "tsx scripts/cape-produce.ts --plan",
     "cape:produce": "tsx scripts/cape-produce.ts",
     "export:statute": "tsx scripts/export-statute-json.ts",
-    "scout:ingest": "tsx scripts/ingest-auction-scout.ts"
+    "scout:ingest": "tsx scripts/ingest-auction-scout.ts",
+    "db:migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

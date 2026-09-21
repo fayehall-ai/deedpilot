@@ -19,6 +19,8 @@ import { getScoutPrompt } from "./scout-prompt";
 import { scoutState as researchState } from "../ai/scout-report";
 import { intelLotId, intelSource, isIntelJob } from "./intel-jobs";
 import { configuredSignalSources, enrichLotIntel } from "../property/signals";
+import { primeCountySources } from "../ingest/county-sources";
+import { ingestResearch } from "../import/scout-research";
 
 export interface JobOutcome {
   job: string;
@@ -57,10 +59,25 @@ export async function runQueuedJob(
       const { template } = await getScoutPrompt();
       const result = await researchState(scoutState(job.adapter), { template });
       await completeJob(job.id, result as unknown as Record<string, unknown>);
+
+      /*
+       * Into the calendar: confirmed official rows straight in, the rest onto
+       * Ed's review list. A failure here does not fail the research — the report
+       * is complete and stored, and the next run will try the ingest again.
+       */
+      let ingested = "";
+      try {
+        const i = await ingestResearch(result, job.id);
+        ingested =
+          `; calendar: ${i.applied.inserted} new, ${i.applied.filled} filled, ` +
+          `${i.heldForReview} held for review, ${i.sourcesAdded} list link(s) added`;
+      } catch (e) {
+        ingested = `; calendar ingest failed: ${e instanceof Error ? e.message : String(e)}`;
+      }
       return outcome(
         true,
         `${result.report.rows.length} rows from ${result.searchCount} searches across ` +
-          `${result.report.countiesChecked} counties`,
+          `${result.report.countiesChecked} counties${ingested}`,
         { rows: result.report.rows.length },
       );
     }
@@ -80,6 +97,7 @@ export async function runQueuedJob(
 
     const adapter = getAdapter(job.adapter);
     if (!adapter) return fail(`unknown adapter: ${job.adapter}`);
+    await primeCountySources();
     const summary = await runAdapter(adapter, {
       countyFips: job.countyFips ?? undefined,
       limit: job.limit ?? undefined,

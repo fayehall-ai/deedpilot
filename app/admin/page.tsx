@@ -19,6 +19,8 @@ import { whatNeedsAttention } from "@/lib/admin/attention";
 import { DiscoverSummary, FunnelBars, PriceSummary, SummaryPending } from "./coverage-summary";
 import { EnrichmentPanel } from "./enrichment-panel";
 import { ImportPanel } from "./import-panel";
+import { ScoutWorkbookPanel } from "./scout-workbook-panel";
+import { ScoutFindingsPanel } from "./scout-findings-panel";
 import { ImportHistoryPanel } from "./import-history-panel";
 import { OpsPanel } from "./ops-panel";
 import { StatutePanel } from "./statute-panel";
@@ -240,6 +242,18 @@ async function Body({
             does this county publish", which is the same question one step
             later; an uploaded calendar answers "which sales are there at all".
           */}
+          {/*
+            Ed's expanded Auction Scout workbook, which used to need a terminal.
+            First because it is the calendar's main feed.
+          */}
+          <Card>
+            <h2 className="mb-1 text-base font-semibold">Upload the Auction Scout workbook</h2>
+            <p className="mb-3 text-sm text-muted">
+              Adds the sales the calendar is missing and fills venue, contact and parcel counts on the
+              ones it holds. Never overwrites what a county or another import published.
+            </p>
+            <ScoutWorkbookPanel />
+          </Card>
           <Card>
             <h2 className="mb-1 text-base font-semibold">Import a sale calendar</h2>
             <p className="mb-3 text-sm text-muted">
@@ -260,6 +274,9 @@ async function Body({
           </Suspense>
           <Suspense fallback={<TableSkeleton />}>
             <ScoutPanel />
+          </Suspense>
+          <Suspense fallback={<TableSkeleton />}>
+            <ScoutFindingsPanel />
           </Suspense>
           <LabelQueuePanel />
         </Stage>

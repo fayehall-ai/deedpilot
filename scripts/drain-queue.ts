@@ -43,6 +43,7 @@ import { claimNext, completeJob, failJob, LANES, reapDeadJobs, reapStuckRuns } f
 import { getAdapter } from "../lib/ingest/adapters";
 import { runAdapter } from "../lib/ingest/runner";
 import { loadPolicyOverrides } from "../lib/admin/policy-load";
+import { primeCountySources } from "../lib/ingest/county-sources";
 import {
   coverageBreakdown,
   foldSupersededImports,
@@ -127,6 +128,7 @@ async function main(): Promise<void> {
 
   // The same access decisions the dispatcher loads before it crawls anything.
   await loadPolicyOverrides();
+  await primeCountySources();
 
   const max = Number(arg("max") ?? Infinity);
   const follow = flag("follow");

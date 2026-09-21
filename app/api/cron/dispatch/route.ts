@@ -41,6 +41,8 @@ import { enqueueWeeklyResearch } from "@/lib/admin/scout-jobs";
 import { enqueuePlan, planGaps } from "@/lib/admin/plan-jobs";
 import { enqueueIntel } from "@/lib/admin/intel-jobs";
 import { getPipelineConfig } from "@/lib/admin/pipeline-settings";
+import { primeCountySources } from "@/lib/ingest/county-sources";
+import { foldSupersededImports } from "@/lib/import/reconcile";
 
 /** Thrown to skip planning without logging it as a fault. */
 class SkipPlanning extends Error {}
@@ -97,6 +99,8 @@ export async function GET(req: NextRequest) {
   if (reaped > 0) log.push(`reaped ${reaped} abandoned ingest_runs`);
   const dead = await reapDeadJobs();
   if (dead > 0) log.push(`retired ${dead} job(s) whose worker died on every attempt`);
+  /* List pages the Auction Scout found, laid over the committed registry. */
+  await primeCountySources();
   const promoted = await enqueueDueSchedules();
   if (promoted > 0) log.push(`enqueued ${promoted} due schedule(s)`);
 
@@ -179,6 +183,19 @@ export async function GET(req: NextRequest) {
     const outcome = await runQueuedJob(job, { onProgress: (m) => log.push(m) });
     log.push(outcome.line);
     done.push({ job: outcome.job, adapter: outcome.adapter, ...outcome.detail });
+  }
+
+  /*
+   * Merge announcements into the crawls that superseded them — an imported or
+   * Scout sale and the crawl that found its parcels, same county, same day.
+   * Cheap, idempotent, and it used to run only at the end of the terminal
+   * drain, so in production the two rows sat side by side indefinitely.
+   */
+  try {
+    const fold = await foldSupersededImports();
+    if (fold.folded) log.push(`folded ${fold.folded} announcement(s) into their crawls`);
+  } catch (e) {
+    log.push(`fold failed: ${e instanceof Error ? e.message : String(e)}`);
   }
 
   return NextResponse.json({
