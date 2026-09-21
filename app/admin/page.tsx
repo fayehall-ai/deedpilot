@@ -31,6 +31,7 @@ import { InventoryPanel } from "./inventory-panel";
 import { LabelQueuePanel } from "./label-queue-panel";
 import { PipelinePanel } from "./pipeline-panel";
 import { CadencePanel } from "./cadence-panel";
+import { CoverageReport } from "@/components/coverage-report";
 
 export const metadata: Metadata = {
   title: "Operations",
@@ -201,6 +202,19 @@ async function Body({
           </ul>
         </Card>
       )}
+
+      {/*
+        ---- coverage and data health --------------------------------------
+        The overview that used to live on the landing page. Admins need to see
+        the full picture of data health — the gold score, what counts as
+        inventory, live inventory by state, and the operational detail the
+        public page never showed.
+      */}
+      <Collapsed label="Coverage and data health" defaultOpen={false}>
+        <Suspense fallback={<TableSkeleton />}>
+          <CoverageReport />
+        </Suspense>
+      </Collapsed>
 
       {/*
         ---- the pipeline, in the order work flows through it ---------------
