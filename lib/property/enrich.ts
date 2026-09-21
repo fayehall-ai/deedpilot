@@ -168,6 +168,12 @@ export async function enrichLotById(
     force?: boolean;
     /** Ask only the free providers — what a pass does once its budget is spent. */
     freeOnly?: boolean;
+    /**
+     * Leave out web search. It cannot write an assessed value, which is what a
+     * valuation pass is for, and a searched call can run for minutes — longer
+     * than a scheduled function may live.
+     */
+    skipSearch?: boolean;
   } = {},
   /** Providers already known dead this run; see `lookupProperty`. */
   unavailable?: Set<string>,
@@ -217,7 +223,12 @@ export async function enrichLotById(
     zip: row.lot.zip,
   };
 
-  const record = await lookupProperty(input, unavailable, opts.freeOnly ? FREE_PROVIDERS : undefined);
+  const providers = opts.freeOnly
+    ? FREE_PROVIDERS
+    : opts.skipSearch
+      ? PROVIDERS.filter((p) => p.name !== "websearch")
+      : undefined;
+  const record = await lookupProperty(input, unavailable, providers);
   if (!record) {
     return {
       lotId,

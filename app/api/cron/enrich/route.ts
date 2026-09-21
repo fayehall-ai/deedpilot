@@ -15,8 +15,12 @@ import { runEnrichmentPass } from "@/lib/property/enrich-pass";
 
 export const maxDuration = 300;
 
-/** Stop taking new parcels with a minute to spare; a lookup can take thirty seconds. */
-const BUDGET_MS = 240_000;
+/**
+ * Stop taking new parcels with two minutes to spare. A single lookup can run
+ * past a minute when a provider is slow, and the first deploy of this route
+ * was killed at 300 seconds by exactly that with a one-minute reserve.
+ */
+const BUDGET_MS = 180_000;
 
 export async function GET(req: NextRequest) {
   if (!cronAuthorised(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

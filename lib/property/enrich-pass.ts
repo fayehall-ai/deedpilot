@@ -120,8 +120,9 @@ export async function runEnrichmentPass(opts: {
     if (!timeLeft()) return { ...result, stoppedBy: "deadline" };
     await db.update(lots).set({ geocodeAttemptedAt: new Date() }).where(eq(lots.id, l.id));
     let hit = null;
-    for (const variant of addressVariants(String(l.address))) {
-      hit = await geocodeAddress(variant, l.state, 25_000);
+    /* Two forms at most, ten seconds each: one slow address must not eat the run. */
+    for (const variant of addressVariants(String(l.address)).slice(0, 2)) {
+      hit = await geocodeAddress(variant, l.state, 10_000);
       if (hit) break;
     }
     if (!hit) continue;
@@ -167,7 +168,7 @@ export async function runEnrichmentPass(opts: {
     await db.update(lots).set({ enrichmentAttemptedAt: new Date() }).where(eq(lots.id, l.id));
     result.attempted++;
     try {
-      const r = await enrichLotById(l.id, { freeOnly: result.freeOnly }, unavailable);
+      const r = await enrichLotById(l.id, { freeOnly: result.freeOnly, skipSearch: true }, unavailable);
       if (r.updated) result.valued++;
       /* Reserve the worst case for a paid attempt; the real rows catch up on the next pass. */
       if (!result.freeOnly) result.spentCents += WORST_CASE_CENTS;
