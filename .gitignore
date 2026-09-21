@@ -103,3 +103,6 @@ __pycache__/
 data/realauction-capture/
 artifacts/frameworks/
 artifacts/cape-videos/
+
+# Browser downloads land here; nothing in it belongs to the repo.
+/downloads/
