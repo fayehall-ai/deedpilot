@@ -11,7 +11,6 @@ import { AtlasExplorer } from "@/components/atlas-explorer";
 import { STATE_PATHS } from "@/lib/atlas/geo";
 import { connection } from "next/server";
 import { getUpcomingAuctions } from "@/lib/queries";
-import { CoverageReport } from "@/components/coverage-report";
 import { PricingPlans } from "@/components/pricing-plans";
 
 /*
@@ -288,16 +287,6 @@ export default function HomePage(props: PageProps<"/">) {
         </div>
       </section>
 
-      {/* --- Coverage ------------------------------------------------------ */}
-      <section id="coverage" className="scroll-mt-20 border-b border-border">
-        <div className="shell py-band">
-          <div className="mb-6">
-          </div>
-          {/* compact: the per-county ingest log is 200 rows of ops detail. */}
-          <CoverageReport compact />
-        </div>
-      </section>
-
       {/* --- Pricing ------------------------------------------------------- */}
       <section id="pricing" className="scroll-mt-20 bg-surface-2/20">
         <div className="shell py-band">
@@ -346,7 +335,7 @@ async function HeroStats() {
           Plus {num(stats.leadLots)} parcels on delinquent rolls and lands-available inventory —
           research leads, not scheduled lots.{" "}
           <Link
-            href="/#coverage"
+            href="/coverage"
             className="underline underline-offset-4 transition-colors hover:text-ink-fg"
           >
             How we count
