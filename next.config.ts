@@ -37,7 +37,14 @@ const nextConfig: NextConfig = {
    * county reports "ok — 1 auction, 0 lots" and looks like a county with no
    * sales.
    */
-  serverExternalPackages: ["pdf-parse"],
+  /*
+   * `@napi-rs/canvas` is what pdf.js polyfills DOMMatrix from on Node. Loaded by
+   * a computed require, it was left out of every function bundle, and every PDF
+   * the crawler fetched on Vercel failed with "DOMMatrix is not defined" — a
+   * county whose parcel list is a PDF read as a county with no parcels. External
+   * here, and its native binary traced into the routes that crawl, below.
+   */
+  serverExternalPackages: ["pdf-parse", "@napi-rs/canvas"],
   /**
    * Data the server reads at runtime by path, which tracing cannot infer.
    *
@@ -54,8 +61,8 @@ const nextConfig: NextConfig = {
    * same adapter binds 774 counties, which is why it had never shown up.
    */
   outputFileTracingIncludes: {
-    "/api/cron/**": ["./data/source-registry.json", "./data/*.json"],
-    "/admin/**": ["./data/source-registry.json"],
+    "/api/cron/**": ["./data/source-registry.json", "./data/*.json", "./node_modules/@napi-rs/canvas*/**/*"],
+    "/admin/**": ["./data/source-registry.json", "./node_modules/@napi-rs/canvas*/**/*"],
     /* Read at request time by `lib/statutory/page.ts`. */
     "/statutory": ["./templates/statutory-ground.html"],
     /*
