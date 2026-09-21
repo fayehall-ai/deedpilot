@@ -30,6 +30,12 @@ assert(capeInputsHash(withParcels({ withAssessed: 190 })) !== capeInputsHash(bas
 assert(capeInputsHash(withParcels({ total: 210 }, { lotCount: 210 })) !== capeInputsHash(base), "a crawl adding parcels does");
 assert(capeInputsHash(withParcels({ withZoning: 1 })) !== capeInputsHash(base), "zoning appearing at all does");
 
+assert(capeInputsHash({ ...base, reviewNotes: [] }) === capeInputsHash(base), "no notes is the same package");
+assert(
+  capeInputsHash({ ...base, reviewNotes: ["The sale is held in the annex, not the courthouse"] }) !== capeInputsHash(base),
+  "a correction makes the script stale, so it is rewritten and re-rendered",
+);
+
 assert(coverageBand(0, 200) === "none", "none");
 assert(coverageBand(110, 200) === "about half", "55% is about half");
 assert(coverageBand(200, 200) === "all", "all");

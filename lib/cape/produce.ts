@@ -253,8 +253,15 @@ export async function produceCapePackage(
     const countyHash = capeCountyInputsHash(input);
     const countyKey = { fips: input.countyFips ?? "", saleType: input.saleType ?? "unknown" };
 
+    /*
+     * A reviewed sale writes its county half fresh and keeps it to itself: Ed's
+     * correction may be about the statute or the deed, which live in that half,
+     * and a half written with one sale's correction is not the county's to share.
+     */
+    const corrected = Boolean(input.reviewNotes?.length);
+
     const loadCountyHalf = async (): Promise<CountyHalf | null> => {
-      if (!countyKey.fips || opts.force) return null;
+      if (!countyKey.fips || opts.force || corrected) return null;
       const [row] = await db
         .select()
         .from(capeCountyScripts)
@@ -275,7 +282,7 @@ export async function produceCapePackage(
     };
 
     const saveCountyHalf = async (half: CountyHalf, model: string) => {
-      if (!countyKey.fips) return;
+      if (!countyKey.fips || corrected) return;
       await db
         .insert(capeCountyScripts)
         .values({
@@ -307,6 +314,7 @@ export async function produceCapePackage(
       platform: input.platform,
       population: input.population,
       countyFips: input.countyFips,
+      reviewNotes: input.reviewNotes,
     }, {
       loadCountyHalf,
       saveCountyHalf,

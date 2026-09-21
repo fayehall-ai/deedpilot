@@ -6,9 +6,9 @@
  * for a page render and throw outside a Next request context, so a CLI that
  * imported them could not run at all. The selection below is the same one.
  */
-import { and, asc, eq, gte, sql } from "drizzle-orm";
+import { and, asc, eq, gte, sql, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { auctions, capeProductions, counties, lots } from "@/lib/db/schema";
+import { auctions, capeProductions, capeReviews, counties, lots } from "@/lib/db/schema";
 import { hasParcels, isConfirmedInventory } from "@/lib/db/inventory";
 import { sql as rawSql } from "drizzle-orm";
 import { getCounty, resolveCountyRule } from "@/lib/atlas";
@@ -193,6 +193,7 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
 
   const coverage = await parcelCoverage();
   const productions = await productionStates();
+  const corrections = await reviewNotes(rows.map((r) => r.id));
 
   const dir = directory as Record<string, CountyDirectory>;
   const officesFor = (fips: string): Partial<Record<string, string>> => {
@@ -245,7 +246,30 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
     parcels: coverage[r.id] ?? empty,
     today,
     production: productions[r.id] ?? null,
+    ...(corrections.get(r.id)?.length ? { reviewNotes: corrections.get(r.id) } : {}),
   }));
+}
+
+/**
+ * Ed's "needs a change" notes per sale, oldest first. See `PackageInput.reviewNotes`.
+ *
+ * Every note, not only the latest: a correction stays true after the rewrite
+ * that applied it — the venue is still the annex next week — and dropping the
+ * first when a second arrives would let the next rewrite undo it.
+ */
+async function reviewNotes(auctionIds: string[]): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  if (auctionIds.length === 0) return out;
+  const rows = await db
+    .select({ auctionId: capeReviews.auctionId, note: capeReviews.note })
+    .from(capeReviews)
+    .where(and(inArray(capeReviews.auctionId, auctionIds), eq(capeReviews.verdict, "needs-change")))
+    .orderBy(asc(capeReviews.createdAt));
+  for (const r of rows) {
+    const note = r.note?.trim();
+    if (note) out.set(r.auctionId, [...(out.get(r.auctionId) ?? []), note]);
+  }
+  return out;
 }
 
 async function parcelCoverage() {

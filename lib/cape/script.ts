@@ -275,6 +275,17 @@ export function factSheet(pkg: CapePackage, meta: CapeScriptMeta): string {
     }
   }
 
+  /*
+   * Last, and marked as outranking what is above it: these are the desk's own
+   * corrections after reading an earlier draft of this briefing. Inside the
+   * FACTS, so a figure a correction supplies passes `verifyNarration` rather
+   * than holding the script it was meant to fix.
+   */
+  if (meta.reviewNotes?.length) {
+    lines.push("", "CORRECTIONS FROM THE TAX DEED COLLECTIVE — confirmed; apply every one, and where one disagrees with anything above, the correction is right:");
+    for (const note of meta.reviewNotes) lines.push(`   - ${note}`);
+  }
+
   return lines.join("\n");
 }
 
@@ -288,6 +299,8 @@ export interface CapeScriptMeta {
   countyFips?: string;
   /** Census population, so the narrator does not reach for it from memory. */
   population?: number | null;
+  /** Ed's corrections from the review page, handed over as confirmed fact. */
+  reviewNotes?: string[];
 }
 
 export interface GeneratedScript {

@@ -151,6 +151,15 @@ export interface PackageInput {
    * report itself as done.
    */
   production?: CapeProductionState | null;
+  /**
+   * Ed's corrections to this sale's briefing, oldest first — every
+   * "needs a change" note from the review page.
+   *
+   * They reach the narrator as confirmed facts (`factSheet`) and join the inputs
+   * hash only when there are any, so a note makes this one script stale — it is
+   * rewritten, and its video re-rendered — without disturbing any other.
+   */
+  reviewNotes?: string[];
 }
 
 /** The subset of a `cape_productions` row the checklist reads. */
@@ -251,6 +260,8 @@ export function capeInputsHash(i: PackageInput): string {
     logistics: i.logistics ?? null,
     rule: i.rule ?? null,
     statute: i.statute ?? null,
+    /* Present only when there are notes, so an unreviewed package keeps the hash it had. */
+    ...(i.reviewNotes?.length ? { review: i.reviewNotes } : {}),
   };
   return createHash("sha256").update(JSON.stringify(shape)).digest("hex").slice(0, 16);
 }

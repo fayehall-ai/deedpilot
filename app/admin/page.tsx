@@ -223,8 +223,12 @@ async function Body({
             <span className="text-muted"> — every county&rsquo;s tax-sale law, with its upcoming sales</span>
           </li>
           <li>
+            <a href="/cape/review" className="underline">Script review</a>
+            <span className="text-muted"> — read this week&rsquo;s briefings; &ldquo;Needs a change&rdquo; rewrites and re-renders</span>
+          </li>
+          <li>
             <a href="/cape" className="underline">CAPE board</a>
-            <span className="text-muted"> — briefing scripts, checklists and videos</span>
+            <span className="text-muted"> — every package against the checklist</span>
           </li>
         </ul>
         <form action="/frameworks/docx" method="get" className="mt-3 flex flex-wrap items-end gap-2">

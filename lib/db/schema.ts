@@ -1408,3 +1408,32 @@ export const countySources = pgTable(
 );
 
 export type CountySource = typeof countySources.$inferSelect;
+
+/**
+ * Ed's verdicts on briefing scripts. See drizzle/0007.
+ *
+ * `needs-change` notes are the ones that act: every such note on a sale is
+ * handed to the narrator as a confirmed correction and joins the script's
+ * inputs hash, so the script is rewritten and its video re-rendered.
+ * `reads-correctly` is recorded for the board and the audit, and changes
+ * nothing.
+ */
+export const capeReviews = pgTable(
+  "cape_reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    auctionId: uuid("auction_id")
+      .notNull()
+      .references(() => auctions.id, { onDelete: "cascade" }),
+    /** `reads-correctly` | `needs-change`. */
+    verdict: text("verdict").notNull(),
+    note: text("note"),
+    /** The inputs hash of the script that was read, so a verdict can be seen to predate a rewrite. */
+    scriptHash: text("script_hash"),
+    reviewer: text("reviewer").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("cape_reviews_auction").on(t.auctionId, t.createdAt)],
+);
+
+export type CapeReview = typeof capeReviews.$inferSelect;
