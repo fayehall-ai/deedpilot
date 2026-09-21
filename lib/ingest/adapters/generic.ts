@@ -34,7 +34,8 @@ import { nextSaleWindows } from "../../atlas/calendar";
 import { countySourcesVersion, mergeCountySources } from "../county-sources";
 import { observedSale } from "../observed-sale";
 import type { SourceRegistry } from "../../prospector/types";
-import { extractLots, NoProviderAvailableError } from "../extract";
+import { extractLots, extractLotsFromImages, NoProviderAvailableError } from "../extract";
+import { renderPdfFromUrl, SCAN_TEXT_PER_PAGE, textDensity } from "../render";
 import { politeFetch } from "../fetch";
 import {
   classifiedPdfLinks,
@@ -51,6 +52,32 @@ import type {
   ListingKind,
   SourceAdapter,
 } from "../types";
+
+const MONTH_NAMES = [
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december",
+];
+
+/**
+ * Order a page's documents so this sale's own list comes first.
+ *
+ * A county that posts next month's list and the month after's side by side —
+ * Clayton's "OCTOBER TAX SALE LISTING" beside "NOVEMBER …" — handed whichever
+ * came first on the page to the sale being crawled, so November's parcels could
+ * land on October's sale. A sale list whose name carries this sale's month moves
+ * ahead of the others; a list naming a different month moves behind them.
+ * Everything else keeps the order the page gave it.
+ */
+export function forThisSale<T extends { url: string; kind: ListingKind }>(docs: T[], saleDate: string): T[] {
+  const month = MONTH_NAMES[Number(saleDate.slice(5, 7)) - 1];
+  const name = (d: T) => decodeURIComponent(d.url.split("/").pop() ?? "").toLowerCase();
+  const rank = (d: T) => {
+    if (d.kind !== "sale_list") return 1;
+    const named = MONTH_NAMES.find((m) => new RegExp(`\\b${m}\\b`).test(name(d)));
+    return !named ? 1 : named === month ? 0 : 2;
+  };
+  return docs.map((d, i) => ({ d, i })).sort((a, b) => rank(a.d) - rank(b.d) || a.i - b.i).map((x) => x.d);
+}
 
 /** Where the Prospector writes its registry. */
 const DEFAULT_REGISTRY_PATH = "data/source-registry.json";
@@ -270,6 +297,24 @@ export const genericAdapter: SourceAdapter = {
         return structured;
       }
       try {
+        /*
+         * A scan has no text layer, and read as text it is an empty page that
+         * the model rightly says holds no list — so a scanned sale list was
+         * recorded as a county with no sale. Georgia learned this on Fulton's
+         * levy list and renders scans for the vision model; roughly one county
+         * list in thirteen is a scan, and the generic crawler now does the same.
+         */
+        const pages = Math.max(1, (text.match(/--\s*\d+\s+of\s+\d+\s*--/g) ?? []).length);
+        if (textDensity(text, pages) < SCAN_TEXT_PER_PAGE && kind === "sale_list") {
+          console.log(`[generic-county] ${doc}: no text layer over ${pages} page(s) — rendering for vision`);
+          const rendered = await renderPdfFromUrl(doc, { maxPages: 20, scale: 2 });
+          const seen = await extractLotsFromImages(rendered, { ...context, sourceUrl: doc });
+          if (seen.containsParcelList && seen.lots.length) {
+            auction.listingKind = kind;
+            return seen.lots;
+          }
+          return null;
+        }
         const result = await extractLots(text, { ...context, sourceUrl: doc });
         if (result.containsParcelList && result.lots.length) {
           auction.listingKind = kind;
@@ -318,8 +363,9 @@ export const genericAdapter: SourceAdapter = {
     const fromTable = parseHtmlTable($, auction.sourceUrl);
     if (fromTable?.length) return fromTable;
 
-    // 2. Documents on the page itself, decoys filtered and sale lists first.
-    for (const { url: doc, kind } of documentLinks($, auction.sourceUrl).slice(0, 4)) {
+    // 2. Documents on the page itself, decoys filtered and sale lists first —
+    //    and among sale lists, the one naming this sale's month.
+    for (const { url: doc, kind } of forThisSale(documentLinks($, auction.sourceUrl), auction.saleDate).slice(0, 4)) {
       const lots = await lotsFromDocument(doc, kind);
       if (lots?.length) return lots;
     }
@@ -355,7 +401,7 @@ export const genericAdapter: SourceAdapter = {
           const subTable = parseHtmlTable($sub, link);
           if (subTable?.length) return subTable;
 
-          for (const { url: doc, kind } of documentLinks($sub, link).slice(0, 3)) {
+          for (const { url: doc, kind } of forThisSale(documentLinks($sub, link), auction.saleDate).slice(0, 3)) {
             if (visited.has(doc)) continue;
             visited.add(doc);
             try {

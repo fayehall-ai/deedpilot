@@ -6,7 +6,7 @@
  * Run: npx tsx lib/ingest/generic-adapter.test.ts
  */
 import * as cheerio from "cheerio";
-import { __setRegistry, genericAdapter } from "./adapters/generic";
+import { __setRegistry, forThisSale, genericAdapter } from "./adapters/generic";
 import { ADAPTERS, getAdapter } from "./adapters";
 import {
   classifiedPdfLinks,
@@ -258,4 +258,19 @@ main()
   // Off-site links are not followed — those are vendors and social media.
   const offsite = cheerio.load(`<a href="https://facebook.com/treasurer">Treasurer</a>`);
   assert(discoveryLinks(offsite, "https://x.gov/").department.length === 0, "stays on-site");
+}
+
+// --- two months' lists on one page -----------------------------------------------
+{
+  const docs = [
+    { url: "https://x.gov/content/PDF/NOVEMBER%20TAX%20SALE%20LISTING%209-8-26.pdf", kind: "sale_list" as const },
+    { url: "https://x.gov/content/PDF/OfficialClaimforExcessFund.pdf", kind: "unknown" as const },
+    { url: "https://x.gov/content/PDF/OCTOBER%20TAX%20SALE%20LISTING%209-8-26.pdf", kind: "sale_list" as const },
+  ];
+  const oct = forThisSale(docs, "2026-10-06").map((d) => d.url.split("/").pop());
+  if (oct[0] !== "OCTOBER%20TAX%20SALE%20LISTING%209-8-26.pdf") throw new Error(`October's sale should read October's list first, got ${oct[0]}`);
+  if (oct[oct.length - 1] !== "NOVEMBER%20TAX%20SALE%20LISTING%209-8-26.pdf") throw new Error("another month's list should go last");
+  const nov = forThisSale(docs, "2026-11-03").map((d) => d.url.split("/").pop());
+  if (nov[0] !== "NOVEMBER%20TAX%20SALE%20LISTING%209-8-26.pdf") throw new Error("November's sale should read November's list first");
+  console.log("forThisSale: a sale reads its own month's list first");
 }
