@@ -88,6 +88,11 @@ export const GA_COUNTIES: GaCounty[] = [
     note: "Sale list is published ~4 weeks before each sale; this is the delinquent roll.",
   },
   { name: "Forsyth", url: "https://forsythcountytax.com/tax-sales-excess-funds/" },
+  {
+    name: "Clayton",
+    url: "https://publicaccess.claytoncountyga.gov/content/home_commissioner.htm",
+    note: "Posts next month's and the month after's lists side by side, named by month.",
+  },
   { name: "Barrow", url: "https://www.barrowgatax.org/tax-sales.html" },
   { name: "Chatham", url: "https://tax.chathamcountyga.gov/TaxSaleList" },
   { name: "Clarke", url: "https://www.accgov.com/1719/Tax-Sales", note: "Athens-Clarke unified government" },
@@ -155,6 +160,12 @@ function iso(year: number, monthIndex: number, day: number): string {
   return `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
+/** The first Tuesday of a month — Georgia's statutory sale day. */
+function firstTuesdayOf(year: number, monthIndex: number): string {
+  const first = new Date(Date.UTC(year, monthIndex, 1)).getUTCDay();
+  return iso(year, monthIndex, 1 + ((2 - first + 7) % 7));
+}
+
 /**
  * Sale dates a county has actually published, newest-first.
  *
@@ -172,13 +183,25 @@ export function parseSaleDates(
   pageText: string,
   filenames: string[],
   today: string,
-): { upcoming: string[]; past: string[] } {
+): {
+  upcoming: string[];
+  past: string[];
+  /** The filename that named each date, when a filename did — so each sale reads its own list. */
+  byDate: Map<string, string>;
+} {
   const found = new Set<string>();
+  const byDate = new Map<string, string>();
+  const named = new Set<string>();
 
   const withYear = new RegExp(`\\b(${MONTH_ALT})[\\s\\-_,]+(\\d{1,2})(?:st|nd|rd|th)?[\\s\\-_,]+(20\\d\\d)\\b`, "gi");
   for (const src of [pageText, ...filenames]) {
     for (const m of src.matchAll(withYear)) {
-      found.add(iso(Number(m[3]), MONTHS.indexOf(m[1].toLowerCase()), Number(m[2])));
+      const d = iso(Number(m[3]), MONTHS.indexOf(m[1].toLowerCase()), Number(m[2]));
+      found.add(d);
+      if (src !== pageText) {
+        byDate.set(d, src);
+        named.add(src);
+      }
     }
   }
 
@@ -199,12 +222,46 @@ export function parseSaleDates(
       const candidates = [thisYear, thisYear + 1]
         .map((y) => iso(y, mo, day))
         .filter((d) => isFirstTuesday(d) && d >= today);
-      if (candidates.length === 1) found.add(candidates[0]);
+      if (candidates.length === 1) {
+        found.add(candidates[0]);
+        byDate.set(candidates[0], name);
+        named.add(name);
+      }
+    }
+  }
+
+  /*
+   * A list named for its month and nothing else: Clayton posts "OCTOBER TAX
+   * SALE LISTING 9-8-26.pdf" and "NOVEMBER TAX SALE LISTING 9-8-26.pdf" side by
+   * side, the trailing date being when the list was posted, not the sale. The
+   * statute fixes the day — the first Tuesday — so the month is the sale.
+   * Filenames only, and only when the name says it is a sale list; only months
+   * within six months ahead, so a list left up after its sale is never pushed
+   * into next year. One that has just passed is recorded as past, like any
+   * other named sale day.
+   */
+  const monthOnly = new RegExp(`\\b(${MONTH_ALT})\\b(?![\\s\\-_]?\\d)`, "i");
+  for (const name of filenames) {
+    if (named.has(name) || !/\bsale\b|\blist(?:ing)?\b/i.test(name)) continue;
+    const m = monthOnly.exec(name);
+    if (!m) continue;
+    const mo = MONTHS.indexOf(m[1].toLowerCase());
+    const thisOne = firstTuesdayOf(thisYear, mo);
+    const days = (d: string) => (Date.parse(`${d}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000;
+    if (thisOne >= today || days(firstTuesdayOf(thisYear + 1, mo)) <= 183) {
+      const d = thisOne >= today ? thisOne : firstTuesdayOf(thisYear + 1, mo);
+      if (days(d) <= 183) {
+        found.add(d);
+        byDate.set(d, name);
+      }
+    } else if (days(thisOne) >= -90) {
+      found.add(thisOne);
     }
   }
 
   const saleDays = [...found].filter(isFirstTuesday).sort();
   return {
+    byDate,
     upcoming: saleDays.filter((d) => d >= today),
     /*
      * Kept rather than discarded. A county whose only named sale day has
@@ -359,6 +416,8 @@ export const georgiaAdapter: SourceAdapter = {
     const today = new Date().toISOString().slice(0, 10);
     let dates: string[] = [];
     let stale: string[] = [];
+    /* Each sale's own list, where the filenames say which is which. */
+    const listFor = new Map<string, string>();
     let saysNoSale = false;
     let discovered: { url: string; kind: ListingKind } | undefined;
 
@@ -384,6 +443,10 @@ export const georgiaAdapter: SourceAdapter = {
         );
         dates = parsed.upcoming;
         stale = parsed.past;
+        for (const [d, name] of parsed.byDate) {
+          const hit = candidates.find((c) => decodeURIComponent(c.url.split("/").pop() ?? "") === name);
+          if (hit) listFor.set(d, hit.url);
+        }
       }
     } catch (e) {
       // A page we cannot read is not a county without a sale. Fall through to
@@ -426,6 +489,14 @@ export const georgiaAdapter: SourceAdapter = {
     const source = listPdf || (confirmed && discovered ? discovered.url : url);
 
     return saleDates.map((saleDate) => ({
+      /*
+       * A page listing two months' sales used to hand both the same document —
+       * the first list it found — so November's sale carried October's parcels.
+       * A sale whose own list is named reads that list.
+       */
+      ...(listFor.has(saleDate) && !listPdf
+        ? { sourceUrl: listFor.get(saleDate)!, listingKind: listKind ?? ("sale_list" as ListingKind) }
+        : { sourceUrl: source, listingKind: kind }),
       countyFips: binding.countyFips,
       platform: "county_site" as const,
       // Georgia conveys a redeemable deed: 12 months at a 20% flat penalty,
@@ -434,10 +505,8 @@ export const georgiaAdapter: SourceAdapter = {
       externalId: `${binding.countyFips}|${saleDate}`,
       saleDate,
       saleDateConfirmed: confirmed,
-      listingKind: kind,
       title: `${name} County tax sale (courthouse steps)`,
       status: "scheduled" as const,
-      sourceUrl: source,
       raw: { registryUrl: url, listPdf, discoveredList: discovered?.url, datesFromPage: dates },
     }));
   },

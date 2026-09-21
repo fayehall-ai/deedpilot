@@ -72,6 +72,28 @@ eq(
   "drops dates that are not the statutory sale day",
 );
 
+// Clayton names only the month; the trailing date is when the list was posted.
+{
+  const clayton = parseSaleDates(
+    "",
+    ["OCTOBER TAX SALE LISTING 9-8-26.pdf", "NOVEMBER TAX SALE LISTING 9-8-26.pdf", "OfficialClaimforExcessFund.pdf"],
+    "2026-09-21",
+  );
+  eq(clayton.upcoming, ["2026-10-06", "2026-11-03"], "a list named for its month is that month's first Tuesday");
+  assert(clayton.byDate.get("2026-10-06") === "OCTOBER TAX SALE LISTING 9-8-26.pdf", "October's sale reads October's list");
+  assert(clayton.byDate.get("2026-11-03") === "NOVEMBER TAX SALE LISTING 9-8-26.pdf", "November's sale reads November's");
+  eq(
+    parseSaleDates("", ["SEPTEMBER TAX SALE LISTING 8-4-26.pdf"], "2026-09-21").upcoming,
+    [],
+    "a month-named list left up after its sale is not pushed into next year",
+  );
+  eq(
+    parseSaleDates("", ["2026 Budget October.pdf"], "2026-09-21").upcoming,
+    [],
+    "a month in a document that is not a sale list is not a sale",
+  );
+}
+
 // Hall County names the date nowhere but the filename, and omits the year.
 eq(
   parseSaleDates("", ["September-1-Website-Tax-Sale-List-1.pdf"], TODAY).upcoming,
@@ -112,24 +134,24 @@ eq(
 // can tell "this county has no upcoming sale" from "this county names no
 // dates at all" — the first must not get a projected window hung off it.
 eq(
-  parseSaleDates("the first Tuesday in June, 2026, the same being June 2, 2026", [], TODAY),
+  (({ upcoming, past }) => ({ upcoming, past }))(parseSaleDates("the first Tuesday in June, 2026, the same being June 2, 2026", [], TODAY)),
   { upcoming: [], past: ["2026-06-02"] },
   "reports Douglas's finished sale as past",
 );
 eq(
-  parseSaleDates("Next Tax Sale for Columbia County scheduled for August 4, 2026 at 10:00am", [], TODAY),
+  (({ upcoming, past }) => ({ upcoming, past }))(parseSaleDates("Next Tax Sale for Columbia County scheduled for August 4, 2026 at 10:00am", [], TODAY)),
   { upcoming: [], past: ["2026-08-04"] },
   "reports Columbia's finished sale as past",
 );
 // A county naming nothing at all is a different case: it still gets crawled.
 eq(
-  parseSaleDates("Tax sales are held on the courthouse steps.", [], TODAY),
+  (({ upcoming, past }) => ({ upcoming, past }))(parseSaleDates("Tax sales are held on the courthouse steps.", [], TODAY)),
   { upcoming: [], past: [] },
   "a county naming no dates yields neither upcoming nor past",
 );
 // A past date that is not a first Tuesday is not a sale at all.
 eq(
-  parseSaleDates("Applications closed January 5, 2024.", [], TODAY),
+  (({ upcoming, past }) => ({ upcoming, past }))(parseSaleDates("Applications closed January 5, 2024.", [], TODAY)),
   { upcoming: [], past: [] },
   "a past non-sale-day date is not counted as a finished sale",
 );
