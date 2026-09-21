@@ -1,10 +1,12 @@
 /*
- * No `server-only` guard — this runs from `scripts/cape-produce.ts` under tsx.
+ * No `server-only` guard — this runs from `scripts/cape-produce.ts` under tsx,
+ * and from the render cron.
  */
 import { createHash } from "node:crypto";
 import { mkdir, writeFile, stat } from "node:fs/promises";
 import path from "node:path";
 import type { CapeScript } from "./script";
+import { probeMedia } from "./ffmpeg";
 
 /**
  * Narration audio, from whichever speech provider is configured.
@@ -242,6 +244,16 @@ function splitForBytes(text: string, maxBytes: number): string[] {
 export interface VoiceOptions {
   /** Where synthesised audio is cached, keyed by content hash. */
   cacheDir: string;
+  /**
+   * Also keep the cache in Vercel Blob, under the same key.
+   *
+   * A function's disk is gone when it returns, so a local cache alone would
+   * re-buy every section of every re-render in the cloud. With this on, a miss
+   * on disk is looked up in Blob before anything is synthesised, and anything
+   * synthesised is written back. Needs `BLOB_READ_WRITE_TOKEN`; without it this
+   * quietly behaves as the disk cache it always was.
+   */
+  remoteCache?: boolean;
 }
 
 export interface SynthesisedSection {
@@ -249,9 +261,54 @@ export interface SynthesisedSection {
   mp3Path: string;
   durationSec: number;
   characters: number;
-  /** True when the file already existed and nothing was billed. */
+  /** True when the audio already existed — on disk or in Blob — and nothing was billed. */
   cached: boolean;
   provider: string;
+}
+
+/**
+ * Where a section's audio lives in Blob.
+ *
+ * The store is public (see `publish.ts`), so the path is only as private as it
+ * is unguessable: the key is a hash of the provider settings and the exact
+ * narration text, which nobody can derive without the script. The audio itself
+ * is a reading of a briefing that is published anyway.
+ */
+const REMOTE_PREFIX = "cape/_audio-cache/";
+
+function remoteEnabled(opts: VoiceOptions): boolean {
+  return Boolean(opts.remoteCache && process.env.BLOB_READ_WRITE_TOKEN);
+}
+
+/** Never throws: a cache that cannot be read is a cache miss, not a failed render. */
+async function remoteGet(key: string): Promise<Buffer | null> {
+  try {
+    const { get } = await import("@vercel/blob");
+    const hit = await get(`${REMOTE_PREFIX}${key}.mp3`, { access: "public" });
+    if (!hit || hit.statusCode !== 200 || !hit.stream) return null;
+    const buf = Buffer.from(await new Response(hit.stream).arrayBuffer());
+    return buf.length > 0 ? buf : null;
+  } catch (e) {
+    console.warn(`[voice] blob cache read failed for ${key}: ${e instanceof Error ? e.message : String(e)}`);
+    return null;
+  }
+}
+
+/** Never throws: failing to cache audio already paid for must not fail the render. */
+async function remotePut(key: string, bytes: Buffer): Promise<void> {
+  try {
+    const { put } = await import("@vercel/blob");
+    await put(`${REMOTE_PREFIX}${key}.mp3`, bytes, {
+      access: "public",
+      contentType: "audio/mpeg",
+      addRandomSuffix: false,
+      /* Same key, same bytes: two renders racing to cache a section is harmless. */
+      allowOverwrite: true,
+      cacheControlMaxAge: 31_536_000,
+    });
+  } catch (e) {
+    console.warn(`[voice] blob cache write failed for ${key}: ${e instanceof Error ? e.message : String(e)}`);
+  }
 }
 
 /** Identity of a piece of audio: the text and the provider's settings. */
@@ -264,23 +321,14 @@ function audioKey(text: string, signature: string): string {
  *
  * Slide timing is derived from this, so a guess shows up as picture drifting
  * out of step with the voice — the most visible defect a produced video can
- * have. `ffprobe` ships with ffmpeg, which the encoder already requires.
+ * have. Read from the header ffmpeg prints; see `ffmpeg.ts` on why not ffprobe.
  */
 async function durationOf(mp3Path: string): Promise<number> {
-  const { execFile } = await import("node:child_process");
-  const { promisify } = await import("node:util");
-  const run = promisify(execFile);
-  const { stdout } = await run("ffprobe", [
-    "-v", "error",
-    "-show_entries", "format=duration",
-    "-of", "default=noprint_wrappers=1:nokey=1",
-    mp3Path,
-  ]);
-  const seconds = Number(stdout.trim());
-  if (!Number.isFinite(seconds) || seconds <= 0) {
-    throw new Error(`ffprobe returned no duration for ${mp3Path}`);
+  const { durationSec } = await probeMedia(mp3Path);
+  if (!Number.isFinite(durationSec) || durationSec <= 0) {
+    throw new Error(`ffmpeg reported no duration for ${mp3Path}`);
   }
-  return seconds;
+  return durationSec;
 }
 
 async function exists(p: string): Promise<boolean> {
@@ -313,10 +361,22 @@ export async function narrate(
     const text = section.narration.trim();
     if (!text) continue;
 
-    const mp3Path = path.join(opts.cacheDir, `${audioKey(text, signature)}.mp3`);
-    const cached = await exists(mp3Path);
+    const key = audioKey(text, signature);
+    const mp3Path = path.join(opts.cacheDir, `${key}.mp3`);
+    let cached = await exists(mp3Path);
+
+    if (!cached && remoteEnabled(opts)) {
+      const hit = await remoteGet(key);
+      if (hit) {
+        await writeFile(mp3Path, hit);
+        cached = true;
+      }
+    }
+
     if (!cached) {
-      await writeFile(mp3Path, await provider.synthesise(text));
+      const bytes = await provider.synthesise(text);
+      await writeFile(mp3Path, bytes);
+      if (remoteEnabled(opts)) await remotePut(key, bytes);
     }
 
     out.push({
