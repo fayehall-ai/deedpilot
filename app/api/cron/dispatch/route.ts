@@ -35,7 +35,7 @@ import {
   reapStuckRuns,
 } from "@/lib/admin/queue";
 import { runQueuedJob } from "@/lib/admin/run-job";
-import { tokenMatches } from "@/lib/admin/token";
+import { cronAuthorised } from "@/lib/admin/cron-auth";
 import { loadPolicyOverrides } from "@/lib/admin/policy-load";
 import { enqueueWeeklyResearch } from "@/lib/admin/scout-jobs";
 import { enqueuePlan, planGaps } from "@/lib/admin/plan-jobs";
@@ -59,23 +59,10 @@ const RESERVE_MS = 45_000;
 const BUDGET_MS = 240_000;
 
 function authorised(req: NextRequest): boolean {
-  const auth = req.headers.get("authorization") ?? "";
-  const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  /*
-   * `CRON_SECRET` first, because `x-vercel-cron` is not dependable on its own.
-   * The CAPE schedule fired every two minutes for half an hour and was refused
-   * every time on exactly that assumption. Same fix here, since this route made
-   * the same one.
-   */
-  const cronSecret = (process.env.CRON_SECRET ?? "").trim();
-  if (cronSecret && bearer === cronSecret) return true;
-  if (req.headers.get("x-vercel-cron")) return true;
-  return (
-    tokenMatches(bearer) ||
-    tokenMatches(req.nextUrl.searchParams.get("token")) ||
-    // Legacy cron secret, so an existing schedule keeps working after deploy.
-    (!!process.env.VERCEL_CRON_SECRET && bearer === process.env.VERCEL_CRON_SECRET)
-  );
+  if (cronAuthorised(req)) return true;
+  // Legacy cron secret, so an existing schedule keeps working after deploy.
+  const bearer = (req.headers.get("authorization") ?? "").replace(/^Bearer /, "");
+  return !!process.env.VERCEL_CRON_SECRET && bearer === process.env.VERCEL_CRON_SECRET;
 }
 
 export async function GET(req: NextRequest) {
