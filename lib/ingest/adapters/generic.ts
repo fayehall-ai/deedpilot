@@ -235,6 +235,18 @@ export const genericAdapter: SourceAdapter = {
      * in as it is on the page the registry points at, and a reader that only
      * works at depth zero finds the landing page and calls the county empty.
      */
+    /*
+     * Sale lists this run could not read, with why.
+     *
+     * "Could not read the list" and "the county published no list" both used to
+     * end in an empty result, and the first was recorded as the second: while
+     * PDF parsing was broken in production, two hundred counties' crawls ran
+     * "ok, 0 lots", which reads as a county with nothing for sale and is not
+     * looked at again for a week. A list that exists and failed to read now
+     * fails the run instead, so it is retried and shows on the console.
+     */
+    const unread: string[] = [];
+
     const lotsFromDocument = async (
       doc: string,
       kind: ListingKind,
@@ -243,7 +255,9 @@ export const genericAdapter: SourceAdapter = {
       try {
         text = await pdfToText(doc);
       } catch (e) {
-        console.warn(`[generic-county] ${doc}: ${e instanceof Error ? e.message : e}`);
+        const why = e instanceof Error ? e.message : String(e);
+        console.warn(`[generic-county] ${doc}: ${why}`);
+        if (kind === "sale_list") unread.push(`${doc} (${why.slice(0, 120)})`);
         return null;
       }
       // Free path: structured sealed-bid / list PDFs (no LLM, no credits).
@@ -282,13 +296,21 @@ export const genericAdapter: SourceAdapter = {
      * its bytes as HTML, find no table and no links in them, and report the
      * county empty.
      */
+    const unreadIsFailure = () => {
+      if (unread.length) throw new Error(`could not read the sale list: ${unread.join("; ")}`);
+    };
+
     if (/\.pdf(\?|#|$)/i.test(auction.sourceUrl)) {
-      return (await lotsFromDocument(auction.sourceUrl, "sale_list")) ?? [];
+      const lots = await lotsFromDocument(auction.sourceUrl, "sale_list");
+      unreadIsFailure();
+      return lots ?? [];
     }
 
     const res = await politeFetch(auction.sourceUrl);
     if (/application\/pdf/i.test(res.contentType)) {
-      return (await lotsFromDocument(auction.sourceUrl, "sale_list")) ?? [];
+      const lots = await lotsFromDocument(auction.sourceUrl, "sale_list");
+      unreadIsFailure();
+      return lots ?? [];
     }
     const $ = cheerio.load(res.body);
 
@@ -354,7 +376,9 @@ export const genericAdapter: SourceAdapter = {
 
     // 4. Nothing published. Legitimate and common — not every county holds a
     //    sale every window, and in many the binding notice is a newspaper legal
-    //    ad rather than the website.
+    //    ad rather than the website. Unless a sale list was there and would not
+    //    read, which is a failure to report, not an empty county.
+    unreadIsFailure();
     return [];
   },
 };

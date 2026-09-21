@@ -328,8 +328,12 @@ async function lotsFromPdf(
   try {
     text = await pdfToText(url);
   } catch (e) {
-    console.warn(`[ga-counties] ${url}: ${e instanceof Error ? e.message : e}`);
-    return [];
+    /*
+     * A list that will not read is not a county with no list. Returning [] here
+     * recorded every Georgia PDF as empty while PDF parsing was broken in
+     * production; failing lets the run retry and the console show it.
+     */
+    throw new Error(`could not read ${url}: ${e instanceof Error ? e.message : e}`);
   }
 
   const structured = parseStructuredPdfText(text, url);
@@ -542,13 +546,29 @@ export const georgiaAdapter: SourceAdapter = {
      * is still reached.
      */
     const classified = classifiedPdfLinks($, auction.sourceUrl);
-    const plausible = classified.filter((c) => c.kind !== "unknown").map((c) => c.url);
-    const candidates = plausible.length ? plausible : pdfLinks($, auction.sourceUrl);
+    const plausible = classified.filter((c) => c.kind !== "unknown");
+    const candidates = plausible.length
+      ? plausible
+      : pdfLinks($, auction.sourceUrl).map((url) => ({ url, kind: "unknown" as ListingKind }));
 
-    for (const pdf of candidates.slice(0, 3)) {
-      const lots = await lotsFromPdf(pdf, { ...context, sourceUrl: pdf });
-      if (lots.length) return lots;
+    /*
+     * Every candidate is tried even when one will not read: a handout that
+     * fails must not stop the real list behind it being reached. Only a
+     * document the county's own wording calls the sale list, failing, makes
+     * the run a failure rather than an empty county.
+     */
+    const unread: string[] = [];
+    for (const { url: pdf, kind } of candidates.slice(0, 3)) {
+      try {
+        const lots = await lotsFromPdf(pdf, { ...context, sourceUrl: pdf });
+        if (lots.length) return lots;
+      } catch (e) {
+        const why = e instanceof Error ? e.message : String(e);
+        console.warn(`[ga-counties] ${why}`);
+        if (kind === "sale_list" || /needs LLM extraction/.test(why)) unread.push(why);
+      }
     }
+    if (unread.length) throw new Error(unread.join("; "));
 
     // 3. Nothing published. In Georgia this is common and legitimate: not
     // every county holds a sale every month, and the binding notice is the
