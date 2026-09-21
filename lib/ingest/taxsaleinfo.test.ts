@@ -10,7 +10,7 @@
  * returns another property's valuation. So a fragment that might not be a street
  * must be refused, and the second block below is the more important one.
  */
-import { parseCatalogDescription } from "./adapters/taxsaleinfo";
+import { parseCatalogDescription, readCatalogLabel } from "./adapters/taxsaleinfo";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) throw new Error(msg);
@@ -81,6 +81,17 @@ assert(sold.street === undefined, `acreage after "On" is not a street, got ${sol
 for (const desc of ["", "Vacant Parcel W/Access Issues", "Farmhouse And 18+ Acre Parcel."]) {
   const got = parseCatalogDescription(desc);
   assert(got.street === undefined, `"${desc}" has no street, got ${JSON.stringify(got.street)}`);
+}
+
+// Re-offer catalogs are the county's second sale, not an unknown county.
+for (const [label, county, reoffer] of [
+  ["Arenac", "Arenac", false],
+  ["Arenac Re-Offer", "Arenac", true],
+  ["Van Buren Reoffer", "Van Buren", true],
+  ["St. Joseph Re-offer", "St. Joseph", true],
+] as const) {
+  const got = readCatalogLabel(label);
+  assert(got.county === county && got.reoffer === reoffer, `${label} -> ${JSON.stringify(got)}`);
 }
 
 console.log("taxsaleinfo description tests ok");

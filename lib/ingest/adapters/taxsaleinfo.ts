@@ -99,6 +99,20 @@ async function fetchCatalogRefs(): Promise<CatalogRef[]> {
 
 let catalogCache: CatalogRef[] | null = null;
 
+/**
+ * A catalog's county label, read as the county and whether it is a re-offer.
+ *
+ * Title Check lists a county's second-round sale as its own catalog, labelled
+ * "Arenac Re-Offer" (or "Reoffer"). Looked up whole, that label matched no
+ * county, so every re-offer catalog — a third of Michigan's sales in a typical
+ * autumn — was dropped at discovery and its parcels never crawled, while the
+ * calendar import held the sale with a count and nothing behind it.
+ */
+export function readCatalogLabel(label: string): { county: string; reoffer: boolean } {
+  const m = /^(.*?)\s+re-?\s?offer\b.*$/i.exec(label.trim());
+  return m ? { county: m[1].trim(), reoffer: true } : { county: label.trim(), reoffer: false };
+}
+
 async function getCatalogRefs(): Promise<CatalogRef[]> {
   if (!catalogCache) catalogCache = await fetchCatalogRefs();
   return catalogCache;
@@ -185,7 +199,7 @@ export const taxSaleInfoAdapter: SourceAdapter = {
     const bindings: CountyBinding[] = [];
 
     for (const ref of refs) {
-      const county = findCountyByName("MI", ref.countyLabel);
+      const county = findCountyByName("MI", readCatalogLabel(ref.countyLabel).county);
       if (!county) {
         console.warn(`[mi-taxsaleinfo] unmatched county label: ${ref.countyLabel}`);
         continue;
@@ -225,7 +239,14 @@ export const taxSaleInfoAdapter: SourceAdapter = {
         saleDateConfirmed: true,
         listingKind: "sale_list",
         startTime,
-        title: `${countyLabel} County tax foreclosure auction`,
+        /*
+         * A re-offer is titled as one, so it reads as the county's second sale
+         * rather than a duplicate of its first — and so the Auction Scout and
+         * the import fold can pair it with the "Re-Offer Sale" they hold.
+         */
+        title: readCatalogLabel(countyLabel).reoffer
+          ? `${readCatalogLabel(countyLabel).county} County tax foreclosure re-offer auction`
+          : `${countyLabel} County tax foreclosure auction`,
         status: "scheduled",
         sourceUrl: `${BASE}/listings/catalog/${catalogId}`,
         raw: { catalogId, countyLabel },
