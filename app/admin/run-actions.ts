@@ -421,7 +421,8 @@ export async function savePipelineSettings(formData: FormData): Promise<void> {
     researchCooldownDays: Number(str(formData, "researchCooldownDays")),
     enrichEnabled: str(formData, "enrichEnabled") === "on",
     enrichWeeklyBudgetDollars: Number(str(formData, "enrichWeeklyBudgetDollars")),
-    videoTopN: Number(str(formData, "videoTopN")),
+    // Absent is "unchanged", not zero — zero pauses video production.
+    videoTopN: str(formData, "videoTopN") ? Number(str(formData, "videoTopN")) : undefined,
   };
 
   const next = await savePipelineConfig(patch, await currentActor());

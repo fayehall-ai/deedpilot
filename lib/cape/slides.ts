@@ -6,6 +6,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { NUMBER_WORD, spokenToDigits, type CapeScript, type CapeSection } from "./script";
+import { FONT_FAMILY, measureText, textPath } from "./text-path";
 
 /**
  * Slides, drawn as SVG and rasterised to PNG.
@@ -15,9 +16,9 @@ import { NUMBER_WORD, spokenToDigits, type CapeScript, type CapeSection } from "
  * The obvious way to render a slide is HTML in Puppeteer, and it is the wrong
  * trade here. A browser is a 300MB dependency, needs a sandbox, and would make
  * video production impossible anywhere the rest of this system runs. SVG is
- * text this module can generate directly, and `sharp` — already present as a
- * transitive dependency of the Next scaffold — rasterises it without any of
- * that.
+ * text this module can generate directly, and `sharp` — a direct dependency, so
+ * the render route's bundle is guaranteed to carry it — rasterises it without
+ * any of that.
  *
  * ## Why layout lives here and not in the model
  *
@@ -33,6 +34,12 @@ import { NUMBER_WORD, spokenToDigits, type CapeScript, type CapeSection } from "
  * truncated by the renderer, it simply draws outside it and disappears — a
  * failure that is invisible until someone watches the video. So every string is
  * measured and broken here, and the estimate is deliberately conservative.
+ *
+ * ## Why there is no `<text>` element
+ *
+ * Every string is drawn as outlines from a bundled font by `text-path.ts`. The
+ * render cron runs in a function with no fonts installed, where `<text>` would
+ * rasterise as nothing at all; outlines look the same on every machine.
  */
 
 export interface SlideTheme {
@@ -61,20 +68,14 @@ export const DEFAULT_THEME: SlideTheme = {
   text: "#f9fafb",
   muted: "#9ca3af",
   accent: "#fbbf24",
-  // A stack, not a webfont: rasterisation happens on whatever machine runs the
-  // encode, and an unavailable font silently changes every metric below.
-  fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif",
+  /*
+   * Informational: the face `text-path.ts` draws, as outlines, on every machine.
+   * It was a system stack (Helvetica Neue, Helvetica, Arial) until the encode
+   * moved into a function with no fonts at all; Liberation Sans is metric-
+   * compatible with Arial, so the wrap arithmetic below did not have to move.
+   */
+  fontFamily: FONT_FAMILY,
 };
-
-/** XML-escape. A county named "Prince George's" breaks the document without it. */
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
 
 /**
  * Break a string to fit a pixel width.
@@ -169,14 +170,20 @@ export function chromeSvg(theme: SlideTheme, logoDataUri?: string | null): strin
       `<image href="${logoDataUri}" x="${W - 160 - size}" y="52" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet"/>`,
     );
   } else {
+    /* The mark sits a fixed gap before the measured wordmark, whatever the face. */
+    const wordmark = measureText(BRAND_NAME, 24, 600, 4.2);
     parts.push(
-      diamond(W - 392, 92, 9, theme.accent),
-      `<text x="${W - 160}" y="101" text-anchor="end" font-family="${theme.fontFamily}" font-size="24" font-weight="600" letter-spacing="4.2" fill="${theme.text}">${esc(BRAND_NAME)}</text>`,
+      diamond(W - 160 - wordmark - 26, 92, 9, theme.accent),
+      textPath(BRAND_NAME, {
+        x: W - 160, y: 101, anchor: "end", size: 24, weight: 600, letterSpacing: 4.2, fill: theme.text,
+      }),
     );
   }
 
   parts.push(
-    `<text x="${W / 2}" y="${H - 34}" text-anchor="middle" font-family="${theme.fontFamily}" font-size="26" letter-spacing="1.2" fill="${theme.text}" opacity="0.78">${esc(BRAND_URL)}</text>`,
+    textPath(BRAND_URL, {
+      x: W / 2, y: H - 34, anchor: "middle", size: 26, letterSpacing: 1.2, fill: theme.text, opacity: 0.78,
+    }),
     `<rect x="0" y="${H - 6}" width="${W}" height="6" fill="${theme.accent}"/>`,
   );
   return parts.join("\n  ");
@@ -268,7 +275,9 @@ export interface CountyPhoto {
 /** A gold eyebrow over a short rule — the reference deck's section marker. */
 function eyebrowSvg(theme: SlideTheme, label: string, x: number, anchor: "start" | "end"): string {
   const ruleX = anchor === "end" ? x - 116 : x;
-  return `<text x="${x}" y="188" text-anchor="${anchor}" font-family="${theme.fontFamily}" font-size="27" font-weight="600" letter-spacing="5.4" fill="${theme.accent}">${esc(label.toUpperCase())}</text>
+  return `${textPath(label.toUpperCase(), {
+    x, y: 188, anchor, size: 27, weight: 600, letterSpacing: 5.4, fill: theme.accent,
+  })}
   <rect x="${ruleX}" y="212" width="116" height="5" fill="${theme.accent}" rx="2"/>`;
 }
 
@@ -289,13 +298,11 @@ export function titleSlideSvg(
     eyebrowSvg(theme, "County auction briefing", 160, "start"),
   ];
   for (const line of titleLines) {
-    parts.push(
-      `<text x="160" y="${y}" font-family="${theme.fontFamily}" font-size="82" font-weight="700" fill="${theme.text}">${esc(line)}</text>`,
-    );
+    parts.push(textPath(line, { x: 160, y, size: 82, weight: 700, fill: theme.text }));
     y += 100;
   }
   parts.push(
-    `<text x="160" y="${y + 26}" font-family="${theme.fontFamily}" font-size="34" fill="${theme.text}" opacity="0.85">${esc(writtenForm(subtitle))}</text>`,
+    textPath(writtenForm(subtitle), { x: 160, y: y + 26, size: 34, fill: theme.text, opacity: 0.85 }),
     chromeSvg(theme, logoDataUri),
   );
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">\n  ${parts.join("\n  ")}\n</svg>`;
@@ -321,9 +328,7 @@ export function contentSlideSvg(
 
   let y = 330;
   for (const line of wrapText(writtenForm(slide.headline), 70, col).slice(0, 2)) {
-    parts.push(
-      `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${theme.fontFamily}" font-size="70" font-weight="700" fill="${theme.text}">${esc(line)}</text>`,
-    );
+    parts.push(textPath(line, { x, y, anchor, size: 70, weight: 700, fill: theme.text }));
     y += 90;
   }
 
@@ -335,7 +340,9 @@ export function contentSlideSvg(
     for (const [i, line] of lines.entries()) {
       const tx = side === "left" ? x + 54 : x - 54;
       parts.push(
-        `<text x="${tx}" y="${y + i * 46}" text-anchor="${anchor}" font-family="${theme.fontFamily}" font-size="34" fill="${theme.text}" opacity="${i === 0 ? 1 : 0.82}">${esc(line)}</text>`,
+        textPath(line, {
+          x: tx, y: y + i * 46, anchor, size: 34, fill: theme.text, opacity: i === 0 ? 1 : 0.82,
+        }),
       );
     }
     y += lines.length * 46 + 30;

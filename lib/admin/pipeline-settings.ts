@@ -29,6 +29,7 @@ export interface PipelineConfig {
   researchCooldownDays: number;
   enrichEnabled: boolean;
   enrichWeeklyBudgetDollars: number;
+  /** Briefing videos per weekly batch — the N largest sales by parcels. 0 pauses. */
   videoTopN: number;
 }
 
@@ -113,7 +114,6 @@ export function validateConfig(patch: Partial<PipelineConfig>): string[] {
   }
   for (const [key, label] of [
     ["enrichWeeklyBudgetDollars", "Weekly enrichment budget"],
-    ["videoTopN", "Sales delivered each week"],
   ] as const) {
     const v = patch[key];
     if (v === undefined) continue;
@@ -122,6 +122,12 @@ export function validateConfig(patch: Partial<PipelineConfig>): string[] {
   }
   if (patch.researchWeekday !== undefined && !(WEEKDAYS as readonly string[]).includes(patch.researchWeekday)) {
     errors.push(`Research day must be one of: ${WEEKDAYS.join(", ")}`);
+  }
+  if (patch.videoTopN !== undefined) {
+    const { min, max } = LIMITS.videoTopN;
+    if (!Number.isInteger(patch.videoTopN) || patch.videoTopN < min || patch.videoTopN > max) {
+      errors.push(`Videos per weekly batch must be a whole number between ${min} and ${max}`);
+    }
   }
   return errors;
 }

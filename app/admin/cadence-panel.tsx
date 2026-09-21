@@ -49,9 +49,12 @@ export async function CadencePanel({
       header: "Units consumed",
       cell: (r) => (
         <span className="font-mono text-xs text-muted">
-          {r.inputTokens > 0 || r.outputTokens > 0
-            ? `${(r.inputTokens / 1000).toFixed(0)}k in / ${(r.outputTokens / 1000).toFixed(0)}k out`
-            : ""}
+          {/* Speech is billed in characters, which ride in the tokens column. See `lib/ai/usage.ts`. */}
+          {r.operation === "cape-narration"
+            ? `${r.inputTokens.toLocaleString()} chars`
+            : r.inputTokens > 0 || r.outputTokens > 0
+              ? `${(r.inputTokens / 1000).toFixed(0)}k in / ${(r.outputTokens / 1000).toFixed(0)}k out`
+              : ""}
           {r.searchCalls > 0 ? `  ${r.searchCalls} searches` : ""}
           {r.requests > 0 ? `  ${r.requests} lookups` : ""}
         </span>
@@ -323,7 +326,7 @@ export async function CadencePanel({
             <div className="text-xs font-semibold uppercase tracking-wide text-muted">Delivery</div>
             <div className="flex flex-wrap items-end gap-3">
               <label className="flex flex-col gap-1">
-                <span className="text-xs text-muted">Sales delivered each week</span>
+                <span className="text-xs text-muted">Sales delivered per weekly batch</span>
                 <input
                   name="videoTopN"
                   type="number"
@@ -334,8 +337,9 @@ export async function CadencePanel({
                 />
               </label>
               <span className="pb-2 text-xs text-muted">
-                the largest upcoming sales by parcel count get a briefing video and a framework
-                document in the CAPE Drive folder. 0 stops delivery.
+                the largest sales by parcel count in each production week get a narrated video
+                and a framework in the CAPE Drive folder · rendered every 10 minutes · 0 pauses
+                delivery · each video buys ~2,000 characters of speech unless cached
               </span>
             </div>
           </div>
