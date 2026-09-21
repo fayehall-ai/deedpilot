@@ -51,7 +51,16 @@ export const MIN_PARCELS = 20;
 export const MIN_LEAD_DAYS = 7;
 
 export async function capePackageInputs(opts: { auctionId?: string; today?: string } = {}): Promise<
-  (PackageInput & { countyFips: string })[]
+  (PackageInput & {
+    countyFips: string;
+    /**
+     * Parcels the county announced, where it stated a count. Carried so the
+     * render cron can rank sales by `greatest(lotCount, announced)` — the same
+     * best figure `MIN_PARCELS` is measured on. Deliberately not part of
+     * `PackageInput`, so it cannot reach `capeInputsHash` and restale scripts.
+     */
+    announcedParcelCount: number | null;
+  })[]
 > {
   const today = opts.today ?? new Date().toISOString().slice(0, 10);
 
@@ -127,6 +136,7 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
       platform: auctions.platform,
       listingKind: auctions.listingKind,
       lotCount: auctions.lotCount,
+      announcedParcelCount: auctions.announcedParcelCount,
       startTime: auctions.startTime,
       logistics: auctions.logistics,
       registrationDeadline: auctions.registrationDeadline,
@@ -226,6 +236,7 @@ export async function capePackageInputs(opts: { auctionId?: string; today?: stri
     registrationDeadline: r.registrationDeadline,
     depositDeadline: r.depositDeadline,
     lotCount: r.lotCount,
+    announcedParcelCount: r.announcedParcelCount ?? null,
     listingKind: r.listingKind,
     rule: resolveCountyRule(r.countyFips),
     statute: statuteFor(r.state) ?? null,

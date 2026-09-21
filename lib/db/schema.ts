@@ -936,6 +936,7 @@ export const pipelineSettings = pgTable("pipeline_settings", {
   researchStates: integer("research_states").notNull().default(4),
   /** Days that must pass before another pass may queue. Guards double-firing. */
   researchCooldownDays: integer("research_cooldown_days").notNull().default(6),
+  videoTopN: integer("video_top_n").notNull().default(16),
   updatedBy: text("updated_by").notNull().default("admin"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

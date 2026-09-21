@@ -49,9 +49,12 @@ export async function CadencePanel({
       header: "Units consumed",
       cell: (r) => (
         <span className="font-mono text-xs text-muted">
-          {r.inputTokens > 0 || r.outputTokens > 0
-            ? `${(r.inputTokens / 1000).toFixed(0)}k in / ${(r.outputTokens / 1000).toFixed(0)}k out`
-            : ""}
+          {/* Speech is billed in characters, which ride in the tokens column. See `lib/ai/usage.ts`. */}
+          {r.operation === "cape-narration"
+            ? `${r.inputTokens.toLocaleString()} chars`
+            : r.inputTokens > 0 || r.outputTokens > 0
+              ? `${(r.inputTokens / 1000).toFixed(0)}k in / ${(r.outputTokens / 1000).toFixed(0)}k out`
+              : ""}
           {r.searchCalls > 0 ? `  ${r.searchCalls} searches` : ""}
           {r.requests > 0 ? `  ${r.requests} lookups` : ""}
         </span>
@@ -293,6 +296,28 @@ export async function CadencePanel({
               whatever day the server thinks it is. Today is <strong>{deskWeekday(now)}</strong>,{" "}
               {deskZoneLabel(now)}.
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted">Briefing videos</div>
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs text-muted">Videos per weekly batch</span>
+                <input
+                  name="videoTopN"
+                  type="number"
+                  min={LIMITS.videoTopN.min}
+                  max={LIMITS.videoTopN.max}
+                  defaultValue={config.videoTopN}
+                  className={`${input} w-24`}
+                />
+              </label>
+              <span className="pb-2 text-xs text-muted">
+                the largest sales by parcel count in each production week get a narrated video,
+                rendered every 10 minutes and delivered to CAPE/Video on Drive · 0 pauses · each
+                video buys ~2,000 characters of speech unless cached
+              </span>
+            </div>
           </div>
 
           <div className="flex gap-2">

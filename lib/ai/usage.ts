@@ -46,7 +46,18 @@ export type Operation =
    * how many scripts were generated and regenerated, and that is answerable
    * only if the script call is not folded into `brief`.
    */
-  | "cape-script";
+  | "cape-script"
+  /*
+   * CAPE narration — speech synthesis, billed per character.
+   *
+   * Recorded once the render cron started buying speech unattended: a queue
+   * that spends money with nobody watching has to leave a bill behind. Only
+   * characters actually synthesised are recorded, never cache hits. The billed
+   * unit is stored in `inputTokens` — characters, not tokens — which lets the
+   * existing per-million rate card price it without a schema change; the note
+   * on each row says so.
+   */
+  | "cape-narration";
 
 export interface UsageRecord {
   provider: string;
@@ -79,6 +90,13 @@ export const DEFAULT_RATES: Record<string, RateCard> = {
   attom: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 4 },
   rentcast: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 2 },
   batchdata: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 3 },
+  /*
+   * Speech, per million *characters* (recorded in `inputTokens`). Neural2 at
+   * $16/M and ElevenLabs Turbo at $50/M — the same list rates `RATE_PER_MILLION`
+   * in `lib/cape/voice.ts` quotes before a run.
+   */
+  "google-tts": { inputPerMTok: 1600, outputPerMTok: 0, perSearchCall: 0, perRequest: 0 },
+  elevenlabs: { inputPerMTok: 5000, outputPerMTok: 0, perSearchCall: 0, perRequest: 0 },
 };
 
 const FALLBACK: RateCard = { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 0 };

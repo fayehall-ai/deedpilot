@@ -31,6 +31,10 @@ import { encodeVideo, EncoderMissingError } from "./video";
 import { countyPhotos } from "./photo";
 import { readFile as readFileAsync } from "node:fs/promises";
 import { blobConfigured, publishVideo } from "./publish";
+import { deliverVideo, VIDEO_SUBFOLDER } from "./deliver";
+import { recordUsage } from "@/lib/ai/usage";
+
+const VIDEO_DELIVERY_PATH = `CAPE/${VIDEO_SUBFOLDER}`;
 
 /**
  * Component Seven, end to end: script, slides, narration, video.
@@ -70,6 +74,26 @@ export interface ProduceOptions {
   scriptAttempts?: number;
   /** Upload the finished video to Vercel Blob and record its public URL. */
   publish?: boolean;
+  /**
+   * Deliver the finished video to the CAPE folder on Google Drive and record
+   * its link in `video_url`. See `deliver.ts`.
+   */
+  drive?: boolean;
+  /**
+   * Narrate the script already stored for these facts instead of writing a new
+   * one.
+   *
+   * The render cron's mode. The script it renders is the one the script worker
+   * wrote and the automatic checks passed; re-rolling it here would put an
+   * unreviewed sample on video and spend a model call doing it. With no stored
+   * script at the current hash this returns without doing anything, and a held
+   * script stays held.
+   */
+  reuseScript?: boolean;
+  /** Where narration is cached. Defaults to `<outRoot>/_audio-cache`. */
+  audioCacheDir?: string;
+  /** Also cache narration in Vercel Blob. See `VoiceOptions.remoteCache`. */
+  remoteAudioCache?: boolean;
   /** How much of the deck moves: `all`, `opening`, or `none`. See `video.ts`. */
   motion?: "all" | "opening" | "none";
   onProgress?: (msg: string) => void;
@@ -85,13 +109,55 @@ export interface ProduceResult {
   slideCount: number;
   audioSeconds?: number;
   characters?: number;
+  /** Characters actually sent to the speech provider — cache hits excluded. */
+  billedCharacters?: number;
   estimatedUsd?: number;
   cachedSections?: number;
   videoPath?: string;
   videoSeconds?: number;
+  videoBytes?: number;
   videoUrl?: string;
+  /** The Drive file name, when delivered. */
+  deliveredAs?: string;
   error?: string;
 }
+
+/**
+ * Why a stored script must not be narrated, or null when it may.
+ *
+ * The two holds `produceCapePackage` writes: a spoken figure the facts do not
+ * support, and a script about the wrong county. Both are recorded on the row
+ * rather than thrown, so anything deciding whether to render reads them here.
+ */
+export function heldReason(row: {
+  unsupportedFigures: string[] | null;
+  error: string | null;
+}): string | null {
+  if ((row.unsupportedFigures ?? []).length > 0) {
+    return `unsupported figure(s): ${(row.unsupportedFigures ?? []).join(", ")}`;
+  }
+  if (row.error?.startsWith("wrong county")) return row.error;
+  return null;
+}
+
+/**
+ * Media fields, emptied whenever a new script is written.
+ *
+ * A video is a reading of one particular script. The row used to keep
+ * `video_path` and `video_url` across a rewrite, so a package whose facts had
+ * moved still reported a video "produced from these facts" — the old one — and
+ * the checklist, the CLI's skip test and the render cron all believed it. With
+ * these cleared, `inputs_hash` plus a video field means what it says.
+ */
+const NO_MEDIA = {
+  audioPath: null,
+  audioDurationSec: null,
+  audioCharacters: null,
+  videoPath: null,
+  videoUrl: null,
+  videoDurationSec: null,
+  videoBytes: null,
+} as const;
 
 /** Filesystem-safe stem for this auction's artifacts. */
 function slug(input: PackageInput): string {
@@ -168,8 +234,11 @@ export async function produceCapePackage(
 
   const outDir = path.join(opts.outRoot, slug(input));
 
-  try {
-    // --- 1. Script and slide plan -------------------------------------------
+  /*
+   * Write a fresh script, or return the held result that stops the package.
+   * Called inside the `try` below, so a failure here is recorded like any other.
+   */
+  const writeScript = async (): Promise<CapeScript | ProduceResult> => {
     log("  writing script…");
 
     /*
@@ -258,6 +327,8 @@ export async function produceCapePackage(
       slidePlanCount: base.slideCount,
       stage: "script",
       error: null,
+      // The old audio and video read the old script. See `NO_MEDIA`.
+      ...NO_MEDIA,
     });
 
     log(
@@ -299,6 +370,39 @@ export async function produceCapePackage(
       return { ...base, stage: "script", skipped: "narration contains unsupported figures" };
     }
 
+    return script;
+  };
+
+  try {
+    // --- 1. Script and slide plan -------------------------------------------
+    let script: CapeScript;
+
+    if (opts.reuseScript) {
+      /*
+       * The stored script, only if it was written from the facts now in force
+       * and nothing held it. A held script is not narrated here any more than
+       * it would have been when it was written — that is a person's call.
+       */
+      const stored = existing?.inputsHash === inputsHash ? existing.script : null;
+      if (!existing || !stored) return { ...base, skipped: "no script written from these facts" };
+      const held = heldReason(existing);
+      if (held) {
+        base.unsupportedFigures = existing.unsupportedFigures ?? [];
+        return { ...base, stage: "script", skipped: `script held — ${held}` };
+      }
+      script = stored as unknown as CapeScript;
+      base.script = script;
+      base.slideCount = script.sections.length + 1; // + the title card
+      log(
+        `  script: reusing the stored one — ${script.sections.length} section(s), ` +
+          `~${estimateDurationSec(script)}s, ${existing.scriptModel ?? "model unknown"}`,
+      );
+    } else {
+      const written = await writeScript();
+      if ("stage" in written) return written;
+      script = written;
+    }
+
     if (opts.scriptOnly) return { ...base, stage: "script" };
 
     // --- 2. Narration -------------------------------------------------------
@@ -316,11 +420,28 @@ export async function produceCapePackage(
           `(~$${base.estimatedUsd.toFixed(3)} if uncached)…`,
       );
 
-      const sections = await narrate(script, { cacheDir: path.join(opts.outRoot, "_audio-cache") });
+      const sections = await narrate(script, {
+        cacheDir: opts.audioCacheDir ?? path.join(opts.outRoot, "_audio-cache"),
+        remoteCache: opts.remoteAudioCache,
+      });
       audioPaths = sections.map((s) => s.mp3Path);
       sectionDurations = sections.map((s) => s.durationSec);
       base.audioSeconds = sections.reduce((n, s) => n + s.durationSec, 0);
       base.cachedSections = sections.filter((s) => s.cached).length;
+
+      /* The bill: characters actually synthesised, never cache hits. */
+      const billed = sections.filter((s) => !s.cached);
+      base.billedCharacters = billed.reduce((n, s) => n + s.characters, 0);
+      if (base.billedCharacters > 0) {
+        await recordUsage({
+          provider: provider.name === "google" ? "google-tts" : provider.name,
+          operation: "cape-narration",
+          inputTokens: base.billedCharacters,
+          requests: billed.length,
+          countyFips: input.countyFips ?? null,
+          note: `characters, not tokens — ${billed.length} section(s) for auction ${input.auctionId}`,
+        });
+      }
 
       await upsert(input.auctionId, {
         inputsHash,
@@ -419,12 +540,38 @@ export async function produceCapePackage(
       }
     }
 
+    /*
+     * Drive delivery, the team's destination. Also opt-in, for the same reason
+     * as Blob: a review encode must not land in a shared folder by accident.
+     */
+    let deliveredAs: string | undefined;
+    if (opts.drive) {
+      log("  delivering to Drive…");
+      const delivered = await deliverVideo({
+        auctionId: input.auctionId,
+        inputsHash,
+        mp4Path: video.mp4Path,
+        countyName: input.countyName,
+        state: input.state,
+        saleDate: input.saleDate,
+      });
+      videoUrl = delivered.webViewLink;
+      deliveredAs = delivered.fileName;
+      log(
+        `  delivered to Drive (${delivered.created ? "new file" : "replaced in place"}): ` +
+          `${VIDEO_DELIVERY_PATH}/${delivered.fileName} → ${delivered.webViewLink}` +
+          (delivered.recorded ? "" : " — NOT recorded: the facts moved during the upload"),
+      );
+    }
+
     return {
       ...base,
       stage: "video",
       videoPath: video.mp4Path,
       videoSeconds: video.durationSec,
+      videoBytes: video.bytes,
       videoUrl,
+      deliveredAs,
     };
   } catch (e) {
     // A missing encoder is an environment fault, not this package's — every

@@ -199,6 +199,21 @@ function hydrate(r: Record<string, unknown>): RunJob {
   };
 }
 
+/**
+ * Hold a claimed job for longer than `LEASE_MS`.
+ *
+ * For work that can outlive the standard lease inside one invocation. A render
+ * may run to the function's 800-second ceiling, past the ten-minute lease, and
+ * a lease that lapses mid-render is claimable by the next tick — two renders of
+ * one briefing, both buying the same speech. Only extends a lease still held.
+ */
+export async function extendLease(id: string, ms: number, now = new Date()): Promise<void> {
+  await db
+    .update(runJobs)
+    .set({ leaseExpiresAt: new Date(now.getTime() + ms) })
+    .where(and(eq(runJobs.id, id), eq(runJobs.status, "leased")));
+}
+
 export async function completeJob(
   id: string,
   result: Record<string, unknown>,

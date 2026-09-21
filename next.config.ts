@@ -56,6 +56,28 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/cron/**": ["./data/source-registry.json", "./data/*.json"],
     "/admin/**": ["./data/source-registry.json"],
+    /*
+     * The render worker's runtime files, all read by path and so invisible to
+     * tracing — the same trap as the registry above, and it would fail the
+     * same quiet way: no ffmpeg means no video, no font means slides with no
+     * words on them, no logo means the wordmark instead of the brand.
+     *
+     *  - ffmpeg: `ffmpeg-static` downloads the build machine's binary on
+     *    install; `lib/cape/ffmpeg.ts` resolves it from the working directory.
+     *    One binary, ~75 MB on linux-x64 — there is deliberately no ffprobe
+     *    (see that file) to stay well inside the 250 MB function limit.
+     *  - sharp's native binding and libvips are loaded through a computed
+     *    `require`; listed so the rasteriser cannot be left behind. The globs
+     *    match nothing on a Mac and the linux packages on Vercel's builders.
+     *  - The slide fonts and the brand logo.
+     */
+    "/api/cron/render": [
+      "./node_modules/ffmpeg-static/ffmpeg",
+      "./node_modules/@img/sharp-linux-x64/**/*",
+      "./node_modules/@img/sharp-libvips-linux-x64/**/*",
+      "./lib/cape/fonts/*.ttf",
+      "./public/brand/tdc-logo.png",
+    ],
   },
 
   /**

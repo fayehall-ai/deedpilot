@@ -419,6 +419,8 @@ export async function savePipelineSettings(formData: FormData): Promise<void> {
     researchWeekday: str(formData, "researchWeekday"),
     researchStates: Number(str(formData, "researchStates")),
     researchCooldownDays: Number(str(formData, "researchCooldownDays")),
+    // Absent is "unchanged", not zero — zero pauses video production.
+    videoTopN: str(formData, "videoTopN") ? Number(str(formData, "videoTopN")) : undefined,
   };
 
   const next = await savePipelineConfig(patch, await currentActor());

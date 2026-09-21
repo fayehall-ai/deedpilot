@@ -27,6 +27,8 @@ export interface PipelineConfig {
   researchWeekday: string;
   researchStates: number;
   researchCooldownDays: number;
+  /** Briefing videos per weekly batch — the N largest sales by parcels. 0 pauses. */
+  videoTopN: number;
 }
 
 /**
@@ -44,6 +46,7 @@ export const DEFAULT_CONFIG: PipelineConfig = {
   researchWeekday: "Sun",
   researchStates: 4,
   researchCooldownDays: 6,
+  videoTopN: 16,
 };
 
 export const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -69,6 +72,8 @@ export const LIMITS = {
   researchStates: { min: 1, max: MAX_SCAN_STATES },
   /** Under a day cannot guard a daily tick; over a fortnight is not "weekly". */
   researchCooldownDays: { min: 1, max: 14 },
+  /** Zero pauses rendering; a hundred a week is past any batch the calendar has held. */
+  videoTopN: { min: 0, max: 100 },
 } as const;
 
 export function validateConfig(patch: Partial<PipelineConfig>): string[] {
@@ -99,6 +104,12 @@ export function validateConfig(patch: Partial<PipelineConfig>): string[] {
   if (patch.researchWeekday !== undefined && !(WEEKDAYS as readonly string[]).includes(patch.researchWeekday)) {
     errors.push(`Research day must be one of: ${WEEKDAYS.join(", ")}`);
   }
+  if (patch.videoTopN !== undefined) {
+    const { min, max } = LIMITS.videoTopN;
+    if (!Number.isInteger(patch.videoTopN) || patch.videoTopN < min || patch.videoTopN > max) {
+      errors.push(`Videos per weekly batch must be a whole number between ${min} and ${max}`);
+    }
+  }
   return errors;
 }
 
@@ -126,6 +137,7 @@ export async function getPipelineConfig(): Promise<PipelineConfig & { edited: bo
     researchWeekday: row.researchWeekday,
     researchStates: row.researchStates,
     researchCooldownDays: row.researchCooldownDays,
+    videoTopN: row.videoTopN,
     edited: true,
     updatedBy: row.updatedBy,
     updatedAt: row.updatedAt,
@@ -147,6 +159,7 @@ export async function savePipelineConfig(
     researchWeekday: patch.researchWeekday ?? current.researchWeekday,
     researchStates: patch.researchStates ?? current.researchStates,
     researchCooldownDays: patch.researchCooldownDays ?? current.researchCooldownDays,
+    videoTopN: patch.videoTopN ?? current.videoTopN,
   };
 
   const { db, pipelineSettings } = await conn();

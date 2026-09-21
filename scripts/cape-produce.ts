@@ -11,6 +11,14 @@
  *   npm run cape:produce -- --limit 20 --force
  *   npm run cape:produce -- --script-only --concurrency 6
  *   npm run cape:produce -- --limit 1 --publish   # upload and print the URL
+ *   npm run cape:produce -- --auction <uuid> --reuse-script --drive
+ *                                            # narrate the stored script, deliver to Drive
+ *
+ * `--drive` puts the finished MP4 in the CAPE folder's Video subfolder on Google
+ * Drive (needs GOOGLE_SERVICE_ACCOUNT_JSON and GOOGLE_DRIVE_CAPE_FOLDER_ID) —
+ * the same delivery the render cron makes. `--reuse-script` narrates the script
+ * already stored for the current facts instead of writing a new one, as the
+ * cron does; packages without one are skipped.
  *
  * ## Order of work
  *
@@ -36,6 +44,7 @@ import { produceCapePackage } from "../lib/cape/produce";
 import { voiceConfigured, voiceProvider, estimateUsd } from "../lib/cape/voice";
 import { assertEncoderAvailable, EncoderMissingError } from "../lib/cape/video";
 import { configuredProviders } from "../lib/ai/providers";
+import { driveConfigured, DriveNotConfiguredError } from "../lib/delivery/drive";
 import path from "node:path";
 
 function arg(name: string): string | undefined {
@@ -121,9 +130,27 @@ async function main() {
   }
 
   // --- guards --------------------------------------------------------------
-  if (configuredProviders().length === 0) {
+  /* A reused script needs no model; everything else writes one. */
+  if (configuredProviders().length === 0 && !flag("reuse-script")) {
     console.error("No model provider configured. Set XAI_API_KEY or ANTHROPIC_API_KEY.");
     process.exit(1);
+  }
+
+  /*
+   * Checked before anything is spent: a run that narrates and encodes a batch
+   * and then cannot hand any of it over has bought speech for nothing.
+   */
+  if (flag("drive")) {
+    if (flag("script-only")) {
+      console.error("--drive delivers a video; it cannot be combined with --script-only.");
+      process.exit(1);
+    }
+    if (!driveConfigured()) {
+      console.error(
+        new DriveNotConfiguredError(["GOOGLE_SERVICE_ACCOUNT_JSON", "GOOGLE_DRIVE_CAPE_FOLDER_ID"]).message,
+      );
+      process.exit(1);
+    }
   }
 
   if (!flag("script-only")) {
@@ -205,6 +232,8 @@ async function main() {
         motion: flag("still") ? "none" : (arg("motion") as "all" | "opening" | "none" | undefined) ?? "opening",
         force: flag("force"),
         publish: flag("publish"),
+        drive: flag("drive"),
+        reuseScript: flag("reuse-script"),
         onProgress: (m) => lines.push(m),
       });
 
@@ -244,10 +273,10 @@ async function main() {
   }
   console.log(`artifacts: ${OUT_ROOT}`);
   if (urls.length > 0) {
-    console.log(`\npublished:`);
+    console.log(`\n${flag("drive") ? "delivered" : "published"}:`);
     for (const u of urls) console.log(`  ${u}`);
-  } else if (!flag("publish") && produced > 0) {
-    console.log(`(local only — pass --publish to host on Vercel Blob and get a URL)`);
+  } else if (!flag("publish") && !flag("drive") && produced > 0) {
+    console.log(`(local only — pass --drive to deliver to the CAPE Drive folder, or --publish for Vercel Blob)`);
   }
 }
 

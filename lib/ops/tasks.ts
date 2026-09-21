@@ -398,6 +398,18 @@ const capeScripts: OpsTask = {
               slidePlanCount: generated.script.sections.length + 1,
               stage: "script",
               error: null,
+              /*
+               * A new script orphans the old narration and video. Cleared so
+               * nothing mistakes them for a reading of this one — the same rule
+               * `produceCapePackage` applies (see `NO_MEDIA` there).
+               */
+              audioPath: null,
+              audioDurationSec: null,
+              audioCharacters: null,
+              videoPath: null,
+              videoUrl: null,
+              videoDurationSec: null,
+              videoBytes: null,
               updatedAt: new Date(),
             },
           });

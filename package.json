@@ -48,6 +48,7 @@
     "intel:locate": "tsx scripts/backfill-parcel-geometry.ts",
     "cape:plan": "tsx scripts/cape-produce.ts --plan",
     "cape:produce": "tsx scripts/cape-produce.ts",
+    "cape:render": "tsx scripts/cape-render-one.ts",
     "export:statute": "tsx scripts/export-statute-json.ts",
     "scout:ingest": "tsx scripts/ingest-auction-scout.ts"
   },
