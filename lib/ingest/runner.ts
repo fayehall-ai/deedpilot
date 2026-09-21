@@ -311,6 +311,16 @@ export async function runAdapter(
   if (opts.limit) bindings = bindings.slice(0, opts.limit);
   log(`[${adapter.name}] ${bindings.length} county binding(s)`);
 
+  /*
+   * One cutoff per county for the whole pass, taken when its first binding
+   * starts. A county can have several bindings — Michigan lists a county's
+   * first sale and its re-offer as two catalogs — and each binding sees only
+   * its own sale. With a cutoff per binding, the second one's reconcile found
+   * the first one's sale "not seen since it started" and delisted a sale the
+   * same pass had just written.
+   */
+  const passCutoff = new Map<string, Date>();
+
   for (const binding of bindings) {
     const started = Date.now();
     let runId: string | undefined;
@@ -343,7 +353,10 @@ export async function runAdapter(
      * entirely along with every other write.
      */
     let countyCutoff: Date | null = null;
-    if (!opts.dryRun) countyCutoff = await nowFromDb();
+    if (!opts.dryRun) {
+      countyCutoff = passCutoff.get(binding.countyFips) ?? (await nowFromDb());
+      passCutoff.set(binding.countyFips, countyCutoff);
+    }
 
     try {
       const rawAuctions = await adapter.listAuctions(binding);
