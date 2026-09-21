@@ -60,6 +60,35 @@ export interface ComponentItem {
    * that. Only the narrator is spared.
    */
   silent?: boolean;
+  /**
+   * What the narrator is told, when it differs from what the board shows.
+   *
+   * The coverage items count parcels as enrichment fills them in — every ten
+   * minutes now — and both the exact percentage and the counts behind it were
+   * in the script's inputs hash. Each parcel valued moved the hash, so the
+   * largest sales, the ones being enriched, had their scripts rewritten and
+   * their videos re-rendered over and over, buying speech each time to change
+   * "sixty-two percent" to "sixty-three". The board keeps the exact figure; the
+   * narrator gets the band (`coverageBand`), and so does the hash.
+   */
+  spoken?: string;
+}
+
+/**
+ * A share of a sale's parcels, in words that change only a few times as it fills.
+ *
+ * Quarter bands: a briefing is not the place for a percentage that is out of
+ * date by the time it is heard, and a band is what a bidder does with it anyway.
+ */
+export function coverageBand(n: number, total: number): string {
+  if (total <= 0 || n <= 0) return "none";
+  const r = n / total;
+  if (r >= 1) return "all";
+  if (r >= 0.875) return "nearly all";
+  if (r >= 0.625) return "about three quarters";
+  if (r >= 0.375) return "about half";
+  if (r >= 0.125) return "about a quarter";
+  return "a few";
 }
 
 export interface Component {
@@ -187,8 +216,10 @@ export interface CapePackage {
  *
  * 2 — the fact sheet dropped Components Seven through Ten and every silent
  *     item, and redemption windows over a year gained a human scale.
+ * 3 — parcel coverage reaches the narrator, and the hash, as a band rather
+ *     than a count; see `ComponentItem.spoken`.
  */
-const FACT_SHEET_VERSION = 2;
+const FACT_SHEET_VERSION = 3;
 
 export function capeInputsHash(i: PackageInput): string {
   const shape = {
@@ -207,7 +238,15 @@ export function capeInputsHash(i: PackageInput): string {
     lotCount: i.lotCount,
     listingKind: i.listingKind,
     population: i.population,
-    parcels: i.parcels,
+    /* The total is a crawl's finding; the rest move with enrichment, so only their bands count. */
+    parcels: {
+      total: i.parcels.total,
+      number: coverageBand(i.parcels.withParcelNumber, i.parcels.total),
+      assessed: coverageBand(i.parcels.withAssessed, i.parcels.total),
+      address: coverageBand(i.parcels.withAddress, i.parcels.total),
+      zoning: coverageBand(i.parcels.withZoning, i.parcels.total),
+      geo: coverageBand(i.parcels.withGeo, i.parcels.total),
+    },
     offices: i.offices,
     logistics: i.logistics ?? null,
     rule: i.rule ?? null,
@@ -249,6 +288,8 @@ export function capeCountyInputsHash(i: PackageInput): string {
 }
 
 const have = (label: string, detail: string): ComponentItem => ({ label, state: "have", detail });
+/** The same item, with what the narrator hears in place of the board's detail. */
+const spoken = (item: ComponentItem, text: string): ComponentItem => ({ ...item, spoken: text });
 /**
  * An item nobody has confirmed — silent to the narrator by default.
  *
@@ -529,9 +570,12 @@ export function buildPackage(i: PackageInput): CapePackage {
 
   // --- Four: property-level due diligence ----------------------------------
   const four = component(4, "Property-level due diligence", [
-    p.withParcelNumber === p.total && p.total > 0
-      ? have("Parcel verification", `${pct(p.withParcelNumber)}% carry a parcel number`)
-      : advise("Parcel verification", `${pct(p.withParcelNumber)}% carry a parcel number`),
+    spoken(
+      p.withParcelNumber === p.total && p.total > 0
+        ? have("Parcel verification", `${pct(p.withParcelNumber)}% carry a parcel number`)
+        : advise("Parcel verification", `${pct(p.withParcelNumber)}% carry a parcel number`),
+      `${coverageBand(p.withParcelNumber, p.total)} of the parcels carry a parcel number`,
+    ),
     /*
      * Four coverage items, silent when empty.
      *
@@ -546,7 +590,10 @@ export function buildPackage(i: PackageInput): CapePackage {
      * "Independent verification required" already says it.
      */
     p.withAssessed > 0
-      ? have("Assessor records", `${pct(p.withAssessed)}% enriched`)
+      ? spoken(
+          have("Assessor records", `${pct(p.withAssessed)}% enriched`),
+          `${coverageBand(p.withAssessed, p.total)} of the parcels carry an assessor record`,
+        )
       : verify("Assessor records", "No parcel in this sale has an assessor record"),
     /*
      * Both sources, as Component Three has always read them.
@@ -561,10 +608,16 @@ export function buildPackage(i: PackageInput): CapePackage {
       ? have("GIS mapping", text(i.offices.gis ?? r?.gisMap?.label)!)
       : verify("GIS mapping", "No county GIS link in the directory or the atlas"),
     p.withZoning > 0
-      ? have("Zoning", `${pct(p.withZoning)}% carry a zoning code`)
+      ? spoken(
+          have("Zoning", `${pct(p.withZoning)}% carry a zoning code`),
+          `${coverageBand(p.withZoning, p.total)} of the parcels carry a zoning code`,
+        )
       : verify("Zoning", "No zoning data on these parcels"),
     p.withGeo > 0
-      ? have("Location / mapping", `${pct(p.withGeo)}% geocoded`)
+      ? spoken(
+          have("Location / mapping", `${pct(p.withGeo)}% geocoded`),
+          `${coverageBand(p.withGeo, p.total)} of the parcels are mapped`,
+        )
       : verify("Location / mapping", "No coordinates on these parcels"),
     verify("Legal access and road frontage", "ATTOM returns frontage on a minority of parcels"),
     verify("Occupancy", "Absentee flag available where enriched; occupancy not confirmed"),

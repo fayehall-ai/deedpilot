@@ -270,7 +270,8 @@ export function factSheet(pkg: CapePackage, meta: CapeScriptMeta): string {
     lines.push(`\n${c.n}. ${c.title}`);
     for (const item of items) {
       const mark = item.state === "have" ? "ON RECORD" : "NEEDS VERIFICATION";
-      lines.push(`   [${mark}] ${item.label}${item.detail ? ` — ${item.detail}` : ""}`);
+      const detail = item.spoken ?? item.detail;
+      lines.push(`   [${mark}] ${item.label}${detail ? ` — ${detail}` : ""}`);
     }
   }
 
