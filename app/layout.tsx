@@ -104,7 +104,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 className="h-8 w-8"
                 priority
               />
-              DeedPilot
+              TD GameChanger
             </HomeLink>
             <nav
               className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-base [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
