@@ -363,8 +363,15 @@ const COLUMNS: Record<ScoutTab, Record<string, string>> = {
   },
 };
 
+/** The property-list column, read when the tab has one. Optional: older workbooks lack it. */
+const LIST_COLUMN: Record<ScoutTab, string> = {
+  "Auction Scout": "Auction Property List / Download Link",
+  "Sep-Oct Source Import": "Original Property List Link",
+};
+
 export interface ScoutRow {
-  tab: ScoutTab;
+  /** The channel this row arrived on: a workbook tab, or "Auction Scout research". */
+  tab: string;
   /** Spreadsheet row number, header = 1. */
   line: number;
   state: string;
@@ -381,6 +388,10 @@ export interface ScoutRow {
   contact: { name?: string; phone?: string; email?: string };
   /** The page the report cites for this sale, as a URL. */
   site: string | null;
+  /** The county's own property list, catalog or PDF, when the row links one. */
+  listUrl?: string | null;
+  /** Local start time as published — the AI research carries one; the workbook does not. */
+  startTime?: string | null;
   /**
    * False where the tab's author marked the row "Past / audit only". The
    * report tab has no such column: every row in it is a sale going forward.
@@ -440,6 +451,7 @@ export function readScoutTab(tab: ScoutTab, grid: Grid): ScoutRowOutcome[] {
         amount: moneyOf(get("amount")),
         contact,
         site: urlOf(get("site")),
+        listUrl: at.has(LIST_COLUMN[tab]) ? urlOf(cells[at.get(LIST_COLUMN[tab])!] ?? "") : null,
         forward: !cols.included || get("included").trim().toLowerCase() === "yes",
         raw: Object.fromEntries(header.map((h, j) => [h, cells[j] ?? ""])),
       },
