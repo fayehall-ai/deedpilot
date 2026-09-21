@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { HomeLink } from "@/components/home-link";
 import { Fraunces, IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
@@ -95,19 +96,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           */}
           <div className="shell flex h-[4.25rem] items-center gap-3 sm:gap-6">
             <HomeLink className="flex shrink-0 items-center gap-2.5 font-display text-xl font-semibold tracking-tight">
-              {/*
-                Gold, like the primary CTA it shares the navy bar with.
-
-                The mark is identity rather than interaction, so blue — which
-                now means "you can act on this" — was the one thing it could not
-                be without lying about itself. Ink on gold is 9.82:1.
-              */}
-              <span
-                aria-hidden
-                className="grid h-8 w-8 place-items-center rounded-lg bg-gold font-sans text-base font-bold text-ink"
-              >
-                §
-              </span>
+              <Image
+                src="/brand/tdc-logo.png"
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8"
+                priority
+              />
               DeedPilot
             </HomeLink>
             <nav

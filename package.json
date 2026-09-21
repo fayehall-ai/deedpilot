@@ -18,6 +18,7 @@
     "repair:delisting": "tsx scripts/repair-imported-delisting.ts",
     "export:atlas": "tsx scripts/export-atlas-for-copilot.ts",
     "scout": "tsx scripts/scout.ts",
+    "scout:import": "tsx scripts/import-auction-scout-xlsx.ts",
     "prospect": "tsx scripts/prospect.ts",
     "cartographer": "tsx scripts/cartographer.ts",
     "prospect:national": "tsx scripts/prospect-national.ts",
