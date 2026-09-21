@@ -55,6 +55,11 @@ the next run:
 - **Sales delivered per weekly batch:** how many of each week's largest sales get
   a video and a framework. 0 pauses delivery.
 
+**Delivery is currently paused (set to 0): scripts only.** Scripts are written,
+and can be read and sent back at /cape/review. No video is voiced or rendered, and
+nothing is sent to Drive. When you're ready, set it back to 16. Drive must be set
+up first; see One-time setup.
+
 ## What it costs
 
 The *Schedules* card shows estimated spend for the last 30 days by service.

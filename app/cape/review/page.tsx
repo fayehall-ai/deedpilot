@@ -11,7 +11,7 @@ import { capeProductions, capeReviews } from "@/lib/db/schema";
 import { capePackageInputs } from "@/lib/cape/inputs";
 import { capeInputsHash } from "@/lib/cape/components";
 import { deliverableInputs, selectVideoCandidates } from "@/lib/admin/video-jobs";
-import { getPipelineConfig } from "@/lib/admin/pipeline-settings";
+import { DEFAULT_CONFIG, getPipelineConfig } from "@/lib/admin/pipeline-settings";
 import { saveCapeReview } from "./actions";
 
 export const metadata: Metadata = {
@@ -60,8 +60,14 @@ type Script = { title: string; keyTakeaway?: string; sections: { heading: string
 async function List() {
   const today = new Date().toISOString().slice(0, 10);
   const { videoTopN } = await getPipelineConfig();
+  /*
+   * With delivery paused the scripts are still written, and still worth reading
+   * before anything is voiced — so the list falls back to the default batch size
+   * rather than going empty.
+   */
+  const paused = videoTopN === 0;
   const inputs = await deliverableInputs(await capePackageInputs({ today }));
-  const candidates = selectVideoCandidates(inputs, { topN: videoTopN, today });
+  const candidates = selectVideoCandidates(inputs, { topN: paused ? DEFAULT_CONFIG.videoTopN : videoTopN, today });
   const ids = candidates.map((c) => c.input.auctionId);
   if (ids.length === 0) return <p className="text-muted">No briefings are due in the next two weeks.</p>;
 
@@ -75,6 +81,12 @@ async function List() {
 
   return (
     <div className="space-y-4">
+      {paused ? (
+        <p className="rounded-lg border border-border bg-surface-2 px-4 py-3 text-sm text-muted">
+          Scripts only: videos and frameworks are paused (&ldquo;Sales delivered per weekly batch&rdquo; is 0 on
+          the console). A change note still rewrites the script; nothing is voiced or sent to Drive.
+        </p>
+      ) : null}
       {candidates.map((c, i) => {
         const p = productionOf.get(c.input.auctionId);
         const script = p?.script as Script | null | undefined;
