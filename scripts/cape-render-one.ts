@@ -19,7 +19,7 @@ import { capePackageInputs } from "../lib/cape/inputs";
 import { capeInputsHash } from "../lib/cape/components";
 import { renderOne } from "../lib/cape/render";
 import { getPipelineConfig, DEFAULT_CONFIG } from "../lib/admin/pipeline-settings";
-import { productionRowsFor, selectVideoCandidates, videoEligibility } from "../lib/admin/video-jobs";
+import { deliverableInputs, productionRowsFor, selectVideoCandidates, videoEligibility } from "../lib/admin/video-jobs";
 import { ffmpegPath } from "../lib/cape/ffmpeg";
 
 function arg(name: string): string | undefined {
@@ -46,7 +46,7 @@ async function main() {
 
   if (flag("plan") || flag("next")) {
     const n = await topN();
-    const candidates = selectVideoCandidates(inputs, { topN: n, today });
+    const candidates = selectVideoCandidates(await deliverableInputs(inputs), { topN: n, today });
     const rows = await productionRowsFor(candidates.map((c) => c.input.auctionId));
     const verdicts = candidates.map((c) => ({ c, v: videoEligibility(rows.get(c.input.auctionId), capeInputsHash(c.input)) }));
 

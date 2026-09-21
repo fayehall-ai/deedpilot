@@ -36,7 +36,7 @@ import path from "node:path";
 import { claimNext, completeJob, extendLease, failJob, LANES, reapDeadJobs } from "@/lib/admin/queue";
 import { enqueueCapeVideos, renderInFlight, videoAuctionId } from "@/lib/admin/video-jobs";
 import { getPipelineConfig } from "@/lib/admin/pipeline-settings";
-import { tokenMatches } from "@/lib/admin/token";
+import { cronAuthorised } from "@/lib/admin/cron-auth";
 import { capePackageInputs } from "@/lib/cape/inputs";
 import { renderOne } from "@/lib/cape/render";
 import { assertEncoderAvailable } from "@/lib/cape/video";
@@ -62,16 +62,7 @@ const RENDER_LEASE_MS = 15 * 60 * 1000;
 const OUT_ROOT = "/tmp/cape";
 
 /** Same contract as `/api/cron/cape`: the cron's bearer secret, Vercel's header, or the operator token. */
-function authorised(req: NextRequest): boolean {
-  const auth = req.headers.get("authorization") ?? "";
-  const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-
-  const cronSecret = (process.env.CRON_SECRET ?? "").trim();
-  if (cronSecret && bearer === cronSecret) return true;
-  if (req.headers.get("x-vercel-cron")) return true;
-
-  return tokenMatches(bearer) || tokenMatches(req.nextUrl.searchParams.get("token"));
-}
+const authorised = cronAuthorised;
 
 export async function GET(req: NextRequest) {
   if (!authorised(req)) {

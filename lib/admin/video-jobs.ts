@@ -39,7 +39,7 @@
 
 import { and, eq, gt, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { capeProductions, runJobs } from "@/lib/db/schema";
+import { auctions, capeProductions, runJobs } from "@/lib/db/schema";
 import { capePackageInputs } from "@/lib/cape/inputs";
 import { capeInputsHash } from "@/lib/cape/components";
 import { productionDeadline } from "@/lib/cape/deadline";
@@ -211,6 +211,25 @@ export interface VideoEnqueueResult {
  * failed is not queued again, so a tick every ten minutes converges instead of
  * piling up. `inputs` lets the render route pass the list it already read.
  */
+/**
+ * The packages that may be delivered: those whose sale the county still lists.
+ *
+ * A delisted sale is one its county stopped publishing — cancelled, postponed
+ * or moved, nobody can tell which from outside. Its script is still written,
+ * because it may reappear, but a narrated briefing and a framework are not sent
+ * to anyone for a sale that may not happen. Filtered before ranking, so it does
+ * not take one of the week's places either.
+ */
+export async function deliverableInputs<T extends { auctionId: string }>(inputs: T[]): Promise<T[]> {
+  if (inputs.length === 0) return inputs;
+  const gone = await db
+    .select({ id: auctions.id })
+    .from(auctions)
+    .where(and(inArray(auctions.id, inputs.map((i) => i.auctionId)), sql`${auctions.delistedAt} IS NOT NULL`));
+  const delisted = new Set(gone.map((g) => g.id));
+  return inputs.filter((i) => !delisted.has(i.auctionId));
+}
+
 export async function enqueueCapeVideos(opts: {
   topN: number;
   inputs?: Input[];
@@ -218,7 +237,7 @@ export async function enqueueCapeVideos(opts: {
   cap?: number;
 }): Promise<VideoEnqueueResult> {
   const today = opts.today ?? new Date().toISOString().slice(0, 10);
-  const inputs = opts.inputs ?? (await capePackageInputs({ today }));
+  const inputs = await deliverableInputs(opts.inputs ?? (await capePackageInputs({ today })));
   const candidates = selectVideoCandidates(inputs, { topN: opts.topN, today });
   const rows = await productionRowsFor(candidates.map((c) => c.input.auctionId));
 
