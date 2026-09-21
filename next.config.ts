@@ -56,6 +56,8 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/cron/**": ["./data/source-registry.json", "./data/*.json"],
     "/admin/**": ["./data/source-registry.json"],
+    /* Read at request time by `lib/statutory/page.ts`. */
+    "/statutory": ["./templates/statutory-ground.html"],
   },
 
   /**
