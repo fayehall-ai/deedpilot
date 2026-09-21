@@ -206,6 +206,46 @@ async function Body({
       )}
 
       {/*
+        ---- the documents -------------------------------------------------
+        Generated from the calendar on each visit rather than published by
+        hand, so none of these is older than the data behind it. Plain anchors:
+        they are route handlers returning whole documents, not pages to prefetch.
+      */}
+      <Card>
+        <h2 className="mb-2 text-base font-semibold">Documents</h2>
+        <ul className="space-y-1 text-sm">
+          <li>
+            <a href="/frameworks" className="underline">County frameworks</a>
+            <span className="text-muted"> — every sale a week to nine weeks out, one page</span>
+          </li>
+          <li>
+            <a href="/statutory" className="underline">Statutory Ground</a>
+            <span className="text-muted"> — every county&rsquo;s tax-sale law, with its upcoming sales</span>
+          </li>
+          <li>
+            <a href="/cape" className="underline">CAPE board</a>
+            <span className="text-muted"> — briefing scripts, checklists and videos</span>
+          </li>
+        </ul>
+        <form action="/frameworks/docx" method="get" className="mt-3 flex flex-wrap items-end gap-2">
+          <label className="flex flex-col gap-1">
+            <span className="text-xs text-muted">One county&rsquo;s framework as Word (county FIPS)</span>
+            <input
+              name="fips"
+              inputMode="numeric"
+              pattern="[0-9]{5}"
+              placeholder="12031"
+              required
+              className="w-28 rounded-lg border border-border bg-surface px-2 py-1 text-sm"
+            />
+          </label>
+          <button type="submit" className="rounded-lg border border-border px-3 py-1.5 text-sm hover:border-accent">
+            Download
+          </button>
+        </form>
+      </Card>
+
+      {/*
         ---- coverage and data health --------------------------------------
         The overview that used to live on the landing page. Admins need to see
         the full picture of data health — the gold score, what counts as

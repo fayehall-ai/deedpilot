@@ -317,7 +317,8 @@ export async function reapDeadJobs(): Promise<number> {
   const rows = (await db.execute(sql`
     UPDATE run_jobs
        SET status = 'failed',
-           finished_at = now(),
+           -- When the worker actually died: its last lease ran out then, not now.
+           finished_at = COALESCE(lease_expires_at, now()),
            last_error = COALESCE(last_error || ' — ', '') || 'worker died on every attempt'
      WHERE status = 'leased'
        AND attempts >= ${MAX_ATTEMPTS}
