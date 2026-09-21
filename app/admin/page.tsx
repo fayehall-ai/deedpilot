@@ -21,6 +21,8 @@ import { EnrichmentPanel } from "./enrichment-panel";
 import { ImportPanel } from "./import-panel";
 import { ScoutWorkbookPanel } from "./scout-workbook-panel";
 import { ScoutFindingsPanel } from "./scout-findings-panel";
+import { CountySourcePanel } from "./county-source-panel";
+import { CountySourcesList } from "./county-sources-list";
 import { ImportHistoryPanel } from "./import-history-panel";
 import { OpsPanel } from "./ops-panel";
 import { StatutePanel } from "./statute-panel";
@@ -322,6 +324,24 @@ async function Body({
           <Suspense fallback={<TableSkeleton />}>
             <ScoutFindingsPanel />
           </Suspense>
+          {/*
+            For the county whose list is plainly on its own site and that no
+            crawler covers — Clayton's October PDF, before it was found.
+          */}
+          <Card>
+            <h2 className="mb-1 text-base font-semibold">Point the crawler at a county&rsquo;s list</h2>
+            <p className="mb-3 text-sm text-muted">
+              When a county publishes its sale list and it is not in DeedPilot, paste the page (or the PDF)
+              here. The crawler reads it within five minutes and on every pass after, with no code change.
+            </p>
+            <CountySourcePanel />
+            <div className="mt-4">
+              <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-faint">Recorded list pages</h3>
+              <Suspense fallback={<TableSkeleton />}>
+                <CountySourcesList />
+              </Suspense>
+            </div>
+          </Card>
           <LabelQueuePanel />
         </Stage>
 
