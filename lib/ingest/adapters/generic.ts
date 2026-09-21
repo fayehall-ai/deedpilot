@@ -221,18 +221,12 @@ export const genericAdapter: SourceAdapter = {
   },
 
   async listLots(auction: DiscoveredAuction): Promise<DiscoveredLot[]> {
-    const res = await politeFetch(auction.sourceUrl);
-    const $ = cheerio.load(res.body);
     const county = getCounty(auction.countyFips);
     const context = {
       countyName: county?.name ?? auction.countyFips,
       state: county?.state ?? "",
       sourceUrl: auction.sourceUrl,
     };
-
-    // 1. Free and exact, when the county publishes a real table.
-    const fromTable = parseHtmlTable($, auction.sourceUrl);
-    if (fromTable?.length) return fromTable;
 
     /**
      * Read one document, wherever it was found.
@@ -281,6 +275,26 @@ export const genericAdapter: SourceAdapter = {
       }
       return null;
     };
+
+    /*
+     * The source is the list itself. A county's list is often a bare PDF — an
+     * operator or the Auction Scout pastes exactly that — and this used to load
+     * its bytes as HTML, find no table and no links in them, and report the
+     * county empty.
+     */
+    if (/\.pdf(\?|#|$)/i.test(auction.sourceUrl)) {
+      return (await lotsFromDocument(auction.sourceUrl, "sale_list")) ?? [];
+    }
+
+    const res = await politeFetch(auction.sourceUrl);
+    if (/application\/pdf/i.test(res.contentType)) {
+      return (await lotsFromDocument(auction.sourceUrl, "sale_list")) ?? [];
+    }
+    const $ = cheerio.load(res.body);
+
+    // 1. Free and exact, when the county publishes a real table.
+    const fromTable = parseHtmlTable($, auction.sourceUrl);
+    if (fromTable?.length) return fromTable;
 
     // 2. Documents on the page itself, decoys filtered and sale lists first.
     for (const { url: doc, kind } of documentLinks($, auction.sourceUrl).slice(0, 4)) {
