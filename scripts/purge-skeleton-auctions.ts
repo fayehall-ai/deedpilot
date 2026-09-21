@@ -3,9 +3,9 @@
  * Prefer: npm run flywheel:coverage -- --purge-skeletons
  */
 import "../lib/env";
-import { and, eq, gte } from "drizzle-orm";
 import { db } from "../lib/db";
 import { auctions } from "../lib/db/schema";
+import { isSkeletonAuction } from "../lib/db/inventory";
 
 async function main() {
   const dry = process.argv.includes("--dry-run");
@@ -13,10 +13,10 @@ async function main() {
   const rows = await db
     .select({ id: auctions.id })
     .from(auctions)
-    .where(and(gte(auctions.saleDate, today), eq(auctions.lotCount, 0)));
+    .where(isSkeletonAuction(today));
   console.log(`${rows.length} skeleton(s)`);
   if (!dry && rows.length) {
-    await db.delete(auctions).where(and(gte(auctions.saleDate, today), eq(auctions.lotCount, 0)));
+    await db.delete(auctions).where(isSkeletonAuction(today));
     console.log("deleted");
   }
   process.exit(0);

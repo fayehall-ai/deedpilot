@@ -11,6 +11,7 @@
  */
 import { and, eq, or, sql } from "drizzle-orm";
 import { auctions } from "./schema";
+import { IMPORT_ID_SQL_PATTERN } from "../import/provenance";
 
 /**
  * A sale whose county has stated a parcel count without publishing the parcels.
@@ -50,4 +51,27 @@ export const isConfirmedInventory = () =>
   and(
     or(eq(auctions.listingKind, "sale_list"), hasAnnouncedCount()),
     eq(auctions.saleDateConfirmed, true),
+  );
+
+/**
+ * An upcoming sale row that says nothing: no parcels held, none announced, not
+ * brought in by an import, never touched by an operator.
+ *
+ * These are what a generic crawl leaves behind when it finds a county page but
+ * no list, and purging them keeps the coverage figures honest. Everything
+ * else with `lot_count = 0` is somebody's claim that a sale is happening — an
+ * announced count, a sale from the calendar import or the Auction Scout, a
+ * venue and contact, an operator's correction — and deleting it destroys the
+ * enrichment worklist along with the sale, while the county holds the auction
+ * regardless. The purges used to test `lot_count = 0` alone, which would have
+ * deleted every imported and Scout-added sale in the calendar.
+ */
+export const isSkeletonAuction = (today: string) =>
+  and(
+    sql`${auctions.saleDate} >= ${today}`,
+    eq(auctions.lotCount, 0),
+    sql`coalesce(${auctions.announcedParcelCount}, 0) = 0`,
+    sql`${auctions.externalId} NOT LIKE ${IMPORT_ID_SQL_PATTERN}`,
+    sql`${auctions.logistics} IS NULL`,
+    sql`coalesce(${auctions.operatorOverrides}, '{}'::jsonb) = '{}'::jsonb`,
   );

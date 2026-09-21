@@ -14,7 +14,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { isSkeletonAuction } from "@/lib/db/inventory";
 import { db } from "@/lib/db";
 import { auctions } from "@/lib/db/schema";
 import { buildCoverageScoreboard } from "@/lib/coverage/scoreboard";
@@ -98,11 +98,7 @@ export async function GET(request: NextRequest) {
      * A skeleton is a row with neither: no parcels and nobody claiming any.
      */
     const today = todayIso();
-    const isSkeleton = and(
-      gte(auctions.saleDate, today),
-      eq(auctions.lotCount, 0),
-      sql`coalesce(${auctions.announcedParcelCount}, 0) = 0`,
-    );
+    const isSkeleton = isSkeletonAuction(today);
     const skel = await db.select({ id: auctions.id }).from(auctions).where(isSkeleton);
     if (skel.length > 0) {
       await db.delete(auctions).where(isSkeleton);

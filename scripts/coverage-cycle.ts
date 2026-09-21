@@ -13,7 +13,7 @@
 import "../lib/env";
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { isSkeletonAuction } from "../lib/db/inventory";
 import { db } from "../lib/db";
 import { auctions } from "../lib/db/schema";
 import { buildCoverageScoreboard, type CoverageScoreboard } from "../lib/coverage/scoreboard";
@@ -45,13 +45,13 @@ async function purgeSkeletons(dryRun: boolean): Promise<{ deleted: number }> {
   const rows = await db
     .select({ id: auctions.id, countyFips: auctions.countyFips, saleDate: auctions.saleDate })
     .from(auctions)
-    .where(and(gte(auctions.saleDate, today), eq(auctions.lotCount, 0)));
+    .where(isSkeletonAuction(today));
 
-  console.log(`Found ${rows.length} skeleton auction(s) (lot_count=0, sale_date>=today)`);
+  console.log(`Found ${rows.length} skeleton auction(s) — see isSkeletonAuction`);
   if (dryRun || rows.length === 0) return { deleted: 0 };
 
   // Cascades to lots (none) and related rows.
-  await db.delete(auctions).where(and(gte(auctions.saleDate, today), eq(auctions.lotCount, 0)));
+  await db.delete(auctions).where(isSkeletonAuction(today));
   return { deleted: rows.length };
 }
 
