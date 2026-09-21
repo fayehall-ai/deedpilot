@@ -39,10 +39,10 @@
 
 import { and, isNotNull, like, sql } from "drizzle-orm";
 import { db } from "../db";
-import { auctions, capeProductions } from "../db/schema";
+import { auctions } from "../db/schema";
 import { buildPackage, capeInputsHash } from "../cape/components";
 import { capePackageInputs } from "../cape/inputs";
-import { generateCapeScript } from "../cape/script";
+import { produceCapePackage } from "../cape/produce";
 import { IMPORT_ID_SQL_PATTERN } from "../import/provenance";
 import { enrichLotsMissingAssessed } from "../property/enrich";
 import { configuredSignalSources, enrichLotIntel } from "../property/signals";
@@ -358,79 +358,26 @@ const capeScripts: OpsTask = {
     let failed = 0;
     const holds: { county: string | null; figures: string[] }[] = [];
 
-    for (const { input, pkg } of pending) {
+    for (const { input } of pending) {
       /*
        * Checked before the call, not after: a model call that starts at 24s
        * finishes well outside the budget and its result is lost anyway.
        */
       if (Date.now() > deadline) break;
 
-      try {
-        const generated = await generateCapeScript(pkg, {
-          countyName: input.countyName,
-          state: input.state,
-          saleDate: input.saleDate,
-          saleDateConfirmed: input.saleDateConfirmed,
-          saleType: input.saleType,
-          platform: input.platform,
-        });
-
-        const inputsHash = capeInputsHash(input);
-        await db
-          .insert(capeProductions)
-          .values({
-            auctionId: input.auctionId,
-            inputsHash,
-            script: generated.script as unknown as Record<string, unknown>,
-            scriptModel: generated.model,
-            unsupportedFigures: generated.unsupportedFigures,
-            slidePlanCount: generated.script.sections.length + 1,
-            stage: "script",
-            error: null,
-          })
-          .onConflictDoUpdate({
-            target: capeProductions.auctionId,
-            set: {
-              inputsHash,
-              script: generated.script as unknown as Record<string, unknown>,
-              scriptModel: generated.model,
-              unsupportedFigures: generated.unsupportedFigures,
-              slidePlanCount: generated.script.sections.length + 1,
-              stage: "script",
-              error: null,
-              /*
-               * A new script orphans the old narration and video. Cleared so
-               * nothing mistakes them for a reading of this one — the same rule
-               * `produceCapePackage` applies (see `NO_MEDIA` there).
-               */
-              audioPath: null,
-              audioDurationSec: null,
-              audioCharacters: null,
-              videoPath: null,
-              videoUrl: null,
-              videoDurationSec: null,
-              videoBytes: null,
-              updatedAt: new Date(),
-            },
-          });
-
-        if (generated.unsupportedFigures.length > 0) {
-          held++;
-          holds.push({ county: input.countyName, figures: generated.unsupportedFigures });
-        } else {
-          drafted++;
-        }
-      } catch (e) {
-        failed++;
-        const message = e instanceof Error ? e.message : String(e);
-        await db
-          .insert(capeProductions)
-          .values({ auctionId: input.auctionId, inputsHash: capeInputsHash(input), stage: "failed", error: message })
-          .onConflictDoUpdate({
-            target: capeProductions.auctionId,
-            set: { stage: "failed", error: message, updatedAt: new Date() },
-          });
-      }
+      /*
+       * The CAPE worker's own path, not a copy of it. This button used to call
+       * the model directly: no per-county cache, no wrong-county hold, and none
+       * of Ed's review notes — a second implementation drifting from the one
+       * that runs every three minutes. `produceCapePackage` records failures
+       * and holds on the production row itself.
+       */
+      const result = await produceCapePackage(input, { outRoot: "/tmp/cape", scriptOnly: true, scriptAttempts: 1 });
+      if (result.stage === "failed") failed++;
+      else if (result.unsupportedFigures.length > 0 || result.skipped) {
+        held++;
+        holds.push({ county: input.countyName, figures: result.unsupportedFigures.length ? result.unsupportedFigures : [result.skipped ?? "held"] });
+      } else drafted++;
     }
 
     const attempted = drafted + held + failed;
