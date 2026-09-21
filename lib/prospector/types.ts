@@ -37,7 +37,13 @@ export type CandidateOrigin =
    */
   | "contact_email"
   /** Followed from a link on an already-verified page. */
-  | "link_followed";
+  | "link_followed"
+  /**
+   * A county property-list link the Auction Scout found — its research, or
+   * Ed's workbook — held in `county_sources` and merged in at runtime rather
+   * than committed. See `lib/ingest/county-sources.ts`.
+   */
+  | "auction_scout";
 
 export interface SourceCandidate {
   fips: string;

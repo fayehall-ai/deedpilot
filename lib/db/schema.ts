@@ -1326,3 +1326,75 @@ export const capeCountyScripts = pgTable(
 );
 
 export type CapeCountyScript = typeof capeCountyScripts.$inferSelect;
+
+/**
+ * Auction Scout findings waiting for a person. See drizzle/0004.
+ *
+ * The AI research writes a sale into the calendar on its own only when it is
+ * confirmed against the county's own page. A platform listing, an unconfirmed
+ * date, a date that disagrees with the calendar, a county it could not place —
+ * each lands here, one row per state, county and date, for Ed to approve or
+ * dismiss. `finding` is the research row exactly as the model returned it.
+ */
+export const scoutFindings = pgTable(
+  "scout_findings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    jobId: uuid("job_id").references(() => runJobs.id, { onDelete: "set null" }),
+    state: text("state").notNull(),
+    county: text("county").notNull(),
+    /** Lower-cased, space-folded county label: the dedupe key with state and date. */
+    countyKey: text("county_key").notNull(),
+    saleDate: date("sale_date").notNull(),
+    finding: jsonb("finding").$type<Record<string, unknown>>().notNull(),
+    /** Why it waits for a person, in words Ed can act on. */
+    reason: text("reason").notNull(),
+    /** `pending` | `approved` | `dismissed`. */
+    status: text("status").notNull().default("pending"),
+    /** What approving did — "matched Carver, MN 2026-09-21", "still a near miss". */
+    outcome: text("outcome"),
+    decidedBy: text("decided_by"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("scout_findings_key").on(t.state, t.countyKey, t.saleDate),
+    index("scout_findings_status").on(t.status),
+  ],
+);
+
+export type ScoutFinding = typeof scoutFindings.$inferSelect;
+
+/**
+ * A county's own property-list page found at runtime. See drizzle/0004.
+ *
+ * The Prospector's registry (`data/source-registry.json`) is committed content
+ * and changes only with a redeploy. A list the Auction Scout finds on Sunday
+ * should be crawlable on Sunday, so these rows are merged into the registry the
+ * crawler reads — `lib/ingest/county-sources.ts` — ahead of the file's own
+ * sources for that county. Policy is checked before a row is written: a link in
+ * a report is not permission to fetch it.
+ */
+export const countySources = pgTable(
+  "county_sources",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    countyFips: text("county_fips")
+      .notNull()
+      .references(() => counties.fips),
+    url: text("url").notNull(),
+    /** A registry `SourceKind`; the Scout only ever records `listing`. */
+    kind: text("kind").notNull().default("listing"),
+    /** `auction-scout-research` | `auction-scout-workbook` | `operator`. */
+    origin: text("origin").notNull(),
+    note: text("note"),
+    enabled: boolean("enabled").notNull().default(true),
+    addedBy: text("added_by").notNull().default("system"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("county_sources_key").on(t.countyFips, t.url)],
+);
+
+export type CountySource = typeof countySources.$inferSelect;

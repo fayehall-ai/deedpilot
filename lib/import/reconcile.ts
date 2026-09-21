@@ -2,6 +2,7 @@ import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { db } from "../db";
 import { auctions, lots } from "../db/schema";
 import { IMPORT_ID_SQL_PATTERN } from "./provenance";
+import { validateOverrides } from "../admin/auction-override-fields";
 
 /**
  * Folding an imported announcement into the crawl that superseded it.
@@ -32,9 +33,11 @@ import { IMPORT_ID_SQL_PATTERN } from "./provenance";
  * crawl. The state converges instead of oscillating.
  *
  * Nothing is lost by it. An announcement carries no parcels — that is the
- * definition of the rows this touches — and everything it did carry is in the
- * source file, in the crawl that replaced it, and in the count moved across
- * first.
+ * definition of the rows this touches — and what it carried that the crawl
+ * cannot supply is moved across first: the announced count, the venue and
+ * contact in `logistics` (no adapter reads those off a county page), and a
+ * published start time, as an operator correction so the next crawl's upsert
+ * does not revert it. Each only where the crawl holds none of its own.
  *
  * ## What it refuses to do
  *
@@ -51,6 +54,8 @@ export interface FoldResult {
   folded: number;
   /** Parcel counts carried across in the process. */
   countsMoved: number;
+  /** Venues and contacts carried across. */
+  logisticsMoved: number;
   /** County/date pairs left alone because the pairing was not one-to-one. */
   ambiguous: { countyFips: string; saleDate: string; imported: number; crawled: number }[];
 }
@@ -63,7 +68,7 @@ export interface FoldResult {
  * that becomes unambiguous later is folded on the next pass.
  */
 export async function foldSupersededImports(): Promise<FoldResult> {
-  const result: FoldResult = { folded: 0, countsMoved: 0, ambiguous: [] };
+  const result: FoldResult = { folded: 0, countsMoved: 0, logisticsMoved: 0, ambiguous: [] };
 
   /*
    * County/date groups holding both kinds of row, for sales that have not
@@ -95,13 +100,20 @@ export async function foldSupersededImports(): Promise<FoldResult> {
 
     const where = and(eq(auctions.countyFips, g.county_fips), eq(auctions.saleDate, g.sale_date));
 
+    const carried = {
+      id: auctions.id,
+      announced: auctions.announcedParcelCount,
+      logistics: auctions.logistics,
+      startTime: auctions.startTime,
+      overrides: auctions.operatorOverrides,
+    };
     const [announcement] = await db
-      .select({ id: auctions.id, announced: auctions.announcedParcelCount })
+      .select(carried)
       .from(auctions)
       .where(and(where, sql`${auctions.externalId} LIKE ${IMPORT_ID_SQL_PATTERN}`, eq(auctions.lotCount, 0)))
       .limit(1);
     const [crawl] = await db
-      .select({ id: auctions.id, announced: auctions.announcedParcelCount })
+      .select(carried)
       .from(auctions)
       .where(and(where, sql`${auctions.externalId} NOT LIKE ${IMPORT_ID_SQL_PATTERN}`))
       .limit(1);
@@ -119,15 +131,22 @@ export async function foldSupersededImports(): Promise<FoldResult> {
       .where(eq(lots.auctionId, announcement.id));
     if (n > 0) continue;
 
-    // Move the count first, so a failure between the two statements leaves the
-    // announcement standing rather than losing the number entirely.
+    // Move what it carries first, so a failure between the two statements leaves
+    // the announcement standing rather than losing any of it.
+    const set: Partial<typeof auctions.$inferInsert> = {};
     if (announcement.announced !== null && crawl.announced === null) {
-      await db
-        .update(auctions)
-        .set({ announcedParcelCount: announcement.announced })
-        .where(eq(auctions.id, crawl.id));
+      set.announcedParcelCount = announcement.announced;
       result.countsMoved++;
     }
+    if (announcement.logistics && !crawl.logistics) {
+      set.logistics = announcement.logistics;
+      result.logisticsMoved++;
+    }
+    const time = (announcement.overrides?.startTime as string | undefined) ?? announcement.startTime;
+    if (time && !crawl.startTime && !crawl.overrides?.startTime && !validateOverrides({ startTime: time }).length) {
+      set.operatorOverrides = { ...(crawl.overrides ?? {}), startTime: time };
+    }
+    if (Object.keys(set).length) await db.update(auctions).set(set).where(eq(auctions.id, crawl.id));
 
     await db.delete(auctions).where(eq(auctions.id, announcement.id));
     result.folded++;

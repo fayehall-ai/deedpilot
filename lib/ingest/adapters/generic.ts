@@ -31,6 +31,8 @@ import {
   toSaleType,
 } from "../../atlas";
 import { nextSaleWindows } from "../../atlas/calendar";
+import { countySourcesVersion, mergeCountySources } from "../county-sources";
+import { observedSale } from "../observed-sale";
 import type { SourceRegistry } from "../../prospector/types";
 import { extractLots, NoProviderAvailableError } from "../extract";
 import { politeFetch } from "../fetch";
@@ -62,15 +64,23 @@ let registryCache: SourceRegistry | null = null;
  */
 let registryOverridden = false;
 
+/** The file's registry with `county_sources` laid over it, rebuilt when those change. */
+let mergedCache: { version: number; base: SourceRegistry; merged: SourceRegistry } | null = null;
+
 export function loadRegistry(path = DEFAULT_REGISTRY_PATH): SourceRegistry | null {
   if (registryOverridden) return registryCache;
-  if (registryCache) return registryCache;
-  try {
-    registryCache = JSON.parse(readFileSync(path, "utf8")) as SourceRegistry;
-    return registryCache;
-  } catch {
-    return null;
+  if (!registryCache) {
+    try {
+      registryCache = JSON.parse(readFileSync(path, "utf8")) as SourceRegistry;
+    } catch {
+      return null;
+    }
   }
+  const version = countySourcesVersion();
+  if (mergedCache?.version !== version || mergedCache.base !== registryCache) {
+    mergedCache = { version, base: registryCache, merged: mergeCountySources(registryCache) };
+  }
+  return mergedCache.merged;
 }
 
 /** Test seam — supply a registry (or an explicit absence) without touching disk. */
@@ -161,17 +171,29 @@ export const genericAdapter: SourceAdapter = {
   async listAuctions(binding: CountyBinding): Promise<DiscoveredAuction[]> {
     const { url, countyName, state } = binding.config as unknown as GenericConfig;
 
-    // Dates come from the calendar rather than a per-adapter rule. An
-    // unresearched county still gets a sweep window, so it is crawled rather
-    // than skipped — the schedule's `confidence` records how much to trust it.
-    const [window] = nextSaleWindows(binding.countyFips, { count: 1 });
+    /*
+     * A sale the county has actually announced outranks the calendar's guess.
+     *
+     * The calendar projects a date from the state's typical schedule; an
+     * imported or Auction Scout sale is a date somebody read off the county's
+     * own notice. Crawling at the projected date put the parcels on a second
+     * row beside the announced sale, a day or a week away from it, where the
+     * fold that merges the two could never pair them. The projection is the
+     * fallback for counties nobody has announced anything for, so an
+     * unresearched county is still crawled rather than skipped.
+     */
+    const observed = await observedSale(binding.countyFips);
+    const [projected] = observed ? [] : nextSaleWindows(binding.countyFips, { count: 1 });
+    const window = observed
+      ? { saleDate: observed.saleDate, estimated: false, confidence: "announced" as const }
+      : projected;
     if (!window) return [];
 
-    // Sale type comes from the county's researched rule, falling back to the
-    // state default. Guessing "Tax Deed" nationally would be wrong in every
-    // lien state and would feed the wrong redemption model downstream.
+    // Sale type comes from the announced sale, else the county's researched
+    // rule, falling back to the state default. Guessing "Tax Deed" nationally
+    // would be wrong in every lien state and feed the wrong redemption model.
     const rule = resolveCountyRule(binding.countyFips);
-    const saleType = rule ? toSaleType(rule.type) : "Tax Deed";
+    const saleType = observed?.saleType ?? (rule ? toSaleType(rule.type) : "Tax Deed");
 
     return [
       {

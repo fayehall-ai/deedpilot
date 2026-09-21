@@ -1,9 +1,10 @@
-import { and, gte, inArray, isNotNull, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { auctions, runJobs } from "../db/schema";
 import { buildAdapterIndex, sourceIndexFromRegistry } from "../scout";
 import { loadRegistry } from "../ingest/adapters/generic";
 import { enqueue, liveJob } from "../admin/queue";
+import { primeCountySources } from "../ingest/county-sources";
 
 /**
  * Filling in what an imported sale calendar does not contain.
@@ -87,10 +88,15 @@ export async function enqueueImportEnrichment(
 
   const today = new Date().toISOString().slice(0, 10);
 
+  /* The registry read below includes list pages the Auction Scout found. */
+  await primeCountySources();
+
   /*
    * The worklist, straight from the gap the schema keeps open: a sale with an
-   * announced count and no parcel rows. Past sales are excluded — crawling a
-   * list for a sale that already happened fills in history nobody asked for and
+   * announced count and fewer parcel rows, or a confirmed sale holding none at
+   * all — the Auction Scout often knows a sale is happening before anyone has
+   * said how many parcels are in it. Past sales are excluded — crawling a list
+   * for a sale that already happened fills in history nobody asked for and
    * costs the same as a useful fetch.
    */
   const pending = await db
@@ -104,8 +110,10 @@ export async function enqueueImportEnrichment(
       and(
         inArray(auctions.countyFips, countyFips),
         gte(auctions.saleDate, today),
-        isNotNull(auctions.announcedParcelCount),
-        sql`${auctions.announcedParcelCount} > ${auctions.lotCount}`,
+        or(
+          and(isNotNull(auctions.announcedParcelCount), sql`${auctions.announcedParcelCount} > ${auctions.lotCount}`),
+          and(eq(auctions.saleDateConfirmed, true), eq(auctions.lotCount, 0)),
+        ),
       ),
     )
     .groupBy(auctions.countyFips);
