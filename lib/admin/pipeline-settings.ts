@@ -27,6 +27,9 @@ export interface PipelineConfig {
   researchWeekday: string;
   researchStates: number;
   researchCooldownDays: number;
+  enrichEnabled: boolean;
+  enrichWeeklyBudgetDollars: number;
+  videoTopN: number;
 }
 
 /**
@@ -44,6 +47,14 @@ export const DEFAULT_CONFIG: PipelineConfig = {
   researchWeekday: "Sun",
   researchStates: 4,
   researchCooldownDays: 6,
+  enrichEnabled: true,
+  /*
+   * $20 a week is a thousand RentCast lookups at list price — enough to value
+   * the top of every week's sales, small enough that a runaway costs little.
+   */
+  enrichWeeklyBudgetDollars: 20,
+  /* The last hand-made batch was sixteen: the largest sales by parcel count. */
+  videoTopN: 16,
 };
 
 export const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -69,6 +80,10 @@ export const LIMITS = {
   researchStates: { min: 1, max: MAX_SCAN_STATES },
   /** Under a day cannot guard a daily tick; over a fortnight is not "weekly". */
   researchCooldownDays: { min: 1, max: 14 },
+  /** Zero means free sources only. The ceiling is a typo guard, not a policy. */
+  enrichWeeklyBudgetDollars: { min: 0, max: 2000 },
+  /** Each is a rendered video and a paid narration; a hundred a week is a lot. */
+  videoTopN: { min: 0, max: 100 },
 } as const;
 
 export function validateConfig(patch: Partial<PipelineConfig>): string[] {
@@ -95,6 +110,15 @@ export function validateConfig(patch: Partial<PipelineConfig>): string[] {
     ) {
       errors.push(`Research cooldown must be a whole number of days between ${min} and ${max}`);
     }
+  }
+  for (const [key, label] of [
+    ["enrichWeeklyBudgetDollars", "Weekly enrichment budget"],
+    ["videoTopN", "Sales delivered each week"],
+  ] as const) {
+    const v = patch[key];
+    if (v === undefined) continue;
+    const { min, max } = LIMITS[key];
+    if (!Number.isInteger(v) || v < min || v > max) errors.push(`${label} must be a whole number between ${min} and ${max}`);
   }
   if (patch.researchWeekday !== undefined && !(WEEKDAYS as readonly string[]).includes(patch.researchWeekday)) {
     errors.push(`Research day must be one of: ${WEEKDAYS.join(", ")}`);
@@ -126,6 +150,9 @@ export async function getPipelineConfig(): Promise<PipelineConfig & { edited: bo
     researchWeekday: row.researchWeekday,
     researchStates: row.researchStates,
     researchCooldownDays: row.researchCooldownDays,
+    enrichEnabled: row.enrichEnabled,
+    enrichWeeklyBudgetDollars: row.enrichWeeklyBudgetDollars,
+    videoTopN: row.videoTopN,
     edited: true,
     updatedBy: row.updatedBy,
     updatedAt: row.updatedAt,
@@ -147,6 +174,9 @@ export async function savePipelineConfig(
     researchWeekday: patch.researchWeekday ?? current.researchWeekday,
     researchStates: patch.researchStates ?? current.researchStates,
     researchCooldownDays: patch.researchCooldownDays ?? current.researchCooldownDays,
+    enrichEnabled: patch.enrichEnabled ?? current.enrichEnabled,
+    enrichWeeklyBudgetDollars: patch.enrichWeeklyBudgetDollars ?? current.enrichWeeklyBudgetDollars,
+    videoTopN: patch.videoTopN ?? current.videoTopN,
   };
 
   const { db, pipelineSettings } = await conn();

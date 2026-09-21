@@ -295,6 +295,51 @@ export async function CadencePanel({
             </p>
           </div>
 
+          <div className="space-y-2">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted">Enrichment</div>
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="flex items-center gap-1.5 text-sm">
+                <input type="checkbox" name="enrichEnabled" defaultChecked={config.enrichEnabled} /> enabled
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs text-muted">Weekly budget ($)</span>
+                <input
+                  name="enrichWeeklyBudgetDollars"
+                  type="number"
+                  min={LIMITS.enrichWeeklyBudgetDollars.min}
+                  max={LIMITS.enrichWeeklyBudgetDollars.max}
+                  defaultValue={config.enrichWeeklyBudgetDollars}
+                  className={`${input} w-28`}
+                />
+              </label>
+              <span className="pb-2 text-xs text-muted">
+                paid parcel lookups for upcoming sales stop here each week; the free county
+                assessor layers carry on. 0 means free sources only.
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted">Delivery</div>
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs text-muted">Sales delivered each week</span>
+                <input
+                  name="videoTopN"
+                  type="number"
+                  min={LIMITS.videoTopN.min}
+                  max={LIMITS.videoTopN.max}
+                  defaultValue={config.videoTopN}
+                  className={`${input} w-24`}
+                />
+              </label>
+              <span className="pb-2 text-xs text-muted">
+                the largest upcoming sales by parcel count get a briefing video and a framework
+                document in the CAPE Drive folder. 0 stops delivery.
+              </span>
+            </div>
+          </div>
+
           <div className="flex gap-2">
             <SubmitButton pendingLabel="Saving…">Save schedules</SubmitButton>
             <button type="submit" name="intent" value="reset" className={ghost}>

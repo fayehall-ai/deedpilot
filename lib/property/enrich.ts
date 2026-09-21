@@ -2,6 +2,7 @@
  * Apply property enrichment to a lot row + lot_valuations.
  */
 
+import { recordUsage } from "../ai/usage";
 import { and, eq, isNull, sql, gte } from "drizzle-orm";
 import { db } from "../db";
 import { lots, lotValuations, counties } from "../db/schema";
@@ -38,6 +39,26 @@ const PROVIDERS: PropertyProvider[] = [
 export function configuredEnrichmentProviders(): string[] {
   return PROVIDERS.filter((p) => p.configured()).map((p) => p.name);
 }
+
+/**
+ * The providers that cost nothing to ask: the state's own assessor layer.
+ *
+ * What a budgeted pass falls back to once the week's money is spent, so parcels
+ * in counties with a published layer keep filling in for free.
+ */
+export const FREE_PROVIDERS: PropertyProvider[] = PROVIDERS.filter((p) => p.name === "cadastre");
+
+/**
+ * Providers billed per request, recorded one usage row per call.
+ *
+ * These calls were never recorded, so the enrichment bill could not be read
+ * off the console and no budget could be enforced against it. The rates that
+ * price them are the operator-editable ones in `lib/ai/usage.ts`; web search
+ * records its own tokens and searches where it makes the call.
+ */
+const PER_REQUEST = new Set(["attom", "batchdata", "rentcast"]);
+/* Only the real providers are billed; a test's stand-in named "attom" is not. */
+const REAL_PROVIDERS = new Set<PropertyProvider>(PROVIDERS);
 
 /**
  * Try providers in order until one returns a record.
@@ -93,6 +114,10 @@ export async function lookupProperty(
 
   for (const p of configured) {
     if (unavailable.has(p.name)) continue;
+    if (PER_REQUEST.has(p.name) && REAL_PROVIDERS.has(p)) {
+      /* Recorded before the call returns: a request is billed whether or not it matches. */
+      void recordUsage({ provider: p.name, operation: "enrich", requests: 1, countyFips: input.fips ?? null });
+    }
     try {
       const rec = await p.lookup(input);
       answered++;
@@ -139,7 +164,11 @@ export interface ApplyEnrichmentResult {
 /** Lookup + write enrichment for one lot id. */
 export async function enrichLotById(
   lotId: string,
-  opts: { force?: boolean } = {},
+  opts: {
+    force?: boolean;
+    /** Ask only the free providers — what a pass does once its budget is spent. */
+    freeOnly?: boolean;
+  } = {},
   /** Providers already known dead this run; see `lookupProperty`. */
   unavailable?: Set<string>,
 ): Promise<ApplyEnrichmentResult> {
@@ -188,7 +217,7 @@ export async function enrichLotById(
     zip: row.lot.zip,
   };
 
-  const record = await lookupProperty(input, unavailable);
+  const record = await lookupProperty(input, unavailable, opts.freeOnly ? FREE_PROVIDERS : undefined);
   if (!record) {
     return {
       lotId,

@@ -388,6 +388,10 @@ export const lots = pgTable(
     ownerName: text("owner_name"),
 
     status: lotStatusEnum("status").notNull().default("pending"),
+    /** When the enrichment pass last asked a provider about this parcel. See drizzle/0006. */
+    enrichmentAttemptedAt: timestamp("enrichment_attempted_at", { withTimezone: true }),
+    /** When the enrichment pass last offered this address to the geocoder. See drizzle/0006. */
+    geocodeAttemptedAt: timestamp("geocode_attempted_at", { withTimezone: true }),
     soldAmount: numeric("sold_amount", { precision: 14, scale: 2 }),
     soldAt: timestamp("sold_at", { withTimezone: true }),
     /** Surplus over the taxes owed — the excess-proceeds claim opportunity. */
@@ -936,6 +940,12 @@ export const pipelineSettings = pgTable("pipeline_settings", {
   researchStates: integer("research_states").notNull().default(4),
   /** Days that must pass before another pass may queue. Guards double-firing. */
   researchCooldownDays: integer("research_cooldown_days").notNull().default(6),
+  /** Master switch for the budgeted enrichment pass. See drizzle/0005. */
+  enrichEnabled: boolean("enrich_enabled").notNull().default(true),
+  /** Paid parcel lookups stop at this many dollars a week; the free layers carry on. */
+  enrichWeeklyBudgetDollars: integer("enrich_weekly_budget_dollars").notNull().default(20),
+  /** Upcoming sales, largest first, that get a briefing video and a framework delivered. */
+  videoTopN: integer("video_top_n").notNull().default(16),
   updatedBy: text("updated_by").notNull().default("admin"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

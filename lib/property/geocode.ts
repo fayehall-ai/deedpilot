@@ -82,3 +82,38 @@ export async function geocodeAddress(
     return null;
   }
 }
+
+/**
+ * Forms of an address worth trying, in order of fidelity.
+ *
+ * A first pass located 1,139 of 1,206 Louisiana lots and left 66, which turned
+ * out not to be unlocatable so much as unparseable:
+ *
+ *     "620 23RD ST (LAND ONLY)"   an annotation the index reads as street
+ *     "1630-32 LAFAYETTE ST"      a range of house numbers, not one address
+ *     "12TH ST"                   an ordinal street with no house number
+ *
+ * The first two are the same address wearing something extra. The third is not
+ * an address at all and no variant rescues it — a street name alone matches the
+ * whole road.
+ *
+ * Variants are tried most-faithful first and the first hit wins, so a cleaned
+ * form is only used when the original found nothing.
+ */
+export function addressVariants(raw: string): string[] {
+  const out: string[] = [];
+  const push = (v: string) => {
+    const t = v.replace(/\s+/g, " ").trim();
+    if (t && /^[0-9]/.test(t) && !out.includes(t)) out.push(t);
+  };
+
+  push(raw);
+  // "620 23RD ST (LAND ONLY)" -> "620 23RD ST"
+  const noParens = raw.replace(/\([^)]*\)/g, "");
+  push(noParens);
+  // "1630-32 LAFAYETTE ST" -> "1630 LAFAYETTE ST". The first number is the one
+  // the parcel is indexed under; the second is the far end of a double lot.
+  push(noParens.replace(/^(\d+)\s*[-–]\s*\d+\b/, "$1"));
+
+  return out;
+}

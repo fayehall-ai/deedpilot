@@ -419,6 +419,9 @@ export async function savePipelineSettings(formData: FormData): Promise<void> {
     researchWeekday: str(formData, "researchWeekday"),
     researchStates: Number(str(formData, "researchStates")),
     researchCooldownDays: Number(str(formData, "researchCooldownDays")),
+    enrichEnabled: str(formData, "enrichEnabled") === "on",
+    enrichWeeklyBudgetDollars: Number(str(formData, "enrichWeeklyBudgetDollars")),
+    videoTopN: Number(str(formData, "videoTopN")),
   };
 
   const next = await savePipelineConfig(patch, await currentActor());
