@@ -48,11 +48,15 @@ import { foldSupersededImports } from "@/lib/import/reconcile";
 class SkipPlanning extends Error {}
 
 /*
- * Fluid Compute allows far longer than the old 60s ceiling. The budget below
- * stops well short of it so the handler returns a real summary instead of
- * being terminated mid-job.
+ * The claiming budget below is what paces the dispatcher; this ceiling is only
+ * how long the last job it claimed may run. At 300 seconds a county claimed at
+ * 190 had under two minutes, and a large list — a PDF of 800 parcels through
+ * the model — was killed partway and left as "abandoned": Vigo and Greene,
+ * Indiana, a thousand parcels between them, never landed. 800 is the same
+ * ceiling the CAPE worker runs under; the claiming budget is unchanged, so
+ * ticks do not pile up.
  */
-export const maxDuration = 300;
+export const maxDuration = 800;
 
 /** Stop claiming new work with this much of the budget left. */
 const RESERVE_MS = 45_000;
