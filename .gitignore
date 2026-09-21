@@ -101,3 +101,8 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 data/realauction-capture/
+
+# Auction Scout xlsx-to-csv intermediate output. The source xlsx lives in
+# data/auction-scout/ and is tracked; the converted CSV is regenerated on
+# each import run.
+/downloads/
