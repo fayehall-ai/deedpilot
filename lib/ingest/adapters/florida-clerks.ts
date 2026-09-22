@@ -105,6 +105,41 @@ export const FL_CLERKS: FlClerk[] = [
     pattern: "wpTaxdeeds",
     title: "Sumter County FL tax deed sales",
   },
+  /*
+   * Added 2026-09-21: each publishes its upcoming sales as the same
+   * `:taxdeeds` JSON Sumter does, found by hand while chasing sales that had
+   * no parcels. None was in this list, so none was ever read.
+   */
+  {
+    name: "DeSoto",
+    indexUrl: "https://www.desotoclerk.com/clerk-services/tax-deeds/",
+    pattern: "wpTaxdeeds",
+    title: "DeSoto County FL tax deed sales",
+  },
+  {
+    name: "Dixie",
+    indexUrl: "https://dixieclerk.com/departments-services/court-services/tax-deed-sales/",
+    pattern: "wpTaxdeeds",
+    title: "Dixie County FL tax deed sales",
+  },
+  {
+    name: "Lafayette",
+    indexUrl: "https://www.lafayetteclerk.com/departments-services/clerk-services/tax-deeds/",
+    pattern: "wpTaxdeeds",
+    title: "Lafayette County FL tax deed sales",
+  },
+  {
+    name: "Hardee",
+    indexUrl: "https://www.hardeeclerk.com/departments/tax-deeds/tax-deed-sales/",
+    pattern: "wpTaxdeeds",
+    title: "Hardee County FL tax deed sales",
+  },
+  {
+    name: "Madison",
+    indexUrl: "https://www.madisonclerk.com/departments-services/property-sales/tax-deed-sales/",
+    pattern: "wpTaxdeeds",
+    title: "Madison County FL tax deed sales",
+  },
   {
     name: "Columbia",
     indexUrl:
