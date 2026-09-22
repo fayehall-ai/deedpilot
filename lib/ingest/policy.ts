@@ -37,6 +37,13 @@ export interface SourcePolicy {
  */
 export const SOURCE_POLICIES: SourcePolicy[] = [
   {
+    host: "realtdm.com",
+    decision: "requires_agreement",
+    minDelayMs: 5000,
+    reason:
+      "RealAuction's tax deed case site (<county>.realtdm.com), which Florida clerks link as their sale list. Same operator as realtaxdeed.com and realforeclose.com, so held to the same posture until measured; it was missing from this list, so a crawl reaching it through a clerk's link would have been allowed by omission. Found 2026-09-21. The clerks' own lists and :taxdeeds pages are the route.",
+  },
+  {
     host: "realtaxdeed.com",
     decision: "requires_agreement",
     minDelayMs: 5000,
