@@ -27,7 +27,7 @@ export const EXCLUDE_HEADERS = /excess\s*funds|overbid|surplus|claim|sold\s*date
 
 /** Link text or filenames that are never an upcoming parcel list. */
 export const EXCLUDE_LINKS =
-  /excess|surplus|overbid|brochure|faq|instruction|guide|kiosk|no tax sale|results|sold|water.?quality|ccr|annual.?report|budget|minutes|agenda|form\b|application|bid.?package|how.?to.?bid|terms.?and.?conditions/i;
+  /excess|surplus|overbid|brochure|faq|instruction|guide|kiosk|no tax sale|results|sold|water.?quality|ccr|annual.?report|budget|minutes|agenda|form\b|application|bid.?package|how.?to.?bid|terms.?(and.?|&.?)?conditions|registration.?requirements|bidder.?registration/i;
 
 /**
  * Pennsylvania names its three sales rather than calling any of them a tax

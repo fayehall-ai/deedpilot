@@ -405,9 +405,34 @@ export const genericAdapter: SourceAdapter = {
 
     // 2. Documents on the page itself, decoys filtered and sale lists first —
     //    and among sale lists, the one naming this sale's month.
-    for (const { url: doc, kind } of forThisSale(documentLinks($, auction.sourceUrl), auction.saleDate).slice(0, 4)) {
+    const onPage = forThisSale(documentLinks($, auction.sourceUrl), auction.saleDate).slice(0, 4);
+    for (const [i, { url: doc, kind }] of onPage.entries()) {
       const lots = await lotsFromDocument(doc, kind);
-      if (lots?.length) return lots;
+      if (!lots?.length) continue;
+      if (kind !== "sale_list") return lots;
+      /*
+       * One sale, more than one list. Florence County, South Carolina posts
+       * its real property (about 1,500 parcels) and its mobile homes (445) as
+       * two PDFs, and stopping at the first list that read kept the smaller
+       * one. The other sale lists on the page are read too. One that mostly
+       * repeats parcels already found is an older version of the same list,
+       * as Fayette's nine "Upset 2026" updates are, and reading stops there.
+       */
+      const key = (l: DiscoveredLot) => (l.parcelNumber ?? l.addressLine ?? l.ownerName ?? "").replace(/\s+/g, "").toLowerCase();
+      const merged = [...lots];
+      const seen = new Set(lots.map(key));
+      for (const companion of onPage.slice(i + 1).filter((c) => c.kind === "sale_list").slice(0, 3)) {
+        const more = await lotsFromDocument(companion.url, companion.kind);
+        if (!more?.length) continue;
+        const repeated = more.filter((l) => seen.has(key(l))).length;
+        if (repeated / more.length > 0.2) break;
+        for (const l of more) {
+          if (seen.has(key(l))) continue;
+          seen.add(key(l));
+          merged.push(l);
+        }
+      }
+      return merged;
     }
 
     /*
