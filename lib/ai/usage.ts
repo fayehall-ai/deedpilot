@@ -85,8 +85,16 @@ export interface RateCard {
 }
 
 export const DEFAULT_RATES: Record<string, RateCard> = {
-  xai: { inputPerMTok: 20, outputPerMTok: 100, perSearchCall: 2.5, perRequest: 0 },
-  anthropic: { inputPerMTok: 300, outputPerMTok: 1500, perSearchCall: 1, perRequest: 0 },
+  /*
+   * grok-4.5 and grok-4.6 list at $2/M in and $6/M out; xAI's own per-call
+   * cost figure (`cost_in_usd_ticks`) agrees. The card said $0.20 and $1.00,
+   * so the Schedules card showed about a sixth of the real xAI bill. List
+   * transcription runs on grok-4.20-non-reasoning at $1.25 and $2.50, so it is
+   * overstated here rather than understated, which is the safe direction.
+   */
+  xai: { inputPerMTok: 200, outputPerMTok: 600, perSearchCall: 2.5, perRequest: 0 },
+  /* Claude Opus 5, the fallback leg. */
+  anthropic: { inputPerMTok: 500, outputPerMTok: 2500, perSearchCall: 1, perRequest: 0 },
   attom: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 4 },
   rentcast: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 2 },
   batchdata: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 3 },
