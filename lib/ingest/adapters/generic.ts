@@ -35,6 +35,7 @@ import { countySourcesVersion, mergeCountySources } from "../county-sources";
 import { observedSale } from "../observed-sale";
 import type { SourceRegistry } from "../../prospector/types";
 import { extractLots, extractLotsFromImages, NoProviderAvailableError } from "../extract";
+import { configuredProviders } from "../../ai/providers";
 import { renderPdfFromUrl, SCAN_TEXT_PER_PAGE, textDensity } from "../render";
 import { politeFetch } from "../fetch";
 import {
@@ -321,7 +322,7 @@ export const genericAdapter: SourceAdapter = {
           return result.lots;
         }
       } catch (e) {
-        if (e instanceof NoProviderAvailableError) {
+        if (e instanceof NoProviderAvailableError && !configuredProviders().length) {
           // "We couldn't look" is not "there is nothing here". Returning []
           // would mark the county as having no inventory, which reads as a
           // fact and stops anyone investigating.
@@ -330,7 +331,18 @@ export const genericAdapter: SourceAdapter = {
               `${context.countyName} left unresolved rather than recorded as empty`,
           );
         }
-        throw e;
+        /*
+         * The model failed on this document: it timed out, or every provider
+         * refused it. The text was there, so this is a list not read, not a
+         * county with none. It used to be thrown, and a document one or two
+         * clicks in is read inside a catch that logged the error and moved on,
+         * so the run ended "ok, 0 lots". Recorded here, at every depth, the
+         * other documents are still tried and the run fails only if none of
+         * them has the list.
+         */
+        const why = e instanceof Error ? e.message : String(e);
+        console.warn(`[generic-county] ${doc}: ${why}`);
+        unread.push(`${doc} (${why.slice(0, 120)})`);
       }
       return null;
     };
