@@ -104,6 +104,15 @@ export async function runQueuedJob(
       dryRun: job.dryRun,
       onProgress: opts.onProgress,
     });
+    /*
+     * A crawl of one county that failed is a failed job: it is retried, and it
+     * counts under "Jobs failed this week". Completing it, as every crawl
+     * used to be, filed a list that would not read as a county with none.
+     */
+    const [only] = summary.counties;
+    if (job.countyFips && summary.counties.length === 1 && only.status === "failed") {
+      return fail(only.error ?? "the crawl failed");
+    }
     await completeJob(job.id, { counties: summary.counties.length, ...summary.totals });
     return outcome(true, `${summary.totals.lots} lot(s) across ${summary.counties.length} county(ies)`, {
       lots: summary.totals.lots,

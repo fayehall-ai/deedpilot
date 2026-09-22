@@ -201,6 +201,11 @@ async function main(): Promise<void> {
         limit: job.limit ?? undefined,
         dryRun: job.dryRun,
       });
+      /* As in `runQueuedJob`: one county that failed is a failed job. */
+      const [only] = summary.counties;
+      if (job.countyFips && summary.counties.length === 1 && only.status === "failed") {
+        throw new Error(only.error ?? "the crawl failed");
+      }
       await completeJob(job.id, { counties: summary.counties.length, ...summary.totals });
       lots += summary.totals.lots;
       done++;

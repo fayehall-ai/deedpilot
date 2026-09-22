@@ -358,6 +358,7 @@ export async function runAdapter(
       passCutoff.set(binding.countyFips, countyCutoff);
     }
 
+    let auctionsFailed = 0;
     try {
       const rawAuctions = await adapter.listAuctions(binding);
       const judgedAuctions = judgeAuctions(rawAuctions, { countyFips: binding.countyFips });
@@ -451,9 +452,21 @@ export async function runAdapter(
         } catch (e) {
           // One bad auction shouldn't lose the rest of the county's sales.
           result.status = "partial";
+          auctionsFailed++;
+          const msg = e instanceof Error ? e.message : String(e);
+          result.error = result.error ? `${result.error}; ${msg}` : msg;
           log(`[${adapter.name}] auction ${auction.externalId} failed: ${String(e)}`);
         }
       }
+      /*
+       * Every sale failed, so nothing was read: that is a failed county, not a
+       * partial one. This catch used to log the error and carry on, and the
+       * run ended "partial" with no error stored and 0 lots, which the queue
+       * completed as a success. So a list that would not read, which
+       * `listLots` throws on purpose, still showed as an empty county.
+       * Fayette, Pennsylvania ran that way twice in an hour.
+       */
+      if (auctionsFailed > 0 && auctionsFailed === result.auctionsFound) result.status = "failed";
     } catch (e) {
       const blocked = e instanceof PolicyBlockedError;
       result.status = blocked ? "blocked" : "failed";
