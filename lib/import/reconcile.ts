@@ -88,6 +88,28 @@ export async function foldSupersededImports(): Promise<FoldResult> {
   `)) as unknown as { county_fips: string; sale_date: string; imported: number; crawled: number }[];
 
   for (const g of groups) {
+    /*
+     * The same announcement imported twice is one sale, not two. Galveston's
+     * 10/06 sale and Pierce's 10/26 each came in as two identical rows, so the
+     * pairing was two-to-one and never folded, and the crawl's parcels sat on
+     * a third row beside two empty ones. Rows that agree on type, title and
+     * source are collapsed to one first. Rows that differ — Adams County's
+     * upset and judicial sales on one day — are still left for a person.
+     */
+    if (g.imported > 1 && g.crawled === 1) {
+      const dupes = (await db.execute(sql`
+        SELECT a.id, a.sale_type::text AS t, lower(coalesce(a.title, '')) AS title, a.source_url AS src
+        FROM auctions a
+        WHERE a.county_fips = ${g.county_fips} AND a.sale_date = ${g.sale_date}::date
+          AND a.external_id LIKE ${IMPORT_ID_SQL_PATTERN} AND a.lot_count = 0
+          AND NOT EXISTS (SELECT 1 FROM lots l WHERE l.auction_id = a.id)
+        ORDER BY a.first_seen_at`)) as unknown as { id: string; t: string; title: string; src: string }[];
+      const [keep, ...rest] = dupes;
+      if (keep && dupes.length === g.imported && rest.every((d) => d.t === keep.t && d.title === keep.title && d.src === keep.src)) {
+        for (const d of rest) await db.delete(auctions).where(eq(auctions.id, d.id));
+        g.imported = 1;
+      }
+    }
     if (g.imported !== 1 || g.crawled !== 1) {
       result.ambiguous.push({
         countyFips: g.county_fips,
