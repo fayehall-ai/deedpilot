@@ -618,7 +618,7 @@ async function officeToText(bytes: Uint8Array, url: string): Promise<string> {
 }
 
 /** An HTML page as text, one line per table row and per block, cells split by " | ". */
-function htmlToText(html: string): string {
+export function htmlToText(html: string): string {
   const $ = cheerio.load(html);
   $("script, style, noscript, nav, header, footer").remove();
   $("td, th").append(" | ");

@@ -41,6 +41,7 @@ import { politeFetch } from "../fetch";
 import {
   classifiedPdfLinks,
   documentLinks,
+  htmlToText,
   listPageLinks,
   parseDelimitedText,
   parseHtmlTable,
@@ -128,6 +129,13 @@ interface GenericConfig {
   url: string;
   countyName: string;
   state: string;
+}
+
+/** Enough money amounts or parcel-shaped numbers that a page is worth reading as a list. */
+export function looksLikeList(text: string): boolean {
+  const money = (text.match(/\$\s?\d[\d,]*\.\d{2}/g) ?? []).length;
+  const parcels = (text.match(/\b[A-Z]?\d{1,5}[-. ]\d{1,5}[-. ]?[A-Z0-9]{0,6}\b/g) ?? []).length;
+  return money >= 5 || parcels >= 25;
 }
 
 /**
@@ -400,6 +408,25 @@ export const genericAdapter: SourceAdapter = {
     for (const { url: doc, kind } of forThisSale(documentLinks($, auction.sourceUrl), auction.saleDate).slice(0, 4)) {
       const lots = await lotsFromDocument(doc, kind);
       if (lots?.length) return lots;
+    }
+
+    /*
+     * 2b. The page is the list. A newspaper's legal notice or a county notice
+     *     page prints its parcels as text, not as a table and not in a linked
+     *     file, and nothing above reads page text. Appling, Bryan and Upson
+     *     counties in Georgia publish that way. Only a page that looks like a
+     *     list goes to the model: enough dollar amounts or parcel numbers
+     *     that it is not a department's landing page.
+     */
+    const pageText = htmlToText(res.body);
+    if (looksLikeList(pageText)) {
+      const tabular = parseDelimitedText(pageText, auction.sourceUrl);
+      if (tabular?.length) return tabular;
+      const result = await extractLots(pageText, context);
+      if (result.containsParcelList && result.lots.length) {
+        auction.listingKind = "sale_list";
+        return result.lots;
+      }
     }
 
     /*

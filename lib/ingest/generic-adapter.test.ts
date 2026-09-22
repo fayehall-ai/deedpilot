@@ -6,7 +6,7 @@
  * Run: npx tsx lib/ingest/generic-adapter.test.ts
  */
 import * as cheerio from "cheerio";
-import { __setRegistry, forThisSale, genericAdapter, pickSource } from "./adapters/generic";
+import { __setRegistry, forThisSale, genericAdapter, looksLikeList, pickSource } from "./adapters/generic";
 import { ADAPTERS, getAdapter } from "./adapters";
 import {
   classifiedPdfLinks,
@@ -328,5 +328,12 @@ main()
   const urls = documentLinks($, "https://www.gwinnetttaxcommissioner.com/property-tax/delinquent_tax/tax-liens-tax-sales").map((l) => l.url);
   assert(urls.some((u) => u.includes("/documents/d/egov/october-2026")), "a Liferay document route is a document");
   assert(urls.includes("https://newtoncountytax.com/wp-content/uploads/2026/09/Newton-October-2026-Tax-Sale.pdf"), "a PDF inside a Google viewer frame is found");
+}
+
+// A notice page that prints its parcels is read; a department landing page is not.
+{
+  const notice = Array.from({ length: 8 }, (_, i) => `Map ${10 + i}-${200 + i}, owner SMITH ${i}, amount due $${1000 + i}.00`).join("\n");
+  assert(looksLikeList(notice), "a legal notice listing parcels with amounts looks like a list");
+  assert(!looksLikeList("Tax Commissioner. Call 770-555-1234. Office hours 8-5. Pay online."), "a landing page does not");
 }
 
