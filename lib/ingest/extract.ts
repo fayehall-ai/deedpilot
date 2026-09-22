@@ -139,7 +139,7 @@ function chunkByLines(text: string): string[] {
  */
 export async function extractLots(
   text: string,
-  context: { countyName: string; state: string; sourceUrl: string },
+  context: { countyName: string; state: string; sourceUrl: string; saleDate?: string },
 ): Promise<ExtractionResult> {
   /* Line breaks kept: a row per line is what lets a chunk end between parcels. */
   const full = text
@@ -178,7 +178,14 @@ ${chunks.length > 1 ? `Document part ${label} (continue extracting; do not resta
 
 Transcribe every parcel in the upcoming tax sale listing below. If this document
 does not contain one, set containsParcelList=false.
-If the document is truncated mid-list, extract every complete parcel that appears.
+If the document is truncated mid-list, extract every complete parcel that appears.${
+          context.saleDate
+            ? `
+This is for the sale on ${context.saleDate}. If the document lists parcels for more
+than one sale (an earlier case, a later offering), transcribe only the parcels
+offered at this sale.`
+            : ""
+        }
 
 ---
 ${chunk}`,

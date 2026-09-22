@@ -118,7 +118,10 @@ async function importedRowFor(
 }
 
 /** A town's list read into liens: tables for free, text by the model, scans by its eyes. */
-async function lotsFromTownList(url: string, context: { countyName: string; state: string; sourceUrl: string }): Promise<DiscoveredLot[]> {
+async function lotsFromTownList(
+  url: string,
+  context: { countyName: string; state: string; sourceUrl: string; saleDate?: string },
+): Promise<DiscoveredLot[]> {
   const [{ documentToText, parseDelimitedText }, { extractLots, extractLotsFromImages }, render] = await Promise.all([
     import("../parse"),
     import("../extract"),
@@ -319,6 +322,7 @@ export const njTaxSaleAdapter: SourceAdapter = {
         countyName: `${town.municipality}, ${getCounty(auction.countyFips)?.name ?? ""} County`,
         state: "NJ",
         sourceUrl: town.townList,
+        saleDate: auction.saleDate,
       });
       /* A lien's amount is its face value, not an opening bid; see the header. */
       return lots.map((l) => ({ ...l, taxesOwed: l.taxesOwed ?? l.openingBid, openingBid: undefined }));

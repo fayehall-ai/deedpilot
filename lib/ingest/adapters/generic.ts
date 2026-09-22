@@ -275,6 +275,12 @@ export const genericAdapter: SourceAdapter = {
       countyName: county?.name ?? auction.countyFips,
       state: county?.state ?? "",
       sourceUrl: auction.sourceUrl,
+      /*
+       * Belmont County, Ohio's treasurer page lists its October case beside a
+       * finished September one, and without the date the model took both:
+       * nine parcels from a sale already held were filed under October 14.
+       */
+      saleDate: auction.saleDate,
     };
 
     /**
