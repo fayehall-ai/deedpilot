@@ -57,9 +57,9 @@ assert(parseHtmlTable(unrelated, "https://co.gov/x") === null, "unrelated table 
 // The largest qualifying table wins — county pages often carry a small summary
 // table above the real list.
 const twoTables = cheerio.load(`
-  <table><tr><th>Parcel</th><th>Owner</th></tr><tr><td>a</td><td>b</td></tr></table>
+  <table><tr><th>Parcel</th><th>Owner</th></tr><tr><td>01-001</td><td>b</td></tr></table>
   <table><tr><th>Parcel</th><th>Owner</th></tr>
-    <tr><td>c</td><td>d</td></tr><tr><td>e</td><td>f</td></tr><tr><td>g</td><td>h</td></tr></table>`);
+    <tr><td>02-001</td><td>d</td></tr><tr><td>02-002</td><td>f</td></tr><tr><td>02-003</td><td>h</td></tr></table>`);
 assert(parseHtmlTable(twoTables, "https://co.gov/x")?.length === 3, "largest table wins");
 
 // --- link filtering ----------------------------------------------------------

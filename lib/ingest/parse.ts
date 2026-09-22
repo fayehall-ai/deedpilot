@@ -256,6 +256,13 @@ export function parseHtmlTable(
         const parcelNumber = iParcel >= 0 ? cells[iParcel] : blockLot;
         const ownerName = iOwner >= 0 ? cells[iOwner] : undefined;
         if (!parcelNumber && !ownerName) return;
+        /*
+         * A page's title or header, repeated on every page of a list, is not
+         * a parcel: Old Bridge's "TOWNSHIP OF OLD BRIDGE / NOTICE OF 2025 TAX
+         * SALE" line came through as a lien. Parcel numbers have digits.
+         */
+        if (parcelNumber && !/\d/.test(parcelNumber)) return;
+        if (cells.join("|").toLowerCase() === headers.join("|")) return;
 
         rows.push({
           parcelNumber: parcelNumber || undefined,
