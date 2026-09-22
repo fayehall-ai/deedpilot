@@ -33,11 +33,25 @@ crawl sources and queues crawls. Anything it could not confirm waits for you.
    sales the research could not confirm. **Approve** adds or fills the sale.
    **Dismiss** hides it for good.
 4. **Missing parcels?** If a sale shows no parcels but the county publishes its
-   list on its own site (a page or a PDF), paste it into *Point the crawler at a
-   county's list* on the same page, as "Clayton, GA" plus the URL. The crawler
-   reads it within five minutes and every week after. It works for any county
-   no dedicated adapter covers. For one that is covered, the box tells you
-   which adapter owns it.
+   list on its own site (a page, a PDF, a spreadsheet or a Word file), paste it
+   into *Point the crawler at a county's list* on the same page, as
+   "Clayton, GA" plus the URL. The crawler reads it within five minutes and
+   every week after. A list you enter there always wins over the pages the
+   crawler found by itself. It works for any county no dedicated adapter
+   covers. For one that is covered, the box tells you which adapter owns it.
+   - Point it at the county's own page when the county posts a new version of
+     the list each week; the crawler picks the newest one for the sale's month.
+     Point it at the file itself when the page is built by JavaScript or hides
+     the list.
+   - **New Jersey** is different: every sale there is a town's, not the
+     county's, so one county can have five sales a week. Town lists go in
+     `data/nj-town-lists.json` (a developer change), one entry per town and
+     sale date, and each is written onto that town's own sale.
+   - **Many sales from the Sep–Oct import have their parcel list in USTLA.**
+     Those rows came from USTLA's research export, and USTLA marks which ones
+     it holds a parcel file for. If a county does not post its list anywhere
+     the crawler can read, the parcel file in your USTLA account is the other
+     route: download it and send it to a developer to load.
 5. **Read the briefings** at **/cape/review**. If one is wrong, choose *Needs a
    change* and say what it should say. Within the hour the script is rewritten
    with your note, and its video is re-rendered and replaced in Drive under the
