@@ -372,6 +372,13 @@ async function lotsFromPdf(
   }
 }
 
+/** The month a list's own name gives, 1-12, or null when it names none. */
+function monthNamed(url: string | undefined): number | null {
+  const name = decodeURIComponent(url ?? "").toLowerCase();
+  const i = MONTHS.findIndex((m) => name.includes(m));
+  return i === -1 ? null : i + 1;
+}
+
 export const georgiaAdapter: SourceAdapter = {
   name: "ga-counties",
   platform: "county_site",
@@ -499,7 +506,15 @@ export const georgiaAdapter: SourceAdapter = {
        */
       ...(listFor.has(saleDate) && !listPdf
         ? { sourceUrl: listFor.get(saleDate)!, listingKind: listKind ?? ("sale_list" as ListingKind) }
-        : { sourceUrl: source, listingKind: kind }),
+        : (listFor.size || monthNamed(discovered?.url) !== null) && !listPdf && monthNamed(discovered?.url) !== Number(saleDate.slice(5, 7))
+          ? /*
+             * The page names lists for other months only. The fallback used
+             * to be the first list found, so Gwinnett's December 1 sale was
+             * handed the October list. This sale reads the page, and the
+             * other months' lists are ruled out in `listLots`.
+             */
+            { sourceUrl: url, listingKind: "unknown" as ListingKind }
+          : { sourceUrl: source, listingKind: kind }),
       countyFips: binding.countyFips,
       platform: "county_site" as const,
       // Georgia conveys a redeemable deed: 12 months at a 20% flat penalty,
@@ -510,7 +525,18 @@ export const georgiaAdapter: SourceAdapter = {
       saleDateConfirmed: confirmed,
       title: `${name} County tax sale (courthouse steps)`,
       status: "scheduled" as const,
-      raw: { registryUrl: url, listPdf, discoveredList: discovered?.url, datesFromPage: dates },
+      raw: {
+        registryUrl: url,
+        listPdf,
+        discoveredList: discovered?.url,
+        datesFromPage: dates,
+        otherSalesLists: [
+          ...[...listFor].filter(([d]) => d !== saleDate).map(([, u]) => u),
+          ...(discovered && monthNamed(discovered.url) !== null && monthNamed(discovered.url) !== Number(saleDate.slice(5, 7))
+            ? [discovered.url]
+            : []),
+        ],
+      },
     }));
   },
 
@@ -527,6 +553,14 @@ export const georgiaAdapter: SourceAdapter = {
     }
 
     const res = await politeFetch(auction.sourceUrl);
+    /*
+     * A document by content, not by extension: Gwinnett's list is at
+     * `/documents/d/egov/october-2026-tax-sale-web-list`, which was fetched as
+     * a web page, found to hold no links, and read as 0 parcels.
+     */
+    if (/application\/pdf|spreadsheet|officedocument|msword|text\/csv/i.test(res.contentType)) {
+      return lotsFromPdf(auction.sourceUrl, context);
+    }
     const $ = cheerio.load(res.body);
 
     // 1. Free and exact, when the county publishes a real table.
@@ -560,7 +594,8 @@ export const georgiaAdapter: SourceAdapter = {
      * the run a failure rather than an empty county.
      */
     const unread: string[] = [];
-    for (const { url: pdf, kind } of candidates.slice(0, 3)) {
+    const othersales = new Set((auction.raw as { otherSalesLists?: string[] } | undefined)?.otherSalesLists ?? []);
+    for (const { url: pdf, kind } of candidates.filter((c) => !othersales.has(c.url)).slice(0, 3)) {
       try {
         const lots = await lotsFromPdf(pdf, { ...context, sourceUrl: pdf });
         if (lots.length) return lots;
