@@ -204,6 +204,73 @@ export function parseHtmlTable(
   return best;
 }
 
+/**
+ * A spreadsheet, CSV or HTML document read as the table it already is.
+ *
+ * `documentToText` turns a workbook into tab-separated rows and an HTML page
+ * into " | "-separated ones. A list in that shape needs no model: it has a
+ * header row, and `parseHtmlTable` already maps headers to fields. That is
+ * free and exact, and a 5,000-row sheet sent to the model would be thirty
+ * paid calls that could each drop or mistype a row.
+ *
+ * Sheets are read separately (a workbook's `# name` lines divide them), and
+ * the header is the first row that names parcel columns, because county
+ * sheets open with a title row or two. Null when nothing looks like a table.
+ */
+export function parseDelimitedText(text: string, sourceUrl: string): DiscoveredLot[] | null {
+  let best: DiscoveredLot[] | null = null;
+  for (const block of text.split(/^# .*$/m)) {
+    const lines = block.split("\n").filter((l) => l.trim());
+    const sep = separatorOf(lines);
+    if (!sep) continue;
+    const rows = lines.map((l) => splitRow(l, sep));
+    const h = rows.findIndex((r) => r.filter(Boolean).length >= 2 && PARCEL_HEADERS.test(r.join(" ")));
+    if (h === -1) continue;
+    const esc = (c: string) => c.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    const html =
+      `<table><tr>${rows[h].map((c) => `<th>${esc(c)}</th>`).join("")}</tr>` +
+      rows
+        .slice(h + 1)
+        .map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`)
+        .join("") +
+      `</table>`;
+    const lots = parseHtmlTable(cheerio.load(html), sourceUrl);
+    if (lots?.length && (!best || lots.length > best.length)) best = lots;
+  }
+  return best;
+}
+
+/** Tab, " | " or comma, whichever most of the rows are split by. */
+function separatorOf(lines: string[]): "\t" | " | " | "," | null {
+  if (lines.length < 3) return null;
+  const share = (test: (l: string) => boolean) => lines.filter(test).length / lines.length;
+  if (share((l) => l.includes("\t")) >= 0.6) return "\t";
+  if (share((l) => l.includes(" | ")) >= 0.6) return " | ";
+  if (share((l) => (l.match(/,/g) ?? []).length >= 2) >= 0.8) return ",";
+  return null;
+}
+
+/** One row's cells. Commas inside quotes stay in their cell. */
+function splitRow(line: string, sep: "\t" | " | " | ","): string[] {
+  if (sep !== ",") return line.split(sep).map((c) => c.trim());
+  const cells: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"' && quoted && line[i + 1] === '"') {
+      cell += '"';
+      i++;
+    } else if (ch === '"') quoted = !quoted;
+    else if (ch === "," && !quoted) {
+      cells.push(cell.trim());
+      cell = "";
+    } else cell += ch;
+  }
+  cells.push(cell.trim());
+  return cells;
+}
+
 /** A candidate document link, with what the county's own wording says it is. */
 export interface ClassifiedPdfLink {
   url: string;
@@ -237,6 +304,13 @@ export interface ClassifiedPdfLink {
 const DOC_ROUTE =
   /(showpublisheddocument|documentcenter\/view|\/download\b|[?&](file|doc|document)(id|_id)?=|\/media\/|attachment|viewdocument|getdocument)/i;
 
+/**
+ * Documents by extension. Not only PDFs: plenty of counties post the sale list
+ * as a spreadsheet or a Word file, and a crawler that followed `.pdf` links
+ * alone never opened them. `documentToText` reads all of these.
+ */
+const DOC_EXT = /\.pdf\b|\.(xlsx|xls|csv|docx|doc)($|[?#&])/i;
+
 /** A response is a PDF if it says so, or if its first bytes say so. */
 export function isPdfResponse(contentType: string | null, head: string): boolean {
   if (/application\/pdf/i.test(contentType ?? "")) return true;
@@ -260,7 +334,7 @@ export function documentLinks(
 
   $("a[href]").each((_, a) => {
     const href = $(a).attr("href");
-    if (!href || /\.pdf($|[?#])/i.test(href)) return;
+    if (!href || DOC_EXT.test(href)) return;
     if (!DOC_ROUTE.test(href)) return;
     const label = `${$(a).text()} ${href}`;
     if (EXCLUDE_LINKS.test(label)) return;
@@ -293,9 +367,9 @@ export function classifiedPdfLinks(
   }
 
   const scored: { url: string; score: number; kind: ListingKind }[] = [];
-  $('a[href*=".pdf" i]').each((_, a) => {
+  $("a[href]").each((_, a) => {
     const href = $(a).attr("href");
-    if (!href) return;
+    if (!href || !DOC_EXT.test(href)) return;
     const label = `${$(a).text()} ${href}`;
     if (EXCLUDE_LINKS.test(label)) return;
     try {
@@ -442,17 +516,95 @@ export function listPageLinks($: cheerio.CheerioAPI, pageUrl: string): string[] 
   return [...direct, ...department].slice(0, 5);
 }
 
-/** Extract text from a PDF at `url`. Policy-gated like every other fetch. */
-export async function pdfToText(url: string): Promise<string> {
-  const { PDFParse } = await import("pdf-parse");
+/**
+ * The text of a county document, whatever the document turns out to be.
+ * Policy-gated like every other fetch.
+ *
+ * This was PDF-only and never looked at the HTTP status. A dead link came back
+ * as a 404 page, went to the PDF parser, and was reported as "Invalid PDF
+ * structure", which reads as a broken county file rather than a moved one.
+ * A list a county posts as a spreadsheet or a Word file, or serves through a
+ * CMS document route that does not say what it is, failed the same way and
+ * was never read. Now the response decides: a PDF is parsed as one, a
+ * workbook becomes one line per row, a Word file one line per paragraph, and
+ * an HTML page one line per table row. Anything else is refused by name.
+ */
+export async function documentToText(url: string): Promise<string> {
   const res = await politeFetchBinary(url);
-  const parser = new PDFParse({ data: res.bytes });
+  if (res.status < 200 || res.status >= 300) throw new Error(`HTTP ${res.status} from ${res.url}`);
+  const type = res.contentType.toLowerCase();
+  const head = new TextDecoder("latin1").decode(res.bytes.slice(0, 1024));
+  const path = new URL(res.url).pathname.toLowerCase();
+
+  if (isPdfResponse(type, head) || head.includes("%PDF-")) return pdfBytesToText(res.bytes);
+  if (head.startsWith("PK")) return officeToText(res.bytes, res.url);
+  if (head.startsWith("\xD0\xCF\x11\xE0")) {
+    throw new Error(`${res.url} is a legacy Office file (.xls/.doc), which this does not read`);
+  }
+  const body = new TextDecoder("utf-8").decode(res.bytes);
+  if (/html|xml/.test(type) || /^\s*</.test(body)) return htmlToText(body);
+  if (/text\/|csv/.test(type) || /\.(csv|txt)$/.test(path)) return body;
+  throw new Error(`${res.url} is ${type || "of no stated type"}, not a document this reads`);
+}
+
+/** The historical name. Every caller wants the text, not the format. */
+export const pdfToText = documentToText;
+
+async function pdfBytesToText(bytes: Uint8Array): Promise<string> {
+  const { PDFParse } = await import("pdf-parse");
+  const parser = new PDFParse({ data: bytes });
   try {
     const parsed = await parser.getText();
     return parsed.text ?? "";
   } finally {
     await parser.destroy().catch(() => {});
   }
+}
+
+/** A workbook as one tab-separated line per row, or a Word file as one line per paragraph. */
+async function officeToText(bytes: Uint8Array, url: string): Promise<string> {
+  const JSZip = (await import("jszip")).default;
+  const zip = await JSZip.loadAsync(bytes);
+  if (zip.file("xl/workbook.xml")) {
+    const { readWorkbook } = await import("../import/scout-workbook");
+    const lines: string[] = [];
+    for (const [sheet, grid] of await readWorkbook(bytes)) {
+      lines.push(`# ${sheet}`);
+      for (const row of grid) {
+        const cells = row.map((c) => (c ?? "").trim());
+        if (cells.some(Boolean)) lines.push(cells.join("\t"));
+      }
+    }
+    return lines.join("\n");
+  }
+  const doc = zip.file("word/document.xml");
+  if (doc) {
+    const xml = await doc.async("string");
+    return cheerio
+      .load(
+        xml
+          .replace(/<\/w:tc>/g, " | ")
+          .replace(/<\/w:p>/g, "\n")
+          .replace(/<w:tab\/>/g, "\t"),
+        { xml: true },
+      )
+      .root()
+      .text();
+  }
+  throw new Error(`${url} is a zip archive that is neither a workbook nor a Word file`);
+}
+
+/** An HTML page as text, one line per table row and per block, cells split by " | ". */
+function htmlToText(html: string): string {
+  const $ = cheerio.load(html);
+  $("script, style, noscript, nav, header, footer").remove();
+  $("td, th").append(" | ");
+  $("tr, p, div, li, br, h1, h2, h3, h4, h5, h6").append("\n");
+  return $.root()
+    .text()
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n+/g, "\n")
+    .trim();
 }
 
 /**

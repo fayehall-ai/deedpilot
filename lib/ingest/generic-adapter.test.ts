@@ -11,6 +11,7 @@ import { ADAPTERS, getAdapter } from "./adapters";
 import {
   classifiedPdfLinks,
   classifyListingLink,
+  parseDelimitedText,
   listPageLinks,
   parseHtmlTable,
   pdfLinks,
@@ -102,6 +103,31 @@ assert(
   classifyListingLink("2026 Repository Sale List") === "sale_list",
   "a Pennsylvania repository list is a sale list",
 );
+
+// A workbook as documentToText renders it: a sheet marker, a title row, then the table.
+{
+  const sheet = [
+    "# DL_RC_REG",
+    "FLC - RICHLAND COUNTY OWNED PROPERTY\t\t\t",
+    "TAX MAP#\tOWNER NAME\tLOCATION\tOPENING BID",
+    "01000-03-38-\tRICHLAND CO FORFEITED LAND COMM\tN/S HUBERT SIMPSON RD\t1300",
+    "09403-04-05-\tRICHLAND CO FORFEITED LAND COMM\t123 MAIN ST\t2,450.00",
+  ].join("\n");
+  const lots = parseDelimitedText(sheet, "https://example.gov/flc.xlsx") ?? [];
+  assert(lots.length === 2, `a sheet with a title row reads its two rows (got ${lots.length})`);
+  assert(lots[0].parcelNumber === "01000-03-38-", "the parcel column is found under a title row");
+  assert(lots[1].openingBid === 2450, "the bid column is read as money");
+}
+{
+  const csv = [
+    "Parcel ID,Owner,Address,Minimum Bid",
+    '12-345-678,"SMITH, JOHN",1 Oak St,"$1,000.00"',
+    '12-345-679,"DOE, JANE",2 Elm St,$500.00',
+  ].join("\n");
+  const lots = parseDelimitedText(csv, "https://example.gov/list.csv") ?? [];
+  assert(lots.length === 2 && lots[0].ownerName === "SMITH, JOHN", "a quoted comma stays inside its CSV cell");
+}
+assert(parseDelimitedText("Notice of tax sale\nAll parcels will be sold\nat the courthouse", "x") === null, "prose is not a table");
 
 const cobbStyle = cheerio.load(`
   <a href="/Delinquent%20Tax%20List%2007.01.2026.pdf">Delinquent Tax List</a>

@@ -42,6 +42,7 @@ import {
   classifiedPdfLinks,
   documentLinks,
   listPageLinks,
+  parseDelimitedText,
   parseHtmlTable,
   parseStructuredPdfText,
   pdfToText,
@@ -296,6 +297,13 @@ export const genericAdapter: SourceAdapter = {
           `[generic-county] ${doc}: structured PDF parse → ${structured.length} lot(s) [${kind}]`,
         );
         return structured;
+      }
+      /* A spreadsheet, CSV or HTML list: a table with headers, read without the model. */
+      const tabular = parseDelimitedText(text, doc);
+      if (tabular?.length) {
+        auction.listingKind = kind;
+        console.log(`[generic-county] ${doc}: table parse → ${tabular.length} lot(s) [${kind}]`);
+        return tabular;
       }
       try {
         /*
