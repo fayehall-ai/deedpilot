@@ -84,7 +84,15 @@ export function mergeCountySources(base: SourceRegistry, extra: CountySource[] =
       sources: [],
       isGap: true,
     };
-    if (entry.sources.some((s) => s.url === r.url)) continue;
+    /*
+     * A URL the registry already holds is not skipped. It is moved to the
+     * front with this row's origin, which is what makes a chosen source win.
+     * Skipping it dropped the choice: Pike, Pennsylvania's upset-sale page was
+     * already in the registry below its general tax claim page, so pointing
+     * the crawler at it changed nothing and the county kept reading 0 parcels.
+     */
+    const known = entry.sources.find((s) => s.url === r.url);
+    const rest = entry.sources.filter((s) => s.url !== r.url);
     const host = hostOf(r.url);
     const source: VerifiedSource = {
       fips: r.countyFips,
@@ -95,11 +103,11 @@ export function mergeCountySources(base: SourceRegistry, extra: CountySource[] =
       kind: r.kind as SourceKind,
       isGovernment: isGovernment(host),
       confidence: 0.75,
-      signals: [r.origin],
+      signals: [r.origin, ...(known?.signals ?? [])],
       verifiedOn: r.updatedAt.toISOString().slice(0, 10),
       httpStatus: 0,
     };
-    counties[r.countyFips] = { ...entry, sources: [source, ...entry.sources], isGap: false };
+    counties[r.countyFips] = { ...entry, sources: [source, ...rest], isGap: false };
   }
   return { ...base, counties };
 }

@@ -18,6 +18,8 @@ import {
   pdfLinks,
 } from "./parse";
 import type { SourceRegistry, VerifiedSource } from "../prospector/types";
+import { mergeCountySources } from "./county-sources";
+import type { CountySource } from "../db/schema";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) throw new Error(msg);
@@ -335,5 +337,15 @@ main()
   const notice = Array.from({ length: 8 }, (_, i) => `Map ${10 + i}-${200 + i}, owner SMITH ${i}, amount due $${1000 + i}.00`).join("\n");
   assert(looksLikeList(notice), "a legal notice listing parcels with amounts looks like a list");
   assert(!looksLikeList("Tax Commissioner. Call 770-555-1234. Office hours 8-5. Pay online."), "a landing page does not");
+}
+
+// A chosen source the registry already lists moves to the front rather than being skipped.
+{
+  const listed = (url: string) => ({ fips: "42103", state: "PA", url, host: "www.pikepa.org", origin: "atlas", kind: "calendar", isGovernment: false, confidence: 0.5, signals: ["tax sale"], verifiedOn: "2026-08-01", httpStatus: 200 }) as unknown as VerifiedSource;
+  const base = { counties: { "42103": { state: "PA", county: "Pike", isGap: false, sources: [listed("https://www.pikepa.org/government/tax_claim/index.php"), listed("https://www.pikepa.org/government/tax_claim/upset_tax_sale/index.php")] } } } as unknown as SourceRegistry;
+  const row = { id: "x", countyFips: "42103", url: "https://www.pikepa.org/government/tax_claim/upset_tax_sale/index.php", kind: "listing", origin: "research", note: null, enabled: true, addedBy: "t", createdAt: new Date(), updatedAt: new Date() } as CountySource;
+  const merged = mergeCountySources(base, [row]).counties["42103"].sources;
+  assert(merged.length === 2, "the registry's copy is replaced, not duplicated");
+  assert(pickSource(merged)?.url === row.url, "a chosen URL the registry already held is the one read");
 }
 
