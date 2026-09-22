@@ -158,7 +158,20 @@ export function parseHtmlTable(
     const headers = headerCells.map((h) => h.toLowerCase());
 
     const col = (re: RegExp) => headers.findIndex((h) => re.test(h));
-    const iParcel = col(/parcel|map/);
+    /* By preference, not by position: the first pattern any header matches wins. */
+    const first = (...res: RegExp[]) => {
+      for (const re of res) {
+        const i = col(re);
+        if (i !== -1) return i;
+      }
+      return -1;
+    };
+    /*
+     * Rockdale County, Georgia heads its parcel column "PID" and Gwinnett
+     * "PIN"; neither says parcel or map, so their rows arrived with no parcel
+     * number at all.
+     */
+    const iParcel = first(/parcel|map/, /\bpid\b|\bpin\b/, /tax\s*id|property\s*id/);
     /*
      * CRH and DIF are Georgia's abbreviations for Current Record Holder and
      * Defendant in Fi-Fa. Both name a person, but only the record holder owns
@@ -169,7 +182,12 @@ export function parseHtmlTable(
      */
     const iOwner = col(/record.?holder|\bcrh\b|owner|defendant|\bdif\b|name/);
     const iAddr = col(/address|location|situs/);
-    const iBid = col(/bid|amount|due|total/);
+    /*
+     * The amount a bidder has to meet, not the first column that mentions
+     * money: Rockdale's table opens with "Original Bill Amount" ($773.30) and
+     * carries "Current Due" ($1,196.33) further along.
+     */
+    const iBid = first(/bid|minimum/, /amount\s*due|current\s*due|total\s*due|\bdue\b/, /total|amount/);
 
     if (iParcel === -1 && iOwner === -1) return;
 

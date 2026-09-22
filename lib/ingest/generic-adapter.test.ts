@@ -349,3 +349,13 @@ main()
   assert(pickSource(merged)?.url === row.url, "a chosen URL the registry already held is the one read");
 }
 
+// Columns by preference: PID is a parcel column, and "Current Due" beats an earlier "Original Bill Amount".
+{
+  const $ = cheerio.load(`<table>
+    <tr><th>Owner Name</th><th>Year</th><th>PID</th><th>Original Bill Amount</th><th>Current Due</th></tr>
+    <tr><td>GARRICK MICHAEL A</td><td>2025</td><td>0010020003</td><td>773.3</td><td>1196.33</td></tr></table>`);
+  const [lot] = parseHtmlTable($, "https://example.gov/") ?? [];
+  assert(lot?.parcelNumber === "0010020003", "a PID column is the parcel number");
+  assert(lot?.openingBid === 1196.33, "the amount due is the bid, not the original bill");
+}
+

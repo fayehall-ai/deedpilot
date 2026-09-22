@@ -385,14 +385,14 @@ export const genericAdapter: SourceAdapter = {
       if (unread.length) throw new Error(`could not read the sale list: ${unread.join("; ")}`);
     };
 
-    if (/\.pdf(\?|#|$)/i.test(auction.sourceUrl)) {
+    if (/\.(pdf|xlsx|xls|csv|docx|doc)(\?|#|$)/i.test(auction.sourceUrl)) {
       const lots = await lotsFromDocument(auction.sourceUrl, "sale_list");
       unreadIsFailure();
       return lots ?? [];
     }
 
     const res = await politeFetch(auction.sourceUrl);
-    if (/application\/pdf/i.test(res.contentType)) {
+    if (/application\/pdf|spreadsheet|officedocument|msword|ms-excel|text\/csv/i.test(res.contentType)) {
       const lots = await lotsFromDocument(auction.sourceUrl, "sale_list");
       unreadIsFailure();
       return lots ?? [];
