@@ -145,8 +145,13 @@ function isoDateOf(cell: string): string | null {
     const y = us[3].length === 2 ? `20${us[3]}` : us[3];
     return `${y}-${us[1].padStart(2, "0")}-${us[2].padStart(2, "0")}`;
   }
-  const named = Date.parse(cell.replace(/(\d)(st|nd|rd|th)\b/, "$1"));
-  return Number.isNaN(named) ? null : new Date(named - new Date(named).getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+  /* The first written-out date in the cell: Knox, Ohio's reads "May 8, 2026IF NO BID, NO SALE, …". */
+  const named = cell.match(
+    /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})/i,
+  );
+  if (!named) return null;
+  const month = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].indexOf(named[1].slice(0, 3).toLowerCase()) + 1;
+  return `${named[3]}-${String(month).padStart(2, "0")}-${named[2].padStart(2, "0")}`;
 }
 
 export function parseHtmlTable(

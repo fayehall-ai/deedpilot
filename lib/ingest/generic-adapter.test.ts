@@ -378,7 +378,7 @@ assert(classifyListingLink("Full list of all available property (as of 9/8/2026)
   const $ = cheerio.load(`<table><tr><th>Sale Date</th><th>Parcel</th><th>Address</th></tr>
     <tr><td>5/15/2026</td><td>21-00762.000</td><td>1 Main</td></tr>
     <tr><td>10/9/2026</td><td>09-00156.000</td><td>4001 McLarnan Rd</td></tr>
-    <tr><td>October 9, 2026</td><td>23-00186.000</td><td>2 Elm</td></tr></table>`);
+    <tr><td>October 9, 2026IF NO BID, NO SALE, 2ND SALE DATE WILL BE October 23, 2026</td><td>23-00186.000</td><td>2 Elm</td></tr></table>`);
   const lots = parseHtmlTable($, "https://co.knox.oh.us/sheriff/", "2026-10-09") ?? [];
   assert(lots.length === 2 && lots.every((l) => l.parcelNumber !== "21-00762.000"), "another sale's rows are dropped");
   assert((parseHtmlTable($, "https://co.knox.oh.us/sheriff/") ?? []).length === 3, "no sale given, no filter");
