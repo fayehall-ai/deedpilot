@@ -40,6 +40,21 @@ const ExtractionSchema = z.object({
   lots: z.array(ExtractedLotSchema),
 });
 
+/**
+ * What names a lot when the list prints no parcel number.
+ *
+ * Wyandotte County, Kansas numbers its sale items and gives each an address,
+ * with no parcel ID, and every one of its 127 lots was rejected as
+ * unidentifiable. The county's own item number is unique within its sale, and
+ * the address is the last resort. A lot with a parcel number needs neither.
+ */
+function identityOf(l: { parcelNumber: string | null; lotNumber: string | null; addressLine: string | null }): string | undefined {
+  if (l.parcelNumber?.trim()) return undefined;
+  if (l.lotNumber?.trim()) return `item ${l.lotNumber.trim()}`;
+  if (l.addressLine?.trim()) return `address ${l.addressLine.trim().toLowerCase()}`;
+  return undefined;
+}
+
 export type ExtractionResult = {
   lots: DiscoveredLot[];
   containsParcelList: boolean;
@@ -217,6 +232,7 @@ ${chunk}`,
       seen.add(key);
       merged.push({
         parcelNumber: l.parcelNumber ?? undefined,
+        externalId: identityOf(l),
         lotNumber: l.lotNumber ?? undefined,
         ownerName: l.ownerName ?? undefined,
         addressLine: l.addressLine ?? undefined,
@@ -327,6 +343,7 @@ and say which it is in note.`,
       added++;
       merged.push({
         parcelNumber: l.parcelNumber ?? undefined,
+        externalId: identityOf(l),
         lotNumber: l.lotNumber ?? undefined,
         ownerName: l.ownerName ?? undefined,
         addressLine: l.addressLine ?? undefined,
