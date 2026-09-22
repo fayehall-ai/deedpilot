@@ -92,6 +92,18 @@ export interface StructuredRequest<T extends z.ZodType> {
    * whole job up to `MAX_ATTEMPTS` times with a fresh lease.
    */
   attempts?: number;
+  /**
+   * `transcribe` for long, mechanical output: copying a parcel list into rows.
+   *
+   * It needs no reasoning, and paying for reasoning made it too slow to finish.
+   * grok-4.5 spent over four minutes on a 12,000-character chunk of Fayette
+   * County, Pennsylvania's list and timed out three times running, so every
+   * county whose list needed the model came back with no parcels. Grok's
+   * non-reasoning model copied the same chunk, 148 parcels, in 67 seconds for
+   * about three cents. Claude, the fallback, runs at low effort for the same
+   * reason.
+   */
+  tier?: "transcribe";
 }
 
 /** See `StructuredRequest.timeoutMs`. Four minutes; scripts land inside two. */
@@ -138,7 +150,8 @@ export interface ProviderResult<T> {
 
 interface Provider {
   name: string;
-  model: string;
+  /** The model this provider sends a given request to. */
+  model(req: StructuredRequest<z.ZodType>): string;
   configured(): boolean;
   run<T extends z.ZodType>(req: StructuredRequest<T>): Promise<z.infer<T>>;
 }
@@ -153,10 +166,12 @@ interface Provider {
  * commit, not a silent behaviour change on someone's auction morning.
  */
 const GROK_MODEL = process.env.XAI_MODEL ?? "grok-4.5";
+/** See `StructuredRequest.tier`. */
+const GROK_TRANSCRIBE_MODEL = process.env.XAI_TRANSCRIBE_MODEL ?? "grok-4.20-non-reasoning";
 
 const grokProvider: Provider = {
   name: "grok",
-  model: GROK_MODEL,
+  model: (req) => (req.tier === "transcribe" ? GROK_TRANSCRIBE_MODEL : GROK_MODEL),
 
   configured: () => (process.env.XAI_API_KEY ?? "").trim().length > 0,
 
@@ -166,9 +181,10 @@ const grokProvider: Provider = {
       baseURL: process.env.XAI_BASE_URL ?? "https://api.x.ai/v1",
     });
 
+    const model = grokProvider.model(req);
     const completion = await client.chat.completions.parse(
       {
-      model: GROK_MODEL,
+      model,
       max_completion_tokens: req.maxTokens ?? 16000,
       messages: [
         { role: "system", content: req.system },
@@ -210,7 +226,7 @@ const grokProvider: Provider = {
     }
     await recordUsage({
       provider: "xai",
-      model: GROK_MODEL,
+      model,
       operation: req.operation ?? "pdf-extract",
       inputTokens: completion.usage?.prompt_tokens ?? null,
       outputTokens: completion.usage?.completion_tokens ?? null,
@@ -229,7 +245,7 @@ const CLAUDE_MODEL = "claude-opus-5";
 
 const claudeProvider: Provider = {
   name: "claude",
-  model: CLAUDE_MODEL,
+  model: () => CLAUDE_MODEL,
 
   // An empty string is not a key. ANTHROPIC_API_KEY was set to "" in .env.local,
   // which `Boolean()` reports as unconfigured only by luck of it being falsy —
@@ -254,7 +270,7 @@ const claudeProvider: Provider = {
       output_config: {
         // Medium is enough for transcription; "high" balloons latency and
         // was forcing the long-request path on booklets.
-        effort: maxTokens >= 16000 ? "medium" : "high",
+        effort: req.tier === "transcribe" ? "low" : maxTokens >= 16000 ? "medium" : "high",
         format: zodOutputFormat(req.schema),
       },
       messages: [
@@ -356,7 +372,7 @@ export async function runStructured<T extends z.ZodType>(
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const data = await provider.run(req);
-        return { data, model: provider.model, usedFallback: i > 0 };
+        return { data, model: provider.model(req), usedFallback: i > 0 };
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         const retryable = isTransient(e) && attempt < maxAttempts;

@@ -93,6 +93,15 @@ assert(
   classifyListingLink("Delinquent Tax Sale List") === "sale_list",
   "sale vocabulary wins when a heading carries both words",
 );
+assert(
+  classifyListingLink("https://www.fayettecountypa.org/DocumentCenter/View/16552/Upset-2026-Final-list-09-18-2026") ===
+    "sale_list",
+  "a Pennsylvania upset sale list is a sale list",
+);
+assert(
+  classifyListingLink("2026 Repository Sale List") === "sale_list",
+  "a Pennsylvania repository list is a sale list",
+);
 
 const cobbStyle = cheerio.load(`
   <a href="/Delinquent%20Tax%20List%2007.01.2026.pdf">Delinquent Tax List</a>

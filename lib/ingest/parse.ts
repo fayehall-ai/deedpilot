@@ -30,10 +30,22 @@ export const EXCLUDE_LINKS =
   /excess|surplus|overbid|brochure|faq|instruction|guide|kiosk|no tax sale|results|sold|water.?quality|ccr|annual.?report|budget|minutes|agenda|form\b|application|bid.?package|how.?to.?bid|terms.?and.?conditions/i;
 
 /**
+ * Pennsylvania names its three sales rather than calling any of them a tax
+ * sale: upset, judicial and repository. Fayette County's list is filed as
+ * "Upset-2026-Final-list", which matched none of the sale words below, so the
+ * crawler ranked it as an unknown document. When it would not read, that was
+ * not recorded as a failure, only as a county with no parcels.
+ */
+const PA_SALE = String.raw`upset.?sale|upset\b.{0,30}\blist|judicial.?sale|repository.?(?:sale|list)`;
+
+/**
  * A list published *for a specific sale* — the only thing that is inventory.
  */
-const SALE_LIST_LINK =
-  /tax.?sale.?list|sale.?list|auction.?advert|properties.?for.?sale|sheriff.?sale|levy.?sale|lien.?sale|deed.?sale|tax.?sale|foreclos/i;
+const SALE_LIST_LINK = new RegExp(
+  String.raw`tax.?sale.?list|sale.?list|auction.?advert|properties.?for.?sale|sheriff.?sale|levy.?sale|lien.?sale|deed.?sale|tax.?sale|foreclos|` +
+    PA_SALE,
+  "i",
+);
 
 /**
  * Everyone behind on taxes. Counties publish this beside the sale list and it

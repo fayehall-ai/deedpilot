@@ -61,12 +61,55 @@ Rules:
 - Transcribe every parcel in the list, not a sample.`;
 
 /**
- * Cap the payload so a 300-page booklet doesn't blow the context window.
- * 80k chars is enough for a typical county list page and keeps Claude under
- * the non-streaming duration estimate that used to force 10-minute streaming
- * failures on huge booklets.
+ * How much of a document the model is asked to read.
+ *
+ * This was 80,000 characters and anything past it was dropped without a word —
+ * a county list of a few thousand parcels arrived as its first few hundred. It
+ * is now large enough for the lists counties actually publish, with a note on
+ * the result when a document is longer still, so a truncation is visible.
  */
-const MAX_CHARS = 80_000;
+const MAX_CHARS = 300_000;
+
+/**
+ * One call's worth of list: small enough that its transcription fits the
+ * model's output limit.
+ *
+ * At 40,000 characters a list of three hundred rows produced more JSON than a
+ * 12,000-token answer holds; Grok stopped at its length limit, Claude's
+ * truncated answer failed to parse, and the county — Fayette, Pennsylvania,
+ * with a clean, fully readable list — was recorded as needing manual review.
+ * Output grows with rows, so the chunk is sized in characters of list, and a
+ * chunk that still overflows is split and retried.
+ */
+const CHUNK = 12_000;
+/** Chunks read at once, so a long list is not read one call at a time. */
+const CONCURRENCY = 4;
+
+const overflowed = (e: unknown) =>
+  /length limit|no parsed output|max_tokens|maximum.*tokens|truncat/i.test(e instanceof Error ? e.message : String(e));
+
+/** Whole lines into chunks of at most `CHUNK` characters, so no row is cut in two. */
+function chunkByLines(text: string): string[] {
+  const chunks: string[] = [];
+  let current = "";
+  for (const line of text.split("\n")) {
+    if (current && current.length + line.length + 1 > CHUNK) {
+      chunks.push(current);
+      current = "";
+    }
+    /* A single line longer than a chunk — a PDF with no line breaks — is cut where it must be. */
+    for (let i = 0; i < line.length; i += CHUNK) {
+      const piece = line.slice(i, i + CHUNK);
+      if (current && current.length + piece.length + 1 > CHUNK) {
+        chunks.push(current);
+        current = "";
+      }
+      current = current ? `${current}\n${piece}` : piece;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
 
 /**
  * Extract parcels from an unstructured county document.
@@ -79,8 +122,11 @@ export async function extractLots(
   text: string,
   context: { countyName: string; state: string; sourceUrl: string },
 ): Promise<ExtractionResult> {
-  // Prefer full document for deterministic pre-parse; LLM still gets a cap.
-  const full = text.replace(/\s+/g, " ").trim();
+  /* Line breaks kept: a row per line is what lets a chunk end between parcels. */
+  const full = text
+    .replace(/[ \t\f\v\r]+/g, " ")
+    .replace(/\n\s*\n+/g, "\n")
+    .trim();
   const trimmed = full.slice(0, MAX_CHARS);
 
   if (trimmed.length < 100) {
@@ -92,35 +138,24 @@ export async function extractLots(
     };
   }
 
-  // Chunk large documents so a 300k-char delinquent list does not blow
-  // structured-output JSON mid-string (Claude truncates and parse fails).
-  const CHUNK = 40_000;
-  const OVERLAP = 500;
-  const chunks: string[] = [];
-  if (trimmed.length <= CHUNK) {
-    chunks.push(trimmed);
-  } else {
-    for (let i = 0; i < trimmed.length; i += CHUNK - OVERLAP) {
-      chunks.push(trimmed.slice(i, i + CHUNK));
-      if (i + CHUNK >= trimmed.length) break;
-    }
-  }
+  const chunks = chunkByLines(trimmed);
 
-  const merged: DiscoveredLot[] = [];
-  const seen = new Set<string>();
-  let model = "none";
-  let anyList = false;
-  let lastNote: string | null = null;
-
-  for (const [idx, chunk] of chunks.entries()) {
-    const result = await runStructured({
-      system: SYSTEM,
-      schema: ExtractionSchema,
-      schemaName: "tax_sale_listing",
-      maxTokens: 12000,
-      prompt: `Source: ${context.countyName} County, ${context.state}
+  type Result = Awaited<ReturnType<typeof runStructured<typeof ExtractionSchema>>>;
+  const readChunk = async (chunk: string, label: string): Promise<Result[]> => {
+    const t0 = Date.now();
+    try {
+      const done = await runStructured({
+        system: SYSTEM,
+        schema: ExtractionSchema,
+        schemaName: "tax_sale_listing",
+        /* A 12,000-character chunk of Fayette's list came back as 9,485 tokens. */
+        maxTokens: 32000,
+        tier: "transcribe",
+        timeoutMs: 180_000,
+        attempts: 2,
+        prompt: `Source: ${context.countyName} County, ${context.state}
 URL: ${context.sourceUrl}
-${chunks.length > 1 ? `Document part ${idx + 1} of ${chunks.length} (continue extracting; do not restate prior parcels).` : ""}
+${chunks.length > 1 ? `Document part ${label} (continue extracting; do not restate prior parcels).` : ""}
 
 Transcribe every parcel in the upcoming tax sale listing below. If this document
 does not contain one, set containsParcelList=false.
@@ -128,12 +163,50 @@ If the document is truncated mid-list, extract every complete parcel that appear
 
 ---
 ${chunk}`,
-    });
+      });
+      console.log(
+        `[extract] ${context.countyName} part ${label}: ${chunk.length} chars → ${done.data.lots.length} lot(s) ` +
+          `in ${Math.round((Date.now() - t0) / 1000)}s (${done.model})`,
+      );
+      return [done];
+    } catch (e) {
+      console.warn(`[extract] ${context.countyName} part ${label}: failed after ${Math.round((Date.now() - t0) / 1000)}s`);
+      /* Still too much list for one answer: halve it on a line break and read both. */
+      if (!overflowed(e) || chunk.length < 2_000) throw e;
+      const lines = chunk.split("\n");
+      const mid = lines.length > 1 ? Math.ceil(lines.length / 2) : 0;
+      const [a, b] = mid ? [lines.slice(0, mid).join("\n"), lines.slice(mid).join("\n")] : [chunk.slice(0, chunk.length / 2), chunk.slice(chunk.length / 2)];
+      return [...(await readChunk(a, `${label}a`)), ...(await readChunk(b, `${label}b`))];
+    }
+  };
 
+  const results: Result[][] = new Array(chunks.length);
+  /*
+   * A one-chunk document that says it holds no list costs one call, as before.
+   * A longer one is read in full: its first chunk is often a cover page or the
+   * statutory notice, and stopping there dropped the list behind it.
+   */
+  results[0] = await readChunk(chunks[0], `1 of ${chunks.length}`);
+  let next = 1;
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, chunks.length - 1) }, async () => {
+      while (next < chunks.length) {
+        const i = next++;
+        results[i] = await readChunk(chunks[i], `${i + 1} of ${chunks.length}`);
+      }
+    }),
+  );
+
+  const merged: DiscoveredLot[] = [];
+  const seen = new Set<string>();
+  let model = "none";
+  let anyList = false;
+  let lastNote: string | null = null;
+
+  results.flat().forEach((result, idx) => {
     model = result.model;
     lastNote = result.data.note;
     if (result.data.containsParcelList) anyList = true;
-
     for (const l of result.data.lots) {
       const key = (l.parcelNumber ?? l.lotNumber ?? l.addressLine ?? JSON.stringify(l)).toString();
       if (seen.has(key)) continue;
@@ -150,17 +223,16 @@ ${chunk}`,
         raw: { extracted: true, model: result.model, chunk: idx },
       });
     }
+  });
 
-    // If the first chunk says there is no list, stop spending.
-    if (idx === 0 && !result.data.containsParcelList && result.data.lots.length === 0) {
-      break;
-    }
-  }
-
+  const truncated =
+    full.length > MAX_CHARS
+      ? `Only the first ${MAX_CHARS.toLocaleString()} of ${full.length.toLocaleString()} characters were read; the list continues.`
+      : null;
   return {
     lots: merged,
     containsParcelList: anyList || merged.length > 0,
-    note: lastNote,
+    note: [truncated, lastNote].filter(Boolean).join(" ") || null,
     model,
   };
 }
