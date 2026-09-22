@@ -384,3 +384,16 @@ assert(classifyListingLink("Full list of all available property (as of 9/8/2026)
   assert((parseHtmlTable($, "https://co.knox.oh.us/sheriff/") ?? []).length === 3, "no sale given, no filter");
 }
 
+// A combined "BLOCK & LOT" column is the parcel, and prose is never the header.
+{
+  const text = [
+    "If the owner is in active duty with the military,\tthe Collector should be notified immediately.",
+    "TOWNSHIP OF OLD BRIDGE\tNOTICE OF 2025 TAX SALE",
+    "BLOCK & LOT\tOWNER NAME\tPROPERTY LOCATION\tTOTAL",
+    "00001 0035\tTORRES-FRANCO, JOSE\t35 CLIFFWOOD WY\t433.29 WS",
+    "00008 0247\tCASE, ROBERT & KRISTINE\t247 BEACHWOOD AV\t7,987.17 T,WS",
+  ].join("\n");
+  const lots = parseDelimitedText(text, "https://oldbridge.example/") ?? [];
+  assert(lots.length === 2 && lots[0].parcelNumber === "00001 0035", "block & lot is the parcel column, prose is skipped");
+}
+

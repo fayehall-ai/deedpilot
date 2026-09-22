@@ -201,7 +201,7 @@ export function parseHtmlTable(
      * "PIN"; neither says parcel or map, so their rows arrived with no parcel
      * number at all.
      */
-    const iParcel = first(/parcel|map/, /\bpid\b|\bpin\b/, /tax\s*id|property\s*id/);
+    const iParcel = first(/parcel|map/, /\bpid\b|\bpin\b/, /block\s*(&|and|\/|-)\s*lot/, /tax\s*id|property\s*id/);
     /*
      * CRH and DIF are Georgia's abbreviations for Current Record Holder and
      * Defendant in Fi-Fa. Both name a person, but only the record holder owns
@@ -303,7 +303,15 @@ export function parseDelimitedText(text: string, sourceUrl: string): DiscoveredL
     const sep = separatorOf(lines);
     if (!sep) continue;
     const rows = lines.map((l) => splitRow(l, sep));
-    const h = rows.findIndex((r) => r.filter(Boolean).length >= 2 && PARCEL_HEADERS.test(r.join(" ")));
+    /*
+     * A header is a row of short labels. Old Bridge, New Jersey's notice has a
+     * paragraph line with a tab in it and the word "owner", which was taken
+     * for the header and turned 449 liens into rows of legal boilerplate.
+     */
+    const h = rows.findIndex((r) => {
+      const cells = r.filter(Boolean);
+      return cells.length >= 3 && cells.every((c) => c.length <= 40) && PARCEL_HEADERS.test(r.join(" "));
+    });
     if (h === -1) continue;
     const esc = (c: string) => c.replace(/&/g, "&amp;").replace(/</g, "&lt;");
     const html =
