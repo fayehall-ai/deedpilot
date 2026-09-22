@@ -31,7 +31,7 @@ import {
   toSaleType,
 } from "../../atlas";
 import { nextSaleWindows } from "../../atlas/calendar";
-import { countySourcesVersion, mergeCountySources } from "../county-sources";
+import { CHOSEN_ORIGINS, countySourcesVersion, mergeCountySources } from "../county-sources";
 import { observedSale } from "../observed-sale";
 import type { SourceRegistry } from "../../prospector/types";
 import { extractLots, extractLotsFromImages, NoProviderAvailableError } from "../extract";
@@ -130,6 +130,24 @@ interface GenericConfig {
   state: string;
 }
 
+/**
+ * Which of a county's sources the crawler reads.
+ *
+ * A source somebody chose on purpose comes first (see `CHOSEN_ORIGINS`); it is
+ * policy-checked when recorded. After that, a government listing page. That
+ * precedence is the whole answer to the RealAuction policy block and must not
+ * be quietly inverted here.
+ */
+export function pickSource<S extends { signals: string[]; isGovernment: boolean; kind: string }>(sources: S[]): S | undefined {
+  return (
+    sources.find((s) => s.signals.some((g) => CHOSEN_ORIGINS.has(g))) ??
+    sources.find((s) => s.isGovernment && s.kind === "listing") ??
+    sources.find((s) => s.isGovernment) ??
+    sources.find((s) => s.kind === "listing") ??
+    sources[0]
+  );
+}
+
 export const genericAdapter: SourceAdapter = {
   name: "generic-county",
   platform: "county_site",
@@ -176,13 +194,7 @@ export const genericAdapter: SourceAdapter = {
       const county = getCounty(fips) ?? findCountyByName(entry.state, entry.county);
       if (!county) continue;
 
-      // Prefer a government listing page; that precedence is the whole answer
-      // to the RealAuction policy block and must not be quietly inverted here.
-      const source =
-        entry.sources.find((s) => s.isGovernment && s.kind === "listing") ??
-        entry.sources.find((s) => s.isGovernment) ??
-        entry.sources.find((s) => s.kind === "listing") ??
-        entry.sources[0];
+      const source = pickSource(entry.sources);
       if (!source) continue;
 
       bindings.push({

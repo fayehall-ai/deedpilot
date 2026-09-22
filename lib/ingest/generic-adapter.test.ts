@@ -6,7 +6,7 @@
  * Run: npx tsx lib/ingest/generic-adapter.test.ts
  */
 import * as cheerio from "cheerio";
-import { __setRegistry, forThisSale, genericAdapter } from "./adapters/generic";
+import { __setRegistry, forThisSale, genericAdapter, pickSource } from "./adapters/generic";
 import { ADAPTERS, getAdapter } from "./adapters";
 import {
   classifiedPdfLinks,
@@ -309,3 +309,13 @@ main()
   if (nov[0] !== "NOVEMBER%20TAX%20SALE%20LISTING%209-8-26.pdf") throw new Error("November's sale should read November's list first");
   console.log("forThisSale: a sale reads its own month's list first");
 }
+
+// A list somebody chose beats the registry's .gov page, even off .gov; a workbook link does not.
+{
+  const gov = { url: "https://county.gov/", signals: ["atlas"], isGovernment: true, kind: "homepage" };
+  const chosen = { url: "https://www.fayettecountypa.org/273/Upset-Sale", signals: ["operator"], isGovernment: false, kind: "listing" };
+  const workbook = { url: "https://www.govdeals.com/MontCoJudicialSale2022", signals: ["auction-scout-workbook"], isGovernment: false, kind: "listing" };
+  assert(pickSource([gov, chosen])?.url === chosen.url, "an operator's list wins over a .gov homepage");
+  assert(pickSource([workbook, gov])?.url === gov.url, "a link the workbook recorded does not outrank the registry");
+}
+

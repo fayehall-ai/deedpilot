@@ -35,13 +35,31 @@ export async function primeCountySources(opts: { force?: boolean } = {}): Promis
   /* Imported here, not at the top: the generic adapter loads this module, and
    * its unit tests run without a database. */
   const { db } = await import("../db");
-  rows = await db.select().from(countySources).where(eq(countySources.enabled, true));
+  /* Oldest first: `mergeCountySources` puts each row ahead of the last, so the newest ends up first. */
+  rows = await db
+    .select()
+    .from(countySources)
+    .where(eq(countySources.enabled, true))
+    .orderBy(countySources.updatedAt);
   loadedAt = Date.now();
   version++;
   return rows.length;
 }
 
 export const countySourcesVersion = () => version;
+
+/**
+ * Origins of a source somebody chose on purpose: Ed's "Point the crawler at a
+ * county's list" box, or a list found and read by hand during research.
+ *
+ * These win over everything else for their county. The generic adapter prefers
+ * a `.gov` page, and most county sites are not on `.gov` (fayettecountypa.org,
+ * pikepa.org), so a list Ed pointed it at lost to whatever `.gov` page the
+ * registry already held, even a county homepage, and nothing said so. Links
+ * the workbook import records on its own do not win; they include auction
+ * platforms and a 2022 GovDeals page.
+ */
+export const CHOSEN_ORIGINS: ReadonlySet<string> = new Set(["operator", "research"]);
 
 const hostOf = (url: string) => {
   try {
