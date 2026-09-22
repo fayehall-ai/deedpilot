@@ -39,11 +39,22 @@ export const EXCLUDE_LINKS =
 const PA_SALE = String.raw`upset.?sale|upset\b.{0,30}\blist|judicial.?sale|repository.?(?:sale|list)`;
 
 /**
+ * A county selling land it holds, named as a sale rather than a tax sale:
+ * Douglas County, Wisconsin's "September Land Sale (Bids due by September
+ * 28th)" sat beside its "Full list of all available property", and with
+ * both unclassified the crawler read the 949-parcel inventory as the
+ * 13-parcel sale.
+ */
+const LAND_SALE = String.raw`land.?sale|real.?estate.?sale`;
+
+/**
  * A list published *for a specific sale* — the only thing that is inventory.
  */
 const SALE_LIST_LINK = new RegExp(
   String.raw`tax.?sale.?list|sale.?list|auction.?advert|properties.?for.?sale|sheriff.?sale|levy.?sale|lien.?sale|deed.?sale|tax.?sale|foreclos|` +
-    PA_SALE,
+    PA_SALE +
+    "|" +
+    LAND_SALE,
   "i",
 );
 
@@ -62,7 +73,7 @@ const DELINQUENT_LIST_LINK = /delinquent|tax.?roll|levy.?list|execution.?docket/
 
 /** Struck-off / forfeited inventory available after a sale, not at one. */
 const LANDS_AVAILABLE_LINK =
-  /lands?.?available|struck.?off|forfeited.?land|county.?held|surplus.?land|flc\b/i;
+  /lands?.?available|struck.?off|forfeited.?land|county.?held|county.?owned|available.?propert|surplus.?land|flc\b/i;
 
 /** Generic parcel-shaped documents — worth opening, kind unknown. */
 const PARCEL_ISH_LINK = /parcel|booklet|list\b/i;

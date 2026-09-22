@@ -359,3 +359,7 @@ main()
   assert(lot?.openingBid === 1196.33, "the amount due is the bid, not the original bill");
 }
 
+// A land sale is a sale; the county's full inventory beside it is not.
+assert(classifyListingLink("Douglas County September Land Sale (Bids due by September 28th)") === "sale_list", "a land sale is a sale list");
+assert(classifyListingLink("Full list of all available property (as of 9/8/2026)") === "lands_available", "a county's available-property inventory is not the sale");
+

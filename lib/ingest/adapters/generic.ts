@@ -310,7 +310,20 @@ export const genericAdapter: SourceAdapter = {
         return null;
       }
       // Free path: structured sealed-bid / list PDFs (no LLM, no credits).
-      const structured = parseStructuredPdfText(text, doc);
+      /*
+       * Trusted only when it accounts for a fair share of the document. It is
+       * a set of layout patterns, and a layout it half-knows yields a few
+       * rows: Los Angeles County's 2026B auction book lists 1,253 parcels and
+       * the structured parse took 8 of them, which then stood as the sale.
+       */
+      const ids = new Set(text.match(/\b[A-Z]?\d{1,5}[-.]\d{1,5}[-.]\d{1,6}\b/g) ?? []);
+      let structured = parseStructuredPdfText(text, doc);
+      if (structured?.length && structured.length < ids.size * 0.25) {
+        console.log(
+          `[generic-county] ${doc}: structured parse found ${structured.length} of ~${ids.size} parcel numbers — reading it another way`,
+        );
+        structured = null;
+      }
       if (structured?.length) {
         auction.listingKind = kind;
         console.log(
