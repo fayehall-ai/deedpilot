@@ -1,5 +1,26 @@
 import type { NextConfig } from "next";
 
+/**
+ * The PDF.js worker, which every PDF read needs and tracing cannot see.
+ *
+ * `pdf-parse` 2.x imports `pdfjs-dist/legacy/build/pdf.mjs`, and on Node that
+ * sets up its "fake worker" by importing `./pdf.worker.mjs` beside itself, a
+ * path computed at runtime. Tracing carried `pdf.mjs` into the function and
+ * left the worker behind, so on Vercel every PDF the crawler opened failed:
+ *
+ *     Setting up fake worker failed: "Cannot find module
+ *     '/var/task/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs'"
+ *
+ * Locally the file is simply there, so every terminal run read Fayette
+ * County's 398 parcels while the dispatcher read none. `pdf-parse` ships its
+ * own copy beside its entry too; both are listed.
+ */
+const PDF_WORKERS = [
+  "./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs",
+  "./node_modules/pdf-parse/dist/pdf-parse/esm/pdf.worker.mjs",
+  "./node_modules/pdf-parse/dist/pdf-parse/cjs/pdf.worker.mjs",
+];
+
 const nextConfig: NextConfig = {
   /**
    * Cache Components. Required by the `unstable_instant` export the
@@ -61,8 +82,8 @@ const nextConfig: NextConfig = {
    * same adapter binds 774 counties, which is why it had never shown up.
    */
   outputFileTracingIncludes: {
-    "/api/cron/**": ["./data/source-registry.json", "./data/*.json", "./node_modules/@napi-rs/canvas*/**/*"],
-    "/admin/**": ["./data/source-registry.json", "./node_modules/@napi-rs/canvas*/**/*"],
+    "/api/cron/**": ["./data/source-registry.json", "./data/*.json", "./node_modules/@napi-rs/canvas*/**/*", ...PDF_WORKERS],
+    "/admin/**": ["./data/source-registry.json", "./node_modules/@napi-rs/canvas*/**/*", ...PDF_WORKERS],
     /* Read at request time by `lib/statutory/page.ts`. */
     "/statutory": ["./templates/statutory-ground.html"],
     /*
