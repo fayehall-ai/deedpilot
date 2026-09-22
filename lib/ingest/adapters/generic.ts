@@ -413,7 +413,7 @@ export const genericAdapter: SourceAdapter = {
     const $ = cheerio.load(res.body);
 
     // 1. Free and exact, when the county publishes a real table.
-    const fromTable = parseHtmlTable($, auction.sourceUrl);
+    const fromTable = parseHtmlTable($, auction.sourceUrl, auction.saleDate);
     if (fromTable?.length) return fromTable;
 
     // 2. Documents on the page itself, decoys filtered and sale lists first —
@@ -495,7 +495,7 @@ export const genericAdapter: SourceAdapter = {
           const sub = await politeFetch(link);
           const $sub = cheerio.load(sub.body);
 
-          const subTable = parseHtmlTable($sub, link);
+          const subTable = parseHtmlTable($sub, link, auction.saleDate);
           if (subTable?.length) return subTable;
 
           for (const { url: doc, kind } of forThisSale(documentLinks($sub, link), auction.saleDate).slice(0, 3)) {

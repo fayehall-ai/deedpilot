@@ -136,9 +136,23 @@ function linkScore(label: string): number {
  * "Best" is the largest qualifying table: county pages often carry a small
  * summary table above the real list, and the real list is the long one.
  */
+/** "10/9/2026", "2026-10-09" or "October 9, 2026" as an ISO date, or null. */
+function isoDateOf(cell: string): string | null {
+  const iso = cell.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
+  if (iso) return iso[0];
+  const us = cell.match(/\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/);
+  if (us) {
+    const y = us[3].length === 2 ? `20${us[3]}` : us[3];
+    return `${y}-${us[1].padStart(2, "0")}-${us[2].padStart(2, "0")}`;
+  }
+  const named = Date.parse(cell.replace(/(\d)(st|nd|rd|th)\b/, "$1"));
+  return Number.isNaN(named) ? null : new Date(named - new Date(named).getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+}
+
 export function parseHtmlTable(
   $: cheerio.CheerioAPI,
   sourceUrl: string,
+  saleDate?: string,
 ): DiscoveredLot[] | null {
   let best: DiscoveredLot[] | null = null;
 
@@ -203,6 +217,13 @@ export function parseHtmlTable(
     const iLotCol = col(/^lot\b|\blot\s*(no|#|number)?$/);
     const iQual = col(/^qual/);
     /*
+     * A table of every sale, not one: Knox County, Ohio's sheriff page lists
+     * May through October in one table, 49 rows, and all of them were filed
+     * under the October 9 sale, which has 11. When the table dates its rows
+     * and the caller knows the sale, only that sale's rows are kept.
+     */
+    const iDate = saleDate ? col(/sale\s*date|auction\s*date|^date$|^sale$/) : -1;
+    /*
      * The amount a bidder has to meet, not the first column that mentions
      * money: Rockdale's table opens with "Original Bill Amount" ($773.30) and
      * carries "Current Due" ($1,196.33) further along.
@@ -221,6 +242,7 @@ export function parseHtmlTable(
           .map((___, td) => $(td).text().replace(/\s+/g, " ").trim())
           .get();
         if (cells.length === 0) return;
+        const rowDate = iDate >= 0 ? isoDateOf(cells[iDate] ?? "") : null;
 
         const blockLot =
           iBlock >= 0 && iLotCol >= 0 && cells[iBlock] && cells[iLotCol]
@@ -236,9 +258,19 @@ export function parseHtmlTable(
           addressLine: iAddr >= 0 ? cells[iAddr] || undefined : undefined,
           openingBid: iBid >= 0 ? parseMoney(cells[iBid]) : undefined,
           sourceUrl,
-          raw: { source: "html-table", cells },
+          raw: { source: "html-table", cells, ...(rowDate ? { rowDate } : {}) },
         });
       });
+
+    /*
+     * Keep this sale's rows. Only when the dates read at all: a column the
+     * date reader cannot parse ("Oct 9", no year) says nothing, and filtering
+     * on it would throw every row away.
+     */
+    if (iDate >= 0 && saleDate && rows.some((r) => (r.raw as { rowDate?: string }).rowDate)) {
+      const mine = rows.filter((r) => (r.raw as { rowDate?: string }).rowDate === saleDate);
+      rows.splice(0, rows.length, ...mine);
+    }
 
     if (rows.length && (!best || rows.length > best.length)) best = rows;
   });
