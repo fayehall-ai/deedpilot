@@ -292,7 +292,15 @@ export async function extractLotsFromImages(
       system: VISION_SYSTEM,
       schema: ExtractionSchema,
       schemaName: "tax_sale_listing",
-      maxTokens: 12000,
+      maxTokens: 16000,
+      /*
+       * The transcription tier, as for text: on the reasoning model a
+       * 12-page scan (Thomas County, Georgia) ran each page to its timeout
+       * and took the whole dispatch tick past 800 seconds.
+       */
+      tier: "transcribe",
+      timeoutMs: 180_000,
+      attempts: 2,
       images: [{ mediaType: page.mediaType, base64: page.base64 }],
       prompt: `Source: ${context.countyName} County, ${context.state}
 URL: ${context.sourceUrl}
