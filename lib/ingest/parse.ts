@@ -302,7 +302,7 @@ export interface ClassifiedPdfLink {
  * fetched and believed only if it comes back as a PDF — see `isPdfResponse`.
  */
 const DOC_ROUTE =
-  /(showpublisheddocument|documentcenter\/view|\/download\b|[?&](file|doc|document)(id|_id)?=|\/media\/|attachment|viewdocument|getdocument)/i;
+  /(showpublisheddocument|documentcenter\/view|\/download\b|[?&](file|doc|document)(id|_id)?=|\/media\/|attachment|viewdocument|getdocument|\/documents\/d\/|\/getmedia\/)/i;
 
 /**
  * Documents by extension. Not only PDFs: plenty of counties post the sale list
@@ -345,6 +345,29 @@ export function documentLinks(
       extra.push({ url, score: linkScore(label), kind: classifyListingLink(label) });
     } catch {
       /* malformed href — skip */
+    }
+  });
+
+  /*
+   * A document shown in a frame rather than linked: Newton County, Georgia
+   * embeds its list PDF in a Google viewer, `docs.google.com/viewer?url=…`,
+   * and has no link to it at all. The document's own URL is in the frame's
+   * address, as `url=` or `file=`, or the frame points straight at it.
+   */
+  $("iframe[src], embed[src], object[data]").each((_, el) => {
+    const src = $(el).attr("src") ?? $(el).attr("data");
+    if (!src) return;
+    try {
+      const frame = new URL(src, pageUrl);
+      const inner = frame.searchParams.get("url") ?? frame.searchParams.get("file");
+      const url = inner ? new URL(inner, pageUrl).toString() : frame.toString();
+      if (seen.has(url) || !(DOC_EXT.test(url) || DOC_ROUTE.test(url))) return;
+      seen.add(url);
+      const label = `${$(el).attr("title") ?? ""} ${url}`;
+      if (EXCLUDE_LINKS.test(label)) return;
+      extra.push({ url, score: linkScore(label), kind: classifyListingLink(label) });
+    } catch {
+      /* malformed frame address — skip */
     }
   });
 

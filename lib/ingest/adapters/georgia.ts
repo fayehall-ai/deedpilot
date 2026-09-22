@@ -30,10 +30,9 @@ import { politeFetch } from "../fetch";
 import { extractLots, extractLotsFromImages, NoProviderAvailableError } from "../extract";
 import { renderPdfFromUrl, textDensity, SCAN_TEXT_PER_PAGE } from "../render";
 import {
-  classifiedPdfLinks,
+  documentLinks,
   parseHtmlTable,
   parseStructuredPdfText,
-  pdfLinks,
   pdfToText,
 } from "../parse";
 import { findCountyByName } from "../../atlas";
@@ -435,7 +434,7 @@ export const georgiaAdapter: SourceAdapter = {
         .replace(/&nbsp;/g, " ")
         .replace(/\s+/g, " ");
 
-      const candidates = classifiedPdfLinks($, url);
+      const candidates = documentLinks($, url);
       discovered = candidates.find((c) => c.kind === "sale_list");
 
       saysNoSale = NO_SALE_MARKER.test(text);
@@ -545,11 +544,14 @@ export const georgiaAdapter: SourceAdapter = {
      * back to the unclassified ranking, so a county with an unhelpful filename
      * is still reached.
      */
-    const classified = classifiedPdfLinks($, auction.sourceUrl);
+    /*
+     * `documentLinks`, not `.pdf` links only: Gwinnett's October list is at
+     * `/documents/d/egov/october-2026-tax-sale-web-list`, with no extension,
+     * and an extension-only search never saw it.
+     */
+    const classified = documentLinks($, auction.sourceUrl);
     const plausible = classified.filter((c) => c.kind !== "unknown");
-    const candidates = plausible.length
-      ? plausible
-      : pdfLinks($, auction.sourceUrl).map((url) => ({ url, kind: "unknown" as ListingKind }));
+    const candidates = plausible.length ? plausible : classified;
 
     /*
      * Every candidate is tried even when one will not read: a handout that

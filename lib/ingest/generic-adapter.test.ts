@@ -11,6 +11,7 @@ import { ADAPTERS, getAdapter } from "./adapters";
 import {
   classifiedPdfLinks,
   classifyListingLink,
+  documentLinks,
   parseDelimitedText,
   listPageLinks,
   parseHtmlTable,
@@ -317,5 +318,15 @@ main()
   const workbook = { url: "https://www.govdeals.com/MontCoJudicialSale2022", signals: ["auction-scout-workbook"], isGovernment: false, kind: "listing" };
   assert(pickSource([gov, chosen])?.url === chosen.url, "an operator's list wins over a .gov homepage");
   assert(pickSource([workbook, gov])?.url === gov.url, "a link the workbook recorded does not outrank the registry");
+}
+
+// Documents with no extension (Liferay) and documents shown only in a viewer frame.
+{
+  const $ = cheerio.load(`
+    <a href="/documents/d/egov/october-2026-tax-sale-web-list?download=true">October 2026 Tax Sale List</a>
+    <iframe src="https://docs.google.com/viewer?url=https://newtoncountytax.com/wp-content/uploads/2026/09/Newton-October-2026-Tax-Sale.pdf&embedded=true"></iframe>`);
+  const urls = documentLinks($, "https://www.gwinnetttaxcommissioner.com/property-tax/delinquent_tax/tax-liens-tax-sales").map((l) => l.url);
+  assert(urls.some((u) => u.includes("/documents/d/egov/october-2026")), "a Liferay document route is a document");
+  assert(urls.includes("https://newtoncountytax.com/wp-content/uploads/2026/09/Newton-October-2026-Tax-Sale.pdf"), "a PDF inside a Google viewer frame is found");
 }
 
