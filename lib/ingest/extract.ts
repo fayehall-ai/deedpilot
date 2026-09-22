@@ -58,6 +58,10 @@ Rules:
 - Excess-funds and past-results tables are not upcoming sale listings.
 - Money: return a plain number. "$1,234.56" becomes 1234.56.
 - Parcel numbers keep their exact printed punctuation and spacing.
+- Where a list identifies parcels by block and lot (New Jersey does), put them
+  in parcelNumber as "BLOCK - LOT", adding " - QUALIFIER" when one is printed,
+  e.g. "12 - 2.04" or "1402 - 7 - C0004". The advertisement or sale number goes
+  in lotNumber.
 - Transcribe every parcel in the list, not a sample.`;
 
 /**

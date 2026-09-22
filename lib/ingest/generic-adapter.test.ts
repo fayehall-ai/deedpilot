@@ -363,3 +363,13 @@ main()
 assert(classifyListingLink("Douglas County September Land Sale (Bids due by September 28th)") === "sale_list", "a land sale is a sale list");
 assert(classifyListingLink("Full list of all available property (as of 9/8/2026)") === "lands_available", "a county's available-property inventory is not the sale");
 
+// New Jersey: block and lot columns make the parcel number.
+{
+  const $ = cheerio.load(`<table><tr><th>Block</th><th>Lot</th><th>Qual</th><th>Owner</th><th>Amount</th></tr>
+    <tr><td>12</td><td>2.04</td><td></td><td>SMITH JOHN</td><td>$2,799.34</td></tr>
+    <tr><td>1402</td><td>7</td><td>C0004</td><td>DOE JANE</td><td>$458.00</td></tr></table>`);
+  const lots = parseHtmlTable($, "https://example.nj.us/") ?? [];
+  assert(lots[0]?.parcelNumber === "12 - 2.04", "block and lot join into the parcel number");
+  assert(lots[1]?.parcelNumber === "1402 - 7 - C0004", "a qualifier is kept");
+}
+

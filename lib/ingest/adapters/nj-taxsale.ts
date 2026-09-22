@@ -64,6 +64,80 @@ import type {
 
 const CAPTURE_DIR = join(process.cwd(), "data", "nj-taxsale-capture");
 
+/**
+ * Lists the towns publish themselves, in `data/nj-town-lists.json`.
+ *
+ * Most of New Jersey's sales are not on newjerseytaxsale.com at all: the
+ * tax collector posts the advertised list on the town's own site, as a PDF,
+ * a scan or a notice page. 161 imported NJ sales had no parcels; 49 of their
+ * towns turned out to publish the list, about 6,000 liens between them.
+ *
+ * Each entry is written onto that town's own imported sale, found by the
+ * town's name, never by county and date alone: several towns in one county
+ * sell on the same day, and matching on the day would hand one town's liens
+ * to another.
+ */
+const TOWN_LISTS = join(process.cwd(), "data", "nj-town-lists.json");
+
+interface TownList {
+  municipality: string;
+  countyFips: string;
+  saleDate: string;
+  url: string;
+}
+
+async function readTownLists(): Promise<TownList[]> {
+  try {
+    const doc = JSON.parse(await readFile(TOWN_LISTS, "utf8")) as { lists?: TownList[] };
+    return (doc.lists ?? []).filter((l) => l.municipality && l.countyFips && l.saleDate && l.url);
+  } catch {
+    return [];
+  }
+}
+
+/** The imported row for this town's sale, so the list lands on it rather than beside it. */
+async function importedRowFor(
+  l: TownList,
+): Promise<{ externalId: string; platform: string; saleType: string; raw: Record<string, unknown> } | null> {
+  const { db } = await import("../../db");
+  const { sql } = await import("drizzle-orm");
+  const rows = (await db.execute(sql`
+    SELECT external_id, platform::text AS platform, sale_type::text AS sale_type, raw FROM auctions
+    WHERE county_fips = ${l.countyFips} AND sale_date = ${l.saleDate}::date AND delisted_at IS NULL
+      AND lower(coalesce(title, '')) = lower(${l.municipality})
+    ORDER BY first_seen_at LIMIT 2`)) as unknown as {
+    external_id: string;
+    platform: string;
+    sale_type: string;
+    raw: Record<string, unknown> | null;
+  }[];
+  /* Two rows with one town's name on one day is a duplicate for a person to settle, not a guess. */
+  if (rows.length !== 1) return null;
+  const [r] = rows;
+  return { externalId: r.external_id, platform: r.platform, saleType: r.sale_type, raw: r.raw ?? {} };
+}
+
+/** A town's list read into liens: tables for free, text by the model, scans by its eyes. */
+async function lotsFromTownList(url: string, context: { countyName: string; state: string; sourceUrl: string }): Promise<DiscoveredLot[]> {
+  const [{ documentToText, parseDelimitedText }, { extractLots, extractLotsFromImages }, render] = await Promise.all([
+    import("../parse"),
+    import("../extract"),
+    import("../render"),
+  ]);
+  const text = await documentToText(url);
+  const pages = Math.max(1, (text.match(/--\s*\d+\s+of\s+\d+\s*--/g) ?? []).length);
+  if (pages > 1 || /\.pdf\b/i.test(url)) {
+    if (render.textDensity(text, pages) < render.SCAN_TEXT_PER_PAGE) {
+      const rendered = await render.renderPdfFromUrl(url, { maxPages: 24, scale: 2 });
+      return (await extractLotsFromImages(rendered, context)).lots;
+    }
+  }
+  const table = parseDelimitedText(text, url);
+  if (table?.length) return table;
+  const result = await extractLots(text, context);
+  return result.containsParcelList ? result.lots : [];
+}
+
 interface NjRow {
   advNum?: string;
   taxYear?: string;
@@ -170,11 +244,13 @@ export const njTaxSaleAdapter: SourceAdapter = {
 
   async discoverCounties(): Promise<CountyBinding[]> {
     const captures = await readCaptures();
-    if (captures.length === 0) {
+    const towns = await readTownLists();
+    if (captures.length === 0 && towns.length === 0) {
       console.log(`[nj-taxsale] no captures in ${CAPTURE_DIR} — see docs/nj-taxsale-capture.md`);
       return [];
     }
     const byFips = new Map<string, CountyBinding>();
+    for (const t of towns) if (getCounty(t.countyFips)) byFips.set(t.countyFips, { countyFips: t.countyFips, config: {} });
     for (const c of captures) {
       if (!getCounty(c.countyFips)) {
         console.warn(`[nj-taxsale] ${c.host}: ${c.countyFips} is not a county — skipped`);
@@ -192,7 +268,30 @@ export const njTaxSaleAdapter: SourceAdapter = {
     const mine = (await readCaptures()).filter((c) => c.countyFips === binding.countyFips);
     const county = getCounty(binding.countyFips);
 
-    return mine.map((c) => ({
+    const fromTowns: DiscoveredAuction[] = [];
+    for (const t of (await readTownLists()).filter((l) => l.countyFips === binding.countyFips)) {
+      const row = await importedRowFor(t);
+      if (!row) {
+        console.warn(`[nj-taxsale] ${t.municipality} ${t.saleDate}: no single imported sale by that name — skipped`);
+        continue;
+      }
+      fromTowns.push({
+        countyFips: t.countyFips,
+        platform: row.platform as DiscoveredAuction["platform"],
+        saleType: row.saleType as DiscoveredAuction["saleType"],
+        externalId: row.externalId,
+        saleDate: t.saleDate,
+        saleDateConfirmed: true,
+        listingKind: "sale_list" as const,
+        title: t.municipality,
+        status: "scheduled" as const,
+        sourceUrl: t.url,
+        /* The upsert replaces `raw`, so the imported row's own fields ride along. */
+        raw: { ...row.raw, townList: t.url, municipality: t.municipality },
+      });
+    }
+
+    return [...fromTowns, ...mine.map((c) => ({
       countyFips: c.countyFips,
       platform: "county_site" as const,
       saleType: "Tax Lien" as const,
@@ -210,10 +309,20 @@ export const njTaxSaleAdapter: SourceAdapter = {
       status: "scheduled" as const,
       sourceUrl: `https://${c.host}/index.cfm?folder=previewitems`,
       raw: { host: c.host, saleDate: c.saleDate, municipality: c.municipality, capturedAt: c.capturedAt },
-    }));
+    }))];
   },
 
   async listLots(auction: DiscoveredAuction): Promise<DiscoveredLot[]> {
+    const town = auction.raw as { townList?: string; municipality?: string } | undefined;
+    if (town?.townList) {
+      const lots = await lotsFromTownList(town.townList, {
+        countyName: `${town.municipality}, ${getCounty(auction.countyFips)?.name ?? ""} County`,
+        state: "NJ",
+        sourceUrl: town.townList,
+      });
+      /* A lien's amount is its face value, not an opening bid; see the header. */
+      return lots.map((l) => ({ ...l, taxesOwed: l.taxesOwed ?? l.openingBid, openingBid: undefined }));
+    }
     const raw = auction.raw as { host?: string; saleDate?: string } | undefined;
     if (!raw?.host || !raw.saleDate) return [];
 

@@ -20,7 +20,7 @@ import { parseMoney } from "./judge";
 import type { DiscoveredLot, ListingKind } from "./types";
 
 /** Headers that suggest a table of parcels going to sale. */
-export const PARCEL_HEADERS = /parcel|map\s*#|property|owner|defendant|bid|amount\s*due|address/i;
+export const PARCEL_HEADERS = /parcel|map\s*#|property|owner|defendant|bid|amount\s*due|address|\bblock\b/i;
 
 /** Headers that mark a table we must NOT ingest as upcoming inventory. */
 export const EXCLUDE_HEADERS = /excess\s*funds|overbid|surplus|claim|sold\s*date|past\s*sale/i;
@@ -194,13 +194,22 @@ export function parseHtmlTable(
     const iOwner = col(/record.?holder|\bcrh\b|owner|defendant|\bdif\b|name/);
     const iAddr = col(/address|location|situs/);
     /*
+     * New Jersey keys a parcel by block and lot (and a qualifier for condos),
+     * printed as separate columns with no parcel column at all, so every row
+     * of Hillsborough Township's 122-lien list was rejected as unidentifiable.
+     * Joined as "block - lot", the form the NJ captures already use.
+     */
+    const iBlock = col(/^block\b|\bblock\s*(no|#|number)?$/);
+    const iLotCol = col(/^lot\b|\blot\s*(no|#|number)?$/);
+    const iQual = col(/^qual/);
+    /*
      * The amount a bidder has to meet, not the first column that mentions
      * money: Rockdale's table opens with "Original Bill Amount" ($773.30) and
      * carries "Current Due" ($1,196.33) further along.
      */
     const iBid = first(/bid|minimum/, /amount\s*due|current\s*due|total\s*due|\bdue\b/, /total|amount/);
 
-    if (iParcel === -1 && iOwner === -1) return;
+    if (iParcel === -1 && iOwner === -1 && (iBlock === -1 || iLotCol === -1)) return;
 
     const rows: DiscoveredLot[] = [];
     $(table)
@@ -213,7 +222,11 @@ export function parseHtmlTable(
           .get();
         if (cells.length === 0) return;
 
-        const parcelNumber = iParcel >= 0 ? cells[iParcel] : undefined;
+        const blockLot =
+          iBlock >= 0 && iLotCol >= 0 && cells[iBlock] && cells[iLotCol]
+            ? [cells[iBlock], cells[iLotCol], iQual >= 0 ? cells[iQual] : ""].filter(Boolean).join(" - ")
+            : undefined;
+        const parcelNumber = iParcel >= 0 ? cells[iParcel] : blockLot;
         const ownerName = iOwner >= 0 ? cells[iOwner] : undefined;
         if (!parcelNumber && !ownerName) return;
 
