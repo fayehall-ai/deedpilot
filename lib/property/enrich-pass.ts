@@ -34,12 +34,12 @@ import { hasCadastre } from "./pipeline";
 /** Do not ask about the same parcel again within this long. */
 const RETRY_DAYS = 14;
 /**
- * The most a single parcel can cost when every paid provider is asked: ATTOM,
- * BatchData and RentCast at their per-request rates. The pass reserves this
+ * The most a single parcel can cost when every paid provider is asked:
+ * RealEstateAPI, ATTOM, BatchData and RentCast at their per-request rates. The pass reserves this
  * before each paid lookup, so the budget cannot be overshot by more than one
  * parcel even though usage rows are written asynchronously.
  */
-const WORST_CASE_CENTS = ["attom", "batchdata", "rentcast"].reduce((n, p) => n + (DEFAULT_RATES[p]?.perRequest ?? 0), 0);
+const WORST_CASE_CENTS = ["realestateapi", "attom", "batchdata", "rentcast"].reduce((n, p) => n + (DEFAULT_RATES[p]?.perRequest ?? 0), 0);
 
 /** Cents spent on paid parcel lookups since Monday at the desk. */
 export async function enrichmentSpendThisWeek(): Promise<number> {

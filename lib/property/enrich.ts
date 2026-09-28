@@ -5,12 +5,14 @@
 import { recordUsage } from "../ai/usage";
 import { and, eq, isNull, sql, gte } from "drizzle-orm";
 import { db } from "../db";
-import { lots, lotValuations, counties } from "../db/schema";
+import { lots, lotValuations, counties, auctions } from "../db/schema";
 import type { EnrichInput, PropertyProvider, PropertyRecord } from "./types";
 import { ProviderUnavailableError } from "./types";
 import { rentcastProvider } from "./providers/rentcast";
 import { attomProvider } from "./providers/attom";
 import { batchdataProvider } from "./providers/batchdata";
+import { realestateapiProvider } from "./providers/realestateapi";
+import { GUARDED_PROVIDERS, paidLookupRefusal } from "./spend-policy";
 import { websearchProvider } from "./providers/websearch";
 import { cadastreProvider } from "./providers/cadastre";
 
@@ -30,6 +32,12 @@ const PROVIDERS: PropertyProvider[] = [
   // the paid providers because it is the source they aggregate, not a fallback
   // for when they fail — and it is free, keyless and sub-second.
   cadastreProvider,
+  /*
+   * The APN-first paid leg with a live account: apn + fips in, assessment, AVM,
+   * equity and open mortgage out, in one billed search. Only asked about
+   * parcels `paidLookupRefusal` allows.
+   */
+  realestateapiProvider,
   attomProvider,
   batchdataProvider,
   rentcastProvider,
@@ -56,7 +64,7 @@ export const FREE_PROVIDERS: PropertyProvider[] = PROVIDERS.filter((p) => p.name
  * price them are the operator-editable ones in `lib/ai/usage.ts`; web search
  * records its own tokens and searches where it makes the call.
  */
-const PER_REQUEST = new Set(["attom", "batchdata", "rentcast"]);
+const PER_REQUEST = new Set(["realestateapi", "attom", "batchdata", "rentcast"]);
 /* Only the real providers are billed; a test's stand-in named "attom" is not. */
 const REAL_PROVIDERS = new Set<PropertyProvider>(PROVIDERS);
 
@@ -96,8 +104,11 @@ export async function lookupProperty(
    *
    * The cadastre keys on a parcel number too, and is the source ATTOM
    * aggregates. It goes first when it goes at all.
+   *
+   * RealEstateAPI is named too: anything omitted sorts behind everything
+   * listed, which would put a dead ATTOM key ahead of the working APN leg.
    */
-  const parcelFirst = ["cadastre", "attom"];
+  const parcelFirst = ["cadastre", "realestateapi", "attom"];
   const order = [...providers].sort((a, b) => {
     if (input.addressLine) return 0;
     const ai = parcelFirst.indexOf(a.name);
@@ -182,9 +193,15 @@ export async function enrichLotById(
     .select({
       lot: lots,
       county: counties,
+      auction: {
+        saleType: auctions.saleType,
+        status: auctions.status,
+        delistedAt: auctions.delistedAt,
+      },
     })
     .from(lots)
     .innerJoin(counties, eq(counties.fips, lots.countyFips))
+    .innerJoin(auctions, eq(auctions.id, lots.auctionId))
     .where(eq(lots.id, lotId))
     .limit(1);
 
@@ -209,7 +226,7 @@ export async function enrichLotById(
       updated: false,
       record: null,
       reason:
-        "No property API configured. Set ATTOM_API_KEY (parcel lookup) and/or RENTCAST_API_KEY (address lookup) in .env.local",
+        "No property API configured. Set REALESTATEAPI_API_KEY (parcel lookup) and/or RENTCAST_API_KEY (address lookup) in .env.local",
     };
   }
 
@@ -223,11 +240,28 @@ export async function enrichLotById(
     zip: row.lot.zip,
   };
 
-  const providers = opts.freeOnly
-    ? FREE_PROVIDERS
-    : opts.skipSearch
-      ? PROVIDERS.filter((p) => p.name !== "websearch")
-      : undefined;
+  /*
+   * Lien sales, cancelled sales, parcels no longer pending and land-only
+   * parcels are not worth a paid RealEstateAPI lookup — see spend-policy.ts.
+   * The rest of the chain still runs, so the free assessor layer can fill them.
+   */
+  const refusal = paidLookupRefusal({
+    saleType: row.auction.saleType,
+    auctionStatus: row.auction.status,
+    delisted: row.auction.delistedAt !== null,
+    lotStatus: row.lot.status,
+    addressLine: row.lot.addressLine,
+    landUse: row.lot.landUse,
+    buildingSqft: row.lot.buildingSqft,
+    yearBuilt: row.lot.yearBuilt,
+  });
+  const providers = (
+    opts.freeOnly
+      ? FREE_PROVIDERS
+      : opts.skipSearch
+        ? PROVIDERS.filter((p) => p.name !== "websearch")
+        : PROVIDERS
+  ).filter((p) => !(refusal && GUARDED_PROVIDERS.has(p.name)));
   const record = await lookupProperty(input, unavailable, providers);
   if (!record) {
     return {
@@ -290,6 +324,7 @@ export async function applyRecordToLot(lotId: string, record: PropertyRecord): P
       lastSaleDate: record.lastSaleDate ?? null,
       homestead: record.homestead ?? null,
       zoning: record.zoning ?? null,
+      floodZone: record.floodZone ?? null,
       // Columns now, not just `raw`. These were collected on every lookup and
       // written only into the JSON blob, so nothing could query them.
       beds: record.beds ?? null,
@@ -322,6 +357,7 @@ export async function applyRecordToLot(lotId: string, record: PropertyRecord): P
         assessedImprovement: sql`excluded.assessed_improvement`,
         lastSaleAmount: sql`excluded.last_sale_amount`,
         lastSaleDate: sql`excluded.last_sale_date`,
+        floodZone: sql`excluded.flood_zone`,
         raw: sql`excluded.raw`,
         fetchedAt: sql`now()`,
       },

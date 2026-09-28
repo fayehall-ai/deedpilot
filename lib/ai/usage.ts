@@ -95,6 +95,12 @@ export const DEFAULT_RATES: Record<string, RateCard> = {
   xai: { inputPerMTok: 200, outputPerMTok: 600, perSearchCall: 2.5, perRequest: 0 },
   /* Claude Opus 5, the fallback leg. */
   anthropic: { inputPerMTok: 500, outputPerMTok: 2500, perSearchCall: 1, perRequest: 0 },
+  /*
+   * UNVERIFIED — RealEstateAPI does not publish a per-record price. Set high on
+   * purpose so the weekly budget stops early rather than late; replace with the
+   * rate on the billing console.
+   */
+  realestateapi: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 5 },
   attom: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 4 },
   rentcast: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 2 },
   batchdata: { inputPerMTok: 0, outputPerMTok: 0, perSearchCall: 0, perRequest: 3 },

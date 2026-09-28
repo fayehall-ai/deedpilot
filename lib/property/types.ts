@@ -30,6 +30,8 @@ export interface PropertyRecord {
   landUse?: string;
   propertyType?: string;
   zoning?: string;
+  /** Flood zone as the county or FEMA labels it ("X", "AE"). */
+  floodZone?: string;
   homestead?: boolean;
   latitude?: number;
   longitude?: number;
