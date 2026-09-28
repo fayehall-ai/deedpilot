@@ -98,7 +98,15 @@ function sectionsOf(raw: Obj): Section[] {
   return top.length ? [{ title: "Summary", fields: top }, ...sections] : sections;
 }
 
-export function RawRecord({ title, raw }: { title: string; raw: Record<string, unknown> | null }) {
+export function RawRecord({
+  title,
+  note,
+  raw,
+}: {
+  title: string;
+  note?: string;
+  raw: Record<string, unknown> | null;
+}) {
   if (!raw || Object.keys(raw).length === 0) return null;
   const sections = sectionsOf(raw as Obj);
   if (sections.length === 0) return null;
@@ -108,14 +116,16 @@ export function RawRecord({ title, raw }: { title: string; raw: Record<string, u
   );
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-5">
+    <section className="rounded-xl border-2 border-dashed border-border bg-surface p-5">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold">{title}</h3>
-        <p className="mt-0.5 text-xs text-muted">Every populated field, as returned · {num(count)} values</p>
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <p className="mt-1 text-sm text-muted">
+          {note ? `${note} · ` : ""}Every populated field, as returned · {num(count)} values
+        </p>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {sections.map((s) => (
-          <details key={s.title} className="group/sec" open={s.title === "Summary"}>
+          <details key={s.title} className="group/sec" open>
             <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-xs uppercase tracking-wide text-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
               <span aria-hidden className="transition-transform group-open/sec:rotate-90">
                 ›
@@ -125,33 +135,66 @@ export function RawRecord({ title, raw }: { title: string; raw: Record<string, u
                 ({s.fields ? s.fields.length : `${s.entries?.length} entries`})
               </span>
             </summary>
-            <div className="mt-2 space-y-3">
-              {s.fields ? <Grid values={s.fields} /> : null}
-              {s.entries?.map((e, i) => (
-                <div key={i} className="rounded-lg border border-border/60 p-3">
-                  <p className="mb-2 text-xs text-muted">
-                    {s.title} · {i + 1} of {s.entries?.length}
-                  </p>
-                  <Grid values={e} />
-                </div>
-              ))}
+            <div className="mt-2 overflow-x-auto rounded-lg border border-border">
+              {s.fields ? <FieldTable values={s.fields} /> : null}
+              {s.entries ? <EntryTable entries={s.entries} /> : null}
             </div>
           </details>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
-function Grid({ values }: { values: { label: string; value: string }[] }) {
+/** Label | value, one row per field. */
+function FieldTable({ values }: { values: { label: string; value: string }[] }) {
   return (
-    <dl className="grid gap-x-6 gap-y-2.5 text-sm sm:grid-cols-2 lg:grid-cols-3">
-      {values.map((v) => (
-        <div key={v.label}>
-          <dt className="text-xs uppercase tracking-wide text-muted">{v.label}</dt>
-          <dd className="mt-0.5 break-words">{v.value}</dd>
-        </div>
-      ))}
-    </dl>
+    <table className="w-full text-sm">
+      <tbody>
+        {values.map((v) => (
+          <tr key={v.label} className="border-b border-border/60 last:border-0">
+            <th className="w-1/3 bg-surface-2/50 px-3 py-1.5 text-left text-xs font-medium text-muted">
+              {v.label}
+            </th>
+            <td className="break-words px-3 py-1.5">{v.value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/**
+ * One row per entry, one column per field any entry carries — so two sales or
+ * four schools read across as a history rather than as stacked cards.
+ */
+function EntryTable({ entries }: { entries: { label: string; value: string }[][] }) {
+  const columns = [...new Set(entries.flatMap((e) => e.map((f) => f.label)))];
+  return (
+    <table className="w-full text-sm">
+      <thead className="bg-surface-2/50 text-left text-xs text-muted">
+        <tr>
+          {columns.map((c) => (
+            <th key={c} className="whitespace-nowrap px-3 py-1.5 font-medium">
+              {c}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {entries.map((e, i) => {
+          const byLabel = new Map(e.map((f) => [f.label, f.value]));
+          return (
+            <tr key={i} className="border-t border-border/60">
+              {columns.map((c) => (
+                <td key={c} className="whitespace-nowrap px-3 py-1.5">
+                  {byLabel.get(c) ?? ""}
+                </td>
+              ))}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
   );
 }
