@@ -34,12 +34,13 @@ import { hasCadastre } from "./pipeline";
 /** Do not ask about the same parcel again within this long. */
 const RETRY_DAYS = 14;
 /**
- * The most a single parcel can cost when every paid provider is asked:
- * RealEstateAPI, ATTOM, BatchData and RentCast at their per-request rates. The pass reserves this
- * before each paid lookup, so the budget cannot be overshot by more than one
- * parcel even though usage rows are written asynchronously.
+ * The most a single parcel can cost: RealEstateAPI, the only paid provider, at
+ * its per-request rate. The pass reserves this before each paid lookup, so the
+ * budget cannot be overshot by more than one parcel even though usage rows are
+ * written asynchronously. Charging for providers that are no longer asked would
+ * quietly shrink the budget — it cost 14¢ a parcel while three were dead.
  */
-const WORST_CASE_CENTS = ["realestateapi", "attom", "batchdata", "rentcast"].reduce((n, p) => n + (DEFAULT_RATES[p]?.perRequest ?? 0), 0);
+const WORST_CASE_CENTS = DEFAULT_RATES.realestateapi?.perRequest ?? 0;
 
 /** Cents spent on paid parcel lookups since Monday at the desk. */
 export async function enrichmentSpendThisWeek(): Promise<number> {
@@ -168,7 +169,7 @@ export async function runEnrichmentPass(opts: {
     await db.update(lots).set({ enrichmentAttemptedAt: new Date() }).where(eq(lots.id, l.id));
     result.attempted++;
     try {
-      const r = await enrichLotById(l.id, { freeOnly: result.freeOnly, skipSearch: true }, unavailable);
+      const r = await enrichLotById(l.id, { freeOnly: result.freeOnly }, unavailable);
       if (r.updated) result.valued++;
       /* Reserve the worst case for a paid attempt; the real rows catch up on the next pass. */
       if (!result.freeOnly) result.spentCents += WORST_CASE_CENTS;

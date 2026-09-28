@@ -8,40 +8,30 @@ import { db } from "../db";
 import { lots, lotValuations, counties, auctions } from "../db/schema";
 import type { EnrichInput, PropertyProvider, PropertyRecord } from "./types";
 import { ProviderUnavailableError } from "./types";
-import { rentcastProvider } from "./providers/rentcast";
-import { attomProvider } from "./providers/attom";
-import { batchdataProvider } from "./providers/batchdata";
 import { realestateapiProvider } from "./providers/realestateapi";
 import { GUARDED_PROVIDERS, paidLookupRefusal } from "./spend-policy";
-import { websearchProvider } from "./providers/websearch";
 import { cadastreProvider } from "./providers/cadastre";
 
 /**
- * ATTOM first for APN → assessed (max-bid).
- * BatchData next for address/owner when ATTOM misses or for address fills.
- * RentCast next (address + AVM; needs street).
- * Web search LAST, and only because the three above can all be unavailable at
- * once — which is the state they are in today: ATTOM 401, BatchData out of
- * credits, RentCast healthy but unable to use a notice that publishes no street
- * number. A searched answer is weaker evidence than any parcel API and is
- * ordered to say so; it also cannot write `assessedValue` at all, so it can
- * never feed the ratio path that turns an assessment into an ARV.
+ * The state's assessor layer, then RealEstateAPI — the only paid source.
+ *
+ * ATTOM (401), BatchData (out of credits), RentCast and web search are out of
+ * the chain by decision, not by failure: a dead account was still asked once
+ * per pass and counted against the weekly budget, 393 BatchData "requests" in a
+ * week that bought nothing, and RentCast and web search duplicate what one
+ * RealEstateAPI record carries. Their modules stay in providers/ so one can be
+ * put back here if an account is renewed.
  */
 const PROVIDERS: PropertyProvider[] = [
   // The state's own assessor layer, where one is published. Ordered ahead of
-  // the paid providers because it is the source they aggregate, not a fallback
-  // for when they fail — and it is free, keyless and sub-second.
+  // the paid provider because it is the source it aggregates — and it is free,
+  // keyless and sub-second.
   cadastreProvider,
   /*
-   * The APN-first paid leg with a live account: apn + fips in, assessment, AVM,
-   * equity and open mortgage out, in one billed search. Only asked about
-   * parcels `paidLookupRefusal` allows.
+   * apn + fips in, assessment, AVM, equity and open mortgage out, in one billed
+   * search. Only asked about parcels `paidLookupRefusal` allows.
    */
   realestateapiProvider,
-  attomProvider,
-  batchdataProvider,
-  rentcastProvider,
-  websearchProvider,
 ];
 
 export function configuredEnrichmentProviders(): string[] {
@@ -179,12 +169,6 @@ export async function enrichLotById(
     force?: boolean;
     /** Ask only the free providers — what a pass does once its budget is spent. */
     freeOnly?: boolean;
-    /**
-     * Leave out web search. It cannot write an assessed value, which is what a
-     * valuation pass is for, and a searched call can run for minutes — longer
-     * than a scheduled function may live.
-     */
-    skipSearch?: boolean;
   } = {},
   /** Providers already known dead this run; see `lookupProperty`. */
   unavailable?: Set<string>,
@@ -226,7 +210,7 @@ export async function enrichLotById(
       updated: false,
       record: null,
       reason:
-        "No property API configured. Set REALESTATEAPI_API_KEY (parcel lookup) and/or RENTCAST_API_KEY (address lookup) in .env.local",
+        "No property API configured. Set REALESTATEAPI_API_KEY in .env.local",
     };
   }
 
@@ -255,13 +239,7 @@ export async function enrichLotById(
     buildingSqft: row.lot.buildingSqft,
     yearBuilt: row.lot.yearBuilt,
   });
-  const providers = (
-    opts.freeOnly
-      ? FREE_PROVIDERS
-      : opts.skipSearch
-        ? PROVIDERS.filter((p) => p.name !== "websearch")
-        : PROVIDERS
-  ).filter((p) => !(refusal && GUARDED_PROVIDERS.has(p.name)));
+  const providers = (opts.freeOnly ? FREE_PROVIDERS : PROVIDERS).filter((p) => !(refusal && GUARDED_PROVIDERS.has(p.name)));
   const record = await lookupProperty(input, unavailable, providers);
   if (!record) {
     return {

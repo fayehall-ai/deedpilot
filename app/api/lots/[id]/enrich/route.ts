@@ -6,7 +6,7 @@
  * ## Why this is gated
  *
  * It was not, and it spends money. `enrichLotById` walks the provider chain,
- * which ends in RentCast and a searched lookup — both metered — and `force`
+ * which ends in a billed RealEstateAPI search, and `force`
  * skips the "this lot already has a value" guard that was the only thing
  * limiting how often it could fire. A public button on every parcel page,
  * calling an unauthenticated endpoint that bills per invocation, is a way to
@@ -75,6 +75,6 @@ export async function GET(
   return NextResponse.json({
     lotId: id,
     providers: configuredEnrichmentProviders(),
-    note: "POST to run enrichment. Set ATTOM_API_KEY and/or RENTCAST_API_KEY.",
+    note: "POST to run enrichment. Set REALESTATEAPI_API_KEY.",
   });
 }
