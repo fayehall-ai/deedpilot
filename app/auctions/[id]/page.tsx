@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getAuction, getAuctionLots } from "@/lib/queries";
+import { countLandOnlyLots, getAuction, getAuctionLots } from "@/lib/queries";
 import { money, num, relativeDays, saleDate } from "@/lib/format";
 import {
   Breadcrumbs,
@@ -56,7 +56,26 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
   if (!row) notFound();
 
   const { auction, county } = row;
-  const lots = await getAuctionLots(auction.id);
+  /*
+   * Land-only parcels are hidden unless `?land=show` — see lib/lots/land-only.ts.
+   * Every count and total below is over the parcels shown.
+   */
+  const showLand = (await props.searchParams).land === "show";
+  const [lots, landOnly] = await Promise.all([
+    getAuctionLots(auction.id, { includeLandOnly: showLand }),
+    countLandOnlyLots(auction.id),
+  ]);
+  const landToggle =
+    landOnly > 0 ? (
+      <Link
+        href={showLand ? `/auctions/${auction.id}` : `/auctions/${auction.id}?land=show`}
+        className="text-sm text-accent hover:underline"
+      >
+        {showLand
+          ? `Hide ${num(landOnly)} land-only parcel(s)`
+          : `Show ${num(landOnly)} land-only parcel(s)`}
+      </Link>
+    ) : null;
   const rule = resolveCountyRule(county.fips);
   const statute = statuteFor(county.state);
 
@@ -102,9 +121,13 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
           label="Parcels"
           value={num(lots.length > 0 ? lots.length : parcelsShown(auction).count)}
           hint={
-            lots.length === 0 && parcelsShown(auction).count > 0
-              ? "announced by the county — list not yet fetched"
-              : undefined
+            lots.length === 0 && landOnly > 0 && !showLand
+              ? `all ${num(landOnly)} look land-only`
+              : lots.length === 0 && parcelsShown(auction).count > 0
+                ? "announced by the county — list not yet fetched"
+                : landOnly > 0 && !showLand
+                  ? `${num(landOnly)} land-only hidden`
+                  : undefined
           }
         />
         {/*
@@ -331,15 +354,21 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
           */}
         {lots.length > 0 && (rule?.county.population ?? 0) >= PROPSTREAM_MIN_POPULATION ? (
           <a
-            href={`/api/cape/${auction.id}/propstream`}
+            href={`/api/cape/${auction.id}/propstream${showLand ? "?land=show" : ""}`}
             className="text-sm text-accent hover:underline"
           >
             Download PropStream list ({num(lots.length)} parcels, CSV)
           </a>
         ) : null}
+        {landToggle}
       </div>
 
-      {lots.length === 0 ? (
+      {lots.length === 0 && landOnly > 0 && !showLand ? (
+        <EmptyState title="Only land-only parcels">
+          Every parcel in this sale looks like vacant land — no street address, a house number of
+          zero, or a street with no number. They are hidden by default.
+        </EmptyState>
+      ) : lots.length === 0 ? (
         <EmptyState title="No parcels published yet">
           {parcelsShown(auction).count > 0 ? (
             <>

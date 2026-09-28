@@ -4,6 +4,7 @@ import { and, asc, desc, eq, gte, inArray, lte, sql, count } from "drizzle-orm";
 import { db } from "./db";
 import { auctions, counties, lots, ingestRuns, dealAnalyses, lotValuations } from "./db/schema";
 import { hasParcels, isConfirmedInventory } from "./db/inventory";
+import { landOnlySql } from "./lots/land-only";
 
 /** Today in UTC as YYYY-MM-DD — sale dates are stored as plain dates. */
 function todayIso(): string {
@@ -309,14 +310,31 @@ export async function getAuction(id: string) {
   return row ?? null;
 }
 
-export async function getAuctionLots(auctionId: string) {
+/**
+ * A sale's parcels, land-only lots left out unless asked for — see
+ * lib/lots/land-only.ts. Filtered in SQL so vacant lots cannot fill the limit.
+ */
+export async function getAuctionLots(auctionId: string, opts: { includeLandOnly?: boolean } = {}) {
   return db
     .select()
     .from(lots)
-    .where(eq(lots.auctionId, auctionId))
+    .where(
+      opts.includeLandOnly
+        ? eq(lots.auctionId, auctionId)
+        : and(eq(lots.auctionId, auctionId), sql`not ${landOnlySql}`),
+    )
     // Biggest apparent spread first — that is what people are scanning for.
     .orderBy(desc(sql`coalesce(${lots.assessedValue}, 0) - coalesce(${lots.openingBid}, 0)`))
     .limit(1000);
+}
+
+/** How many of a sale's parcels the land-only rule hides. */
+export async function countLandOnlyLots(auctionId: string): Promise<number> {
+  const [row] = await db
+    .select({ n: count() })
+    .from(lots)
+    .where(and(eq(lots.auctionId, auctionId), landOnlySql));
+  return row?.n ?? 0;
 }
 
 export async function getLot(id: string) {
