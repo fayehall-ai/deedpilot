@@ -12,7 +12,7 @@
  * it for the case where you know why you want a smaller county.
  */
 import { NextResponse, type NextRequest } from "next/server";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, ne, sql } from "drizzle-orm";
 import { landOnlySql } from "@/lib/lots/land-only";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/admin/auth";
@@ -99,11 +99,16 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       landUse: lots.landUse,
     })
     .from(lots)
-    /* Land-only parcels are left out unless `?land=show` — see lib/lots/land-only.ts. */
+    /*
+     * Withdrawn parcels are always left out; land-only ones unless `?land=show`
+     * — see lib/lots/land-only.ts.
+     */
     .where(
-      req.nextUrl.searchParams.get("land") === "show"
-        ? eq(lots.auctionId, id)
-        : and(eq(lots.auctionId, id), sql`not ${landOnlySql}`),
+      and(
+        eq(lots.auctionId, id),
+        ne(lots.status, "withdrawn"),
+        req.nextUrl.searchParams.get("land") === "show" ? undefined : sql`not ${landOnlySql}`,
+      ),
     )
     .orderBy(asc(lots.parcelNumber))
     .limit(10_000);

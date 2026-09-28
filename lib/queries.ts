@@ -1,6 +1,6 @@
 import "server-only";
 import { cacheLife } from "next/cache";
-import { and, asc, desc, eq, gte, inArray, lte, sql, count } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, ne, sql, count } from "drizzle-orm";
 import { db } from "./db";
 import { auctions, counties, lots, ingestRuns, dealAnalyses, lotValuations } from "./db/schema";
 import { hasParcels, isConfirmedInventory } from "./db/inventory";
@@ -311,30 +311,38 @@ export async function getAuction(id: string) {
 }
 
 /**
- * A sale's parcels, land-only lots left out unless asked for — see
- * lib/lots/land-only.ts. Filtered in SQL so vacant lots cannot fill the limit.
+ * A sale's parcels. Withdrawn parcels are always left out — they are no longer
+ * on offer — and land-only lots unless asked for (see lib/lots/land-only.ts).
+ * Filtered in SQL so neither can fill the limit.
  */
 export async function getAuctionLots(auctionId: string, opts: { includeLandOnly?: boolean } = {}) {
   return db
     .select()
     .from(lots)
     .where(
-      opts.includeLandOnly
-        ? eq(lots.auctionId, auctionId)
-        : and(eq(lots.auctionId, auctionId), sql`not ${landOnlySql}`),
+      and(
+        eq(lots.auctionId, auctionId),
+        ne(lots.status, "withdrawn"),
+        opts.includeLandOnly ? undefined : sql`not ${landOnlySql}`,
+      ),
     )
     // Biggest apparent spread first — that is what people are scanning for.
     .orderBy(desc(sql`coalesce(${lots.assessedValue}, 0) - coalesce(${lots.openingBid}, 0)`))
     .limit(1000);
 }
 
-/** How many of a sale's parcels the land-only rule hides. */
-export async function countLandOnlyLots(auctionId: string): Promise<number> {
+/** What `getAuctionLots` leaves out of a sale: withdrawn parcels, and land-only among the rest. */
+export async function countHiddenLots(
+  auctionId: string,
+): Promise<{ withdrawn: number; landOnly: number }> {
   const [row] = await db
-    .select({ n: count() })
+    .select({
+      withdrawn: sql<number>`count(*) filter (where ${lots.status} = 'withdrawn')::int`,
+      landOnly: sql<number>`count(*) filter (where ${lots.status} <> 'withdrawn' and ${landOnlySql})::int`,
+    })
     .from(lots)
-    .where(and(eq(lots.auctionId, auctionId), landOnlySql));
-  return row?.n ?? 0;
+    .where(eq(lots.auctionId, auctionId));
+  return { withdrawn: row?.withdrawn ?? 0, landOnly: row?.landOnly ?? 0 };
 }
 
 export async function getLot(id: string) {
