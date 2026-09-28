@@ -395,6 +395,17 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             <PropertyDetail raw={attomRaw} />
           )}
 
+          {/*
+            Its own box under the standard record, not merged into it: this is a
+            separate, separately billed PropertyDetail call, and none of it
+            feeds a figure on this page.
+          */}
+          <RawRecord
+            title="RealEstateAPI property detail (experiment)"
+            note="Separate PropertyDetail call, not the standard search above; used in no figure on this page"
+            raw={reapiDetailRaw}
+          />
+
           <Card>
             <h3 className="mb-2 text-sm font-semibold">County records</h3>
             <p className="mb-3 text-xs leading-relaxed text-muted">
@@ -527,21 +538,6 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
           */}
         </aside>
       </div>
-
-      {/*
-        Apart from everything above on purpose: this is a separate, separately
-        billed PropertyDetail call, and none of it feeds a figure on this page.
-        Full width so its history tables have room.
-      */}
-      {reapiDetailRaw ? (
-        <div className="mt-10">
-          <RawRecord
-            title="RealEstateAPI property detail (experiment)"
-            note="Separate PropertyDetail call, not the standard search above; used in no figure on this page"
-            raw={reapiDetailRaw}
-          />
-        </div>
-      ) : null}
     </div>
   );
 }
