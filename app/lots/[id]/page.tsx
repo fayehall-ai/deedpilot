@@ -12,6 +12,7 @@ import { DealCalculator } from "@/components/deal-calculator";
 import { ParcelBrief } from "@/components/parcel-brief";
 import { HistoricalComps } from "@/components/historical-comps";
 import { PropertyDetail } from "@/components/property-detail";
+import { RawRecord } from "@/components/raw-record";
 import { ParcelImagery } from "@/components/parcel-imagery";
 import { SiteIntel } from "@/components/site-intel";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
@@ -94,6 +95,13 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
   const reapiRaw = (valuations.find((v) => v.source === "realestateapi")?.raw ?? null) as
     | Record<string, unknown>
     | null;
+  /*
+   * Experiment: a RealEstateAPI PropertyDetail payload, pulled by hand for a
+   * parcel to compare against the standard search. Stored under its own source
+   * with empty value columns, so it is shown here and merged into nothing.
+   */
+  const reapiDetailRaw = (valuations.find((v) => v.source === "realestateapi-detail")?.raw ??
+    null) as Record<string, unknown> | null;
   const beds = latestVal?.beds ?? (typeof valRaw.beds === "number" ? valRaw.beds : null);
   const baths =
     latestVal?.baths !== null && latestVal?.baths !== undefined
@@ -386,6 +394,8 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
           ) : (
             <PropertyDetail raw={attomRaw} />
           )}
+
+          <RawRecord title="RealEstateAPI property detail (experiment)" raw={reapiDetailRaw} />
 
           <Card>
             <h3 className="mb-2 text-sm font-semibold">County records</h3>
