@@ -14,6 +14,8 @@ import { HistoricalComps } from "@/components/historical-comps";
 import { PropertyDetail } from "@/components/property-detail";
 import { RawRecord } from "@/components/raw-record";
 import { ParcelImagery } from "@/components/parcel-imagery";
+import { StreetView } from "@/components/street-view";
+import { streetViewLocation } from "@/lib/property/streetview";
 import { SiteIntel } from "@/components/site-intel";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
 import { getComparables } from "@/lib/history/comparables";
@@ -364,6 +366,18 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             Renders nothing when the lot has no coordinates, which is most of
             them until the geocoder has run over the county.
           */}
+          {/*
+            The front of the house, before the view from above: whether there
+            is a house, and what state it is in, is the first question. Behind
+            its own boundary so a slow Google answer never holds the page.
+          */}
+          <Suspense fallback={null}>
+            <StreetView
+              lotId={lot.id}
+              location={streetViewLocation({ ...lot, state: county.state })}
+            />
+          </Suspense>
+
           <ParcelImagery
             latitude={lot.latitude ? Number(lot.latitude) : null}
             longitude={lot.longitude ? Number(lot.longitude) : null}
