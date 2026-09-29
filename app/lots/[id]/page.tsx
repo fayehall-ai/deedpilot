@@ -88,20 +88,12 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
     | Record<string, unknown>
     | null;
   /*
-   * RealEstateAPI's record, when there is one, leads the full-record panel: it
-   * carries equity, open mortgage, occupancy and distress flags, which decide a
-   * tax-sale bid before construction details do. ATTOM's is the fallback.
+   * RealEstateAPI's PropertyDetail payload — mortgage, sale and foreclosure
+   * history, tax and lot detail, schools, fair-market rents — drawn in full.
    */
   const reapiRaw = (valuations.find((v) => v.source === "realestateapi")?.raw ?? null) as
     | Record<string, unknown>
     | null;
-  /*
-   * Experiment: a RealEstateAPI PropertyDetail payload, pulled by hand for a
-   * parcel to compare against the standard search. Stored under its own source
-   * with empty value columns, so it is shown here and merged into nothing.
-   */
-  const reapiDetailRaw = (valuations.find((v) => v.source === "realestateapi-detail")?.raw ??
-    null) as Record<string, unknown> | null;
   const beds = latestVal?.beds ?? (typeof valRaw.beds === "number" ? valRaw.beds : null);
   const baths =
     latestVal?.baths !== null && latestVal?.baths !== undefined
@@ -389,22 +381,9 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
           */}
           <SiteIntel signals={siteSignals} checkedSources={checkedIntelSources} />
 
-          {reapiRaw ? (
-            <PropertyDetail raw={reapiRaw} source="realestateapi" />
-          ) : (
-            <PropertyDetail raw={attomRaw} />
-          )}
+          <PropertyDetail raw={attomRaw} />
 
-          {/*
-            Its own box under the standard record, not merged into it: this is a
-            separate, separately billed PropertyDetail call, and none of it
-            feeds a figure on this page.
-          */}
-          <RawRecord
-            title="RealEstateAPI property detail (experiment)"
-            note="Separate PropertyDetail call, not the standard search above; used in no figure on this page"
-            raw={reapiDetailRaw}
-          />
+          <RawRecord title="Property detail" note="RealEstateAPI PropertyDetail" raw={reapiRaw} />
 
           <Card>
             <h3 className="mb-2 text-sm font-semibold">County records</h3>

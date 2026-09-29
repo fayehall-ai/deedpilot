@@ -1,5 +1,5 @@
 /**
- * The full property record, as ATTOM or RealEstateAPI returns it.
+ * The full property record, as ATTOM returns it.
  *
  * `expandedprofile` comes back with 179 populated fields across ownership,
  * construction, utilities, parking, survey geography, tax assessment, sale
@@ -35,10 +35,6 @@ type Fmt =
   | "sqft"
   | "percent"
   | "yesno"
-  /** A flag where "no" is an answer too — owner-occupied, corporate, absentee. */
-  | "bool"
-  /** Money where $0 is a real figure: an open mortgage of $0 means none. */
-  | "money0"
   /**
    * Printed exactly as stored.
    *
@@ -52,8 +48,6 @@ interface FieldSpec {
   label: string;
   path: string | string[];
   fmt?: Fmt;
-  /** Built from several fields — an owner's first and last name. Wins over `path`. */
-  compute?: (raw: Record<string, unknown>) => unknown;
 }
 
 interface SectionSpec {
@@ -70,7 +64,7 @@ interface SectionSpec {
  * differently across records — `baths` sits at the top level on some payloads
  * and under `building.rooms.bathsTotal` on others. First populated path wins.
  */
-const ATTOM_SECTIONS: SectionSpec[] = [
+const SECTIONS: SectionSpec[] = [
   {
     title: "Ownership",
     open: true,
@@ -203,180 +197,7 @@ const ATTOM_SECTIONS: SectionSpec[] = [
   },
 ];
 
-/*
- * RealEstateAPI's standard Property Search record: flat keys, booleans as
- * booleans, several money figures as strings. Ordered for a tax-sale bidder —
- * what the owner stands to lose and whether they are likely to pay, before
- * what the house is made of.
- */
-const REAPI_SECTIONS: SectionSpec[] = [
-  {
-    title: "Value, equity & mortgage",
-    open: true,
-    fields: [
-      { label: "Estimated value", path: "estimatedValue", fmt: "money" },
-      { label: "Estimated equity", path: "estimatedEquity", fmt: "money0" },
-      { label: "Equity", path: "equityPercent", fmt: "percent" },
-      { label: "Open mortgage balance", path: "openMortgageBalance", fmt: "money0" },
-      { label: "Est. mortgage payment", path: "estimatedMortgagePayment", fmt: "money" },
-      { label: "Last mortgage amount", path: "lastMortgage1Amount", fmt: "money" },
-      { label: "Lender", path: "lenderName" },
-      { label: "High equity", path: "highEquity", fmt: "bool" },
-      { label: "Negative equity", path: "negativeEquity", fmt: "yesno" },
-      { label: "Free and clear", path: "freeClear", fmt: "yesno" },
-      { label: "Adjustable rate", path: "adjustableRate", fmt: "yesno" },
-      { label: "Assumable", path: "assumable", fmt: "yesno" },
-      { label: "Private lender", path: "privateLender", fmt: "yesno" },
-    ],
-  },
-  {
-    title: "Distress & auction",
-    open: true,
-    fields: [
-      { label: "Auction", path: "auction", fmt: "yesno" },
-      { label: "Auction date", path: "auctionDate", fmt: "date" },
-      { label: "Foreclosure", path: "foreclosure", fmt: "yesno" },
-      { label: "Pre-foreclosure", path: "preForeclosure", fmt: "yesno" },
-      { label: "Notice type", path: "noticeType" },
-      { label: "Last recorded document", path: "documentType" },
-      { label: "Tax lien", path: "taxLien", fmt: "yesno" },
-      { label: "Tax delinquent year", path: "taxDelinquentYear" },
-      { label: "Judgment", path: "judgment", fmt: "yesno" },
-      { label: "REO", path: "reo", fmt: "yesno" },
-      { label: "Owner deceased", path: "death", fmt: "yesno" },
-      { label: "Inherited", path: "inherited", fmt: "yesno" },
-      { label: "Vacant", path: "vacant", fmt: "bool" },
-    ],
-  },
-  {
-    title: "Ownership",
-    open: true,
-    fields: [
-      {
-        label: "Owner",
-        path: "companyName",
-        compute: (r) =>
-          r.companyName || [r.owner1FirstName, r.owner1LastName].filter(Boolean).join(" "),
-      },
-      {
-        label: "Owner 2",
-        path: "owner2LastName",
-        compute: (r) => [r.owner2FirstName, r.owner2LastName].filter(Boolean).join(" "),
-      },
-      { label: "Mailing address", path: "mailAddress.address", fmt: "verbatim" },
-      { label: "Owner occupied", path: "ownerOccupied", fmt: "bool" },
-      { label: "Absentee owner", path: "absenteeOwner", fmt: "bool" },
-      { label: "Out-of-state owner", path: "outOfStateAbsenteeOwner", fmt: "yesno" },
-      { label: "Corporate owned", path: "corporateOwned", fmt: "bool" },
-      { label: "Cash buyer", path: "cashBuyer", fmt: "yesno" },
-      { label: "Investor buyer", path: "investorBuyer", fmt: "yesno" },
-      { label: "Years owned", path: "yearsOwned", fmt: "number" },
-      { label: "Properties owned", path: "totalPropertiesOwned", fmt: "number" },
-      { label: "Portfolio value", path: "totalPortfolioValue", fmt: "money" },
-      { label: "Portfolio equity", path: "totalPortfolioEquity", fmt: "money" },
-      { label: "Portfolio mortgages", path: "totalPortfolioMortgageBalance", fmt: "money" },
-      { label: "Bought, last 12 months", path: "portfolioPurchasedLast12Months", fmt: "number" },
-    ],
-  },
-  {
-    title: "Property characteristics",
-    open: true,
-    fields: [
-      { label: "Property use", path: "propertyUse" },
-      { label: "Land use", path: "landUse" },
-      { label: "Use code", path: "propertyUseCode" },
-      { label: "Year built", path: "yearBuilt" },
-      { label: "Beds", path: "bedrooms", fmt: "number" },
-      { label: "Baths", path: "bathrooms", fmt: "number" },
-      { label: "Stories", path: "stories", fmt: "number" },
-      { label: "Rooms", path: "roomsCount", fmt: "number" },
-      { label: "Units", path: "unitsCount", fmt: "number" },
-      { label: "Living area", path: "squareFeet", fmt: "sqft" },
-      { label: "Lot area", path: "lotSquareFeet", fmt: "sqft" },
-      { label: "Air conditioning", path: "airConditioningAvailable", fmt: "yesno" },
-      { label: "Basement", path: "basement", fmt: "yesno" },
-      { label: "Garage", path: "garage", fmt: "yesno" },
-      { label: "Pool", path: "pool", fmt: "yesno" },
-      { label: "Deck", path: "deck", fmt: "yesno" },
-      { label: "Patio", path: "patio", fmt: "yesno" },
-      { label: "HOA", path: "hoa", fmt: "yesno" },
-      { label: "Roof", path: ["roofMaterial", "roofConstruction"] },
-      { label: "Flood zone", path: "floodZoneType" },
-    ],
-  },
-  {
-    title: "Tax assessment",
-    fields: [
-      { label: "Assessed total", path: "assessedValue", fmt: "money" },
-      { label: "Assessed land", path: "assessedLandValue", fmt: "money" },
-      { label: "Assessed improvement", path: "assessedImprovementValue", fmt: "money" },
-      { label: "Improvement %", path: "improvementValuePercent", fmt: "percent" },
-    ],
-  },
-  {
-    title: "Sale history",
-    fields: [
-      { label: "Last sale", path: "lastSaleDate", fmt: "date" },
-      { label: "Last sale amount", path: "lastSaleAmount", fmt: "money" },
-      { label: "Bought by", path: "lastSaleBuyerNames" },
-      { label: "Arm's length", path: "lastSaleArmsLength", fmt: "bool" },
-      { label: "Recorded", path: "recordingDate", fmt: "date" },
-      { label: "Last arm's-length sale", path: "latestArmsLengthSaleDate", fmt: "date" },
-      { label: "Arm's-length amount", path: "latestArmsLengthSaleAmount", fmt: "money" },
-      { label: "Prior sale", path: "priorSaleDate", fmt: "date" },
-      { label: "Prior sale amount", path: "priorSaleAmount", fmt: "money" },
-      { label: "Prior owner", path: "priorOwner" },
-      { label: "Prior owner held", path: "priorOwnerMonthsOwned", compute: (r) => r.priorOwnerMonthsOwned ? `${r.priorOwnerMonthsOwned} months` : null },
-    ],
-  },
-  {
-    title: "Rent & listing",
-    fields: [
-      { label: "Suggested rent", path: "suggestedRent", compute: (r) => perMonth(r.suggestedRent) },
-      { label: "Rent", path: "rentAmount", compute: (r) => perMonth(r.rentAmount) },
-      { label: "For sale", path: "forSale", fmt: "yesno" },
-      { label: "MLS status", path: "mlsStatus" },
-      { label: "MLS type", path: "mlsType" },
-      { label: "Listed", path: "mlsListingDate", fmt: "date" },
-      { label: "List price", path: ["mlsListingPrice", "listingAmount"], fmt: "money" },
-      { label: "Sold price", path: "mlsSoldPrice", fmt: "money" },
-      { label: "MLS last sale", path: "mlsLastSaleDate", fmt: "date" },
-      { label: "Days on market", path: "mlsDaysOnMarket", fmt: "number" },
-      { label: "Price reduced", path: "priceReduced", fmt: "yesno" },
-    ],
-  },
-  {
-    title: "Location",
-    fields: [
-      { label: "APN", path: "apn", fmt: "verbatim" },
-      { label: "RealEstateAPI ID", path: "id", fmt: "verbatim" },
-      { label: "Neighborhood", path: "neighborhood.name" },
-      { label: "Median income", path: "medianIncome", fmt: "money" },
-      { label: "County", path: "address.county" },
-      { label: "Latitude", path: "latitude", compute: (r) => coord(r.latitude) },
-      { label: "Longitude", path: "longitude", compute: (r) => coord(r.longitude) },
-    ],
-  },
-];
-
-function perMonth(v: unknown): string | null {
-  const n = Number(v);
-  return v !== null && v !== "" && Number.isFinite(n) && n > 0 ? `${money(n)}/mo` : null;
-}
-
-/** Six places is about ten centimetres — anything past it is noise. */
-function coord(v: unknown): string | null {
-  const n = Number(v);
-  return v !== null && v !== "" && Number.isFinite(n) ? n.toFixed(6) : null;
-}
-
-const SECTIONS: Record<"attom" | "realestateapi", SectionSpec[]> = {
-  attom: ATTOM_SECTIONS,
-  realestateapi: REAPI_SECTIONS,
-};
-
 function fmtValue(v: unknown, fmt: Fmt = "text"): string | null {
-  if (fmt === "bool" && typeof v === "boolean") return v ? "Yes" : "No";
   if (v === null || v === undefined || v === "") return null;
   const s = String(v);
   // ATTOM writes these as strings and they mean "we checked and it is not".
@@ -386,10 +207,6 @@ function fmtValue(v: unknown, fmt: Fmt = "text"): string | null {
     case "money": {
       const n = Number(v);
       return Number.isFinite(n) && n !== 0 ? money(n) : null;
-    }
-    case "money0": {
-      const n = Number(v);
-      return Number.isFinite(n) ? money(n) : null;
     }
     case "number":
     case "sqft": {
@@ -407,7 +224,6 @@ function fmtValue(v: unknown, fmt: Fmt = "text"): string | null {
     }
     case "date":
       return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : s;
-    case "bool":
     case "yesno":
       return /^(y|yes|true)$/i.test(s) ? "Yes" : null;
     case "verbatim":
@@ -425,7 +241,6 @@ function fmtValue(v: unknown, fmt: Fmt = "text"): string | null {
 }
 
 function resolve(raw: Record<string, unknown>, f: FieldSpec): string | null {
-  if (f.compute) return fmtValue(f.compute(raw), f.fmt);
   const paths = Array.isArray(f.path) ? f.path : [f.path];
   for (const p of paths) {
     const v = fmtValue(at(raw, p), f.fmt);
@@ -434,16 +249,10 @@ function resolve(raw: Record<string, unknown>, f: FieldSpec): string | null {
   return null;
 }
 
-export function PropertyDetail({
-  raw,
-  source = "attom",
-}: {
-  raw: Record<string, unknown> | null;
-  source?: "attom" | "realestateapi";
-}) {
+export function PropertyDetail({ raw }: { raw: Record<string, unknown> | null }) {
   if (!raw || Object.keys(raw).length === 0) return null;
 
-  const sections = SECTIONS[source].map((s) => ({
+  const sections = SECTIONS.map((s) => ({
     ...s,
     values: s.fields
       .map((f) => ({ label: f.label, value: resolve(raw, f) }))
@@ -452,7 +261,7 @@ export function PropertyDetail({
 
   if (sections.length === 0) return null;
 
-  const legal = source === "attom" ? fmtValue(at(raw, "summary.legal1")) : null;
+  const legal = fmtValue(at(raw, "summary.legal1"));
 
   /*
    * No field count and no vendor line.

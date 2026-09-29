@@ -303,6 +303,7 @@ export async function applyRecordToLot(lotId: string, record: PropertyRecord): P
       homestead: record.homestead ?? null,
       zoning: record.zoning ?? null,
       floodZone: record.floodZone ?? null,
+      taxYear: record.taxYear === undefined ? null : Math.round(record.taxYear),
       // Columns now, not just `raw`. These were collected on every lookup and
       // written only into the JSON blob, so nothing could query them.
       beds: record.beds ?? null,
@@ -336,6 +337,7 @@ export async function applyRecordToLot(lotId: string, record: PropertyRecord): P
         lastSaleAmount: sql`excluded.last_sale_amount`,
         lastSaleDate: sql`excluded.last_sale_date`,
         floodZone: sql`excluded.flood_zone`,
+        taxYear: sql`excluded.tax_year`,
         raw: sql`excluded.raw`,
         fetchedAt: sql`now()`,
       },

@@ -34,6 +34,7 @@
     "ingest:found": "tsx scripts/ingest-found-lists.ts",
     "ingest:fl": "tsx scripts/ingest.ts -- --adapter fl-clerks",
     "enrich:lots": "tsx scripts/enrich-lots.ts",
+    "enrich:reapi": "tsx scripts/enrich-reapi-detail.ts",
     "crawl:directory": "tsx scripts/crawl-directory.ts",
     "seed:schedules": "tsx scripts/seed-schedules.ts",
     "promote:sources": "tsx scripts/promote-scout-sources.ts",

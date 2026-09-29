@@ -30,6 +30,8 @@ export interface PropertyRecord {
   landUse?: string;
   propertyType?: string;
   zoning?: string;
+  /** Assessment year — an assessment is only as good as its vintage. */
+  taxYear?: number;
   /** Flood zone as the county or FEMA labels it ("X", "AE"). */
   floodZone?: string;
   homestead?: boolean;

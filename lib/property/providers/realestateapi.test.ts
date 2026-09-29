@@ -1,59 +1,82 @@
 /**
- * RealEstateAPI Property Search mapping + failure classification.
+ * RealEstateAPI mapping + failure-classification assertions.
  * Run: npx tsx lib/property/providers/realestateapi.test.ts
  *
- * No network: `globalThis.fetch` is stubbed. The fixture follows the documented
- * Property Search record — flat fields, `address` as an object, the sale amount
- * as a string — which is where careless coercions go wrong.
+ * No network: `globalThis.fetch` is stubbed. No db import either — the
+ * provider only pulls in `../types` and `../retry`, so this runs in a few ms.
+ *
+ * The fixture is a trimmed copy of a real PropertyDetail response for a
+ * Maitland FL parcel, kept verbatim in the parts that matter: the three
+ * disagreeing valuations, the zeroed land/improvement split, the stringified
+ * `lotAcres` and `lastSalePrice`, and the ISO-datetime sale date. Every one of
+ * those is a coercion this mapping gets wrong if written carelessly.
  */
-import { apnCandidates, buildAddress, mapRecord, realestateapiProvider } from "./realestateapi";
+import { mapRecord, apnCandidates, buildAddress, realestateapiProvider } from "./realestateapi";
 import { ProviderUnavailableError } from "../types";
 
 function assert(cond: unknown, msg: string) {
   if (!cond) throw new Error(msg);
 }
+
 function eq(actual: unknown, expected: unknown, msg: string) {
   if (actual !== expected) {
     throw new Error(`${msg}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
   }
 }
 
-const RECORD = {
-  id: "253175355",
-  apn: "13-0133-LL-230-7",
-  address: {
-    address: "2201 Crossrail Dr, Atlanta, GA 30318",
-    street: "2201 Crossrail Dr",
-    city: "Atlanta",
-    county: "Fulton County",
-    state: "GA",
-    zip: "30318",
-  },
-  latitude: 33.78,
-  longitude: -84.43,
-  yearBuilt: 2004,
-  squareFeet: 1650,
-  lotSquareFeet: 4356,
-  bedrooms: 3,
-  bathrooms: 2,
-  assessedValue: 98000,
-  assessedLandValue: 30000,
-  assessedImprovementValue: 68000,
-  estimatedValue: 310000,
-  estimatedEquity: 190000,
-  equityPercent: 61,
-  openMortgageBalance: 120000,
-  lastSaleAmount: "185000",
-  lastSaleDate: "2015-06-01",
-  owner1FirstName: "Pat",
-  owner1LastName: "Example",
+/** Trimmed real response — Maitland FL, APN 29-21-30-3578-06-040. */
+const FIXTURE = {
   propertyType: "SFR",
-  propertyUse: "Single Family Residence",
-  landUse: "Residential",
-  floodZone: true,
-  floodZoneType: "AE",
+  estimatedValue: 560000,
+  lastSalePrice: "549000",
+  lastSaleDate: "2026-02-19",
+  floodZone: false,
+  floodZoneType: null,
+  floodZoneDescription: null,
+  taxInfo: {
+    assessedValue: 180577,
+    assessedLandValue: 0,
+    assessedImprovementValue: 0,
+    marketValue: 585520,
+    estimatedValue: null,
+    assessmentYear: 2025,
+    year: 2025,
+    taxAmount: "2117.35",
+    taxDelinquentYear: null,
+  },
+  lotInfo: {
+    apn: "29-21-30-3578-06-040",
+    apnUnformatted: "292130357806040",
+    lotAcres: "0.23",
+    lotSquareFeet: 10011,
+    zoning: "RSF-2",
+    landUse: "Residential",
+    propertyUse: "Single Family Residence",
+  },
+  propertyInfo: {
+    address: {
+      address: "2121 Thunderbird Trl",
+      city: "Maitland",
+      state: "FL",
+      zip: "32751",
+      county: "Orange County",
+      fips: "12095",
+    },
+    bedrooms: 3,
+    bathrooms: 2,
+    partialBathrooms: 0,
+    buildingSquareFeet: 2813,
+    livingSquareFeet: 2080,
+    yearBuilt: 1963,
+    taxExemptionHomeownerFlag: true,
+    latitude: 28.637657000103346,
+    longitude: -81.3384212514644,
+  },
+  ownerInfo: { owner1FullName: "TEST OWNER", owner1Type: "Individual" },
+  lastSale: { saleAmount: 549000, saleDate: "2026-02-19T00:00:00.000Z", armsLength: true },
 };
 
+/** Install a fetch stub; returns the recorded request bodies. */
 function stubFetch(responder: (body: Record<string, unknown>) => { status: number; json: unknown }) {
   const seen: Record<string, unknown>[] = [];
   globalThis.fetch = (async (_url: string, init: RequestInit) => {
@@ -70,110 +93,241 @@ function stubFetch(responder: (body: Record<string, unknown>) => { status: numbe
   return seen;
 }
 
-const found = (rec: unknown) => ({ status: 200, json: { statusCode: 200, data: [rec], resultCount: 1 } });
-const none = { status: 200, json: { statusCode: 200, data: [], resultCount: 0 } };
-
-const INPUT = {
-  state: "GA",
-  fips: "13121",
-  countyName: "Fulton",
-  parcelNumber: "13-0133-LL-230-7",
-  addressLine: "2201 CROSSRAIL DR",
-  city: "Atlanta",
-  zip: null,
-};
-
 async function main() {
   const origFetch = globalThis.fetch;
   process.env.REALESTATEAPI_API_KEY = "test-key";
 
   // ---- mapping -----------------------------------------------------------
-  const r = mapRecord(RECORD);
-  eq(r.assessedValue, 98000, "assessedValue is the tax assessment");
-  eq(r.marketValue, 310000, "marketValue is the AVM");
-  eq(r.landValue, 30000, "land split kept");
-  eq(r.improvementValue, 68000, "improvement split kept");
-  eq(r.lastSaleAmount, 185000, "string sale amount parsed");
-  eq(r.lastSaleDate, "2015-06-01", "sale date");
-  eq(r.addressLine, "2201 Crossrail Dr", "street, not the full label");
-  eq(r.county, "Fulton", "county suffix stripped");
-  eq(r.ownerName, "Pat Example", "owner joined");
-  eq(r.buildingSqft, 1650, "living area");
-  eq(r.acreage, 0.1, "acreage from lot sqft");
-  eq(r.floodZone, "AE", "flood zone letter, not the boolean");
-  eq(r.propertyType, "Single Family Residence", "property use");
-  eq((r.raw as Record<string, unknown>).openMortgageBalance, 120000, "mortgage kept in raw");
+  const r = mapRecord(FIXTURE as unknown as Record<string, unknown>);
 
-  const zeroed = mapRecord({ ...RECORD, assessedLandValue: 0, assessedImprovementValue: 0 });
-  eq(zeroed.landValue, undefined, "zeroed split dropped");
-  eq(zeroed.improvementValue, undefined, "zeroed split dropped");
+  /*
+   * The one that costs money if it is wrong. maxbid divides assessedValue by
+   * the assessment ratio, so the AVM must never reach it.
+   */
+  eq(r.assessedValue, 180577, "assessedValue must be the tax assessment");
+  eq(r.marketValue, 560000, "marketValue must be the AVM");
+  assert(r.assessedValue !== 560000, "AVM leaked into assessedValue");
+  assert(r.assessedValue !== 585520, "county market value leaked into assessedValue");
 
-  const vacant = mapRecord({ ...RECORD, squareFeet: 0, yearBuilt: 0, bedrooms: 0, lastSaleAmount: "0", estimatedValue: 0 });
-  eq(vacant.buildingSqft, undefined, "0 sqft means no building");
-  eq(vacant.yearBuilt, undefined, "0 year built dropped");
-  eq(vacant.lastSaleAmount, undefined, "$0 sale is not a sale");
-  eq(vacant.marketValue, undefined, "$0 AVM is not a value");
+  // AVM absent → fall back to the county's full-market figure, still not assessed.
+  const noAvm = mapRecord({ ...FIXTURE, estimatedValue: null } as unknown as Record<
+    string,
+    unknown
+  >);
+  eq(noAvm.marketValue, 585520, "marketValue should fall back to taxInfo.marketValue");
+  eq(noAvm.assessedValue, 180577, "fallback must not disturb assessedValue");
 
-  const corp = mapRecord({ ...RECORD, companyName: "ACME HOLDINGS LLC" });
-  eq(corp.ownerName, "ACME HOLDINGS LLC", "company name wins");
+  // Zeroed split dropped rather than published as "land worth nothing".
+  eq(r.landValue, undefined, "zeroed assessedLandValue should be dropped");
+  eq(r.improvementValue, undefined, "zeroed assessedImprovementValue should be dropped");
 
-  // ---- helpers -------------------------------------------------------------
-  eq(apnCandidates("13-0133-LL-230-7").join("|"), "13-0133-LL-230-7|130133LL2307", "two APN forms");
-  eq(apnCandidates("130133").length, 1, "already bare: one attempt");
-  eq(buildAddress({ ...INPUT, city: null, zip: null, state: "" }), null, "no locality, no address search");
+  // A genuine breakdown is kept.
+  const split = mapRecord({
+    ...FIXTURE,
+    taxInfo: { ...FIXTURE.taxInfo, assessedLandValue: 40000, assessedImprovementValue: 140577 },
+  } as unknown as Record<string, unknown>);
+  eq(split.landValue, 40000, "real land value should survive");
+  eq(split.improvementValue, 140577, "real improvement value should survive");
 
-  // ---- lookup --------------------------------------------------------------
-  let seen = stubFetch(() => found(RECORD));
-  let rec = await realestateapiProvider.lookup(INPUT);
-  eq(rec?.marketValue, 310000, "APN hit");
-  eq(seen.length, 1, "one billed call on a hit");
-  eq(seen[0].apn, "13-0133-LL-230-7", "APN sent as published");
-  eq(seen[0].fips, "13121", "fips sent");
-  eq(seen[0].size, 1, "one record requested");
+  // Coercions.
+  eq(r.acreage, 0.23, "lotAcres arrives as a string and must be numeric");
+  eq(r.lotSqft, 10011, "lotSqft");
+  eq(r.buildingSqft, 2080, "buildingSqft must prefer living area, not total building");
+  eq(r.yearBuilt, 1963, "yearBuilt");
+  eq(r.beds, 3, "beds");
+  eq(r.baths, 2, "baths must not double-count partialBathrooms");
+  eq(r.taxYear, 2025, "taxYear from assessmentYear");
+  eq(r.lastSaleAmount, 549000, "lastSaleAmount should prefer the numeric lastSale.saleAmount");
+  eq(r.lastSaleDate, "2026-02-19", "ISO datetime should narrow to YYYY-MM-DD");
+  eq(r.county, "Orange", '"Orange County" should reduce to the bare county name');
+  eq(r.homestead, true, "homestead from taxExemptionHomeownerFlag");
+  eq(r.zoning, "RSF-2", "zoning");
+  eq(r.propertyType, "SFR", "propertyType");
+  eq(r.landUse, "Residential", "landUse");
+  eq(r.parcelNumber, "29-21-30-3578-06-040", "formatted APN preferred");
+  eq(r.latitude, 28.637657000103346, "latitude");
+  eq(r.source, "realestateapi", "source");
 
-  // Punctuation differs, same parcel → accepted.
-  seen = stubFetch(() => found({ ...RECORD, apn: "130133LL2307" }));
-  rec = await realestateapiProvider.lookup(INPUT);
-  assert(rec, "same APN without punctuation is a match");
+  // A never-traded parcel reports "0"; that is not a comp.
+  const untraded = mapRecord({
+    ...FIXTURE,
+    lastSalePrice: "0",
+    lastSale: {},
+  } as unknown as Record<string, unknown>);
+  eq(untraded.lastSaleAmount, undefined, 'lastSalePrice "0" must not become a $0 sale');
 
-  // Autocomplete returned a different parcel → not accepted, falls to address.
-  seen = stubFetch((b) => (b.apn ? found({ ...RECORD, apn: "13-0133-LL-231-0" }) : found(RECORD)));
-  rec = await realestateapiProvider.lookup(INPUT);
-  eq(seen.length, 3, "two APN forms rejected, then address");
-  assert(typeof seen[2].address === "string", "address search last");
-  assert(rec, "address hit accepted");
+  /*
+   * floodZone: false with no description stays undefined. The column is text
+   * and cannot distinguish "not in a flood zone" from "no flood data", so
+   * writing "none" would assert something unverified.
+   */
+  eq(r.floodZone, undefined, "absent flood description must not become a value");
+  const flooded = mapRecord({
+    ...FIXTURE,
+    floodZone: true,
+    floodZoneDescription: "AE",
+  } as unknown as Record<string, unknown>);
+  eq(flooded.floodZone, "AE", "flood zone description should be stored");
 
-  // Genuine miss everywhere → null, not a throw.
-  stubFetch(() => none);
-  eq(await realestateapiProvider.lookup(INPUT), null, "empty data is a miss");
-  stubFetch(() => ({ status: 200, json: { statusCode: 404, statusMessage: "Not Found" } }));
-  eq(await realestateapiProvider.lookup(INPUT), null, "body 404 is a miss");
+  // ---- identifier helpers ------------------------------------------------
+  const cands = apnCandidates("29-21-30-3578-06-040");
+  eq(cands.length, 2, "at most two APN candidates, to protect billed lookups");
+  eq(cands[0], "29-21-30-3578-06-040", "clerk value first");
+  eq(cands[1], "292130357806040", "stripped variant second");
+  eq(apnCandidates("292130357806040").length, 1, "no separators means no second attempt");
+  eq(apnCandidates("   ").length, 0, "blank parcel yields nothing");
+  eq(
+    apnCandidates("43-036-009-000-0000").join("|"),
+    "43-036-009-000-0000|43-036-009|430360090000000",
+    "zero-padded PA parcel: as printed, then trimmed, then stripped",
+  );
+  eq(apnCandidates("01-035-034").length, 2, "no zero tail, no trimmed attempt");
 
-  // Dead wallet / key → ProviderUnavailableError, which aborts a batch.
-  for (const [status, json] of [
-    [402, { statusCode: 402, message: "Insufficient wallet balance.", errorCode: "WALLET_INSUFFICIENT_BALANCE" }],
-    [401, { message: "Unauthorized" }],
-    [400, { message: "Insufficient wallet balance" }],
-  ] as const) {
-    stubFetch(() => ({ status, json }));
-    let threw = false;
-    try {
-      await realestateapiProvider.lookup(INPUT);
-    } catch (e) {
-      threw = e instanceof ProviderUnavailableError;
-    }
-    assert(threw, `${status} must raise ProviderUnavailableError`);
+  eq(
+    buildAddress({ state: "FL", fips: "12095", countyName: "Orange", addressLine: "2121 Thunderbird Trl", city: "Maitland", zip: "32751" }),
+    "2121 Thunderbird Trl, Maitland FL 32751",
+    "address string shape",
+  );
+  eq(
+    buildAddress({ state: "FL", fips: "12095", countyName: "Orange", addressLine: null }),
+    null,
+    "no street means no address lookup",
+  );
+
+  // ---- request ordering --------------------------------------------------
+  {
+    const seen = stubFetch(() => ({ status: 200, json: { statusCode: 200, data: FIXTURE } }));
+    const rec = await realestateapiProvider.lookup({
+      state: "FL",
+      fips: "12095",
+      countyName: "Orange",
+      parcelNumber: "29-21-30-3578-06-040",
+      addressLine: "2121 Thunderbird Trl",
+      city: "Maitland",
+      zip: "32751",
+    });
+    eq(seen.length, 1, "a first-try match must not spend a second lookup");
+    eq(seen[0].apn, "29-21-30-3578-06-040", "APN is asked before address");
+    eq(seen[0].fips, "12095", "fips accompanies the APN");
+    eq(rec?.marketValue, 560000, "record returned from the APN path");
   }
 
-  // No key → not configured, no call.
-  process.env.REALESTATEAPI_API_KEY = "";
-  assert(!realestateapiProvider.configured(), "unconfigured without key");
+  // ---- no-match is HTTP 200 with a 404 body ------------------------------
+  {
+    const seen = stubFetch(() => ({
+      status: 200,
+      json: { statusCode: 404, statusMessage: "Not Found", data: {} },
+    }));
+    const rec = await realestateapiProvider.lookup({
+      state: "FL",
+      fips: "12095",
+      countyName: "Orange",
+      parcelNumber: "99-99-99-9999-99-999",
+    });
+    eq(rec, null, "a body-level 404 is a genuine miss, not an outage");
+    eq(seen.length, 2, "both APN candidates should be tried before conceding");
+  }
+
+  // Falls through APN misses to the address attempt.
+  {
+    const seen = stubFetch((body) =>
+      body.address
+        ? { status: 200, json: { statusCode: 200, data: FIXTURE } }
+        : { status: 200, json: { statusCode: 404, data: {} } },
+    );
+    const rec = await realestateapiProvider.lookup({
+      state: "FL",
+      fips: "12095",
+      countyName: "Orange",
+      parcelNumber: "29-21-30-3578-06-040",
+      addressLine: "2121 Thunderbird Trl",
+      city: "Maitland",
+      zip: "32751",
+    });
+    eq(seen.length, 3, "two APN candidates then the address");
+    eq(rec?.assessedValue, 180577, "address attempt recovered the record");
+  }
+
+  // ---- provider-level failures throw, so the batch aborts ----------------
+  const unavailable = async (
+    status: number,
+    json: unknown,
+    label: string,
+  ) => {
+    stubFetch(() => ({ status, json }));
+    let threw: unknown = null;
+    try {
+      await realestateapiProvider.lookup({
+        state: "FL",
+        fips: "12095",
+        countyName: "Orange",
+        parcelNumber: "29-21-30-3578-06-040",
+      });
+    } catch (e) {
+      threw = e;
+    }
+    assert(
+      threw instanceof ProviderUnavailableError,
+      `${label} must raise ProviderUnavailableError, got ${threw}`,
+    );
+  };
+
+  await unavailable(
+    401,
+    { statusCode: 401, error: "Unauthorized", errorCode: "AUTH_KEY_NOT_FOUND" },
+    "a rejected key",
+  );
+  await unavailable(403, { statusCode: 403, message: "Forbidden" }, "a forbidden key");
+  await unavailable(402, { statusCode: 402, message: "Payment Required" }, "payment required");
+  await unavailable(
+    400,
+    { statusCode: 400, message: "Your plan limit has been exceeded" },
+    "an exhausted plan",
+  );
+  await unavailable(
+    429,
+    { statusCode: 429, message: "Too Many Requests" },
+    "sustained rate limiting",
+  );
+
+  // A plain bad-request must NOT be treated as an outage — it is our input.
+  {
+    stubFetch(() => ({ status: 400, json: { statusCode: 400, message: "Invalid zip format" } }));
+    const rec = await realestateapiProvider.lookup({
+      state: "FL",
+      fips: "12095",
+      countyName: "Orange",
+      parcelNumber: "29-21-30-3578-06-040",
+    });
+    eq(rec, null, "a malformed-identifier 400 is a miss, not a dead provider");
+  }
+
+  // Unconfigured provider answers null without touching the network.
+  {
+    const saved = process.env.REALESTATEAPI_API_KEY;
+    delete process.env.REALESTATEAPI_API_KEY;
+    eq(realestateapiProvider.configured(), false, "no key means not configured");
+    let called = false;
+    globalThis.fetch = (async () => {
+      called = true;
+      throw new Error("should not be called");
+    }) as typeof fetch;
+    const rec = await realestateapiProvider.lookup({
+      state: "FL",
+      fips: "12095",
+      countyName: "Orange",
+      parcelNumber: "1",
+    });
+    eq(rec, null, "unconfigured lookup returns null");
+    eq(called, false, "unconfigured lookup must not hit the network");
+    process.env.REALESTATEAPI_API_KEY = saved;
+  }
 
   globalThis.fetch = origFetch;
-  console.log("realestateapi: ok");
+  console.log("realestateapi: all assertions passed");
 }
 
 main().catch((e) => {
-  console.error(e);
+  console.error(e instanceof Error ? e.message : e);
   process.exit(1);
 });
