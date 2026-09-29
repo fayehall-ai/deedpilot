@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { SearchedProperty } from "@/lib/property/providers/websearch";
 import type { ReapiExtras } from "@/lib/property/address-lookup";
-import { ParcelImagery } from "./parcel-imagery";
+import { StreetViewFrame } from "./street-view-frame";
 
 /**
  * One property lookup, rendered.
@@ -21,15 +21,12 @@ import { ParcelImagery } from "./parcel-imagery";
 
 export interface ResultProps {
   data: SearchedProperty;
-  citations: { url: string; title: string | null }[];
   /** Hours since this answer was read, when it came from the cache. */
   ageHours?: number;
-  /** Resolved by the geocoder, not stated by a source. Absent when unplaceable. */
-  location?: { lat: number; lon: number; matched: string };
-  /** Which source answered: a county record through RealEstateAPI, or a web search. */
-  source?: "realestateapi" | "web";
   /** Figures only a record carries. */
   extras?: ReapiExtras;
+  /** Google's photograph of the front, when the lookup found one. */
+  streetView?: { location: string; date: string | null };
 }
 
 const money = (n: number | null | undefined) =>
@@ -42,26 +39,6 @@ function Field({ label, value }: { label: string; value: string | number | null 
       <dt className="text-sm font-medium uppercase tracking-[0.12em] text-muted">{label}</dt>
       <dd className="tnum mt-1 text-lg font-medium text-foreground">{value}</dd>
     </div>
-  );
-}
-
-function Sources({ citations }: { citations: ResultProps["citations"] }) {
-  if (citations.length === 0) return null;
-  return (
-    <ul className="mt-4 space-y-2 text-base">
-      {citations.slice(0, 8).map((c) => (
-        <li key={c.url}>
-          <a
-            href={c.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent underline underline-offset-2 hover:opacity-80"
-          >
-            {c.title ?? new URL(c.url).hostname}
-          </a>
-        </li>
-      ))}
-    </ul>
   );
 }
 
@@ -211,26 +188,29 @@ function Remaining({ p, extras }: { p: SearchedProperty; extras?: ReapiExtras })
 
 function Listing({
   p,
-  location,
-  caption,
   extras,
+  streetView,
 }: {
   p: SearchedProperty;
-  location?: ResultProps["location"];
-  caption?: string | null;
   extras?: ReapiExtras;
+  streetView?: ResultProps["streetView"];
 }) {
   return (
     <div className="mt-6 flex flex-col gap-8 lg:flex-row lg:items-start">
       {/*
-        Not wrapped. ParcelImagery renders nothing without coordinates, and a
-        wrapper would leave a 520px empty column in the flex row when it does.
+        The front of the house and nothing else — the lookup shows Street View
+        only. Absent where Google has no photograph, and the facts take the row.
       */}
-      <ParcelImagery
-        latitude={location?.lat}
-        longitude={location?.lon}
-        caption={caption}
-      />
+      {streetView ? (
+        <div className="w-full lg:w-[min(28rem,45%)] lg:shrink-0">
+          <StreetViewFrame
+            src={`/api/streetview?${new URLSearchParams({ location: streetView.location })}`}
+            label={streetView.location}
+            mapsQuery={streetView.location}
+            date={streetView.date}
+          />
+        </div>
+      ) : null}
       <Remaining p={p} extras={extras} />
     </div>
   );
@@ -244,65 +224,12 @@ function Card({ children }: { children: ReactNode }) {
   );
 }
 
-export function PropertyResult({
-  data: p,
-  citations,
-  ageHours = 0,
-  location,
-  source = "web",
-  extras,
-}: ResultProps) {
-  const fromRecord = source === "realestateapi";
-  const exact = p.found && p.confidence !== "none";
-
-  /*
-   * Not the exact property.
-   *
-   * The valuation is withheld — no price on a property that was not identified —
-   * but everything genuinely known is shown, labelled as describing the closest
-   * match rather than the address that was typed.
-   */
-  if (!exact) {
-    const hasContext =
-      p.closestMatch || p.propertyType || p.neighborhood || p.features.length > 0 || p.comparables;
-
-    if (!hasContext) {
-      return (
-        <Card>
-          <h3 className="font-display text-2xl font-medium">No record found for that address</h3>
-          <p className="mt-2 text-base text-muted">{p.basis}</p>
-        </Card>
-      );
-    }
-
-    return (
-      <Card>
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
-          <h3 className="min-w-0 font-display text-2xl font-medium tracking-tight">
-            {p.closestMatch ? "Closest match" : "What was found"}
-          </h3>
-          <span className="self-start rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-            not the exact address
-          </span>
-        </div>
-        {p.closestMatch && <p className="mt-3 text-lg leading-relaxed">{p.closestMatch}</p>}
-        <SpecStrip p={p} />
-        <Listing p={p} location={location} caption={location?.matched} />
-
-        <div className="mt-8 border-t border-border pt-6">
-          <h4 className="font-display text-lg font-medium">Why this is not the exact property</h4>
-          <p className="mt-2 text-base leading-relaxed text-muted">{p.basis}</p>
-          <Sources citations={citations} />
-        </div>
-
-        <p className="mt-6 text-sm leading-relaxed text-muted">
-          No value is shown for the address you entered, because it was not identified. The figures
-          above describe the closest match and are context, not a valuation of your property.
-        </p>
-      </Card>
-    );
-  }
-
+/**
+ * A RealEstateAPI property record — the only source the lookup uses now. There
+ * is no "closest match" or "what was read" section: those described the web
+ * search, which returned other properties' figures and cited the pages it read.
+ */
+export function PropertyResult({ data: p, ageHours = 0, extras, streetView }: ResultProps) {
   return (
     <Card>
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
@@ -310,62 +237,42 @@ export function PropertyResult({
           {p.addressLine ?? "This property"}
           {p.city ? `, ${p.city}` : ""} {p.zip ?? ""}
         </h3>
-        <span
-          className={`self-start rounded-full px-2.5 py-1 text-xs font-medium uppercase tracking-wide ${
-            p.confidence === "stated"
-              ? "bg-surface-2 text-muted"
-              : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
-          }`}
-        >
-          {fromRecord
-            ? "county record"
-            : p.confidence === "stated"
-              ? "stated by a source"
-              : "derived from comparables"}
+        <span className="self-start rounded-full bg-surface-2 px-2.5 py-1 text-xs font-medium uppercase tracking-wide text-muted">
+          county record
         </span>
       </div>
 
       {p.marketValue !== null && (
-        <p className="tnum font-display mt-4 text-4xl font-medium text-foreground sm:text-5xl">
-          {money(p.marketValue)}
-        </p>
+        <>
+          <p className="tnum font-display mt-4 text-4xl font-medium text-foreground sm:text-5xl">
+            {money(p.marketValue)}
+          </p>
+          <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-muted">
+            Estimated market value from RealEstateAPI&apos;s valuation model. This is{" "}
+            <strong className="text-foreground">not</strong> an assessed value and is not used to
+            price a bid.
+            {ageHours > 0 && (
+              <>
+                {" "}
+                Read{" "}
+                {ageHours < 24
+                  ? `${ageHours} hour${ageHours === 1 ? "" : "s"} ago`
+                  : `${Math.floor(ageHours / 24)} day${Math.floor(ageHours / 24) === 1 ? "" : "s"} ago`}
+                .
+              </>
+            )}
+          </p>
+        </>
       )}
-      <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-muted">
-        Estimated market value{fromRecord ? " from RealEstateAPI's valuation model" : ""}. This is{" "}
-        <strong className="text-foreground">not</strong> an assessed value and is not used to price
-        a bid.
-        {ageHours > 0 && (
-          <>
-            {" "}
-            Read{" "}
-            {ageHours < 24
-              ? `${ageHours} hour${ageHours === 1 ? "" : "s"} ago`
-              : `${Math.floor(ageHours / 24)} day${Math.floor(ageHours / 24) === 1 ? "" : "s"} ago`}
-            .
-          </>
-        )}
-      </p>
 
       <SpecStrip p={p} />
-      <Listing
-        p={p}
-        location={location}
-        caption={location?.matched ?? p.addressLine}
-        extras={extras}
-      />
+      <Listing p={p} extras={extras} streetView={streetView} />
 
-      <div className="mt-8 border-t border-border pt-6">
-        <h4 className="font-display text-lg font-medium text-foreground">
-          {fromRecord ? "Source" : "What was read"}
-        </h4>
-        <p className="mt-2 text-base leading-relaxed text-foreground">{p.basis}</p>
-        <Sources citations={citations} />
-      </div>
-
-      <p className="mt-6 text-sm leading-relaxed text-muted">
-        {fromRecord
-          ? "Figures come from the county assessor record and RealEstateAPI's valuation model, not an appraisal, and the value is an as-is estimate rather than an after-repair value. Equity and mortgage are modelled from recorded loans. Verify against the county record before bidding."
-          : "Figures come from public web sources read at the time of the search, not from a licensed data provider, and are an as-is estimate rather than an after-repair value. Verify against the county record before bidding."}
+      <p className="mt-8 border-t border-border pt-6 text-sm leading-relaxed text-muted">
+        Figures come from the county assessor record and RealEstateAPI&apos;s valuation model, not
+        an appraisal, and the value is an as-is estimate rather than an after-repair value. Equity
+        and mortgage are modelled from recorded loans. Verify against the county record before
+        bidding.
       </p>
     </Card>
   );

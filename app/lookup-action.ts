@@ -11,10 +11,9 @@ import type { ReapiExtras } from "@/lib/property/address-lookup";
  * design sent the reader to `/property?q=…`, which lost the query from the input
  * and made a twenty-second search feel like a page that had gone somewhere else.
  *
- * RealEstateAPI answers first: the county record and a valuation in about a
- * second. The web search — twenty seconds and more, figures read off listing
- * pages — runs only when RealEstateAPI has no record for the address, or is
- * unavailable.
+ * Answered from RealEstateAPI only: the county record and a valuation in about
+ * a second. There is no web-search fallback — it read figures off listing
+ * pages and got them wrong.
  */
 
 export interface LookupState {
@@ -36,40 +35,43 @@ export interface LookupState {
   source?: "realestateapi" | "web";
   /** Record-only figures, when RealEstateAPI answered. */
   extras?: ReapiExtras;
+  /** Google's photograph of the front, when it has one near the address. */
+  streetView?: { location: string; date: string | null };
   error?: string;
 }
 
 /**
- * Longer than a search takes and shorter than the function may run.
- *
- * A cold lookup is around 27 seconds and has been seen past 45. When the
- * platform kills the function instead, the browser gets a dead response and
- * renders "This page couldn't load" — a full-page error, with nothing in the
- * runtime log to explain it, for what is really just a slow search.
- *
- * Failing on our own terms turns that into a sentence the reader can act on.
+ * Fail on our own terms if the record service hangs, rather than let the
+ * platform kill the function and show "This page couldn't load".
  */
-const BUDGET_MS = 55_000;
-
 function timeout<T>(p: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
     p,
     new Promise<never>((_, reject) =>
-      setTimeout(
-        () =>
-          reject(
-            new Error(
-              "That search took longer than a minute and was stopped. Sources were slow to " +
-                "respond — try again, or add the city and ZIP to narrow it.",
-            ),
-          ),
-        ms,
-      ),
+      setTimeout(() => reject(new Error(`no answer within ${Math.round(ms / 1000)} seconds`)), ms),
     ),
   ]);
 }
 
 export async function lookupProperty(
+  prev: LookupState | null,
+  formData: FormData,
+): Promise<LookupState> {
+  const state = await lookupInner(prev, formData);
+  if (!state.data) return state;
+  /*
+   * The front of the house, the only photograph the lookup shows. Aimed at the
+   * record's own label when there is one — it carries the state the typed
+   * address may lack — and asked of the free metadata endpoint, so the card
+   * shows nothing where Google never drove.
+   */
+  const where = state.location?.matched ?? state.query;
+  const { streetViewMetadata } = await import("@/lib/property/streetview");
+  const meta = await streetViewMetadata(where).catch(() => null);
+  return meta ? { ...state, streetView: { location: where, date: meta.date } } : state;
+}
+
+async function lookupInner(
   _prev: LookupState | null,
   formData: FormData,
 ): Promise<LookupState> {
@@ -98,9 +100,10 @@ export async function lookupProperty(
   };
 
   /*
-   * RealEstateAPI first. Cached under its own key, so a record and a web
-   * answer for the same address never stand in for each other, and so a
-   * repeated search is not billed twice. A miss or an outage falls through.
+   * RealEstateAPI only. The web search that used to answer when it had no
+   * record read figures off listing pages — 7 beds for a 4-bed house at 7714
+   * Mocorito Ave — so a miss now says so instead. Cached under its own key, so
+   * a repeated search is not billed twice.
    */
   try {
     const cache = await import("@/lib/property/lookup-cache");
@@ -113,47 +116,23 @@ export async function lookupProperty(
     }
     const { reapiLookup } = await import("@/lib/property/address-lookup");
     const found = await timeout(reapiLookup(query), 15_000);
-    if (found) {
-      const { recordUsage } = await import("@/lib/ai/usage");
-      void recordUsage({ provider: "realestateapi", operation: "property-lookup", requests: 1 });
-      const location = found.location ?? (await located());
-      const stored: Stored = { found: true, data: found.data, extras: found.extras, location };
-      await cache.putCached(recordKey, stored, []);
-      return { query, data: found.data, extras: found.extras, citations: [], ageHours: 0, location, source: "realestateapi" };
-    }
-  } catch (e) {
-    console.warn(
-      `[lookup] RealEstateAPI did not answer; using the web search: ${e instanceof Error ? e.message : e}`,
-    );
-  }
-
-  try {
-    const [{ retrievePhase, extractPhase }, cache] = await Promise.all([
-      import("@/lib/property/providers/websearch"),
-      import("@/lib/property/lookup-cache"),
-    ]);
-
-    const cached = await cache.getCached<SearchedProperty>(query);
-    if (cached) {
+    if (!found) {
       return {
         query,
-        data: cached.result,
-        citations: cached.citations,
-        ageHours: cached.ageHours,
-        location: await located(),
-        source: "web",
+        error:
+          "No property record matches that address. Check the house number and street, and include the city and state or the ZIP.",
       };
     }
-
-    const started = Date.now();
-    const retrieval = await timeout(retrievePhase(query), BUDGET_MS);
-    const { data, citations } = await timeout(
-      extractPhase(query, retrieval),
-      Math.max(5_000, BUDGET_MS - (Date.now() - started)),
-    );
-    await cache.putCached(query, data, citations);
-    return { query, data, citations, ageHours: 0, location: await located(), source: "web" };
+    const { recordUsage } = await import("@/lib/ai/usage");
+    void recordUsage({ provider: "realestateapi", operation: "property-lookup", requests: 1 });
+    const location = found.location ?? (await located());
+    const stored: Stored = { found: true, data: found.data, extras: found.extras, location };
+    await cache.putCached(recordKey, stored, []);
+    return { query, data: found.data, extras: found.extras, citations: [], ageHours: 0, location, source: "realestateapi" };
   } catch (e) {
-    return { query, error: e instanceof Error ? e.message : String(e) };
+    return {
+      query,
+      error: `The property record service did not answer (${e instanceof Error ? e.message : String(e)}). Try again in a moment.`,
+    };
   }
 }

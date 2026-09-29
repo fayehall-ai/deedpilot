@@ -113,15 +113,13 @@ export function PropertySearch() {
         </div>
       </div>
 
-      {state?.data && state.citations && (
+      {state?.data && (
         <div className="min-w-0 lg:col-span-2">
           <PropertyResult
             data={state.data}
-            citations={state.citations}
             ageHours={state.ageHours}
-            location={state.location}
-            source={state.source}
             extras={state.extras}
+            streetView={state.streetView}
           />
         </div>
       )}
