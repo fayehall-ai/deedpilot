@@ -32,17 +32,21 @@ import { FRAMES, aerialUrl, requestWidthFor } from "@/lib/property/imagery";
  * Capped at a width the imagery can actually fill. Bigger was a claim the
  * pixels could not back.
  *
- * ## Why the caveat is not fine print
+ * ## No caption
  *
- * Someone deciding whether to drive four hours to a sale will read a photograph
- * as current unless told otherwise, and aerial imagery is flown on a multi-year
- * cycle. The date line sits on the image itself, in the frame, because a caveat
- * placed below the fold of attention is a caveat designed not to be read.
+ * The USGS caveat under the frame — flown on a multi-year cycle, not evidence
+ * of current condition — was cut at the operator's request: the photographs
+ * sit side by side and the captions only made them uneven.
  */
 
 /** The rendered size, and the ceiling the request math is measured against. */
 const DISPLAY_WIDTH = 520;
-const DISPLAY_HEIGHT = 340;
+/*
+ * 4:3, the Street View photograph's shape, so the two sit side by side at the
+ * same size on the parcel page. The frame is centred on the parcel, so the
+ * narrower crop loses nothing that matters.
+ */
+const DISPLAY_HEIGHT = 390;
 
 export function ParcelImagery({
   latitude,
@@ -126,7 +130,7 @@ export function ParcelImagery({
                 })
               }
               aria-hidden={i !== frame}
-              className={`block aspect-[520/340] w-full bg-surface-2 object-cover ${
+              className={`block aspect-[4/3] w-full bg-surface-2 object-cover ${
                 i === frame ? "" : "absolute inset-0 opacity-0"
               }`}
             />
@@ -167,19 +171,6 @@ export function ParcelImagery({
         </a>
       </div>
 
-      <figcaption className="border-t border-border/70 px-4 py-3 text-sm text-muted">
-        Aerial imagery from the{" "}
-        <a
-          href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-accent underline underline-offset-2 hover:opacity-80"
-        >
-          USGS National Map
-        </a>
-        . Flown on a multi-year cycle — it shows the site as photographed, which may predate
-        clearing, construction or demolition. Not evidence of current condition.
-      </figcaption>
     </figure>
   );
 }

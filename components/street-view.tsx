@@ -55,10 +55,6 @@ export async function StreetView({
           Open in Maps ↗
         </a>
       </div>
-      <figcaption className="border-t border-border/70 px-4 py-3 text-sm text-muted">
-        Google Street View of {location.label}. It shows the house as photographed
-        {taken ? ` in ${taken}` : ""}, not as it is now.
-      </figcaption>
     </figure>
   );
 }
