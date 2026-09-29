@@ -115,6 +115,29 @@ export function addressParts(line: string | null | undefined): { house: string; 
   return m ? { house: m[1], street: m[2].trim() } : null;
 }
 
+/**
+ * City and ZIP as a lookup wants them, from what lists actually print.
+ *
+ * New York lists name the municipality — "Town of Edmeston", "City of
+ * Gloversville", "Village of Laurens, Town of Laurens" — and the lookup wants
+ * "Edmeston". Oregon lists put "SALEM OR 97302" in the city column.
+ */
+export function locality(input: EnrichInput): { city?: string; zip?: string } {
+  let city = input.city?.trim() || undefined;
+  let zip = input.zip?.trim() || undefined;
+  if (city) {
+    const tail = /^(.*?),?\s+[A-Z]{2}\s+(\d{5})(-\d{4})?$/.exec(city);
+    if (tail) {
+      city = tail[1].trim() || undefined;
+      zip ??= tail[2];
+    }
+  }
+  if (city) {
+    city = city.split(",")[0].replace(/^(town|city|village|borough|township) of\s+/i, "").trim() || undefined;
+  }
+  return { city, zip };
+}
+
 export function buildAddress(input: EnrichInput): string | null {
   const street = input.addressLine?.trim();
   if (!street) return null;
@@ -124,8 +147,7 @@ export function buildAddress(input: EnrichInput): string | null {
    * Fulton, and wrote a stranger's owner and parcel number onto the lot —
    * 381 times in one Broome sale.
    */
-  const city = input.city?.trim();
-  const zip = input.zip?.trim();
+  const { city, zip } = locality(input);
   if (!city && !zip) return null;
   const tail = [city, input.state, zip].filter((s): s is string => Boolean(s)).join(" ");
   return `${street}, ${tail}`;
@@ -213,13 +235,13 @@ export const realestateapiProvider: PropertyProvider = {
     }
 
     /*
-     * Last resort: house and street within the county, when the list gives no
-     * locality a full-address lookup could use. An `ids_only` search, accepted
+     * Last resort: house and street within the county, after every other form
+     * has missed — the list gave no locality, or one the lookup did not know. An `ids_only` search, accepted
      * only when it names exactly one property — a street number repeated on
      * two roads of the same name is a guess, not a match — then the detail
      * record by id.
      */
-    if (parts && input.countyName && !input.city && !input.zip) {
+    if (parts && input.countyName) {
       const found = await post("PropertySearch", {
         ...parts,
         county: input.countyName,

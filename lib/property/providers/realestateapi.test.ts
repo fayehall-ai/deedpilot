@@ -17,6 +17,7 @@ import {
   buildAddress,
   extraApnCandidates,
   inCounty,
+  locality,
   addressParts,
   realestateapiProvider,
 } from "./realestateapi";
@@ -184,6 +185,19 @@ async function main() {
   eq(cands[1], "292130357806040", "stripped variant second");
   eq(apnCandidates("292130357806040").length, 1, "no separators means no second attempt");
   eq(apnCandidates("   ").length, 0, "blank parcel yields nothing");
+
+  // Localities as lists print them.
+  const ny = { state: "NY", fips: "36077", countyName: "Otsego" };
+  eq(locality({ ...ny, city: "Town of Edmeston" }).city, "Edmeston", "Town of prefix dropped");
+  eq(locality({ ...ny, city: "Village of Laurens, Town of Laurens" }).city, "Laurens", "first municipality");
+  eq(locality({ ...ny, city: "City of Gloversville" }).city, "Gloversville", "City of prefix dropped");
+  const or = locality({ state: "OR", fips: "41047", countyName: "Marion", city: "SALEM OR 97302" });
+  eq(`${or.city}|${or.zip}`, "SALEM|97302", "state and ZIP split out of the city column");
+  eq(
+    buildAddress({ ...ny, addressLine: "29 South St", city: "Town of Edmeston" }),
+    "29 South St, Edmeston NY",
+    "clean city in the address",
+  );
 
   // Another county's parcel is refused, whatever matched it.
   const orange = { state: "FL", fips: "12095", countyName: "Orange" };
