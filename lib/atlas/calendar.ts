@@ -80,6 +80,14 @@ export interface SaleWindow {
   saleDate: string;
   /** True unless a county has a researched, dated schedule. Always true today. */
   estimated: boolean;
+  /**
+   * True when this is a sweep — a date to look at the county's page, spaced
+   * evenly because nobody knows when it sells — not a projected sale date. A
+   * crawl must never save it as one: King County's September sale had passed,
+   * the sweep landed on 10 October, and the foreclosure certificate on the
+   * county page became 225 parcels in a sale that does not exist.
+   */
+  sweep: boolean;
   confidence: ScheduleConfidence;
   /** Crawl for the parcel list from this date through the sale. */
   listingOpensOn: string;
@@ -379,6 +387,19 @@ export const COUNTY_SALE_SCHEDULE: Record<string, Partial<SaleSchedule>> = {
     asOf: "2026-07",
     notes: "Large online February lien sale; list posts well ahead of the sale.",
   },
+  // King County WA — the Treasury's annual foreclosure auction, every September.
+  "53033": {
+    cadence: "annual",
+    confidence: "typical",
+    months: [9],
+    publishLeadDays: 30,
+    notes:
+      "Annual tax foreclosure auction every September on RealAuction (king.wa.realforeclose.com): 18 Sep 2024; 9, 16 and 23 Sep 2026 for the 2025 action. The Certificate of Delinquency posted each November starts the next year's action — it is every parcel entered into foreclosure, with owners' mailing addresses, not the sale list; parcels redeem up to the day before.",
+    asOf: "2026-09",
+    sources: [
+      "https://kingcounty.gov/en/dept/executive-services/buildings-property/treasury-operations/tax-foreclosures/auctions",
+    ],
+  },
   // Wayne County MI — Detroit; the largest Michigan auction.
   "26163": {
     months: [9, 10],
@@ -537,6 +558,7 @@ export function nextSaleWindows(
     // projection is an estimate. The Scout replaces these with observed dates
     // once it has actually seen a listing.
     estimated: true,
+    sweep: !pinned,
     confidence: schedule.confidence,
     listingOpensOn: iso(addDays(d, -schedule.publishLeadDays)),
     resultsOpenOn: iso(addDays(d, schedule.resultsLagDays)),

@@ -53,6 +53,7 @@ async function main() {
       saleType: auctions.saleType,
       auctionStatus: auctions.status,
       delistedAt: auctions.delistedAt,
+      saleDateConfirmed: auctions.saleDateConfirmed,
       saleDate: auctions.saleDate,
       state: counties.state,
       fips: counties.fips,
@@ -66,6 +67,7 @@ async function main() {
         sql`${auctions.saleDate} between current_date and current_date + ${days}::int`,
         sql`${auctions.saleType} <> 'Tax Lien'`,
         sql`${auctions.status} <> 'cancelled' and ${auctions.delistedAt} is null`,
+        eq(auctions.saleDateConfirmed, true),
         eq(lots.status, "pending"),
         sql`not ${landOnlySql}`,
         sql`not exists (
@@ -97,6 +99,7 @@ async function main() {
         saleType: r.saleType,
         auctionStatus: r.auctionStatus,
         delisted: r.delistedAt !== null,
+        saleDateConfirmed: r.saleDateConfirmed,
         lotStatus: r.lotStatus,
         addressLine: r.addressLine,
         landUse: r.landUse,

@@ -181,6 +181,7 @@ export async function enrichLotById(
         saleType: auctions.saleType,
         status: auctions.status,
         delistedAt: auctions.delistedAt,
+        saleDateConfirmed: auctions.saleDateConfirmed,
       },
     })
     .from(lots)
@@ -233,6 +234,7 @@ export async function enrichLotById(
     saleType: row.auction.saleType,
     auctionStatus: row.auction.status,
     delisted: row.auction.delistedAt !== null,
+    saleDateConfirmed: row.auction.saleDateConfirmed,
     lotStatus: row.lot.status,
     addressLine: row.lot.addressLine,
     landUse: row.lot.landUse,

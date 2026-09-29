@@ -237,6 +237,16 @@ export const genericAdapter: SourceAdapter = {
       ? { saleDate: observed.saleDate, estimated: false, confidence: "announced" as const }
       : projected;
     if (!window) return [];
+    /*
+     * A sweep is when to look, not when the county sells, and this adapter
+     * never reads a sale date out of a document. Saving one as a sale put
+     * parcels under invented dates — 63 upcoming "sales", 29,295 parcels,
+     * among them King County's foreclosure certificate filed under 10 October
+     * for an auction held on 9 September. With no announced sale and no
+     * researched schedule, there is no date to file a list under, so there is
+     * no sale. Research the county's schedule, or import its announcement.
+     */
+    if (!observed && projected?.sweep) return [];
 
     // Sale type comes from the announced sale, else the county's researched
     // rule, falling back to the state default. Guessing "Tax Deed" nationally

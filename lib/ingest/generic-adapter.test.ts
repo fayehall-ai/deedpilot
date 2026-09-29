@@ -216,8 +216,14 @@ assert(
   "schedule confidence is carried through to the auction record",
 );
 
+/*
+ * Cuyahoga's schedule is unresearched, so the calendar offers only a sweep —
+ * when to look, not when it sells. No sale is filed under it; King County's
+ * foreclosure certificate became 225 parcels in a nonexistent October sale
+ * that way.
+ */
 const ohAuctions = await genericAdapter.listAuctions(cuyahoga);
-assert(ohAuctions[0].saleType !== undefined, "Ohio resolves a sale type from the atlas");
+assert(ohAuctions.length === 0, "a sweep window is not a sale date");
 
 // --- registration order is precedence ----------------------------------------
 

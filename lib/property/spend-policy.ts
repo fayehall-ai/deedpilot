@@ -12,6 +12,9 @@ import { isLandOnly, type LandOnlyFields } from "../lots/land-only";
  *     auctions (from 1 June 2026) are typed Tax Deed and pass; its annual lien
  *     sales stay typed Tax Lien and do not;
  *   - a sale that was cancelled or delisted will not happen;
+ *   - a sale whose date nobody has confirmed may not happen when, or at all,
+ *     as filed: 159 lookups went on King County parcels under a 10 October
+ *     "sale" that was a crawl date, a month after the real auction;
  *   - a parcel no longer pending — withdrawn, redeemed, cancelled, sold — is
  *     not on offer;
  *   - a land-only parcel is not of interest (see lib/lots/land-only.ts).
@@ -22,12 +25,14 @@ export interface SpendFields extends LandOnlyFields {
   saleType: string;
   auctionStatus: string;
   delisted: boolean;
+  saleDateConfirmed: boolean;
   lotStatus: string;
 }
 
 export function paidLookupRefusal(p: SpendFields): string | null {
   if (p.saleType === "Tax Lien") return "tax lien sale";
   if (p.auctionStatus === "cancelled" || p.delisted) return "sale cancelled";
+  if (!p.saleDateConfirmed) return "sale date not confirmed";
   if (p.lotStatus !== "pending") return `parcel ${p.lotStatus}`;
   if (isLandOnly(p)) return "land-only parcel";
   return null;
