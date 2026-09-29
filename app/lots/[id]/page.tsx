@@ -242,7 +242,12 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
         and the brief are what you do *about* it, and they sit alongside where
         both stay visible while you read.
       */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+      {/*
+        minmax(0, 1fr), not 1fr: a plain 1fr column will not shrink below its
+        content, and the property-detail history tables (up to 17 unwrapped
+        columns) widened it to 2,700px, pushing the deal column off-screen.
+      */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <section className="space-y-6">
           <Card>
             {/*
@@ -367,22 +372,25 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             them until the geocoder has run over the county.
           */}
           {/*
-            The front of the house, before the view from above: whether there
-            is a house, and what state it is in, is the first question. Behind
-            its own boundary so a slow Google answer never holds the page.
+            The front of the house beside the view from above — whether there
+            is a house, and what surrounds it, read at one glance. Street View
+            is behind its own boundary so a slow Google answer never holds the
+            page; either frame renders nothing when it has nothing, and the
+            other then takes the row. Stacked on narrow screens.
           */}
-          <Suspense fallback={null}>
-            <StreetView
-              lotId={lot.id}
-              location={streetViewLocation({ ...lot, state: county.state })}
+          <div className="grid items-start gap-6 md:grid-cols-2 [&>*]:min-w-0 [&>*]:max-w-none">
+            <Suspense fallback={null}>
+              <StreetView
+                lotId={lot.id}
+                location={streetViewLocation({ ...lot, state: county.state })}
+              />
+            </Suspense>
+            <ParcelImagery
+              latitude={lot.latitude ? Number(lot.latitude) : null}
+              longitude={lot.longitude ? Number(lot.longitude) : null}
+              caption={lot.addressLine ?? `parcel ${lot.parcelNumber ?? ""}`.trim()}
             />
-          </Suspense>
-
-          <ParcelImagery
-            latitude={lot.latitude ? Number(lot.latitude) : null}
-            longitude={lot.longitude ? Number(lot.longitude) : null}
-            caption={lot.addressLine ?? `parcel ${lot.parcelNumber ?? ""}`.trim()}
-          />
+          </div>
 
           {/*
             What surrounds it, after what it looks like.

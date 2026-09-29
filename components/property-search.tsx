@@ -57,44 +57,6 @@ function Submit() {
   );
 }
 
-/**
- * The wait is long enough that a spinner alone reads as a hang, so it says what
- * is happening and roughly how long it takes.
- *
- * ## Say what it does, not what it aspires to
- *
- * This read "Reading county assessor and listing sources", which was not true.
- * Retrieval is a general web search; the extraction prompt *asks* for the
- * assessor record first, but what comes back is whatever the index holds — in
- * measured runs PropertyShark, Redfin, Zillow, Xome, sometimes an assessor page
- * and often not.
- *
- * Naming a specific authoritative source the search may never touch is the same
- * failure as an unsourced figure: it borrows credibility the answer has not
- * earned. The result panel already lists the URLs actually read, and this line
- * should not promise more than that list will show.
- */
-function Pending() {
-  const { pending } = useFormStatus();
-  if (!pending) return null;
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="mt-4 flex items-center gap-3 rounded-3xl border border-border bg-surface p-4 text-foreground"
-    >
-      <span
-        className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-accent
-                   border-t-transparent motion-reduce:animate-none"
-        aria-hidden
-      />
-      <p className="text-sm text-muted">
-        Searching public records and property listings — usually twenty to thirty seconds.
-      </p>
-    </div>
-  );
-}
-
 export function PropertySearch() {
   const [state, action] = useActionState<LookupState | null, FormData>(lookupProperty, null);
 
@@ -103,10 +65,6 @@ export function PropertySearch() {
       <div className="w-full min-w-0">
         <div className="glass rounded-3xl p-[clamp(1.35rem,1.6vw,2rem)]">
           <h2 className="font-display text-xl font-medium text-ink-fg">Look up any address</h2>
-          <p className="mt-1.5 text-base leading-relaxed text-ink-muted">
-            Owner, last sale, and an estimated market value for any US property — before you
-            decide it is worth researching.
-          </p>
           <div className="mt-4">
             <form action={action}>
               {/*
@@ -143,7 +101,6 @@ export function PropertySearch() {
                 />
                 <Submit />
               </div>
-              <Pending />
             </form>
 
             {state?.error && (
