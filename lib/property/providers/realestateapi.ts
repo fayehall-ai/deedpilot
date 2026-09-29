@@ -284,6 +284,51 @@ export function inCounty(d: Record<string, unknown>, input: EnrichInput): boolea
 }
 
 /**
+ * The detail record for an address someone typed, for the home-page lookup.
+ *
+ * Returns the raw payload, or null when there is no match. A match is kept
+ * only when its house number is the one typed: the lookup resolves a free-text
+ * address and would otherwise answer "2201 Crossrail Dr" with a neighbour.
+ * Throws `ProviderUnavailableError` when the key or wallet is dead, so the
+ * caller can fall back rather than report a miss.
+ */
+export async function detailByAddress(address: string): Promise<Record<string, unknown> | null> {
+  const key = (process.env.REALESTATEAPI_API_KEY ?? "").trim();
+  if (!key) return null;
+  const res = await fetchWithBackoff(
+    `${BASE}/PropertyDetail`,
+    {
+      method: "POST",
+      headers: {
+        "x-api-key": key,
+        "x-user-id": "deedpilot",
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ address }),
+    },
+    { provider: "realestateapi" },
+  );
+  const text = await res.text();
+  let env: DetailEnvelope = {};
+  try {
+    env = JSON.parse(text) as DetailEnvelope;
+  } catch {
+    /* Non-JSON body — the status checks below decide. */
+  }
+  assertUsable(res.status, env, text);
+  const data = env.data;
+  if ((env.statusCode ?? res.status) !== 200 || !data || typeof data !== "object" || Array.isArray(data)) {
+    return null;
+  }
+  const record = data as Record<string, unknown>;
+  const typed = /^\s*(\d+)/.exec(address)?.[1];
+  const house = str(obj(obj(record.propertyInfo).address).house);
+  if (typed && house && typed !== house) return null;
+  return Object.keys(record).length ? record : null;
+}
+
+/**
  * Throw when the *provider* is unusable, as opposed to the parcel being absent.
  *
  * 401/403 are terminal: a rejected key is rejected again in four seconds.

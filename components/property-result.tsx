@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { SearchedProperty } from "@/lib/property/providers/websearch";
+import type { ReapiExtras } from "@/lib/property/address-lookup";
 import { ParcelImagery } from "./parcel-imagery";
 
 /**
@@ -25,6 +26,10 @@ export interface ResultProps {
   ageHours?: number;
   /** Resolved by the geocoder, not stated by a source. Absent when unplaceable. */
   location?: { lat: number; lon: number; matched: string };
+  /** Which source answered: a county record through RealEstateAPI, or a web search. */
+  source?: "realestateapi" | "web";
+  /** Figures only a record carries. */
+  extras?: ReapiExtras;
 }
 
 const money = (n: number | null | undefined) =>
@@ -131,10 +136,34 @@ function SpecStrip({ p }: { p: SearchedProperty }) {
   );
 }
 
-function Remaining({ p }: { p: SearchedProperty }) {
+const yesNo = (b: boolean | null | undefined) => (b === null || b === undefined ? null : b ? "Yes" : "No");
+
+function Remaining({ p, extras }: { p: SearchedProperty; extras?: ReapiExtras }) {
   return (
     <div className="min-w-0 flex-1">
       <dl className="grid gap-x-10 gap-y-5 sm:grid-cols-2">
+        {extras ? (
+          <>
+            <Field label="Assessed value" value={money(extras.assessedValue)} />
+            <Field
+              label="Estimated equity"
+              value={
+                extras.estimatedEquity !== null
+                  ? `${money(extras.estimatedEquity)}${extras.equityPercent !== null ? ` (${extras.equityPercent}%)` : ""}`
+                  : null
+              }
+            />
+            <Field
+              label="Open mortgage"
+              value={extras.openMortgageBalance !== null ? (money(extras.openMortgageBalance) ?? "$0") : null}
+            />
+            <Field label="Owner occupied" value={yesNo(extras.ownerOccupied)} />
+            <Field label="Absentee owner" value={yesNo(extras.absenteeOwner)} />
+            <Field label="Tax delinquent since" value={extras.taxDelinquentYear} />
+            <Field label="Parcel number" value={extras.apn} />
+            <Field label="County" value={extras.county} />
+          </>
+        ) : null}
         <Field label="Type" value={p.propertyType} />
         <Field label="Status" value={p.status} />
         <Field label="Last sale" value={money(p.lastSaleAmount)} />
@@ -184,10 +213,12 @@ function Listing({
   p,
   location,
   caption,
+  extras,
 }: {
   p: SearchedProperty;
   location?: ResultProps["location"];
   caption?: string | null;
+  extras?: ReapiExtras;
 }) {
   return (
     <div className="mt-6 flex flex-col gap-8 lg:flex-row lg:items-start">
@@ -200,7 +231,7 @@ function Listing({
         longitude={location?.lon}
         caption={caption}
       />
-      <Remaining p={p} />
+      <Remaining p={p} extras={extras} />
     </div>
   );
 }
@@ -213,7 +244,15 @@ function Card({ children }: { children: ReactNode }) {
   );
 }
 
-export function PropertyResult({ data: p, citations, ageHours = 0, location }: ResultProps) {
+export function PropertyResult({
+  data: p,
+  citations,
+  ageHours = 0,
+  location,
+  source = "web",
+  extras,
+}: ResultProps) {
+  const fromRecord = source === "realestateapi";
   const exact = p.found && p.confidence !== "none";
 
   /*
@@ -278,7 +317,11 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
               : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
           }`}
         >
-          {p.confidence === "stated" ? "stated by a source" : "derived from comparables"}
+          {fromRecord
+            ? "county record"
+            : p.confidence === "stated"
+              ? "stated by a source"
+              : "derived from comparables"}
         </span>
       </div>
 
@@ -288,8 +331,9 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
         </p>
       )}
       <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-muted">
-        Estimated market value. This is <strong className="text-foreground">not</strong> an
-        assessed value and is not used to price a bid.
+        Estimated market value{fromRecord ? " from RealEstateAPI's valuation model" : ""}. This is{" "}
+        <strong className="text-foreground">not</strong> an assessed value and is not used to price
+        a bid.
         {ageHours > 0 && (
           <>
             {" "}
@@ -303,18 +347,25 @@ export function PropertyResult({ data: p, citations, ageHours = 0, location }: R
       </p>
 
       <SpecStrip p={p} />
-      <Listing p={p} location={location} caption={location?.matched ?? p.addressLine} />
+      <Listing
+        p={p}
+        location={location}
+        caption={location?.matched ?? p.addressLine}
+        extras={extras}
+      />
 
       <div className="mt-8 border-t border-border pt-6">
-        <h4 className="font-display text-lg font-medium text-foreground">What was read</h4>
+        <h4 className="font-display text-lg font-medium text-foreground">
+          {fromRecord ? "Source" : "What was read"}
+        </h4>
         <p className="mt-2 text-base leading-relaxed text-foreground">{p.basis}</p>
         <Sources citations={citations} />
       </div>
 
       <p className="mt-6 text-sm leading-relaxed text-muted">
-        Figures come from public web sources read at the time of the search, not from a licensed
-        data provider, and are an as-is estimate rather than an after-repair value. Verify against
-        the county record before bidding.
+        {fromRecord
+          ? "Figures come from the county assessor record and RealEstateAPI's valuation model, not an appraisal, and the value is an as-is estimate rather than an after-repair value. Equity and mortgage are modelled from recorded loans. Verify against the county record before bidding."
+          : "Figures come from public web sources read at the time of the search, not from a licensed data provider, and are an as-is estimate rather than an after-repair value. Verify against the county record before bidding."}
       </p>
     </Card>
   );

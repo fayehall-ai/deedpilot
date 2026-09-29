@@ -163,6 +163,8 @@ export function PropertySearch() {
             citations={state.citations}
             ageHours={state.ageHours}
             location={state.location}
+            source={state.source}
+            extras={state.extras}
           />
         </div>
       )}

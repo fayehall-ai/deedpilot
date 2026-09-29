@@ -1,6 +1,7 @@
 "use server";
 
 import type { SearchedProperty } from "@/lib/property/providers/websearch";
+import type { ReapiExtras } from "@/lib/property/address-lookup";
 
 /**
  * Look up a property for the home-page search box.
@@ -9,6 +10,11 @@ import type { SearchedProperty } from "@/lib/property/providers/websearch";
  * the box that asked for it and the address stays in the field. The previous
  * design sent the reader to `/property?q=…`, which lost the query from the input
  * and made a twenty-second search feel like a page that had gone somewhere else.
+ *
+ * RealEstateAPI answers first: the county record and a valuation in about a
+ * second. The web search — twenty seconds and more, figures read off listing
+ * pages — runs only when RealEstateAPI has no record for the address, or is
+ * unavailable.
  */
 
 export interface LookupState {
@@ -26,6 +32,10 @@ export interface LookupState {
    * number, or anything else the address file cannot place.
    */
   location?: { lat: number; lon: number; matched: string };
+  /** Which source answered — the card words its caveats to match. */
+  source?: "realestateapi" | "web";
+  /** Record-only figures, when RealEstateAPI answered. */
+  extras?: ReapiExtras;
   error?: string;
 }
 
@@ -87,6 +97,36 @@ export async function lookupProperty(
     return hit ? { lat: hit.lat, lon: hit.lon, matched: hit.matched } : undefined;
   };
 
+  /*
+   * RealEstateAPI first. Cached under its own key, so a record and a web
+   * answer for the same address never stand in for each other, and so a
+   * repeated search is not billed twice. A miss or an outage falls through.
+   */
+  try {
+    const cache = await import("@/lib/property/lookup-cache");
+    const recordKey = `realestateapi: ${query}`;
+    type Stored = { found: boolean; data: SearchedProperty; extras: ReapiExtras; location?: LookupState["location"] };
+    const hit = await cache.getCached<Stored>(recordKey);
+    if (hit?.result.found) {
+      const { data, extras, location } = hit.result;
+      return { query, data, extras, location, citations: [], ageHours: hit.ageHours, source: "realestateapi" };
+    }
+    const { reapiLookup } = await import("@/lib/property/address-lookup");
+    const found = await timeout(reapiLookup(query), 15_000);
+    if (found) {
+      const { recordUsage } = await import("@/lib/ai/usage");
+      void recordUsage({ provider: "realestateapi", operation: "property-lookup", requests: 1 });
+      const location = found.location ?? (await located());
+      const stored: Stored = { found: true, data: found.data, extras: found.extras, location };
+      await cache.putCached(recordKey, stored, []);
+      return { query, data: found.data, extras: found.extras, citations: [], ageHours: 0, location, source: "realestateapi" };
+    }
+  } catch (e) {
+    console.warn(
+      `[lookup] RealEstateAPI did not answer; using the web search: ${e instanceof Error ? e.message : e}`,
+    );
+  }
+
   try {
     const [{ retrievePhase, extractPhase }, cache] = await Promise.all([
       import("@/lib/property/providers/websearch"),
@@ -101,6 +141,7 @@ export async function lookupProperty(
         citations: cached.citations,
         ageHours: cached.ageHours,
         location: await located(),
+        source: "web",
       };
     }
 
@@ -111,7 +152,7 @@ export async function lookupProperty(
       Math.max(5_000, BUDGET_MS - (Date.now() - started)),
     );
     await cache.putCached(query, data, citations);
-    return { query, data, citations, ageHours: 0, location: await located() };
+    return { query, data, citations, ageHours: 0, location: await located(), source: "web" };
   } catch (e) {
     return { query, error: e instanceof Error ? e.message : String(e) };
   }
