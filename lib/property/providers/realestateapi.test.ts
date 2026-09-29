@@ -18,6 +18,7 @@ import {
   extraApnCandidates,
   inCounty,
   locality,
+  parseTypedAddress,
   addressParts,
   realestateapiProvider,
 } from "./realestateapi";
@@ -185,6 +186,18 @@ async function main() {
   eq(cands[1], "292130357806040", "stripped variant second");
   eq(apnCandidates("292130357806040").length, 1, "no separators means no second attempt");
   eq(apnCandidates("   ").length, 0, "blank parcel yields nothing");
+
+  // Addresses as people type them into the home-page search.
+  eq(
+    JSON.stringify(parseTypedAddress("2930 Cowley Way Unit 211, San Diego 92117")),
+    JSON.stringify({ house: "2930", street: "Cowley Way", unit: "211", zip: "92117" }),
+    "unit and ZIP, no state",
+  );
+  eq(parseTypedAddress("2930 Cowley Way #211, San Diego, CA 92117")?.unit, "211", "# unit");
+  eq(parseTypedAddress("12 Elm St Apt 4B, 30349")?.unit, "4B", "Apt unit");
+  eq(parseTypedAddress("2201 Crossrail Dr, Atlanta GA 30349")?.street, "Crossrail Dr", "no unit");
+  eq(parseTypedAddress("2201 Crossrail Dr, Atlanta GA 30349")?.zip, "30349", "ZIP");
+  eq(parseTypedAddress("Crossrail Dr, Atlanta"), null, "no house number");
 
   // Localities as lists print them.
   const ny = { state: "NY", fips: "36077", countyName: "Otsego" };

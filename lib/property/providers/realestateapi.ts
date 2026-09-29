@@ -295,37 +295,79 @@ export function inCounty(d: Record<string, unknown>, input: EnrichInput): boolea
 export async function detailByAddress(address: string): Promise<Record<string, unknown> | null> {
   const key = (process.env.REALESTATEAPI_API_KEY ?? "").trim();
   if (!key) return null;
-  const res = await fetchWithBackoff(
-    `${BASE}/PropertyDetail`,
-    {
-      method: "POST",
-      headers: {
-        "x-api-key": key,
-        "x-user-id": "deedpilot",
-        "Content-Type": "application/json",
-        Accept: "application/json",
+
+  const ask = async (body: Record<string, unknown>): Promise<Record<string, unknown> | null> => {
+    const res = await fetchWithBackoff(
+      `${BASE}/PropertyDetail`,
+      {
+        method: "POST",
+        headers: {
+          "x-api-key": key,
+          "x-user-id": "deedpilot",
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(body),
       },
-      body: JSON.stringify({ address }),
-    },
-    { provider: "realestateapi" },
-  );
-  const text = await res.text();
-  let env: DetailEnvelope = {};
-  try {
-    env = JSON.parse(text) as DetailEnvelope;
-  } catch {
-    /* Non-JSON body — the status checks below decide. */
-  }
-  assertUsable(res.status, env, text);
-  const data = env.data;
-  if ((env.statusCode ?? res.status) !== 200 || !data || typeof data !== "object" || Array.isArray(data)) {
-    return null;
-  }
-  const record = data as Record<string, unknown>;
+      { provider: "realestateapi" },
+    );
+    const text = await res.text();
+    let env: DetailEnvelope = {};
+    try {
+      env = JSON.parse(text) as DetailEnvelope;
+    } catch {
+      /* Non-JSON body — the status checks below decide. */
+    }
+    assertUsable(res.status, env, text);
+    const data = env.data;
+    if ((env.statusCode ?? res.status) !== 200 || !data || typeof data !== "object" || Array.isArray(data)) {
+      return null;
+    }
+    return Object.keys(data).length ? (data as Record<string, unknown>) : null;
+  };
+
+  /*
+   * As typed first. Then, when that is refused, in parts. The free-text parser
+   * needs a state to find the city and ZIP: "2930 Cowley Way Unit 211, San
+   * Diego 92117" came back 400 "must contain at least one of [zip, city]" and
+   * the search fell through to the web. House, street, unit and ZIP alone are
+   * accepted — a city in parts demands a state too, so it is left out.
+   */
+  const parts = parseTypedAddress(address);
+  const record =
+    (await ask({ address })) ??
+    (parts?.zip
+      ? await ask({ house: parts.house, street: parts.street, zip: parts.zip, ...(parts.unit ? { unit: parts.unit } : {}) })
+      : null);
+  if (!record) return null;
+
   const typed = /^\s*(\d+)/.exec(address)?.[1];
   const house = str(obj(obj(record.propertyInfo).address).house);
   if (typed && house && typed !== house) return null;
-  return Object.keys(record).length ? record : null;
+  return record;
+}
+
+/**
+ * House, street, unit and ZIP out of an address as someone types it:
+ * "2930 Cowley Way Unit 211, San Diego 92117", "12 Elm St #4, 30349".
+ * Null when the first segment does not start with a house number.
+ */
+export function parseTypedAddress(
+  input: string,
+): { house: string; street: string; unit?: string; zip?: string } | null {
+  const [first] = input.split(",");
+  const m = /^\s*(\d+[A-Z]?)\s+(.+?)(?:\s+(?:unit|apt\.?|apartment|suite|ste\.?|#)\s*#?\s*([\w-]+)|\s*#\s*([\w-]+))?\s*$/i.exec(
+    first ?? "",
+  );
+  if (!m) return null;
+  const zip = /\b(\d{5})(?:-\d{4})?\s*$/.exec(input)?.[1];
+  const unit = m[3] ?? m[4];
+  return {
+    house: m[1],
+    street: m[2].trim(),
+    ...(unit ? { unit } : {}),
+    ...(zip ? { zip } : {}),
+  };
 }
 
 /**
