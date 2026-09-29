@@ -42,43 +42,6 @@ export function streetViewLocation(lot: {
 export interface StreetViewMeta {
   /** YYYY-MM when Google photographed it — shown, because a 2019 photo is not today. */
   date: string | null;
-  panoId: string | null;
-  /** Where the camera stood. */
-  lat: number | null;
-  lng: number | null;
-}
-
-/**
- * Key for the interactive Street View embed, which sits in the page's HTML.
- *
- * A separate key from the server's on purpose: this one must be restricted to
- * the site's domain, and a domain-restricted key refuses server calls, which
- * send no referrer — so the metadata check needs the other. Unset, the page
- * falls back to the static photograph.
- */
-export function streetViewEmbedKey(): string | null {
-  return (process.env.GOOGLE_MAPS_EMBED_KEY ?? "").trim() || null;
-}
-
-/**
- * Compass bearing from the camera to the parcel, so the panorama opens facing
- * the house. The parcel point is the lot's centroid, not its front door, so it
- * can sit a little off — the viewer can be turned.
- */
-export function headingTo(from: { lat: number; lng: number }, to: { lat: number; lng: number }): number {
-  const r = Math.PI / 180;
-  const y = Math.sin((to.lng - from.lng) * r) * Math.cos(to.lat * r);
-  const x =
-    Math.cos(from.lat * r) * Math.sin(to.lat * r) -
-    Math.sin(from.lat * r) * Math.cos(to.lat * r) * Math.cos((to.lng - from.lng) * r);
-  return Math.round(((Math.atan2(y, x) / r + 360) % 360) * 10) / 10;
-}
-
-/** The interactive panorama, free under the Maps Embed API. */
-export function streetViewEmbedUrl(opts: { panoId: string; heading?: number; key: string }): string {
-  const q = new URLSearchParams({ key: opts.key, pano: opts.panoId, pitch: "0", fov: "80" });
-  if (opts.heading !== undefined) q.set("heading", String(opts.heading));
-  return `https://www.google.com/maps/embed/v1/streetview?${q}`;
 }
 
 /** Whether Google has an outdoor photograph near the address. Free. */
@@ -89,20 +52,8 @@ export async function streetViewMetadata(location: string): Promise<StreetViewMe
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
-    const body = (await res.json()) as {
-      status?: string;
-      date?: string;
-      pano_id?: string;
-      location?: { lat?: number; lng?: number };
-    };
-    return body.status === "OK"
-      ? {
-          date: body.date ?? null,
-          panoId: body.pano_id ?? null,
-          lat: body.location?.lat ?? null,
-          lng: body.location?.lng ?? null,
-        }
-      : null;
+    const body = (await res.json()) as { status?: string; date?: string };
+    return body.status === "OK" ? { date: body.date ?? null } : null;
   } catch {
     return null;
   }
@@ -110,12 +61,18 @@ export async function streetViewMetadata(location: string): Promise<StreetViewMe
 
 /** The image request. Billed per call. */
 export function streetViewImageUrl(location: string, key: string): string {
+  /*
+   * The house, not the street. Google caps the image at 640 pixels, so they
+   * are spent on the building: a 50° field of view framed 2201 Crossrail Dr
+   * from roof to front steps, where 70° spread the same pixels across both
+   * neighbours and read as a smudge. Tilted up a little for a two-storey front.
+   */
   return `${BASE}?${new URLSearchParams({
-    size: "640x400",
+    size: "640x480",
     location,
     source: "outdoor",
-    fov: "70",
-    pitch: "5",
+    fov: "50",
+    pitch: "8",
     key,
   })}`;
 }

@@ -375,8 +375,6 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             <StreetView
               lotId={lot.id}
               location={streetViewLocation({ ...lot, state: county.state })}
-              latitude={lot.latitude ? Number(lot.latitude) : null}
-              longitude={lot.longitude ? Number(lot.longitude) : null}
             />
           </Suspense>
 
