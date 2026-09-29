@@ -9,7 +9,7 @@
  * grid still and opens a window. Same move: the cell stays four rows tall,
  * and the rest of the day is a dialog at body size, not 11px.
  */
-import { useId, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import Link from "next/link";
 import { money, num, saleTypeColor } from "@/lib/format";
 
@@ -49,6 +49,20 @@ export function DaySalesDialog({
   function close() {
     dialogRef.current?.close();
   }
+
+  /*
+   * Closed when the calendar goes away, not only when someone presses ×.
+   *
+   * `showModal()` makes everything outside the dialog inert. Picking a sale
+   * navigates without closing it, and the router keeps the calendar mounted
+   * but hidden for the back button — so the modal stayed open, invisible, and
+   * every link on the sale page it led to was dead until a reload. Hiding a
+   * kept route runs effect cleanup, so this closes it on the way out.
+   */
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    return () => dialog?.close();
+  }, []);
 
   return (
     <>
@@ -115,6 +129,7 @@ export function DaySalesDialog({
             <li key={row.id}>
               <Link
                 href={`/auctions/${row.id}`}
+                onClick={close}
                 className={[
                   "flex items-start gap-4 rounded-lg px-4 py-3.5 text-2xl leading-snug transition-colors hover:bg-surface-2",
                   row.cancelled ? "text-muted line-through" : "",
