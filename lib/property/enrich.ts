@@ -263,10 +263,14 @@ export async function applyRecordToLot(lotId: string, record: PropertyRecord): P
   // tax assessments when we only wanted a RentCast market valuation row.
   const assessed = record.assessedValue;
 
+  /*
+   * A house number and a street, or nothing. RealEstateAPI returns a bare
+   * state for a parcel with no situs address, and the old test — any letter or
+   * digit — wrote "SC" over 100 Florence County addresses and "OR" and "KY"
+   * over others.
+   */
   const addressOk =
-    record.addressLine &&
-    /[A-Za-z0-9]/.test(record.addressLine) &&
-    !/^,\s*,/.test(record.addressLine.trim());
+    record.addressLine && /^[1-9]\d*[A-Z]?\s+\S/i.test(record.addressLine.trim());
 
   await db
     .update(lots)

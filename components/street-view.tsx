@@ -8,9 +8,15 @@
  */
 import { streetViewMetadata } from "@/lib/property/streetview";
 
-export async function StreetView({ lotId, location }: { lotId: string; location: string | null }) {
+export async function StreetView({
+  lotId,
+  location,
+}: {
+  lotId: string;
+  location: { query: string; label: string } | null;
+}) {
   if (!location) return null;
-  const meta = await streetViewMetadata(location);
+  const meta = await streetViewMetadata(location.query);
   if (!meta) return null;
 
   const taken = meta.date
@@ -28,7 +34,7 @@ export async function StreetView({ lotId, location }: { lotId: string; location:
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`/api/lots/${lotId}/streetview`}
-          alt={`Street view of ${location}`}
+          alt={`Street view of ${location.label}`}
           width={640}
           height={480}
           loading="lazy"
@@ -41,7 +47,7 @@ export async function StreetView({ lotId, location }: { lotId: string; location:
           </span>
         ) : null}
         <a
-          href={`https://www.google.com/maps/search/?${new URLSearchParams({ api: "1", query: location })}`}
+          href={`https://www.google.com/maps/search/?${new URLSearchParams({ api: "1", query: location.query })}`}
           target="_blank"
           rel="noopener noreferrer"
           className="absolute bottom-3 right-3 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-medium text-ink-fg backdrop-blur transition-colors hover:bg-ink/85"
@@ -50,7 +56,7 @@ export async function StreetView({ lotId, location }: { lotId: string; location:
         </a>
       </div>
       <figcaption className="border-t border-border/70 px-4 py-3 text-sm text-muted">
-        Google Street View of {location}. It shows the house as photographed
+        Google Street View of {location.label}. It shows the house as photographed
         {taken ? ` in ${taken}` : ""}, not as it is now.
       </figcaption>
     </figure>

@@ -21,22 +21,35 @@ export function streetViewKey(): string | null {
 }
 
 /**
- * The address to aim at, or null when there is nothing a camera can face: no
- * house number, or no city or ZIP to say which street of that name it is. A
- * street name alone matches the whole road.
+ * What to aim at, and how to name it on the page.
+ *
+ * The address when it can be used — a house number, and a city or ZIP to say
+ * which street of that name; Google then turns the camera to the building. A
+ * street name alone matches the whole road. Without one, the parcel's
+ * coordinates, so an enriched parcel with no usable address — land, mostly —
+ * still shows the road frontage nearest it.
  */
 export function streetViewLocation(lot: {
   addressLine: string | null;
   city: string | null;
   zip: string | null;
   state: string;
-}): string | null {
+  latitude?: string | number | null;
+  longitude?: string | number | null;
+}): { query: string; label: string } | null {
   const street = lot.addressLine?.trim();
-  if (!street || !/^[1-9]\d*[A-Z]?\s+\S/i.test(street)) return null;
   const city = lot.city?.trim();
   const zip = lot.zip?.trim();
-  if (!city && !zip) return null;
-  return [street, city, [lot.state, zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+  if (street && /^[1-9]\d*[A-Z]?\s+\S/i.test(street) && (city || zip)) {
+    const address = [street, city, [lot.state, zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+    return { query: address, label: address };
+  }
+  const lat = Number(lot.latitude);
+  const lng = Number(lot.longitude);
+  if (lot.latitude != null && lot.longitude != null && Number.isFinite(lat) && Number.isFinite(lng)) {
+    return { query: `${lat},${lng}`, label: "the road nearest this parcel" };
+  }
+  return null;
 }
 
 export interface StreetViewMeta {

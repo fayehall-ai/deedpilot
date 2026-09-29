@@ -19,7 +19,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     : null;
   if (!key || !location) return new Response(null, { status: 404 });
 
-  const res = await fetch(streetViewImageUrl(location, key), { signal: AbortSignal.timeout(10_000) });
+  const res = await fetch(streetViewImageUrl(location.query, key), { signal: AbortSignal.timeout(10_000) });
   const type = res.headers.get("content-type") ?? "";
   if (!res.ok || !type.startsWith("image/")) return new Response(null, { status: 502 });
 
