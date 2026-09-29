@@ -15,6 +15,7 @@ import { z } from "zod";
 import { runStructured, NoProviderAvailableError } from "../ai/providers";
 import type { DiscoveredLot } from "./types";
 import type { RenderedPage } from "./render";
+import { cleanAddressLine } from "./clean-address";
 
 const ExtractedLotSchema = z.object({
   parcelNumber: z
@@ -242,7 +243,7 @@ ${chunk}`,
         externalId: identityOf(l),
         lotNumber: l.lotNumber ?? undefined,
         ownerName: l.ownerName ?? undefined,
-        addressLine: l.addressLine ?? undefined,
+        addressLine: cleanAddressLine(l.addressLine),
         city: l.city ?? undefined,
         openingBid: l.openingBid ?? undefined,
         legalDescription: l.legalDescription ?? undefined,
@@ -353,7 +354,7 @@ and say which it is in note.`,
         externalId: identityOf(l),
         lotNumber: l.lotNumber ?? undefined,
         ownerName: l.ownerName ?? undefined,
-        addressLine: l.addressLine ?? undefined,
+        addressLine: cleanAddressLine(l.addressLine),
         city: l.city ?? undefined,
         openingBid: l.openingBid ?? undefined,
         legalDescription: l.legalDescription ?? undefined,

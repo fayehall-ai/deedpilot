@@ -35,12 +35,14 @@
 import type { EnrichInput, PropertyProvider, PropertyRecord } from "../types";
 import { ProviderUnavailableError } from "../types";
 import { fetchWithBackoff } from "../retry";
+import { cleanAddressLine } from "../../ingest/clean-address";
 
 const BASE = "https://api.realestateapi.com/v2";
 
 /** Shape of the envelope every PropertyDetail response arrives in. */
 interface DetailEnvelope {
-  data?: Record<string, unknown>;
+  /** An object from PropertyDetail; an array of ids from an `ids_only` search. */
+  data?: unknown;
   statusCode?: number;
   statusMessage?: string;
   error?: string;
@@ -75,14 +77,57 @@ export function apnCandidates(parcel: string): string[] {
 }
 
 /** Full-address string in the "123 Main St, Arlington VA 22205" form docs want. */
+/**
+ * Parcel numbers the list does not print as such, from county-specific shapes.
+ *
+ * - Klamath County, OR prints the map tax lot run together (`3610001D002600`);
+ *   its assessor indexes `R-3610-001D0-02600-000`. 131 of 164 missed on it.
+ * - Marion County, OR lists put the map tax lot (`073W27CD07200`) in the
+ *   address column and an account number in the parcel column. 57 of 82 missed.
+ */
+export function extraApnCandidates(input: EnrichInput): string[] {
+  const out: string[] = [];
+  const parcel = input.parcelNumber?.trim() ?? "";
+  const klamath = /^(\d{4})(\d{3}[A-Z0-9]{2})(\d{5})$/i.exec(parcel);
+  if (input.fips === "41035" && klamath) {
+    out.push(`R-${klamath[1]}-${klamath[2].toUpperCase()}-${klamath[3]}-000`);
+  }
+  const addr = input.addressLine?.trim() ?? "";
+  if (input.state === "OR" && /^[0-9]{1,3}[NS]?[0-9]{0,2}[EW][0-9]{2}[A-Z0-9]{0,3}[0-9]{5}$/i.test(addr)) {
+    out.push(addr.toUpperCase());
+  }
+  return out;
+}
+
+/**
+ * House number and street, for a search scoped by county when the list gives
+ * no city or ZIP — Burnett County, WI prints a short account number and
+ * "7093 STATE RD 70" with nothing after it. Null when the line is not one
+ * clean address ("125 BENSON AVE W ; 137 BENSON AVE W", or a bare "2025").
+ */
+export function addressParts(line: string | null | undefined): { house: string; street: string } | null {
+  /*
+   * Burnett's list also leaks the tax year into the address column: "2025
+   * 27175 ENGEBRETSON RD" is 27175 Engebretson Rd. See clean-address.ts.
+   */
+  const cleaned = cleanAddressLine(line) ?? "";
+  const m = /^(\d+[A-Z]?)\s+([A-Za-z0-9 .'-]*[A-Za-z][A-Za-z0-9 .'-]*)$/.exec(cleaned);
+  return m ? { house: m[1], street: m[2].trim() } : null;
+}
+
 export function buildAddress(input: EnrichInput): string | null {
   const street = input.addressLine?.trim();
   if (!street) return null;
-  const tail = [input.city?.trim(), input.state, input.zip?.trim()]
-    .filter((s): s is string => Boolean(s))
-    .join(" ");
-  // Street alone matches half of America. Require a locality of some kind.
-  if (!tail) return null;
+  /*
+   * A city or a ZIP, not just the state. "1 Irving Ave, NY" was sent for a
+   * Binghamton parcel whose list printed no city, matched 1 Irving Ave in
+   * Fulton, and wrote a stranger's owner and parcel number onto the lot —
+   * 381 times in one Broome sale.
+   */
+  const city = input.city?.trim();
+  const zip = input.zip?.trim();
+  if (!city && !zip) return null;
+  const tail = [city, input.state, zip].filter((s): s is string => Boolean(s)).join(" ");
   return `${street}, ${tail}`;
 }
 
@@ -110,10 +155,12 @@ export const realestateapiProvider: PropertyProvider = {
         attempts.push({ apn, fips: input.fips });
       }
     }
+    for (const apn of extraApnCandidates(input)) attempts.push({ apn, fips: input.fips });
     const address = buildAddress(input);
     if (address) attempts.push({ address });
+    const parts = addressParts(input.addressLine);
 
-    if (attempts.length === 0) return null;
+    if (attempts.length === 0 && !parts) return null;
 
     /*
      * `answered` separates "nobody matched" from "we never got to ask".
@@ -122,9 +169,9 @@ export const realestateapiProvider: PropertyProvider = {
      * batch aborts rather than recording the run as a wall of data misses.
      */
     let answered = false;
-    for (const body of attempts) {
+    const post = async (path: string, body: Record<string, unknown>): Promise<DetailEnvelope> => {
       const res = await fetchWithBackoff(
-        `${BASE}/PropertyDetail`,
+        `${BASE}/${path}`,
         {
           method: "POST",
           headers: {
@@ -137,7 +184,6 @@ export const realestateapiProvider: PropertyProvider = {
         },
         { provider: "realestateapi" },
       );
-
       const text = await res.text();
       let env: DetailEnvelope = {};
       try {
@@ -145,18 +191,46 @@ export const realestateapiProvider: PropertyProvider = {
       } catch {
         /* Non-JSON body — fall through to the status checks below. */
       }
-
       assertUsable(res.status, env, text);
       answered = true;
-
       // Body status is authoritative; see the header comment.
-      const bodyStatus = env.statusCode ?? res.status;
-      const data = env.data;
-      if (bodyStatus === 200 && data && Object.keys(data).length > 0) {
-        return mapRecord(data);
-      }
+      return { ...env, statusCode: env.statusCode ?? res.status };
+    };
+    const detail = (env: DetailEnvelope) =>
+      env.statusCode === 200 &&
+      env.data &&
+      typeof env.data === "object" &&
+      !Array.isArray(env.data) &&
+      Object.keys(env.data).length > 0
+        ? (env.data as Record<string, unknown>)
+        : null;
+
+    for (const body of attempts) {
+      const data = detail(await post("PropertyDetail", body));
+      if (data && inCounty(data, input)) return mapRecord(data);
       // 404 (no match) or 400 (this identifier shape was rejected) — try the
       // next candidate rather than giving up on the lot.
+    }
+
+    /*
+     * Last resort: house and street within the county, when the list gives no
+     * locality a full-address lookup could use. An `ids_only` search, accepted
+     * only when it names exactly one property — a street number repeated on
+     * two roads of the same name is a guess, not a match — then the detail
+     * record by id.
+     */
+    if (parts && input.countyName && !input.city && !input.zip) {
+      const found = await post("PropertySearch", {
+        ...parts,
+        county: input.countyName,
+        state: input.state,
+        ids_only: true,
+      });
+      const ids = Array.isArray(found.data) ? found.data : [];
+      if (found.statusCode === 200 && ids.length === 1) {
+        const data = detail(await post("PropertyDetail", { id: String(ids[0]) }));
+        if (data && inCounty(data, input)) return mapRecord(data);
+      }
     }
 
     if (!answered) {
@@ -169,6 +243,23 @@ export const realestateapiProvider: PropertyProvider = {
     return null;
   },
 };
+
+/**
+ * Whether a detail record is for a parcel in the county we asked about.
+ *
+ * The APN lookup does not stay inside the fips it is given, and an address
+ * can exist in fifty counties. A record from another county is someone else's
+ * property, and `applyRecordToLot` would copy its owner, parcel number and
+ * assessment onto ours, so it is refused rather than trusted. A record that
+ * names no county is let through: the other checks are all that can be done.
+ */
+export function inCounty(d: Record<string, unknown>, input: EnrichInput): boolean {
+  const addr = obj(obj(d.propertyInfo).address);
+  const fips = str(addr.fips);
+  if (fips && input.fips) return fips === input.fips;
+  const county = str(addr.county)?.replace(/\s+(county|parish|borough)$/i, "").toLowerCase();
+  return !county || !input.countyName || county === input.countyName.toLowerCase();
+}
 
 /**
  * Throw when the *provider* is unusable, as opposed to the parcel being absent.

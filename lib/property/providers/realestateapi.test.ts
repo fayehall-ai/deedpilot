@@ -11,7 +11,15 @@
  * `lotAcres` and `lastSalePrice`, and the ISO-datetime sale date. Every one of
  * those is a coercion this mapping gets wrong if written carelessly.
  */
-import { mapRecord, apnCandidates, buildAddress, realestateapiProvider } from "./realestateapi";
+import {
+  mapRecord,
+  apnCandidates,
+  buildAddress,
+  extraApnCandidates,
+  inCounty,
+  addressParts,
+  realestateapiProvider,
+} from "./realestateapi";
 import { ProviderUnavailableError } from "../types";
 
 function assert(cond: unknown, msg: string) {
@@ -176,12 +184,46 @@ async function main() {
   eq(cands[1], "292130357806040", "stripped variant second");
   eq(apnCandidates("292130357806040").length, 1, "no separators means no second attempt");
   eq(apnCandidates("   ").length, 0, "blank parcel yields nothing");
+
+  // Another county's parcel is refused, whatever matched it.
+  const orange = { state: "FL", fips: "12095", countyName: "Orange" };
+  eq(inCounty(FIXTURE as unknown as Record<string, unknown>, orange), true, "same fips accepted");
+  eq(inCounty(FIXTURE as unknown as Record<string, unknown>, { ...orange, fips: "12117", countyName: "Seminole" }), false, "other fips refused");
+  eq(
+    buildAddress({ state: "NY", fips: "36007", countyName: "Broome", addressLine: "1 Irving Ave" }),
+    null,
+    "street + state alone is not an address: it matched Fulton for a Binghamton parcel",
+  );
   eq(
     apnCandidates("43-036-009-000-0000").join("|"),
     "43-036-009-000-0000|43-036-009|430360090000000",
     "zero-padded PA parcel: as printed, then trimmed, then stripped",
   );
   eq(apnCandidates("01-035-034").length, 2, "no zero tail, no trimmed attempt");
+
+  // County-specific shapes.
+  const base = { state: "OR", countyName: "Klamath" };
+  eq(
+    extraApnCandidates({ ...base, fips: "41035", parcelNumber: "3610001D002600" }).join("|"),
+    "R-3610-001D0-02600-000",
+    "Klamath map tax lot reformatted to its assessor's account form",
+  );
+  eq(extraApnCandidates({ ...base, fips: "41047", parcelNumber: "3610001D002600" }).length, 0, "Klamath rule is Klamath-only");
+  eq(
+    extraApnCandidates({ ...base, fips: "41047", countyName: "Marion", parcelNumber: "592058", addressLine: "073W27CD07200" }).join("|"),
+    "073W27CD07200",
+    "Marion tax lot in the address column tried as the APN",
+  );
+  eq(extraApnCandidates({ ...base, fips: "41047", addressLine: "1201 Commercial St SE" }).length, 0, "a real address is not a tax lot");
+
+  eq(JSON.stringify(addressParts("7093 STATE RD 70")), JSON.stringify({ house: "7093", street: "STATE RD 70" }), "house + street");
+  eq(addressParts("2025"), null, "a bare number is not an address");
+  eq(
+    JSON.stringify(addressParts("2025 27175 ENGEBRETSON RD")),
+    JSON.stringify({ house: "27175", street: "ENGEBRETSON RD" }),
+    "leaked tax year dropped",
+  );
+  eq(addressParts("125 BENSON AVE W ; 137 BENSON AVE W"), null, "two addresses are not one");
 
   eq(
     buildAddress({ state: "FL", fips: "12095", countyName: "Orange", addressLine: "2121 Thunderbird Trl", city: "Maitland", zip: "32751" }),
@@ -246,6 +288,50 @@ async function main() {
     });
     eq(seen.length, 3, "two APN candidates then the address");
     eq(rec?.assessedValue, 180577, "address attempt recovered the record");
+  }
+
+  // Last resort: county-scoped search by house + street, one id only, then detail by id.
+  const BURNETT = {
+    ...FIXTURE,
+    propertyInfo: {
+      ...FIXTURE.propertyInfo,
+      address: { ...FIXTURE.propertyInfo.address, county: "Burnett County", fips: "55013" },
+    },
+  };
+  {
+    const seen = stubFetch((body) =>
+      body.ids_only
+        ? { status: 200, json: { statusCode: 200, data: [309561666] } }
+        : body.id
+          ? { status: 200, json: { statusCode: 200, data: BURNETT } }
+          : { status: 200, json: { statusCode: 404, data: {} } },
+    );
+    const rec = await realestateapiProvider.lookup({
+      state: "WI",
+      fips: "55013",
+      countyName: "Burnett",
+      parcelNumber: "19734",
+      addressLine: "7093 STATE RD 70",
+    });
+    const search = seen.find((b) => b.ids_only);
+    eq(search?.county, "Burnett", "search scoped to the county");
+    eq(search?.house, "7093", "house number sent");
+    eq(seen[seen.length - 1].id, "309561666", "detail fetched by the one id");
+    assert(rec, "record returned via search");
+
+    stubFetch((body) =>
+      body.ids_only
+        ? { status: 200, json: { statusCode: 200, data: [1, 2] } }
+        : { status: 200, json: { statusCode: 404, data: {} } },
+    );
+    const amb = await realestateapiProvider.lookup({
+      state: "WI",
+      fips: "55013",
+      countyName: "Burnett",
+      parcelNumber: "19734",
+      addressLine: "7093 STATE RD 70",
+    });
+    eq(amb, null, "two candidates is a guess, not a match");
   }
 
   // ---- provider-level failures throw, so the batch aborts ----------------
