@@ -103,6 +103,32 @@ export function PropertySearch() {
               </div>
             </form>
 
+            {/*
+              The same street address in several places. Each is its own tiny
+              form on the same action, so picking one runs that search and puts
+              the full address in the box.
+            */}
+            {state?.choices && (
+              <div className="mt-4 rounded-3xl border border-border bg-surface p-4 text-foreground">
+                <p className="text-base font-medium">That address is in more than one place. Which one?</p>
+                <ul className="mt-3 space-y-2">
+                  {state.choices.map((c) => (
+                    <li key={c}>
+                      <form action={action}>
+                        <input type="hidden" name="q" value={c} />
+                        <button
+                          type="submit"
+                          className="w-full rounded-xl border border-border px-4 py-2.5 text-left text-base hover:border-accent hover:text-accent"
+                        >
+                          {c}
+                        </button>
+                      </form>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {state?.error && (
               <div className="mt-4 rounded-3xl border border-red-300 bg-red-50 p-4 text-foreground dark:border-red-900 dark:bg-red-950/40">
                 <p className="text-base font-medium">That search could not run.</p>

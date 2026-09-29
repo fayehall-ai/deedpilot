@@ -327,7 +327,26 @@ export async function detailByAddress(address: string): Promise<Record<string, u
   };
 
   /*
-   * As typed first. Then, when that is refused, in parts. The free-text parser
+   * AutoComplete first — free, and it fills in what the typist left out. Given
+   * "7714 Mocorito Ave, Las Vegas" it answers "…, Las Vegas, NV, 89113" with the
+   * property's id. One address back: fetch that record by id. The same street
+   * address in several places ("100 Main St, Springfield": Vermont and Oregon)
+   * is not ours to pick, so the caller is told to choose. Several parcels at one
+   * identical address — the White House returns three — are one address.
+   */
+  const typedHouse = /^\s*(\d+)/.exec(address)?.[1];
+  const suggestions = await autocomplete(key, address);
+  const same = suggestions.filter((x) => !typedHouse || x.house === typedHouse);
+  const places = [...new Set(same.map((x) => x.label))];
+  if (places.length > 1) throw new AmbiguousAddressError(places);
+  if (places.length === 1) {
+    const only = same.filter((x) => x.label === places[0]);
+    const found = await ask(only.length === 1 && only[0].id ? { id: only[0].id } : { address: places[0] });
+    if (found) return found;
+  }
+
+  /*
+   * As typed. Then, when that is refused, in parts. The free-text parser
    * needs a state to find the city and ZIP: "2930 Cowley Way Unit 211, San
    * Diego 92117" came back 400 "must contain at least one of [zip, city]" and
    * the search fell through to the web. House, street, unit and ZIP alone are
@@ -345,6 +364,46 @@ export async function detailByAddress(address: string): Promise<Record<string, u
   const house = str(obj(obj(record.propertyInfo).address).house);
   if (typed && house && typed !== house) return null;
   return record;
+}
+
+/** The address matches more than one place; the reader has to choose. */
+export class AmbiguousAddressError extends Error {
+  constructor(readonly choices: string[]) {
+    super(`That address matches ${choices.length} places: ${choices.join("; ")}`);
+    this.name = "AmbiguousAddressError";
+  }
+}
+
+/**
+ * RealEstateAPI's AutoComplete, for full addresses only. Free, so it is asked
+ * first; any failure answers "no suggestions" and the paid lookups decide.
+ */
+async function autocomplete(
+  key: string,
+  search: string,
+): Promise<{ id: string | null; house: string | null; label: string }[]> {
+  try {
+    const res = await fetch(`${BASE}/AutoComplete`, {
+      method: "POST",
+      headers: { "x-api-key": key, "x-user-id": "deedpilot", "Content-Type": "application/json" },
+      body: JSON.stringify({ search }),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { data?: unknown };
+    const rows = Array.isArray(body.data) ? body.data : [];
+    return rows
+      .map((r) => obj(r))
+      .filter((r) => r.searchType === "A" && str(r.title))
+      .map((r) => ({
+        id: str(r.id) ?? null,
+        house: str(r.house) ?? null,
+        // "2930 Cowley Way, Unit 211, San Diego, CA, 92117" → no comma before the state's ZIP.
+        label: String(str(r.title)).replace(/,\s*([A-Z]{2}),\s*(\d{5})$/, ", $1 $2"),
+      }));
+  } catch {
+    return [];
+  }
 }
 
 /**

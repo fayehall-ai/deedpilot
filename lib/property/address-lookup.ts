@@ -13,6 +13,7 @@
  */
 import type { SearchedProperty } from "./providers/websearch";
 import { detailByAddress, mapRecord } from "./providers/realestateapi";
+export { AmbiguousAddressError } from "./providers/realestateapi";
 
 /** What a bidder reads that a web search never reliably had. */
 export interface ReapiExtras {

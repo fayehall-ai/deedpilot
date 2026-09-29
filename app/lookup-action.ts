@@ -35,6 +35,8 @@ export interface LookupState {
   source?: "realestateapi" | "web";
   /** Record-only figures, when RealEstateAPI answered. */
   extras?: ReapiExtras;
+  /** The same street address in more than one place — the reader picks one. */
+  choices?: string[];
   /** Google's photograph of the front, when it has one near the address. */
   streetView?: { location: string; date: string | null };
   error?: string;
@@ -130,6 +132,8 @@ async function lookupInner(
     await cache.putCached(recordKey, stored, []);
     return { query, data: found.data, extras: found.extras, citations: [], ageHours: 0, location, source: "realestateapi" };
   } catch (e) {
+    const { AmbiguousAddressError } = await import("@/lib/property/address-lookup");
+    if (e instanceof AmbiguousAddressError) return { query, choices: e.choices };
     return {
       query,
       error: `The property record service did not answer (${e instanceof Error ? e.message : String(e)}). Try again in a moment.`,
