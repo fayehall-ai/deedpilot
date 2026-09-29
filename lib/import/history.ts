@@ -46,7 +46,8 @@ import { db } from "../db";
 import { adminAudit } from "../db/schema";
 
 /** How the file reached the importer. */
-export type ImportVia = "console" | "cli";
+/** `drive`: picked up from CAPE/Auction Scout on Drive by the Sunday CAPE run. */
+export type ImportVia = "console" | "cli" | "drive";
 
 /** Where an import came from and who asked for it. */
 export interface ImportContext {
@@ -246,7 +247,7 @@ export async function readImportHistory(limit = 20): Promise<ImportRecord[]> {
       at: row.createdAt,
       ok: row.action === "import.applied",
       source: row.target ?? "—",
-      via: via === "console" || via === "cli" ? via : null,
+      via: via === "console" || via === "cli" || via === "drive" ? via : null,
       actor: row.actor,
       bytes: num(d.bytes),
       stages: readStages(d),

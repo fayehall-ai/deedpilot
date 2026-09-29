@@ -77,6 +77,13 @@ export async function GET(req: NextRequest) {
   const started = Date.now();
   const log: string[] = [];
   const done: unknown[] = [];
+  /*
+   * `?drain=1`: the Sunday CAPE run. Plan nothing — no due schedules, no
+   * calendar crawl, no research, no site intel — and claim only county crawls,
+   * so the tick reads the lists the Auction Scout workbook just queued and
+   * nothing else.
+   */
+  const drainOnly = req.nextUrl.searchParams.get("drain") === "1";
 
   /*
    * Housekeeping first and cheaply: resolve runs abandoned by dead processes,
@@ -92,7 +99,7 @@ export async function GET(req: NextRequest) {
   if (dead > 0) log.push(`retired ${dead} job(s) whose worker died on every attempt`);
   /* List pages the Auction Scout found, laid over the committed registry. */
   await primeCountySources();
-  const promoted = await enqueueDueSchedules();
+  const promoted = drainOnly ? 0 : await enqueueDueSchedules();
   if (promoted > 0) log.push(`enqueued ${promoted} due schedule(s)`);
 
   /*
@@ -111,6 +118,7 @@ export async function GET(req: NextRequest) {
    * stop the pipeline entirely.
    */
   try {
+    if (drainOnly) throw new SkipPlanning();
     /*
      * Capped to what one tick can actually drain.
      *
@@ -169,7 +177,7 @@ export async function GET(req: NextRequest) {
   }
 
   while (Date.now() - started < BUDGET_MS - RESERVE_MS) {
-    const job = await claimNext(new Date(), LANES.dispatch);
+    const job = await claimNext(new Date(), drainOnly ? LANES.crawl : LANES.dispatch);
     if (!job) break;
     const outcome = await runQueuedJob(job, { onProgress: (m) => log.push(m) });
     log.push(outcome.line);

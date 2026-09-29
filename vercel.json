@@ -1,8 +1,10 @@
 {
   "crons": [
-    {
-      "path": "/api/cron/cape",
-      "schedule": "*/3 2-6 * * 1"
-    }
+    { "path": "/api/cron/scout-intake", "schedule": "0 2 * * 1" },
+    { "path": "/api/cron/crawl-drain", "schedule": "*/5 2-3 * * 1" },
+    { "path": "/api/cron/reapi-enrich", "schedule": "*/15 4-5 * * 1" },
+    { "path": "/api/cron/cape", "schedule": "*/3 6-9 * * 1" },
+    { "path": "/api/cron/frameworks", "schedule": "0 6,10 * * 1" },
+    { "path": "/api/cron/render", "schedule": "*/10 10-13 * * 1" }
   ]
 }

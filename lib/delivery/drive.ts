@@ -212,7 +212,7 @@ export function q(value: string): string {
   return `'${value.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
 }
 
-interface DriveFile {
+export interface DriveFile {
   id: string;
   name: string;
   mimeType?: string;
@@ -269,6 +269,45 @@ async function list(query: string, fields = "id,name,mimeType,webViewLink,modifi
     pageToken = page.nextPageToken;
   } while (pageToken);
   return out;
+}
+
+/**
+ * The files in a CAPE subfolder, newest first. Read side of the same client —
+ * the Sunday CAPE run reads the Auction Scout workbook from CAPE/Auction Scout.
+ */
+export async function listSubfolder(name: string): Promise<DriveFile[]> {
+  const folder = await resolveSubfolder(name);
+  const files = await list(`${q(folder)} in parents and trashed = false`);
+  return files.sort((a, b) => (b.modifiedTime ?? "").localeCompare(a.modifiedTime ?? ""));
+}
+
+const GOOGLE_SHEET_MIME = "application/vnd.google-apps.spreadsheet";
+const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+/** Whether a Drive file is a spreadsheet the workbook reader can take. */
+export function isSpreadsheet(f: Pick<DriveFile, "name" | "mimeType">): boolean {
+  return f.mimeType === GOOGLE_SHEET_MIME || f.mimeType === XLSX_MIME || /\.xlsx$/i.test(f.name);
+}
+
+/**
+ * A file's bytes. A native Google Sheet has no bytes of its own — an uploaded
+ * workbook opened in Sheets and saved becomes one — so it is exported as xlsx.
+ * Not through `call`, which parses JSON.
+ */
+export async function downloadFile(f: Pick<DriveFile, "id" | "mimeType">): Promise<Uint8Array> {
+  const url =
+    f.mimeType === GOOGLE_SHEET_MIME
+      ? // Export takes no shared-drive flag; the file id is enough.
+        `${DRIVE}/files/${encodeURIComponent(f.id)}/export?${new URLSearchParams({ mimeType: XLSX_MIME })}`
+      : driveUrl(`${DRIVE}/files/${encodeURIComponent(f.id)}`, { alt: "media" });
+  const res = await fetch(url, {
+    headers: { authorization: `Bearer ${await accessToken()}` },
+    signal: AbortSignal.timeout(120_000),
+  });
+  if (!res.ok) {
+    throw new DriveError(res.status, `Drive download ${f.id} → ${res.status}: ${(await res.text().catch(() => "")).slice(0, 300)}`);
+  }
+  return new Uint8Array(await res.arrayBuffer());
 }
 
 /**

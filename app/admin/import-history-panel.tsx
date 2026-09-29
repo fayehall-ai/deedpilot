@@ -56,7 +56,7 @@ function secs(ms: number | null): string {
 
 /** Where the file came from, in the operator's words rather than the enum's. */
 function viaLabel(via: ImportRecord["via"]): string {
-  return via === "cli" ? "terminal" : via === "console" ? "upload" : "—";
+  return via === "cli" ? "terminal" : via === "console" ? "upload" : via === "drive" ? "Google Drive" : "—";
 }
 
 /** One stage, as a count and the words for what it counted. */
