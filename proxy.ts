@@ -29,9 +29,28 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SITE_COOKIE, UNLOCK_PATH, siteGateConfigured, sitePasswordMatches } from "@/lib/site-gate/token";
 
+/**
+ * Hosts served without the password: the public domain, set in
+ * `DEEDPILOT_PUBLIC_HOSTS` as a comma-separated list ("deedpilot.app,
+ * www.deedpilot.app"). The vercel.app address stays gated, and /admin keeps its
+ * own token on every host. A forged Host header gains nothing: Vercel routes
+ * by it, so claiming the public host simply reaches the public site.
+ */
+function publicHost(request: NextRequest): boolean {
+  const hosts = (process.env.DEEDPILOT_PUBLIC_HOSTS ?? "")
+    .split(",")
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean);
+  if (hosts.length === 0) return false;
+  const host = (request.headers.get("host") ?? "").toLowerCase().replace(/:\d+$/, "");
+  return hosts.includes(host);
+}
+
 export function proxy(request: NextRequest) {
   // Unarmed: no password configured, so the site behaves exactly as before.
   if (!siteGateConfigured()) return NextResponse.next();
+
+  if (publicHost(request)) return NextResponse.next();
 
   if (sitePasswordMatches(request.cookies.get(SITE_COOKIE)?.value)) {
     return NextResponse.next();
