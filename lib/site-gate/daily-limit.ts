@@ -16,14 +16,14 @@ import { isPublicHost } from "./public-host";
 
 export type LimitedFeature = "lookup" | "streetview" | "brief";
 
-/** Per visitor and site-wide, per UTC day. */
+/** Per visitor and site-wide, per UTC day. A quarter of the first limits (2026-10-01), rounded. */
 export const DAILY_LIMITS: Record<LimitedFeature, { perVisitor: number; total: number; label: string }> = {
   /* A new address is one billed RealEstateAPI record. */
-  lookup: { perVisitor: 10, total: 300, label: "address lookups" },
+  lookup: { perVisitor: 3, total: 75, label: "address lookups" },
   /* One billed Google image; the browser keeps it a day, so revisits are free. */
-  streetview: { perVisitor: 60, total: 3000, label: "street photos" },
+  streetview: { perVisitor: 15, total: 750, label: "street photos" },
   /* One model call per brief written; a brief already written is free. */
-  brief: { perVisitor: 5, total: 150, label: "AI briefs" },
+  brief: { perVisitor: 1, total: 38, label: "AI briefs" },
 };
 
 export type LimitCheck = { ok: true } | { ok: false; message: string };
