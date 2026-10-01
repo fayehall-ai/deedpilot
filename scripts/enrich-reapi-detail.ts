@@ -4,6 +4,7 @@
  *   npm run enrich:reapi -- --dry-run          # count and cost, no calls
  *   npm run enrich:reapi                       # next 8 weeks of sales
  *   npm run enrich:reapi -- --days 28 --limit 500 --concurrency 5
+ *   npm run enrich:reapi -- --auction <uuid>[,<uuid>]   # one sale's parcels
  *
  * The pass itself is `lib/property/reapi-detail-pass.ts`, shared with the
  * Sunday CAPE run on Vercel (`/api/cron/reapi-enrich`).
@@ -21,6 +22,7 @@ runReapiDetailPass({
   days: Number(arg("days") ?? 56),
   limit: arg("limit") ? Number(arg("limit")) : undefined,
   concurrency: Number(arg("concurrency") ?? 5),
+  auctionIds: arg("auction")?.split(",").map((s) => s.trim()).filter(Boolean),
   dryRun: flag("dry-run"),
   onLog: (line) => console.log(line),
 })

@@ -13,7 +13,7 @@
  * skipped, so a stopped pass resumes where it left off without paying twice.
  * An empty wallet or rejected key stops the pass; the rest are not misses.
  */
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import { auctions, counties, lots } from "../db/schema";
 import { recordUsage } from "../ai/usage";
@@ -36,6 +36,8 @@ export interface ReapiPassOptions {
    * ask about it again.
    */
   skipAttemptedWithinHours?: number;
+  /** Only these sales' parcels — a one-off top-up for a sale that was missed. */
+  auctionIds?: string[];
   /** Count only; ask nothing. */
   dryRun?: boolean;
   onLog?: (line: string) => void;
@@ -97,6 +99,7 @@ export async function runReapiDetailPass(opts: ReapiPassOptions = {}): Promise<R
           where v.lot_id = ${lots.id} and v.source = 'realestateapi'
             and v.raw ? 'propertyInfo' and v.fetched_at > now() - interval '90 days'
         )`,
+        opts.auctionIds?.length ? inArray(auctions.id, opts.auctionIds) : undefined,
         opts.skipAttemptedWithinHours
           ? sql`(${lots.enrichmentAttemptedAt} is null
                  or ${lots.enrichmentAttemptedAt} < now() - make_interval(hours => ${opts.skipAttemptedWithinHours}::int))`
