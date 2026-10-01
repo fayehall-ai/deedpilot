@@ -117,11 +117,11 @@ async function lookupInner(
       return { query, data, extras, location, citations: [], ageHours: hit.ageHours, source: "realestateapi" };
     }
     /* Past the cache, a lookup is billed: the public domain's daily limit applies. */
-    const [{ headers }, { useDailyAllowance }] = await Promise.all([
+    const [{ headers }, { spendDailyAllowance }] = await Promise.all([
       import("next/headers"),
       import("@/lib/site-gate/daily-limit"),
     ]);
-    const allowed = await useDailyAllowance("lookup", await headers());
+    const allowed = await spendDailyAllowance("lookup", await headers());
     if (!allowed.ok) return { query, error: allowed.message };
     const { reapiLookup } = await import("@/lib/property/address-lookup");
     const found = await timeout(reapiLookup(query), 15_000);

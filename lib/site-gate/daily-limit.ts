@@ -50,7 +50,7 @@ async function bump(key: string): Promise<number> {
  * money is about to be spent — after a cache has missed — so free answers do
  * not use up the allowance.
  */
-export async function useDailyAllowance(feature: LimitedFeature, headers: Headers): Promise<LimitCheck> {
+export async function spendDailyAllowance(feature: LimitedFeature, headers: Headers): Promise<LimitCheck> {
   if (!isPublicHost(headers.get("host"))) return { ok: true };
   const limit = DAILY_LIMITS[feature];
   const visitor = createHash("sha256").update(clientIp(headers)).digest("hex").slice(0, 32);
