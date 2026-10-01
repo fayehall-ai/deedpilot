@@ -17,6 +17,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import { auctions, counties, lots } from "../db/schema";
 import { recordUsage } from "../ai/usage";
+import { isConfirmedInventory } from "../db/inventory";
 import { landOnlySql } from "../lots/land-only";
 import { applyRecordToLot } from "./enrich";
 import { realestateapiProvider } from "./providers/realestateapi";
@@ -78,6 +79,8 @@ export async function runReapiDetailPass(opts: ReapiPassOptions = {}): Promise<R
       auctionStatus: auctions.status,
       delistedAt: auctions.delistedAt,
       saleDateConfirmed: auctions.saleDateConfirmed,
+      listingKind: auctions.listingKind,
+      announcedParcelCount: auctions.announcedParcelCount,
       saleDate: auctions.saleDate,
       state: counties.state,
       fips: counties.fips,
@@ -91,7 +94,7 @@ export async function runReapiDetailPass(opts: ReapiPassOptions = {}): Promise<R
         sql`${auctions.saleDate} between current_date and current_date + ${days}::int`,
         sql`${auctions.saleType} <> 'Tax Lien'`,
         sql`${auctions.status} <> 'cancelled' and ${auctions.delistedAt} is null`,
-        eq(auctions.saleDateConfirmed, true),
+        isConfirmedInventory(),
         eq(lots.status, "pending"),
         sql`not ${landOnlySql}`,
         sql`not exists (
@@ -134,6 +137,8 @@ export async function runReapiDetailPass(opts: ReapiPassOptions = {}): Promise<R
         auctionStatus: r.auctionStatus,
         delisted: r.delistedAt !== null,
         saleDateConfirmed: r.saleDateConfirmed,
+        listingKind: r.listingKind,
+        announcedParcelCount: r.announcedParcelCount,
         lotStatus: r.lotStatus,
         addressLine: r.addressLine,
         landUse: r.landUse,

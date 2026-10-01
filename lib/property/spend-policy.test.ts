@@ -15,6 +15,8 @@ const ok: SpendFields = {
   auctionStatus: "scheduled",
   delisted: false,
   saleDateConfirmed: true,
+  listingKind: "sale_list",
+  announcedParcelCount: null,
   lotStatus: "pending",
   addressLine: "2201 CROSSRAIL DR",
   landUse: null,
@@ -30,6 +32,9 @@ eq(p({ saleType: "Hybrid" }), null, "hybrid allowed");
 eq(p({ saleType: "Tax Lien" }), "tax lien sale", "lien sale refused");
 eq(p({ auctionStatus: "cancelled" }), "sale cancelled", "cancelled sale refused");
 eq(p({ delisted: true }), "sale cancelled", "delisted sale refused");
+eq(p({ listingKind: "delinquent_list" }), "not a sale list (delinquent_list)", "delinquent roll refused");
+eq(p({ listingKind: "unknown" }), "not known to be a sale list", "unread list refused");
+eq(p({ listingKind: "unknown", announcedParcelCount: 946 }), null, "announced sale allowed");
 eq(p({ saleDateConfirmed: false }), "sale date not confirmed", "projected date refused");
 eq(p({ lotStatus: "withdrawn" }), "parcel withdrawn", "withdrawn parcel refused");
 eq(p({ lotStatus: "redeemed" }), "parcel redeemed", "redeemed parcel refused");

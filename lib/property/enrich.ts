@@ -182,6 +182,8 @@ export async function enrichLotById(
         status: auctions.status,
         delistedAt: auctions.delistedAt,
         saleDateConfirmed: auctions.saleDateConfirmed,
+        listingKind: auctions.listingKind,
+        announcedParcelCount: auctions.announcedParcelCount,
       },
     })
     .from(lots)
@@ -226,7 +228,7 @@ export async function enrichLotById(
   };
 
   /*
-   * Lien sales, cancelled sales, parcels no longer pending and land-only
+   * Lien sales, cancelled sales, lists that are not sale lists, parcels no longer pending and land-only
    * parcels are not worth a paid RealEstateAPI lookup — see spend-policy.ts.
    * The rest of the chain still runs, so the free assessor layer can fill them.
    */
@@ -235,6 +237,8 @@ export async function enrichLotById(
     auctionStatus: row.auction.status,
     delisted: row.auction.delistedAt !== null,
     saleDateConfirmed: row.auction.saleDateConfirmed,
+    listingKind: row.auction.listingKind,
+    announcedParcelCount: row.auction.announcedParcelCount,
     lotStatus: row.lot.status,
     addressLine: row.lot.addressLine,
     landUse: row.lot.landUse,
