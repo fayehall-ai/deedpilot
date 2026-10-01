@@ -908,6 +908,20 @@ export const lotObservations = pgTable(
 export type LotObservation = typeof lotObservations.$inferSelect;
 
 /**
+ * Daily counters for the paid features on the public domain. See
+ * drizzle/0008 and lib/site-gate/daily-limit.ts.
+ */
+export const dailyLimits = pgTable(
+  "daily_limits",
+  {
+    key: text("key").notNull(),
+    day: date("day").notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.key, t.day] })],
+);
+
+/**
  * Operator-tunable pipeline cadence.
  *
  * These numbers were hardcoded in three places — the plan cap in the dispatcher

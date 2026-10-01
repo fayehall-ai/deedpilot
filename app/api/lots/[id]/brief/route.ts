@@ -1,3 +1,4 @@
+import { useDailyAllowance } from "@/lib/site-gate/daily-limit";
 import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
@@ -87,6 +88,10 @@ export async function POST(
       deal,
     });
   }
+
+  /* Writing a brief is a billed model call; on the public domain it counts against the daily limit. */
+  const allowed = await useDailyAllowance("brief", request.headers);
+  if (!allowed.ok) return NextResponse.json({ error: allowed.message, deal }, { status: 429 });
 
   try {
     const { brief, model, usedFallback } = await generateBrief(input);

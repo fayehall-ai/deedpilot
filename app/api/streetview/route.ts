@@ -7,6 +7,7 @@
  * like every other route; each request is a billed image call, which the
  * browser may keep for a day.
  */
+import { useDailyAllowance } from "@/lib/site-gate/daily-limit";
 import { streetViewImageUrl, streetViewKey } from "@/lib/property/streetview";
 
 export async function GET(req: Request) {
@@ -16,6 +17,10 @@ export async function GET(req: Request) {
   if (!key || location.length > 200 || !/^\d+[A-Z]?\s+\S/i.test(location)) {
     return new Response(null, { status: 404 });
   }
+
+  /* Each image is billed; on the public domain it counts against the daily limit. */
+  const allowed = await useDailyAllowance("streetview", req.headers);
+  if (!allowed.ok) return new Response(allowed.message, { status: 429 });
 
   const res = await fetch(streetViewImageUrl(location, key), { signal: AbortSignal.timeout(10_000) });
   const type = res.headers.get("content-type") ?? "";
