@@ -76,7 +76,7 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
       "2026-09-14: 403 to our user agent, 403 to none, 200 to Chrome's, 403 for robots.txt. " +
       "Several Texas counties have moved here from the LGBS pages we crawl, which is how it " +
       "surfaced; the move does not make the new host fetchable. Getting in would mean claiming to " +
-      "be a browser, which `docs/bid4assets-capture.md` rules out.",
+      "be a browser, which this project rules out.",
   },
   {
     host: "govease.com",
@@ -86,10 +86,8 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
       "OPERATOR AGREEMENT STATED 2026-09-15: the operator reports an agreement is in place for this host. Recorded here rather than flipped to `allow`, following the bid4assets precedent: `requires_agreement` is a true statement about the host's public posture, and our permission is a fact about us, not about it. An adapter with a transport may now pass `underAgreement` to `politeFetch`. Note that the agreement does not by itself defeat the edge control measured below — a 403 to this project's user agent stays a 403 until the agreement supplies credentials, an allow-listed agent, or an API. liveauctions.govease.com/robots.txt is `User-agent: * / Disallow: /` — verified 2026-08-05. " +
       "GovEase is the widest-reach platform in the researched set (59 counties across AL, CA, IA, IN, " +
       "MO, MS, OK, PA, TN, TX, WA). The data itself is public — no login — but this entry stays " +
-      "`requires_agreement` so nothing in the ingest path can crawl it by default. The `govease` " +
-      "adapter takes the browser-capture route instead: pages are opened in the operator's own " +
-      "browser and read from data/govease-capture/, and the adapter imports node:fs rather than " +
-      "politeFetch, so there is no code path from it to this host. See docs/govease-capture.md.",
+      "`requires_agreement` so nothing in the ingest path can crawl it by default. Nothing reads " +
+      "it now: the browser-capture adapter that did was removed on 2026-10-01.",
   },
   {
     host: "bid4assets.com",
@@ -97,7 +95,7 @@ export const SOURCE_POLICIES: SourcePolicy[] = [
     minDelayMs: 5000,
     reason:
       "THE OPERATOR HOLDS AN AGREEMENT WITH THIS HOST, confirmed 2026-09-11, and " +
-      "`lib/ingest/adapters/bid4assets.ts` is the only caller that passes `underAgreement`. " +
+      "No adapter reads it: the browser-capture adapter was removed on 2026-10-01. " +
       "The decision stays `requires_agreement` rather than becoming `allow` because that is what " +
       "it is: permitted to us, on the strength of a specific agreement, and not to anyone else " +
       "reading this file. Same stance as RealAuction for everybody without one. " +

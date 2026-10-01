@@ -2,22 +2,22 @@ import type { SourceAdapter } from "../types";
 import { arkansasCoslAdapter } from "./arkansas";
 import { georgiaAdapter } from "./georgia";
 import { genericAdapter } from "./generic";
-import { goveaseAdapter } from "./govease";
 import { lgbsAdapter } from "./lgbs";
 import { missouriCollectorAdapter } from "./missouri";
 import { mvbaAdapter } from "./mvba";
 import { newMexicoPtdAdapter } from "./new-mexico";
-import { sriAdapter } from "./sri";
 import { taxSaleInfoAdapter } from "./taxsaleinfo";
 import { floridaAdapter, floridaClerksAdapter } from "./florida";
 import { clarkNvAdapter } from "./clark-nv";
 import { zeusAdapter } from "./zeus";
-import { realauctionAdapter } from "./realauction";
-import { njTaxSaleAdapter } from "./nj-taxsale";
-import { bid4assetsAdapter } from "./bid4assets";
 
 /**
  * Order is precedence. Bespoke first, generic last.
+ *
+ * Only adapters that fetch for themselves. The hand-capture adapters —
+ * RealAuction, Bid4Assets, GovEase, SRI and New Jersey's municipal sales, all
+ * read from pages saved in a browser because those sites refuse crawlers —
+ * were removed on 2026-10-01 at the operator's request.
  */
 export const ADAPTERS: SourceAdapter[] = [
   lgbsAdapter,
@@ -28,13 +28,8 @@ export const ADAPTERS: SourceAdapter[] = [
   arkansasCoslAdapter,
   newMexicoPtdAdapter,
   missouriCollectorAdapter,
-  goveaseAdapter,
-  sriAdapter,
   clarkNvAdapter,
   zeusAdapter,
-  bid4assetsAdapter,
-  realauctionAdapter,
-  njTaxSaleAdapter,
   genericAdapter,
 ];
 
@@ -55,12 +50,7 @@ export {
   arkansasCoslAdapter,
   newMexicoPtdAdapter,
   missouriCollectorAdapter,
-  goveaseAdapter,
-  sriAdapter,
   clarkNvAdapter,
   zeusAdapter,
-  bid4assetsAdapter,
-  realauctionAdapter,
-  njTaxSaleAdapter,
   genericAdapter,
 };
