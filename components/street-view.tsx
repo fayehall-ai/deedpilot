@@ -1,5 +1,5 @@
 /**
- * The front of the house on the parcel page, beside the aerial view.
+ * The front of the house, the only photograph on the parcel page.
  *
  * Renders only when Google has a photograph near the address — the metadata
  * call that decides is free — so a rural lot with no coverage shows nothing

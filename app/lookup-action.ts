@@ -102,7 +102,7 @@ async function lookupInner(
    * added to every lookup including cache hits, which are otherwise instant.
    *
    * Deliberately not part of the `timeout` race: a slow geocoder should cost
-   * the reader an aerial photo, never the valuation they actually asked for.
+   * the reader a located address, never the valuation they actually asked for.
    */
   const locating = import("@/lib/property/geocode")
     .then((m) => m.geocodeAddress(query))

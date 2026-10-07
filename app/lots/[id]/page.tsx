@@ -14,7 +14,6 @@ import { HistoricalComps } from "@/components/historical-comps";
 import { PropertyDetail } from "@/components/property-detail";
 import { PropertyDetailTabs, PropertySummary } from "@/components/property-card";
 import { buildPropertyView } from "@/lib/property/reapi-view";
-import { ParcelImagery } from "@/components/parcel-imagery";
 import { StreetViewThumb } from "@/components/street-view";
 import { streetViewLocation } from "@/lib/property/streetview";
 import { SiteIntel } from "@/components/site-intel";
@@ -351,23 +350,10 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
           <PropertyDetailTabs view={view} />
 
           {/*
-            The overhead frame, after the record. "27 acres, $4,100 opening
-            bid" describes a fortune and a mistake equally well, and the aerial
-            is the fastest way to tell which — whether anything is built,
-            whether a road reaches it. The street photo moved up into the
-            summary strip, where PropStream puts it.
-          */}
-          <ParcelImagery
-            latitude={lot.latitude ? Number(lot.latitude) : null}
-            longitude={lot.longitude ? Number(lot.longitude) : null}
-            caption={lot.addressLine ?? `parcel ${lot.parcelNumber ?? ""}`.trim()}
-          />
+            What surrounds it, after the record.
 
-          {/*
-            What surrounds it, after what it looks like.
-
-            The aerial frame shows a reader that something is next door; this
-            names it, measures it and says why it matters. On the Houston test
+            The street photo shows the front of the parcel; this names what is
+            next door, measures it and says why it matters. On the Houston test
             parcel that is a Union Pacific mainline at 344 ft, the Wallisville
             substation at 397 ft, and ten industrial parcels — none of which is
             visible in an assessment, a tax notice or a listing feed.

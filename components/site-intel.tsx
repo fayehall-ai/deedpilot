@@ -127,10 +127,8 @@ function Heading() {
   return (
     <>
       {/*
-        Not "What's around it" — the aerial frame directly above this already
-        carries a tab with that exact label, and two adjacent headings saying
-        the same words read as a duplicated section rather than as a photograph
-        followed by its explanation.
+        Not "What's around it": that was the label of the aerial frame that
+        once sat above this, and the heading was chosen to differ from it.
       */}
       <h2 className="mb-1 text-lg font-medium">Site &amp; surroundings</h2>
       <p className="mb-4 text-sm text-muted">
