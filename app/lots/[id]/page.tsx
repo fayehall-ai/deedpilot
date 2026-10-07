@@ -5,16 +5,17 @@ import type { Metadata } from "next";
 import { getCachedBrief, getLot, getLotValuations } from "@/lib/queries";
 import { computeMaxBid } from "@/lib/deal/maxbid";
 import { briefInputsHash } from "@/lib/ai/brief";
-import { money, num, relativeDays, saleDate } from "@/lib/format";
+import { money, relativeDays, saleDate } from "@/lib/format";
 import { Breadcrumbs, Callout, Card, SaleTypeBadge, StatusBadge } from "@/components/ui";
 import { DetailSkeleton } from "@/components/skeleton";
 import { DealCalculator } from "@/components/deal-calculator";
 import { ParcelBrief } from "@/components/parcel-brief";
 import { HistoricalComps } from "@/components/historical-comps";
 import { PropertyDetail } from "@/components/property-detail";
-import { RawRecord } from "@/components/raw-record";
+import { PropertyDetailTabs, PropertySummary } from "@/components/property-card";
+import { buildPropertyView } from "@/lib/property/reapi-view";
 import { ParcelImagery } from "@/components/parcel-imagery";
-import { StreetView } from "@/components/street-view";
+import { StreetViewThumb } from "@/components/street-view";
 import { streetViewLocation } from "@/lib/property/streetview";
 import { SiteIntel } from "@/components/site-intel";
 import { resolveCountyRule, countySlug, stateSlug, STATE_NAMES } from "@/lib/atlas";
@@ -177,6 +178,31 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
 
   const thinListing = !assessedValue && !lot.addressLine;
 
+  const numOrNull = (v: string | number | null | undefined) =>
+    v === null || v === undefined || v === "" ? null : Number(v);
+  const view = buildPropertyView(reapiRaw, {
+    parcelNumber: lot.parcelNumber,
+    ownerName: lot.ownerName,
+    countyName: county.name,
+    beds,
+    baths,
+    buildingSqft: lot.buildingSqft ?? latestVal?.buildingSqft ?? null,
+    lotSqft: latestVal?.lotSqft ?? null,
+    acreage: numOrNull(lot.acreage),
+    yearBuilt: lot.yearBuilt ?? latestVal?.yearBuilt ?? null,
+    landUse: lot.landUse,
+    propertyType,
+    legalDescription: lot.legalDescription,
+    assessedValue: assessedValue ?? null,
+    assessedLand: numOrNull(latestVal?.assessedLand),
+    assessedImprovement: numOrNull(latestVal?.assessedImprovement),
+    marketValue: marketValue ?? null,
+    lastSaleAmount: numOrNull(latestVal?.lastSaleAmount),
+    lastSaleDate: latestVal?.lastSaleDate ?? null,
+    openingBid: openingBid ?? null,
+    taxesOwed: numOrNull(lot.taxesOwed),
+  });
+
   return (
     <div className="shell py-band">
       <Breadcrumbs
@@ -247,6 +273,25 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
         content, and the property-detail history tables (up to 17 unwrapped
         columns) widened it to 2,700px, pushing the deal column off-screen.
       */}
+      {/*
+        PropStream's layout, because that is where bidders learned to read a
+        property: four summary cards across the top, then the record in tabs.
+        Full width, above the deal column, so the strip reads as one row.
+      */}
+      <div className="mb-6">
+        <PropertySummary
+          view={view}
+          photo={
+            <Suspense fallback={null}>
+              <StreetViewThumb
+                lotId={lot.id}
+                location={streetViewLocation({ ...lot, state: county.state })}
+              />
+            </Suspense>
+          }
+        />
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <section className="space-y-6">
           <Card>
@@ -282,70 +327,14 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
               <Figure label="Taxes owed" value={money(lot.taxesOwed)} />
             </div>
 
-            {/* Characteristics, in the width the sidebar never had. */}
-            <dl className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-3 lg:grid-cols-4">
-              <Row label="Parcel number" value={lot.parcelNumber} mono stacked />
-              <Row label="Case number" value={lot.caseNumber} mono stacked />
-              <Row label="Land use" value={lot.landUse ?? propertyType} stacked />
-              {beds !== null || baths !== null ? (
-                <Row
-                  label="Beds / baths"
-                  stacked
-                  value={[
-                    beds !== null ? `${beds} bd` : null,
-                    baths !== null ? `${baths} ba` : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                />
-              ) : null}
-              {/*
-                Sale-list value first, enrichment second. What the county
-                published about the parcel it is selling outranks what a
-                commercial database says about the same APN — the county is the
-                one holding the auction.
-              */}
-              <Row
-                label="Building"
-                value={
-                  (lot.buildingSqft ?? latestVal?.buildingSqft)
-                    ? `${num(lot.buildingSqft ?? latestVal?.buildingSqft)} sqft`
-                    : null
-                }
-                stacked
-              />
-              <Row label="Acreage" value={lot.acreage ? num(lot.acreage) : null} stacked />
-              <Row
-                label="Lot size"
-                value={latestVal?.lotSqft ? `${num(latestVal.lotSqft)} sqft` : null}
-                stacked
-              />
-              <Row
-                label="Year built"
-                value={
-                  (lot.yearBuilt ?? latestVal?.yearBuilt)
-                    ? String(lot.yearBuilt ?? latestVal?.yearBuilt)
-                    : null
-                }
-                stacked
-              />
-              <Row label="Owner of record" value={lot.ownerName} stacked />
-              {latestVal?.lastSaleAmount ? (
-                <Row
-                  label="Last sale"
-                  stacked
-                  value={`${money(latestVal.lastSaleAmount)}${
-                    latestVal.lastSaleDate ? ` · ${latestVal.lastSaleDate}` : ""
-                  }`}
-                />
-              ) : null}
-            </dl>
-
-            {lot.legalDescription ? (
-              <div className="mt-4 border-t border-border pt-3">
-                <p className="text-xs uppercase tracking-wide text-muted">Legal description</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted">{lot.legalDescription}</p>
-              </div>
+            {/*
+              The parcel's characteristics now live in the PropStream-style tabs
+              below; this card keeps only what the auction itself decides.
+            */}
+            {lot.caseNumber ? (
+              <p className="mt-3 text-sm text-muted">
+                Case number <span className="font-mono text-xs text-foreground">{lot.caseNumber}</span>
+              </p>
             ) : null}
 
             {/* Provenance stays on the card it describes, not in a footer. */}
@@ -359,38 +348,20 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
             ) : null}
           </Card>
 
-          {/*
-            What it looks like, after what it costs.
+          <PropertyDetailTabs view={view} />
 
-            The figures come first because they decide whether the parcel is
-            worth a second thought at all. But "27 acres, $4,100 opening bid"
-            describes a fortune and a mistake equally well, and the overhead
-            frame is the fastest way to tell which — whether anything is built,
-            whether a road reaches it, what it sits next to.
-
-            Renders nothing when the lot has no coordinates, which is most of
-            them until the geocoder has run over the county.
-          */}
           {/*
-            The front of the house beside the view from above — whether there
-            is a house, and what surrounds it, read at one glance. Street View
-            is behind its own boundary so a slow Google answer never holds the
-            page; either frame renders nothing when it has nothing, and the
-            other then takes the row. Stacked on narrow screens.
+            The overhead frame, after the record. "27 acres, $4,100 opening
+            bid" describes a fortune and a mistake equally well, and the aerial
+            is the fastest way to tell which — whether anything is built,
+            whether a road reaches it. The street photo moved up into the
+            summary strip, where PropStream puts it.
           */}
-          <div className="grid items-start gap-6 md:grid-cols-2 [&>*]:min-w-0 [&>*]:max-w-none">
-            <Suspense fallback={null}>
-              <StreetView
-                lotId={lot.id}
-                location={streetViewLocation({ ...lot, state: county.state })}
-              />
-            </Suspense>
-            <ParcelImagery
-              latitude={lot.latitude ? Number(lot.latitude) : null}
-              longitude={lot.longitude ? Number(lot.longitude) : null}
-              caption={lot.addressLine ?? `parcel ${lot.parcelNumber ?? ""}`.trim()}
-            />
-          </div>
+          <ParcelImagery
+            latitude={lot.latitude ? Number(lot.latitude) : null}
+            longitude={lot.longitude ? Number(lot.longitude) : null}
+            caption={lot.addressLine ?? `parcel ${lot.parcelNumber ?? ""}`.trim()}
+          />
 
           {/*
             What surrounds it, after what it looks like.
@@ -404,8 +375,6 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
           <SiteIntel signals={siteSignals} checkedSources={checkedIntelSources} />
 
           <PropertyDetail raw={attomRaw} />
-
-          <RawRecord title="Property detail" note="RealEstateAPI PropertyDetail" raw={reapiRaw} />
 
           <Card>
             <h3 className="mb-2 text-sm font-semibold">County records</h3>
