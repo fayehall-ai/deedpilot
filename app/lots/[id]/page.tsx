@@ -14,6 +14,7 @@ import { HistoricalComps } from "@/components/historical-comps";
 import { PropertyDetail } from "@/components/property-detail";
 import { PropertyDetailTabs, PropertySummary } from "@/components/property-card";
 import { buildPropertyView } from "@/lib/property/reapi-view";
+import { taxYearFromRaw } from "@/lib/lots/tax-year";
 import { StreetViewThumb } from "@/components/street-view";
 import { streetViewLocation } from "@/lib/property/streetview";
 import { SiteIntel } from "@/components/site-intel";
@@ -200,6 +201,7 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
     lastSaleDate: latestVal?.lastSaleDate ?? null,
     openingBid: openingBid ?? null,
     taxesOwed: numOrNull(lot.taxesOwed),
+    taxesOwedYear: taxYearFromRaw(lot.raw)?.label ?? null,
   });
 
   return (
@@ -330,7 +332,9 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
                 as if the parcel owed nothing.
               */}
               {lot.taxesOwed || !view.propertyTax ? (
-                <Figure label="Taxes owed" value={money(lot.taxesOwed)} />
+                <Figure label="Taxes owed" value={money(lot.taxesOwed)}>
+                  {view.taxesOwedPeriod}
+                </Figure>
               ) : (
                 <Figure
                   label={`Property tax${view.propertyTax.year ? ` ${view.propertyTax.year}` : ""}`}

@@ -164,6 +164,18 @@ const taxStat = v.opportunity.find((s) => s.label.startsWith("Property Tax"));
 eq([taxStat?.label, taxStat?.value, taxStat?.note], ["Property Tax 2026", "$4,171", "annual bill · not the amount owed"], "tax stat");
 eq(bid.opportunity.some((s) => s.label.startsWith("Property Tax")), false, "list amount owed wins");
 
+// An amount owed always says which year it covers.
+eq(bid.taxesOwedPeriod, "tax year not stated on the list", "no year anywhere");
+const listed2 = buildPropertyView(raw, { countyName: "Clark", taxesOwed: 980, taxesOwedYear: "2025" });
+eq(listed2.taxesOwedPeriod, "tax year 2025", "list year leads");
+eq(listed2.opportunity.find((s) => s.label === "Taxes Owed")?.note, "tax year 2025", "stat note");
+const since = buildPropertyView({ ...raw, taxInfo: { ...raw.taxInfo, taxDelinquentYear: "2017" } }, {
+  countyName: "Clark",
+  taxesOwed: 980,
+});
+eq(since.taxesOwedPeriod, "delinquent since 2017", "provider year second");
+eq(v.taxesOwedPeriod, null, "no amount, no period");
+
 eq(usDate("2022-04-25T00:00:00.000Z"), "04/25/2022", "usDate");
 eq(ownershipLength(12), "1 Year", "1 year");
 eq(ownershipLength(0), null, "zero months");

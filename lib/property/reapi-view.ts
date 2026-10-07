@@ -67,6 +67,8 @@ export interface LotFacts {
   /** What the auction asks: the parcel's opening bid and the taxes behind it. */
   openingBid?: number | null;
   taxesOwed?: number | null;
+  /** The tax year the list prints beside that amount ("2025", "2019–2023"), when it prints one. */
+  taxesOwedYear?: string | null;
 }
 
 export interface Stat {
@@ -91,6 +93,12 @@ export interface PropertyView {
    * bill, not the delinquency the sale collects, and is labelled as such.
    */
   propertyTax: { amount: number; year: string | null } | null;
+  /**
+   * Which year the list's "taxes owed" covers, in words: the list's own tax
+   * year first, the provider's first delinquent year second, and otherwise an
+   * admission that the list does not say. Null when there is no amount owed.
+   */
+  taxesOwedPeriod: string | null;
   /** Whether the provider record exists at all; without it only `facts` and the details tab render. */
   enriched: boolean;
   tabs: Tab[];
@@ -424,6 +432,19 @@ export function buildPropertyView(rawIn: Record<string, unknown> | null, lot: Lo
   const propertyTax = taxAmount
     ? { amount: taxAmount, year: s(ti.year) ?? s(ti.assessmentYear) }
     : null;
+  /*
+   * An amount owed is meaningless without its period: $1,154 for one year and
+   * $1,154 accumulated since 2017 are different parcels. The county's list is
+   * the authority on what the sale collects, so its year leads.
+   */
+  const delinquentSince = s(ti.taxDelinquentYear) ?? s(raw.taxDelinquentYear);
+  const taxesOwedPeriod = lot.taxesOwed
+    ? lot.taxesOwedYear
+      ? `tax year ${lot.taxesOwedYear}`
+      : delinquentSince
+        ? `delinquent since ${delinquentSince}`
+        : "tax year not stated on the list"
+    : null;
   const opportunity: Stat[] = [
     lot.openingBid ? { label: "Opening Bid", value: money(lot.openingBid) } : null,
     lot.openingBid && worth
@@ -434,7 +455,7 @@ export function buildPropertyView(rawIn: Record<string, unknown> | null, lot: Lo
         }
       : null,
     lot.taxesOwed
-      ? { label: "Taxes Owed", value: money(lot.taxesOwed) }
+      ? { label: "Taxes Owed", value: money(lot.taxesOwed), note: taxesOwedPeriod ?? undefined }
       : propertyTax
         ? {
             label: `Property Tax${propertyTax.year ? ` ${propertyTax.year}` : ""}`,
@@ -693,7 +714,7 @@ export function buildPropertyView(rawIn: Record<string, unknown> | null, lot: Lo
     ...(enriched ? [foreclosure, mls, demographics, tax, history] : []),
   ];
 
-  return { facts, status, value, debt, lastSale, opportunity, propertyTax, enriched, tabs };
+  return { facts, status, value, debt, lastSale, opportunity, propertyTax, taxesOwedPeriod, enriched, tabs };
 }
 
 const mortgageCols: [string, (e: O) => string | null][] = [
