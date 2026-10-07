@@ -57,12 +57,26 @@ const POPULATION_STOPS: { min: number; label: string }[] = [
   { min: 1_000_000, label: "1M+" },
 ];
 
+/*
+ * The map's palette, matched to The Tax Deed Collective's 50-state map
+ * (map.thetaxdeedcollective.com), which is the map our bidders already know:
+ * navy deed, cyan redeemable, yellow lien, orange hybrid, read off its SVG.
+ *
+ * Literal hex, not the site's `--type-*` tokens, and the same in both themes.
+ * Those tokens also colour the sale-type badges, where text sits on the page
+ * background — #FFE600 type on cream would be unreadable. The map fills
+ * shapes, so it can take the reference's saturated colours as they are.
+ */
 const TYPE_COLOR: Record<string, string> = {
-  "Tax Lien": "var(--type-lien)",
-  "Tax Deed": "var(--type-deed)",
-  "Redeemable Deed": "var(--type-redeemable)",
-  Hybrid: "var(--type-hybrid)",
+  "Tax Deed": "#0B2E59",
+  "Redeemable Deed": "#22C7FF",
+  "Tax Lien": "#FFE600",
+  Hybrid: "#FF8A00",
 };
+/** Counties below the population filter, as the reference greys them. */
+const FILTERED_COUNTY = "#DBE4EF";
+/** The outline on a chosen county. */
+const SELECTED_STROKE = "#12233A";
 
 export function AtlasExplorer({
   states,
@@ -357,18 +371,20 @@ export function AtlasExplorer({
                     </title>
                     <path
                       d={c.d}
+                      /*
+                       * The reference's county view: every county in the
+                       * state's sale-type colour, the ones below the population
+                       * filter greyed out. Researched-vs-defaults stays in the
+                       * tooltip and the panel rather than the fill.
+                       */
                       fill={
-                        selected
-                          ? "var(--accent)"
-                          : c.researched
-                            ? "var(--accent)"
-                            : "var(--surface-2)"
+                        dimmed && !selected
+                          ? FILTERED_COUNTY
+                          : (TYPE_COLOR[openState.saleType] ?? "var(--muted)")
                       }
-                      fillOpacity={
-                        dimmed && !selected ? 0.15 : selected ? 1 : c.researched ? 0.85 : 1
-                      }
-                      stroke={selected ? "var(--foreground)" : "var(--border)"}
-                      strokeWidth={selected ? 1.2 : 0.4}
+                      fillOpacity={dimmed && !selected ? 0.55 : 1}
+                      stroke={selected ? SELECTED_STROKE : "#fff"}
+                      strokeWidth={selected ? 1.6 : 0.4}
                       vectorEffect="non-scaling-stroke"
                       className="cursor-pointer transition-opacity hover:opacity-100"
                     />
@@ -414,9 +430,9 @@ export function AtlasExplorer({
                   <path
                     d={s.d}
                     fill={TYPE_COLOR[s.saleType] ?? "var(--muted)"}
-                    stroke="var(--surface)"
-                    strokeWidth={0.75}
-                    className="cursor-pointer opacity-80 transition-opacity hover:opacity-100"
+                    stroke="#fff"
+                    strokeWidth={0.6}
+                    className="cursor-pointer transition-[filter] hover:brightness-110"
                   />
                 </a>
               ))}
@@ -449,13 +465,17 @@ export function AtlasExplorer({
                     textAnchor={s.label.external ? "start" : "middle"}
                     dominantBaseline="central"
                     fontSize={s.label.external ? 13 : 14}
-                    fontWeight={600}
+                    fontWeight={s.label.external ? 600 : 900}
                     /*
-                     * White on the sale-type fills, which are mid-tone enough
-                     * to carry it in both themes; the gutter labels sit on the
-                     * page background and take the page's own text colour.
+                     * White with a dark outline, as the reference draws them:
+                     * the outline is what keeps white legible on its yellow
+                     * and cyan states. Gutter labels sit on the page background
+                     * and take the page's own text colour, unoutlined.
                      */
                     fill={s.label.external ? "var(--foreground)" : "#fff"}
+                    stroke={s.label.external ? undefined : "rgba(0, 0, 0, 0.55)"}
+                    strokeWidth={s.label.external ? undefined : 2.5}
+                    paintOrder="stroke"
                     className="select-none"
                   >
                     {s.abbr}
@@ -470,12 +490,14 @@ export function AtlasExplorer({
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted">
           {openState ? (
             <>
-              <Swatch color="var(--accent)" opacity={0.85} />
-              Researched individually (
-              {openState.counties.filter((c) => c.researched).length})
-              <Swatch color="var(--surface-2)" bordered />
-              Showing state defaults (
-              {openState.counties.filter((c) => !c.researched).length})
+              <Swatch color={TYPE_COLOR[openState.saleType] ?? "var(--muted)"} />
+              {openState.saleType} ({openState.counties.filter(passesPopulation).length})
+              <Swatch color={FILTERED_COUNTY} opacity={0.55} bordered />
+              Below the population filter (
+              {openState.counties.filter((c) => !passesPopulation(c)).length})
+              <span className="text-faint">
+                · {openState.counties.filter((c) => c.researched).length} researched individually
+              </span>
             </>
           ) : (
             Object.entries(TYPE_COLOR).map(([label, color]) => (
