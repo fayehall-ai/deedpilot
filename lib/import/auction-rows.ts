@@ -58,8 +58,10 @@ export interface ImportedAuction {
   externalId: string;
   stateLabel: string;
   countyLabel: string;
-  /** ISO, YYYY-MM-DD. */
+  /** ISO, YYYY-MM-DD: the day the sale opens. */
   saleDate: string;
+  /** The last day, when the export gives a later one; null for a one-day sale. */
+  saleEndDate: string | null;
   saleType: SaleType;
   platform: Platform;
   /** The venue as published: Live, Online, Simulcast, Sealed Bid. */
@@ -252,8 +254,17 @@ export function readRow(src: RowSource, line: number): RowOutcome {
   if (!stateLabel) return fail("no State");
   if (!countyLabel) return fail("no County");
 
-  const saleDate = parseSaleDate(src.cell("Sale Date"));
+  /*
+   * The opening day, preferring an explicit start column where an export has
+   * one. USTLA's own records put a multi-day sale under its closing date —
+   * Santa Clara, Oct 30 to Nov 2, is listed on Nov 2 — so a "Sale Start Date"
+   * is the better source for the day a bidder has to be there.
+   */
+  const saleDate =
+    parseSaleDate(src.cell("Sale Start Date")) ?? parseSaleDate(src.cell("Sale Date"));
   if (!saleDate) return fail(`unreadable Sale Date "${src.cell("Sale Date")}"`);
+  const endDate = parseSaleDate(src.cell("Sale End Date"));
+  const saleEndDate = endDate && endDate > saleDate ? endDate : null;
 
   const typeLabel = src.cell("Auction Type").toLowerCase().trim();
   const saleType = SALE_TYPES[typeLabel];
@@ -304,6 +315,7 @@ export function readRow(src: RowSource, line: number): RowOutcome {
       stateLabel,
       countyLabel,
       saleDate,
+      saleEndDate,
       saleType,
       platform: derivePlatform(site, venue),
       venue,

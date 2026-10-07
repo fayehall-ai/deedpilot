@@ -310,6 +310,7 @@ async function insert(tx: Tx, r: ResolvedAuction): Promise<void> {
       externalId: r.externalId,
       title: r.title,
       saleDate: r.saleDate,
+      saleEndDate: r.saleEndDate,
       /*
        * The date is confirmed. This is a county-published sale date relayed by
        * an aggregator, not a date this system projected from a state's typical
@@ -345,6 +346,13 @@ async function insert(tx: Tx, r: ResolvedAuction): Promise<void> {
       set: {
         saleType: sql`coalesce((${auctions.operatorOverrides}->>'saleType')::sale_type, excluded.sale_type)`,
         saleDate: sql`coalesce((${auctions.operatorOverrides}->>'saleDate')::date, excluded.sale_date)`,
+        /*
+         * Kept only while it still follows the start: an operator who moves the
+         * start past the file's end has said the old span is wrong.
+         */
+        saleEndDate: sql`case
+          when excluded.sale_end_date >= coalesce((${auctions.operatorOverrides}->>'saleDate')::date, excluded.sale_date)
+          then excluded.sale_end_date end`,
         startTime: sql`coalesce(${auctions.operatorOverrides}->>'startTime', excluded.start_time)`,
         title: sql`coalesce(${auctions.operatorOverrides}->>'title', excluded.title)`,
         sourceUrl: sql`excluded.source_url`,

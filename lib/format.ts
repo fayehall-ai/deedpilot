@@ -47,6 +47,34 @@ export function saleDate(iso: string | null | undefined): string {
   });
 }
 
+/**
+ * A sale's dates: "Oct 7, 2026" for one day, "Oct 30 – Nov 2, 2026" for a span.
+ * The year is written once when both ends share it.
+ */
+export function saleDateRange(start: string | null | undefined, end?: string | null): string {
+  if (!start) return "—";
+  if (!end || end <= start) return saleDate(start);
+  const md = (iso: string) => {
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", {
+      timeZone: "UTC",
+      month: "short",
+      day: "numeric",
+    });
+  };
+  return start.slice(0, 4) === end.slice(0, 4)
+    ? `${md(start)} – ${md(end)}, ${end.slice(0, 4)}`
+    : `${saleDate(start)} – ${saleDate(end)}`;
+}
+
+/** Whole days from one ISO date to another, counting both ends: Oct 30 → Nov 2 is 4. */
+export function daysSpanned(start: string, end?: string | null): number {
+  if (!end || end <= start) return 1;
+  const ms = Date.UTC(+end.slice(0, 4), +end.slice(5, 7) - 1, +end.slice(8, 10)) -
+    Date.UTC(+start.slice(0, 4), +start.slice(5, 7) - 1, +start.slice(8, 10));
+  return Math.round(ms / 86_400_000) + 1;
+}
+
 /** "in 6 days" / "today" / "3 days ago", relative to now in whole days. */
 export function relativeDays(iso: string | null | undefined): string {
   if (!iso) return "";

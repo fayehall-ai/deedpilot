@@ -14,7 +14,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { getUpcomingAuctions } from "@/lib/queries";
-import { money, num, relativeDays, saleDate, parcelsShown } from "@/lib/format";
+import { money, num, relativeDays, saleDate, saleDateRange, parcelsShown } from "@/lib/format";
 import { EmptyState, SaleTypeBadge, StatusBadge } from "@/components/ui";
 import { STATE_NAMES } from "@/lib/atlas";
 
@@ -122,7 +122,13 @@ export async function AuctionsList(props: {
                         <div className="truncate font-medium group-hover:text-accent">
                           {a.countyName} County
                         </div>
-                        <div className="text-xs text-muted">{STATE_NAMES[a.state] ?? a.state}</div>
+                        <div className="text-xs text-muted">
+                          {STATE_NAMES[a.state] ?? a.state}
+                          {/* Grouped under its opening day; a multi-day sale says when it closes. */}
+                          {a.saleEndDate && a.saleEndDate > a.saleDate
+                            ? ` · runs ${saleDateRange(a.saleDate, a.saleEndDate)}`
+                            : ""}
+                        </div>
                       </div>
                       <StatusBadge status={a.status} />
                     </div>

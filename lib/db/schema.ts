@@ -230,7 +230,13 @@ export const auctions = pgTable(
     /** The platform's own id for this sale — half of the dedupe key. */
     externalId: text("external_id").notNull(),
     title: text("title"),
+    /** The day the sale opens. The only date a one-day sale has. */
     saleDate: date("sale_date").notNull(),
+    /**
+     * The last day of a sale that runs longer than one, else null. See
+     * drizzle/0009: the calendar draws the sale on every day through it.
+     */
+    saleEndDate: date("sale_end_date"),
     /**
      * True only when the county published this date for this sale. False when
      * `nextSaleWindows` projected it from the state's typical schedule.

@@ -21,7 +21,17 @@ import {
   type CalendarAuctionRow,
   type CalendarFacet,
 } from "@/lib/queries";
-import { money, num, platformLabel, relativeDays, saleDate, saleTypeColor, parcelsShown } from "@/lib/format";
+import {
+  daysSpanned,
+  money,
+  num,
+  parcelsShown,
+  platformLabel,
+  relativeDays,
+  saleDate,
+  saleDateRange,
+  saleTypeColor,
+} from "@/lib/format";
 import { STATE_NAMES, countyLabel } from "@/lib/atlas";
 import { DaySalesDialog, type DaySaleRow } from "@/components/day-sales-dialog";
 import {
@@ -115,19 +125,49 @@ export async function CalendarView(props: {
    */
   const rows =
     filters.month === monthOf(today)
-      ? fetched.filter((r) => r.saleDate >= today)
+      ? fetched.filter((r) => (r.saleEndDate ?? r.saleDate) >= today)
       : fetched;
 
+  /*
+   * A multi-day sale sits in every square it runs through, from the day it
+   * opens. Storing only one day put Santa Clara (Oct 30 – Nov 2) on Nov 2 in
+   * the source data, three days after bidding opened. Past days of the current
+   * month stay blank, as for one-day sales; each square's copy carries which
+   * day of the run it is.
+   */
   const byDay = new Map<string, CalendarAuctionRow[]>();
   for (const r of rows) {
-    const day = byDay.get(r.saleDate);
-    if (day) day.push(r);
-    else byDay.set(r.saleDate, [r]);
+    const days = Math.min(daysSpanned(r.saleDate, r.saleEndDate), 31);
+    for (let k = 1; k <= days; k++) {
+      const iso = addDays(r.saleDate, k - 1);
+      if (iso < start || iso > end) continue;
+      if (filters.month === monthOf(today) && iso < today) continue;
+      const entry = days > 1 ? { ...r, spanDay: k, spanDays: days } : r;
+      const day = byDay.get(iso);
+      if (day) day.push(entry);
+      else byDay.set(iso, [entry]);
+    }
   }
+  /*
+   * The agenda lists a sale once, on the day it opens (or today, for one
+   * already running), with its range spelled out — repeating a four-day sale
+   * four times down a phone screen reads as four sales.
+   */
+  const byOpening = new Map<string, CalendarAuctionRow[]>();
+  for (const r of rows) {
+    const shown =
+      filters.month === monthOf(today) && r.saleDate < today ? today : r.saleDate;
+    if (shown < start || shown > end) continue;
+    const day = byOpening.get(shown);
+    if (day) day.push(r);
+    else byOpening.set(shown, [r]);
+  }
+  const agendaDays = [...byOpening.entries()].sort(([a], [b]) => a.localeCompare(b));
 
   // Headline counts describe the month, not the grid — the spillover squares
   // belong to a neighbouring month and would double-count if paged through.
-  const inMonth = rows.filter((r) => r.saleDate >= first && r.saleDate <= last);
+  // A sale counts once, if any day of it falls in the month.
+  const inMonth = rows.filter((r) => (r.saleEndDate ?? r.saleDate) >= first && r.saleDate <= last);
   // Parcels on offer, not parcels held: an imported sale contributes its
   // announced count, or the headline would read 0 for a month of real auctions.
   const lotTotal = inMonth.reduce((n, r) => n + parcelsShown(r).count, 0);
@@ -190,6 +230,13 @@ export async function CalendarView(props: {
           {weeks.flat().map((cell, i) => {
             const sales = byDay.get(cell.iso) ?? [];
             const groups = groupSalesByCounty(sales);
+            /*
+             * The square's parcel figure counts a multi-day sale on its
+             * opening day only. Its parcels are on offer once, not once per
+             * day it runs, and a total that quadrupled a four-day sale would
+             * point at the wrong day.
+             */
+            const opening = sales.filter((s) => (s.spanDay ?? 1) === 1);
             return (
               <div
                 key={cell.iso}
@@ -230,14 +277,14 @@ export async function CalendarView(props: {
                   {/* Lots, not sales — the number that says where the volume is.
                       A day with one 400-lot county outranks a day with four
                       counties selling three parcels each. */}
-                  {sales.length > 0 ? (
+                  {opening.length > 0 ? (
                     <span
                       className="tnum text-cell font-semibold text-foreground"
-                      title={`${num(dayParcels(sales).total)} parcels across ${num(sales.length)} ${sales.length === 1 ? "sale" : "sales"}${bidPhrase(
-                        sumBids(sales),
-                      )}${announcedPhrase(dayParcels(sales).announced)}`}
+                      title={`${num(dayParcels(opening).total)} parcels across ${num(opening.length)} ${opening.length === 1 ? "sale" : "sales"} opening this day${bidPhrase(
+                        sumBids(opening),
+                      )}${announcedPhrase(dayParcels(opening).announced)}`}
                     >
-                      {num(dayParcels(sales).total)}
+                      {num(dayParcels(opening).total)}
                     </span>
                   ) : null}
                 </div>
@@ -269,9 +316,9 @@ export async function CalendarView(props: {
           7-column grid on a phone or a small laptop is unreadable, and this
           is the view someone opens standing in a courthouse hallway. */}
       <div className="xl:hidden">
-        {[...byDay.entries()].length === 0 ? null : (
+        {agendaDays.length === 0 ? null : (
           <div className="space-y-6">
-            {[...byDay.entries()].map(([day, sales]) => (
+            {agendaDays.map(([day, sales]) => (
               <section key={day}>
                 <div className="mb-3 flex items-baseline gap-2 border-b border-border pb-2">
                   <h2 className="text-lg font-semibold">{saleDate(day)}</h2>
@@ -482,7 +529,7 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
   return (
     <Link
       href={`/auctions/${auction.id}`}
-      title={`${county}, ${stateName} — ${auction.saleType}, ${num(parcelsShown(auction).count)} parcels${bidPhrase(
+      title={`${county}, ${stateName} — ${auction.saleType}, ${saleDateRange(auction.saleDate, auction.saleEndDate)}, ${num(parcelsShown(auction).count)} parcels${bidPhrase(
         sumBids([auction]),
       )}, ${platformLabel(auction.platform)}`}
       className={[
@@ -513,6 +560,7 @@ function SaleLink({ auction, verbose = false }: { auction: CalendarAuctionRow; v
           {auction.countyName}
         </span>
         {showLeadTag(standing, verbose) ? <LeadTag auction={auction} standing={standing} /> : null}
+        <SpanTag auction={auction} verbose={verbose} />
       </span>
       {verbose ? <Totals lots={parcelsShown(auction).count} bids={sumBids([auction])} /> : null}
     </Link>
@@ -982,4 +1030,25 @@ function Legend({ types }: { types: string[] }) {
       ))}
     </div>
   );
+}
+
+/** ISO date `n` days after `iso`, in UTC so no timezone moves the day. */
+function addDays(iso: string, n: number): string {
+  const d = new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10) + n));
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Where a multi-day sale is in its run. The grid says "day 2/4" on the days
+ * after it opens and "→ Nov 2" on the opening day; the agenda, which lists a
+ * sale once, spells the whole range.
+ */
+function SpanTag({ auction, verbose }: { auction: CalendarAuctionRow; verbose: boolean }) {
+  if (!auction.saleEndDate || auction.saleEndDate <= auction.saleDate) return null;
+  const text = verbose
+    ? saleDateRange(auction.saleDate, auction.saleEndDate)
+    : (auction.spanDay ?? 1) === 1
+      ? `→ ${saleDate(auction.saleEndDate).replace(/, \d{4}$/, "")}`
+      : `day ${auction.spanDay}/${auction.spanDays}`;
+  return <span className="whitespace-nowrap text-xs font-normal text-muted">{text}</span>;
 }

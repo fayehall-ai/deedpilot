@@ -14,7 +14,10 @@ function todayIso(): string {
 
 export interface AuctionListRow {
   id: string;
+  /** The day the sale opens. */
   saleDate: string;
+  /** The last day of a multi-day sale, else null. */
+  saleEndDate: string | null;
   saleType: string;
   status: string;
   title: string | null;
@@ -62,7 +65,9 @@ export async function getUpcomingAuctions(
   // Skeletons — no lots and no announced count — are not inventory: they
   // inflate "coverage" and look like real sales. Opt in only for ops views.
   const where = [
-    gte(auctions.saleDate, todayIso()),
+    // Upcoming until its last day: a sale that opened yesterday and closes
+    // tomorrow is still one a bidder can join.
+    sql`coalesce(${auctions.saleEndDate}, ${auctions.saleDate}) >= ${todayIso()}`,
     ...(opts.includeSkeletons ? [] : [hasParcels()]),
     ...(opts.includeUnconfirmed ? [] : [isConfirmedInventory()]),
   ];
@@ -72,6 +77,7 @@ export async function getUpcomingAuctions(
     .select({
       id: auctions.id,
       saleDate: auctions.saleDate,
+      saleEndDate: auctions.saleEndDate,
       saleType: auctions.saleType,
       status: auctions.status,
       title: auctions.title,
@@ -101,7 +107,16 @@ export async function getUpcomingAuctions(
 
 export interface CalendarAuctionRow {
   id: string;
+  /** The day the sale opens. */
   saleDate: string;
+  /** The last day of a multi-day sale, else null. */
+  saleEndDate: string | null;
+  /**
+   * Set by the calendar, not the query: which day of a multi-day sale this
+   * square shows (1-based) and how many days it runs.
+   */
+  spanDay?: number;
+  spanDays?: number;
   saleType: string;
   status: string;
   platform: string;
@@ -171,6 +186,7 @@ export async function getCalendarAuctions(
     .select({
       id: auctions.id,
       saleDate: auctions.saleDate,
+      saleEndDate: auctions.saleEndDate,
       saleType: auctions.saleType,
       status: auctions.status,
       platform: auctions.platform,
@@ -193,7 +209,9 @@ export async function getCalendarAuctions(
     .innerJoin(counties, eq(counties.fips, auctions.countyFips))
     .where(
       and(
-        gte(auctions.saleDate, opts.from),
+        // Any sale whose span overlaps the grid, so a sale that opened last
+        // month still draws on the days of this one it runs into.
+        sql`coalesce(${auctions.saleEndDate}, ${auctions.saleDate}) >= ${opts.from}`,
         lte(auctions.saleDate, opts.to),
         ...calendarWhere(opts),
       ),
@@ -237,7 +255,9 @@ export async function getCalendarFacets(
     })
     .from(auctions)
     .innerJoin(counties, eq(counties.fips, auctions.countyFips))
-    .where(and(gte(auctions.saleDate, todayIso()), ...calendarWhere(opts)))
+    .where(
+      and(sql`coalesce(${auctions.saleEndDate}, ${auctions.saleDate}) >= ${todayIso()}`, ...calendarWhere(opts)),
+    )
     .groupBy(counties.state, auctions.saleType, auctions.platform);
 
   const tally = (key: "state" | "saleType" | "platform"): CalendarFacet[] => {

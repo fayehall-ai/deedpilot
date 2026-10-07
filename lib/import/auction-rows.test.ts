@@ -54,6 +54,27 @@ if (ok.ok) {
 }
 
 // ---------------------------------------------------------------------------
+// Sale dates: the opening day leads, a later end makes a span
+// ---------------------------------------------------------------------------
+
+{
+  const one = readRow(src({ ...FULL, "Sale End Date": "2026-08-31" }), 2);
+  assert(one.ok && one.value.saleEndDate === null, "an end equal to the start is a one-day sale");
+  const none = readRow(src(FULL), 2);
+  assert(none.ok && none.value.saleEndDate === null, "no end column is a one-day sale");
+  const span = readRow(
+    src({ ...FULL, "Sale Start Date": "10/30/2026", "Sale Date": "2026-11-02", "Sale End Date": "2026-11-02" }),
+    2,
+  );
+  assert(
+    span.ok && span.value.saleDate === "2026-10-30" && span.value.saleEndDate === "2026-11-02",
+    "an explicit start wins over a Sale Date that holds the close",
+  );
+  const reversed = readRow(src({ ...FULL, "Sale End Date": "2026-08-01" }), 2);
+  assert(reversed.ok && reversed.value.saleEndDate === null, "an end before the start is dropped");
+}
+
+// ---------------------------------------------------------------------------
 // Sale type is rejected, never defaulted
 // ---------------------------------------------------------------------------
 

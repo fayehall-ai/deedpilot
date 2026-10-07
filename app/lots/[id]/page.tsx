@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { getCachedBrief, getLot, getLotValuations } from "@/lib/queries";
 import { computeMaxBid } from "@/lib/deal/maxbid";
 import { briefInputsHash } from "@/lib/ai/brief";
-import { money, relativeDays, saleDate } from "@/lib/format";
+import { money, relativeDays, saleDate, saleDateRange } from "@/lib/format";
 import { Breadcrumbs, Callout, Card, SaleTypeBadge, StatusBadge } from "@/components/ui";
 import { DetailSkeleton } from "@/components/skeleton";
 import { DealCalculator } from "@/components/deal-calculator";
@@ -232,7 +232,8 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
               <SaleTypeBadge type={auction.saleType} />
               <StatusBadge status={lot.status} />
               <span className="text-sm text-muted">
-                Sells {saleDate(auction.saleDate)} · {relativeDays(auction.saleDate)}
+                Sells {saleDateRange(auction.saleDate, auction.saleEndDate)} ·{" "}
+                {relativeDays(auction.saleDate)}
               </span>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { countHiddenLots, getAuction, getAuctionLots } from "@/lib/queries";
-import { money, num, relativeDays, saleDate } from "@/lib/format";
+import { money, num, relativeDays, saleDate, saleDateRange } from "@/lib/format";
 import {
   Breadcrumbs,
   Callout,
@@ -105,7 +105,7 @@ async function AuctionBody(props: PageProps<"/auctions/[id]">) {
           </h1>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-base text-muted">
             <span>
-              {saleDate(auction.saleDate)} · {relativeDays(auction.saleDate)}
+              {saleDateRange(auction.saleDate, auction.saleEndDate)} · {relativeDays(auction.saleDate)}
             </span>
             {auction.startTime ? <span>· {auction.startTime}</span> : null}
           </p>
