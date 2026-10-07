@@ -32,6 +32,8 @@ export interface ReapiLookup {
   data: SearchedProperty;
   extras: ReapiExtras;
   location?: { lat: number; lon: number; matched: string };
+  /** The whole PropertyDetail payload, so the lookup can draw the parcel page's card. */
+  raw: Record<string, unknown>;
 }
 
 const obj = (v: unknown): Record<string, unknown> =>
@@ -120,6 +122,7 @@ export async function reapiLookup(query: string): Promise<ReapiLookup | null> {
   return {
     data,
     extras,
+    raw,
     location:
       lat !== undefined && lon !== undefined
         ? { lat, lon, matched: str(addr.label) ?? query }

@@ -22,16 +22,27 @@ export function PropertySummary({
   photo?: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.45fr)_repeat(3,minmax(0,1fr))]">
-      <div className={`${CARD} p-4 md:col-span-2 xl:col-span-1`}>
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <div className="space-y-3">
-            {photo}
+    /*
+     * Laid out by the room the strip actually has, not the viewport: the lot
+     * page and the home-page lookup sit in different widths at different base
+     * sizes, and one breakpoint left numbers breaking mid-figure in one or the
+     * other. Four across only when there is room for four; otherwise the
+     * property card takes its own row and the three figure cards sit beneath.
+     */
+    <div className="@container">
+      <div className="grid gap-4 @3xl:grid-cols-3 @[80rem]:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))]">
+        <div className={`${CARD} @container p-4 @3xl:col-span-3 @[80rem]:col-span-1`}>
+          {/*
+            Narrow: photo, facts, status stacked. Medium: photo across the top,
+            facts and status side by side. Full row: all three across, as in
+            PropStream's header. An empty photo slot drops out of the grid.
+          */}
+          <div className="grid gap-4 @[26rem]:grid-cols-2 @[44rem]:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1.1fr)]">
+            <div className="empty:hidden @[26rem]:col-span-2 @[44rem]:col-span-1">{photo}</div>
             <FactList fields={view.facts} />
+            <FactList fields={view.status} />
           </div>
-          <FactList fields={view.status} />
         </div>
-      </div>
 
       {view.value.length ? <StatCard title="Value" stats={view.value} /> : null}
 
@@ -47,6 +58,7 @@ export function PropertySummary({
       ) : null}
 
       {view.opportunity.length ? <StatCard title="Opportunity" stats={view.opportunity} /> : null}
+      </div>
     </div>
   );
 }

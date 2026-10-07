@@ -146,6 +146,7 @@ export function PropertySearch() {
             ageHours={state.ageHours}
             extras={state.extras}
             streetView={state.streetView}
+            view={state.view}
           />
         </div>
       )}

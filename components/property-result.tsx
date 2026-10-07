@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import type { SearchedProperty } from "@/lib/property/providers/websearch";
 import type { ReapiExtras } from "@/lib/property/address-lookup";
+import type { PropertyView } from "@/lib/property/reapi-view";
 import { StreetViewFrame } from "./street-view-frame";
+import { PropertyDetailTabs, PropertySummary } from "./property-card";
 
 /**
  * One property lookup, rendered.
@@ -27,6 +29,8 @@ export interface ResultProps {
   extras?: ReapiExtras;
   /** Google's photograph of the front, when the lookup found one. */
   streetView?: { location: string; date: string | null };
+  /** The parcel page's card, when the lookup kept the full record. */
+  view?: PropertyView;
 }
 
 const money = (n: number | null | undefined) =>
@@ -216,9 +220,14 @@ function Listing({
   );
 }
 
-function Card({ children }: { children: ReactNode }) {
+function Card({ children, tight = false }: { children: ReactNode; tight?: boolean }) {
   return (
-    <article className="w-full min-w-0 rounded-3xl border border-border bg-surface p-[clamp(1.35rem,2vw,2.25rem)] text-foreground shadow-[var(--shadow-sm)]">
+    <article
+      className={`w-full min-w-0 rounded-3xl border border-border bg-surface text-foreground shadow-[var(--shadow-sm)] ${
+        // The four-card strip needs the width the listing card spent on padding.
+        tight ? "p-3 sm:p-4" : "p-[clamp(1.35rem,2vw,2.25rem)]"
+      }`}
+    >
       {children}
     </article>
   );
@@ -229,7 +238,55 @@ function Card({ children }: { children: ReactNode }) {
  * is no "closest match" or "what was read" section: those described the web
  * search, which returned other properties' figures and cited the pages it read.
  */
-export function PropertyResult({ data: p, ageHours = 0, extras, streetView }: ResultProps) {
+export function PropertyResult({ data: p, ageHours = 0, extras, streetView, view }: ResultProps) {
+  /*
+   * The parcel page's layout, so an address looked up on the home page reads
+   * exactly like a parcel in a sale: the four-card strip, then the tabs.
+   */
+  if (view) {
+    return (
+      <Card tight>
+        <div className="flex flex-col gap-2 px-2 pt-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
+          <h3 className="min-w-0 font-display text-2xl font-medium tracking-tight text-foreground sm:text-3xl">
+            {p.addressLine ?? "This property"}
+            {p.city ? `, ${p.city}` : ""} {p.zip ?? ""}
+          </h3>
+          <span className="self-start rounded-full bg-surface-2 px-2.5 py-1 text-xs font-medium uppercase tracking-wide text-muted">
+            county record{ageHours > 0 ? ` · read ${ageHours < 24 ? `${ageHours}h` : `${Math.floor(ageHours / 24)}d`} ago` : ""}
+          </span>
+        </div>
+        <div className="mt-6">
+          <PropertySummary
+            view={view}
+            photo={
+              streetView ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={`/api/streetview?${new URLSearchParams({ location: streetView.location })}`}
+                  alt={`Street view of ${streetView.location}`}
+                  width={640}
+                  height={480}
+                  loading="lazy"
+                  decoding="async"
+                  className="block aspect-[4/3] w-full rounded-xl bg-surface-2 object-cover"
+                />
+              ) : null
+            }
+          />
+        </div>
+        <div className="mt-6">
+          <PropertyDetailTabs view={view} />
+        </div>
+        <p className="mx-2 mt-8 mb-2 border-t border-border pt-6 text-sm leading-relaxed text-muted">
+          Figures come from the county assessor record and RealEstateAPI&apos;s valuation model, not
+          an appraisal; the estimated value is as-is, not after-repair, and is not used to price a
+          bid. Equity and mortgage are modelled from recorded loans. Verify against the county
+          record before bidding.
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">

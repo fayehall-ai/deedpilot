@@ -2,6 +2,7 @@
 
 import type { SearchedProperty } from "@/lib/property/providers/websearch";
 import type { ReapiExtras } from "@/lib/property/address-lookup";
+import { buildPropertyView, type PropertyView } from "@/lib/property/reapi-view";
 
 /**
  * Look up a property for the home-page search box.
@@ -39,7 +40,18 @@ export interface LookupState {
   choices?: string[];
   /** Google's photograph of the front, when it has one near the address. */
   streetView?: { location: string; date: string | null };
+  /**
+   * The parcel page's PropStream-style card, built on the server from the full
+   * record. Absent for answers cached before the record was kept, which draw
+   * the older summary card instead of paying for the lookup again.
+   */
+  view?: PropertyView;
   error?: string;
+}
+
+/** The same shaping the parcel page uses; a looked-up address has no sale list behind it. */
+function viewOf(raw: Record<string, unknown> | undefined, extras: ReapiExtras): PropertyView | undefined {
+  return raw ? buildPropertyView(raw, { countyName: extras.county ?? "" }) : undefined;
 }
 
 /**
@@ -110,11 +122,26 @@ async function lookupInner(
   try {
     const cache = await import("@/lib/property/lookup-cache");
     const recordKey = `realestateapi: ${query}`;
-    type Stored = { found: boolean; data: SearchedProperty; extras: ReapiExtras; location?: LookupState["location"] };
+    type Stored = {
+      found: boolean;
+      data: SearchedProperty;
+      extras: ReapiExtras;
+      location?: LookupState["location"];
+      raw?: Record<string, unknown>;
+    };
     const hit = await cache.getCached<Stored>(recordKey);
     if (hit?.result.found) {
-      const { data, extras, location } = hit.result;
-      return { query, data, extras, location, citations: [], ageHours: hit.ageHours, source: "realestateapi" };
+      const { data, extras, location, raw } = hit.result;
+      return {
+        query,
+        data,
+        extras,
+        location,
+        view: viewOf(raw, extras),
+        citations: [],
+        ageHours: hit.ageHours,
+        source: "realestateapi",
+      };
     }
     /* Past the cache, a lookup is billed: the public domain's daily limit applies. */
     const [{ headers }, { spendDailyAllowance }] = await Promise.all([
@@ -135,9 +162,18 @@ async function lookupInner(
     const { recordUsage } = await import("@/lib/ai/usage");
     void recordUsage({ provider: "realestateapi", operation: "property-lookup", requests: 1 });
     const location = found.location ?? (await located());
-    const stored: Stored = { found: true, data: found.data, extras: found.extras, location };
+    const stored: Stored = { found: true, data: found.data, extras: found.extras, location, raw: found.raw };
     await cache.putCached(recordKey, stored, []);
-    return { query, data: found.data, extras: found.extras, citations: [], ageHours: 0, location, source: "realestateapi" };
+    return {
+      query,
+      data: found.data,
+      extras: found.extras,
+      view: viewOf(found.raw, found.extras),
+      citations: [],
+      ageHours: 0,
+      location,
+      source: "realestateapi",
+    };
   } catch (e) {
     const { AmbiguousAddressError } = await import("@/lib/property/address-lookup");
     if (e instanceof AmbiguousAddressError) return { query, choices: e.choices };
