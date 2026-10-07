@@ -116,6 +116,70 @@ async function ustlaGet(path) {
 
 class SigninError extends Error {}
 
+// ---------------------------------------------------------------- dates per auction
+
+/*
+ * USTLA's list files a multi-day sale under the day it closes: Santa Clara,
+ * which opens Oct 30, is listed on Nov 2. Only the per-auction record carries
+ * saleStartDate and saleEndDate, so those are read for every auction and kept
+ * for a day — a refresh should not cost USTLA four hundred requests again.
+ */
+const DETAIL_TTL_MS = 24 * 60 * 60 * 1000;
+const details = new Map();
+
+const startOf = (a) => details.get(a.id)?.saleStartDate || a.saleDate;
+function endOf(a) {
+  const d = details.get(a.id);
+  const end = d?.saleEndDate || null;
+  return end && end > startOf(a) ? end : null;
+}
+
+async function loadDetailCache() {
+  try {
+    const { ustlaDetails = {} } = await chrome.storage.local.get("ustlaDetails");
+    const now = Date.now();
+    for (const [id, v] of Object.entries(ustlaDetails)) {
+      if (now - v.at < DETAIL_TTL_MS) details.set(Number(id), v.d);
+    }
+  } catch {
+    /* no cache: every detail is fetched */
+  }
+}
+
+async function saveDetailCache() {
+  try {
+    const at = Date.now();
+    const out = {};
+    for (const [id, d] of details) out[id] = { d, at };
+    await chrome.storage.local.set({ ustlaDetails: out });
+  } catch {
+    /* the cache is a convenience */
+  }
+}
+
+/** Fetch the record of every auction not already known, four at a time. */
+async function loadDetails(list) {
+  const todo = list.filter((a) => !details.has(a.id));
+  const total = todo.length;
+  let done = 0;
+  const worker = async () => {
+    while (todo.length) {
+      const a = todo.shift();
+      const d = await ustlaGet(`/api/research/auctions/${encodeURIComponent(a.id)}`);
+      details.set(a.id, d.auction ?? d);
+      done++;
+      if (done % 10 === 0 || done === total) {
+        setStatus(`Reading each sale's start and end dates from USTLA… ${done} of ${total}`);
+      }
+    }
+  };
+  if (total) {
+    setStatus(`Reading each sale's start and end dates from USTLA… 0 of ${total}`);
+    await Promise.all([1, 2, 3, 4].map(worker));
+    await saveDetailCache();
+  }
+}
+
 // ---------------------------------------------------------------- load
 
 async function load() {
@@ -126,12 +190,16 @@ async function load() {
 
   try {
     const all = [];
+    // Two weeks past the window: a sale that opens inside it but closes after
+    // is listed under its closing day, which can fall outside.
+    const fetchTo = new Date(end);
+    fetchTo.setDate(fetchTo.getDate() + 14);
     for (let page = 1; ; page++) {
       const q = new URLSearchParams({
         auctionTime: "future",
         purchased: "all",
         minSaleDate: us(iso(start)),
-        maxSaleDate: us(iso(end)),
+        maxSaleDate: us(iso(fetchTo)),
         perPage: "1000",
         page: String(page),
       });
@@ -140,12 +208,14 @@ async function load() {
       const pages = data.pagination?.totalPages ?? 1;
       if (page >= pages) break;
     }
-    // The window is inclusive at both ends, whatever the API does with them.
+    await loadDetailCache();
+    await loadDetails(all);
+    // In the window if any day of the sale is: opened by its end, still running at its start.
     auctions = all
-      .filter((a) => a.saleDate >= iso(start) && a.saleDate <= iso(end))
+      .filter((a) => (endOf(a) ?? startOf(a)) >= iso(start) && startOf(a) <= iso(end))
       .sort(
         (a, b) =>
-          a.saleDate.localeCompare(b.saleDate) ||
+          startOf(a).localeCompare(startOf(b)) ||
           (a.stateName ?? "").localeCompare(b.stateName ?? "") ||
           (a.countyName ?? "").localeCompare(b.countyName ?? ""),
       );
@@ -220,7 +290,7 @@ function render() {
 
   const weeks = new Map();
   for (const a of rows) {
-    const w = weekStart(a.saleDate);
+    const w = weekStart(startOf(a) < iso(windowDates().start) ? iso(windowDates().start) : startOf(a));
     if (!weeks.has(w)) weeks.set(w, []);
     weeks.get(w).push(a);
   }
@@ -251,7 +321,9 @@ function render() {
 function row(a) {
   const typeClass = (a.auctionType ?? "").split(" ")[0];
   return `<tr class="row" data-id="${esc(a.id)}">
-    <td>${esc(dayLabel(a.saleDate))}</td>
+    <td>${esc(dayLabel(startOf(a)))}${
+      endOf(a) ? ` <span class="muted">– ${esc(dayLabel(endOf(a)))}</span>` : ""
+    }</td>
     <td>${esc(a.saleTime ?? "")}</td>
     <td>${esc(a.stateName ?? "")}</td>
     <td>${esc(a.countyName ?? "")}</td>
@@ -274,8 +346,10 @@ async function toggleDetail(tr) {
   cell.innerHTML = `<td colspan="10">Loading…</td>`;
   tr.after(cell);
   try {
-    const d = await ustlaGet(`/api/research/auctions/${encodeURIComponent(id)}`);
-    const a = d.auction ?? d;
+    // Already read for its dates on load, normally; fetched only if not.
+    const a =
+      details.get(Number(id)) ??
+      (await ustlaGet(`/api/research/auctions/${encodeURIComponent(id)}`).then((d) => d.auction ?? d));
     const site = a.onlineSiteDeed || a.onlineSiteLien || a.onlineSiteForeclosure;
     const venue = [a.saleAddress1, a.saleAddress2, a.saleCity, a.saleZipCode].filter(Boolean).join(", ");
     const fields = [
@@ -303,18 +377,40 @@ async function toggleDetail(tr) {
 // ---------------------------------------------------------------- CSV
 
 function downloadCsv() {
+  /*
+   * USTLA's own export columns, so the file goes straight into DeedPilot's
+   * /admin import, plus the start and end the export lacks. "Sale Date" is the
+   * opening day here, where the export puts the closing one; the importer
+   * reads "Sale Start Date" first either way.
+   */
+  const det = (a) => details.get(a.id) ?? {};
+  const none = (v) => (v && v !== "None" ? v : "");
   const cols = [
-    ["Sale date", (a) => a.saleDate],
-    ["Time", (a) => a.saleTime],
     ["State", (a) => a.stateName],
     ["County", (a) => a.countyName],
-    ["Type", (a) => a.auctionType],
-    ["Format", (a) => a.onlineOffer],
-    ["Parcels", (a) => a.parcelNum],
-    ["Aggregate amount", (a) => a.aggregateSaleAmount],
-    ["Bid procedure", (a) => a.bidProcedures],
-    ["List uploaded", (a) => a.fileUploadDate],
-    ["USTLA id", (a) => a.id],
+    ["Sale Date", (a) => startOf(a)],
+    ["Sale Start Date", (a) => startOf(a)],
+    ["Sale End Date", (a) => endOf(a) ?? startOf(a)],
+    ["Sale Time", (a) => a.saleTime ?? det(a).saleTime],
+    ["Sale Duration", (a) => det(a).saleDuration],
+    ["Auction Type", (a) => a.auctionType],
+    ["Online or Onsite", (a) => a.onlineOffer],
+    ["Bid Procedures", (a) => a.bidProcedures],
+    ["Parcel Count", (a) => a.parcelNum],
+    ["Aggregate Sale Amount (USD)", (a) => a.aggregateSaleAmount],
+    ["Sale Address 1", (a) => det(a).saleAddress1],
+    ["Sale Address 2", (a) => det(a).saleAddress2],
+    ["Sale City", (a) => det(a).saleCity],
+    ["Sale Zip", (a) => det(a).saleZipCode],
+    ["Online Site (Lien)", (a) => det(a).onlineSiteLien],
+    ["Online Site (Deed)", (a) => det(a).onlineSiteDeed],
+    ["Online Site (Foreclosure)", (a) => det(a).onlineSiteForeclosure],
+    ["Additional Sale Notes", (a) => none(det(a).additionalSaleNotes)],
+    ["Recent Notes", (a) => none(det(a).recentNotes)],
+    ["Registration / County Laws", (a) => none(det(a).countyLaws)],
+    ["Has Parcel Data", (a) => (det(a).hasParcelsData ? "true" : "false")],
+    ["File Upload Date", (a) => a.fileUploadDate],
+    ["Auction ID", (a) => a.id],
   ];
   const cell = (v) => {
     const s = String(v ?? "");
