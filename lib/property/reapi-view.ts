@@ -85,6 +85,12 @@ export interface PropertyView {
   debt: Stat[];
   lastSale: Stat[];
   opportunity: Stat[];
+  /**
+   * The year's property tax bill, from the provider's tax record. Shown where
+   * the sale list gives no amount owed — which is most lists. It is the annual
+   * bill, not the delinquency the sale collects, and is labelled as such.
+   */
+  propertyTax: { amount: number; year: string | null } | null;
   /** Whether the provider record exists at all; without it only `facts` and the details tab render. */
   enriched: boolean;
   tabs: Tab[];
@@ -408,6 +414,16 @@ export function buildPropertyView(rawIn: Record<string, unknown> | null, lot: Lo
    * is plain division, so nothing here is an estimate.
    */
   const worth = estimated ?? lot.marketValue ?? null;
+  /*
+   * The year comes from the record, never from today's date. Counties certify
+   * the new roll mid-year, so after July the current year's bill is usually
+   * there (2026 on 5076 Momenti St) — but where the provider still carries
+   * last year's, saying "2026" would put a wrong year on a real number.
+   */
+  const taxAmount = n(ti.taxAmount);
+  const propertyTax = taxAmount
+    ? { amount: taxAmount, year: s(ti.year) ?? s(ti.assessmentYear) }
+    : null;
   const opportunity: Stat[] = [
     lot.openingBid ? { label: "Opening Bid", value: money(lot.openingBid) } : null,
     lot.openingBid && worth
@@ -417,7 +433,15 @@ export function buildPropertyView(rawIn: Record<string, unknown> | null, lot: Lo
           note: `of ${money(worth)}`,
         }
       : null,
-    lot.taxesOwed ? { label: "Taxes Owed", value: money(lot.taxesOwed) } : null,
+    lot.taxesOwed
+      ? { label: "Taxes Owed", value: money(lot.taxesOwed) }
+      : propertyTax
+        ? {
+            label: `Property Tax${propertyTax.year ? ` ${propertyTax.year}` : ""}`,
+            value: money(propertyTax.amount),
+            note: "annual bill · not the amount owed",
+          }
+        : null,
     equity !== null && enriched
       ? {
           label: "Equity (est.)",
@@ -669,7 +693,7 @@ export function buildPropertyView(rawIn: Record<string, unknown> | null, lot: Lo
     ...(enriched ? [foreclosure, mls, demographics, tax, history] : []),
   ];
 
-  return { facts, status, value, debt, lastSale, opportunity, enriched, tabs };
+  return { facts, status, value, debt, lastSale, opportunity, propertyTax, enriched, tabs };
 }
 
 const mortgageCols: [string, (e: O) => string | null][] = [

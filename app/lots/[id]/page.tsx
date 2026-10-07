@@ -323,7 +323,22 @@ async function LotBody(props: PageProps<"/lots/[id]">) {
                 ) : null}
               </Figure>
               <Figure label="Market / AVM" value={money(latestVal?.marketValue)} />
-              <Figure label="Taxes owed" value={money(lot.taxesOwed)} />
+              {/*
+                The sale list's amount owed when it has one; otherwise the
+                year's tax bill from the property record, labelled as the bill
+                it is. Most lists publish no amount, and a bare "—" here read
+                as if the parcel owed nothing.
+              */}
+              {lot.taxesOwed || !view.propertyTax ? (
+                <Figure label="Taxes owed" value={money(lot.taxesOwed)} />
+              ) : (
+                <Figure
+                  label={`Property tax${view.propertyTax.year ? ` ${view.propertyTax.year}` : ""}`}
+                  value={money(view.propertyTax.amount)}
+                >
+                  Annual bill — the sale list gives no amount owed
+                </Figure>
+              )}
             </div>
 
             {/*

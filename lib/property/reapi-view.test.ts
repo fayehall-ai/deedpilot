@@ -81,7 +81,7 @@ const raw = {
     ],
   },
   lotInfo: { apn: "164-25-516-036", lotSquareFeet: 6098, zoning: "R-2", subdivision: "Sun Colony At Summerlin-Unit 15B" },
-  taxInfo: { assessedValue: 158472, assessedLandValue: 71750, assessedImprovementValue: 86722, marketValue: 327714, year: 2026 },
+  taxInfo: { taxAmount: 4171, assessedValue: 158472, assessedLandValue: 71750, assessedImprovementValue: 86722, marketValue: 327714, year: 2026 },
   demographics: { fmrTwoBedroom: "1626" },
 };
 
@@ -157,6 +157,12 @@ eq(bid.opportunity.slice(0, 3).map((x) => [x.label, x.value]), [
 const lienStat = v.debt.find((s) => s.label === "Lien Flags");
 eq([lienStat?.value, lienStat?.note], ["None recorded", "RealEstateAPI flags · not a lien search"], "lien wording");
 eq(v.debt.some((s) => s.value === "None"), false, "no bare None");
+
+// No amount owed on the list: the year's bill stands in, labelled as a bill.
+eq(v.propertyTax, { amount: 4171, year: "2026" }, "property tax from record");
+const taxStat = v.opportunity.find((s) => s.label.startsWith("Property Tax"));
+eq([taxStat?.label, taxStat?.value, taxStat?.note], ["Property Tax 2026", "$4,171", "annual bill · not the amount owed"], "tax stat");
+eq(bid.opportunity.some((s) => s.label.startsWith("Property Tax")), false, "list amount owed wins");
 
 eq(usDate("2022-04-25T00:00:00.000Z"), "04/25/2022", "usDate");
 eq(ownershipLength(12), "1 Year", "1 year");
