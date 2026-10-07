@@ -667,3 +667,59 @@ export async function getCapeParcelCoverage(): Promise<
 
   return Object.fromEntries(rows.map((r) => [r.auctionId, r]));
 }
+
+/**
+ * Upcoming sale lots that are this looked-up property.
+ *
+ * Read-only: it links a home-page lookup to the lot page, and never writes a
+ * provider record onto a lot. Two ways to match, both inside the county's FIPS
+ * so a same-numbered parcel elsewhere cannot answer:
+ *
+ *   - RealEstateAPI's own property id, when the enrichment pass already fetched
+ *     this lot from the same provider. The strongest match there is.
+ *   - The parcel number with punctuation stripped. Sale lists and the provider
+ *     format the same APN differently ("164-25-516-036" against "16425516036").
+ *
+ * Only confirmed inventory, so a projected sweep date never claims the house
+ * is "in a sale".
+ */
+export async function findUpcomingLotsForProperty(opts: {
+  fips: string;
+  apns: string[];
+  reapiId?: string | null;
+}) {
+  const keys = [...new Set(opts.apns.map((a) => a.replace(/[^0-9a-z]/gi, "").toUpperCase()).filter(Boolean))];
+  if (!keys.length && !opts.reapiId) return [];
+  const byApn = keys.length
+    ? sql`upper(regexp_replace(coalesce(${lots.parcelNumber}, ''), '[^0-9A-Za-z]', '', 'g')) in (${sql.join(
+        keys.map((k) => sql`${k}`),
+        sql`, `,
+      )})`
+    : sql`false`;
+  const byId = opts.reapiId
+    ? sql`exists (select 1 from ${lotValuations} lv where lv.lot_id = ${lots.id}
+        and lv.source = 'realestateapi' and lv.raw->>'id' = ${opts.reapiId})`
+    : sql`false`;
+  return db
+    .select({
+      lotId: lots.id,
+      parcelNumber: lots.parcelNumber,
+      openingBid: lots.openingBid,
+      status: lots.status,
+      auctionId: auctions.id,
+      saleDate: auctions.saleDate,
+      saleType: auctions.saleType,
+    })
+    .from(lots)
+    .innerJoin(auctions, eq(auctions.id, lots.auctionId))
+    .where(
+      and(
+        eq(lots.countyFips, opts.fips),
+        gte(auctions.saleDate, sql`current_date`),
+        isConfirmedInventory(),
+        sql`(${byApn} or ${byId})`,
+      ),
+    )
+    .orderBy(asc(auctions.saleDate))
+    .limit(5);
+}

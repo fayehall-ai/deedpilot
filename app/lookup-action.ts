@@ -3,6 +3,8 @@
 import type { SearchedProperty } from "@/lib/property/providers/websearch";
 import type { ReapiExtras } from "@/lib/property/address-lookup";
 import { buildPropertyView, type PropertyView } from "@/lib/property/reapi-view";
+import type { HistoryBucket } from "@/lib/history/comparables";
+import type { SaleType } from "@/lib/atlas/types";
 
 /**
  * Look up a property for the home-page search box.
@@ -46,7 +48,132 @@ export interface LookupState {
    * the older summary card instead of paying for the lookup again.
    */
   view?: PropertyView;
+  /** County rules, records links, deal inputs and sale matches — the parcel page's other half. */
+  context?: LookupContext;
   error?: string;
+}
+
+/**
+ * What the parcel page shows beside the record, worked out on the server for a
+ * looked-up address. Plain data, because the lookup renders in the browser.
+ */
+export interface LookupContext {
+  state: string;
+  fips: string;
+  countyName: string;
+  /** The county's atlas page, or the state's when the county is not in it. */
+  atlasHref: string;
+  rule: {
+    type: string;
+    saleType: SaleType;
+    redemption: string;
+    returns: string;
+    statute: string;
+    survivingLiens?: string;
+    quietTitle?: string;
+    isStateDefault: boolean;
+    taxCollector?: { url: string; label: string };
+  } | null;
+  links: { url: string; label: string; searchOnly?: boolean }[];
+  /** The max-bid engine's inputs. No opening bid: an address is not a sale lot. */
+  deal: { assessedValue?: number; marketValue?: number };
+  history: { bucket: HistoryBucket | null; key: string } | null;
+  /** This same property as a lot in one of our upcoming sales. */
+  saleLots: {
+    lotId: string;
+    parcelNumber: string | null;
+    openingBid: string | null;
+    status: string;
+    saleDate: string;
+    saleType: string;
+  }[];
+}
+
+const objOf = (v: unknown): Record<string, unknown> =>
+  v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+const numOf = (v: unknown): number | undefined => {
+  const n = typeof v === "number" ? v : typeof v === "string" && v.trim() ? Number(v) : NaN;
+  return Number.isFinite(n) ? n : undefined;
+};
+const strOf = (v: unknown): string | undefined =>
+  typeof v === "string" && v.trim() ? v.trim() : typeof v === "number" ? String(v) : undefined;
+
+async function contextOf(raw: Record<string, unknown> | undefined): Promise<LookupContext | undefined> {
+  if (!raw) return undefined;
+  const addr = objOf(objOf(raw.propertyInfo).address);
+  const lotInfo = objOf(raw.lotInfo);
+  const tax = objOf(raw.taxInfo);
+  const fips = strOf(addr.fips)?.padStart(5, "0");
+  const state = strOf(addr.state);
+  if (!fips || !state) return undefined;
+
+  const [{ resolveCountyRule, stateSlug, countySlug }, { assessorLinks }, { getComparables }] = await Promise.all([
+    import("@/lib/atlas"),
+    import("@/lib/property/assessor-links"),
+    import("@/lib/history/comparables"),
+  ]);
+  const resolved = resolveCountyRule(fips);
+  const countyName =
+    resolved?.county.name ?? strOf(addr.county)?.replace(/\s+county$/i, "") ?? "";
+  const apn = strOf(lotInfo.apn) ?? null;
+
+  /*
+   * The same split as the provider mapping: assessment in `assessedValue`, the
+   * AVM (or the county's market figure) in `marketValue`. An AVM in the
+   * assessed slot gets divided by the assessment ratio a second time.
+   */
+  const assessedValue = numOf(tax.assessedValue);
+  const marketValue = numOf(raw.estimatedValue) ?? numOf(tax.estimatedValue) ?? numOf(tax.marketValue);
+
+  const history = resolved
+    ? getComparables({ state, saleType: resolved.saleType, assessedValue, fips, limit: 1 })
+    : null;
+
+  /* A failed match must not cost the reader the lookup they asked for. */
+  const saleLots = await import("@/lib/queries")
+    .then((q) =>
+      q.findUpcomingLotsForProperty({
+        fips,
+        apns: [apn, strOf(lotInfo.apnUnformatted)].filter((a): a is string => Boolean(a)),
+        reapiId: strOf(raw.id) ?? null,
+      }),
+    )
+    .catch(() => []);
+
+  return {
+    state,
+    fips,
+    countyName,
+    atlasHref: resolved
+      ? `/atlas/${stateSlug(state)}/${countySlug(countyName)}`
+      : `/atlas/${stateSlug(state)}`,
+    rule: resolved
+      ? {
+          type: resolved.type,
+          saleType: resolved.saleType,
+          redemption: resolved.redemption,
+          returns: resolved.returns,
+          statute: resolved.statute,
+          survivingLiens: resolved.survivingLiens,
+          quietTitle: resolved.quietTitle,
+          isStateDefault: resolved.isStateDefault,
+          taxCollector: resolved.taxCollector?.url
+            ? { url: resolved.taxCollector.url, label: resolved.taxCollector.label }
+            : undefined,
+        }
+      : null,
+    links: assessorLinks({ state, fips, countyName, parcelNumber: apn }),
+    deal: { assessedValue, marketValue },
+    history: history ? { bucket: history.bucket, key: history.key } : null,
+    saleLots: saleLots.map((l) => ({
+      lotId: l.lotId,
+      parcelNumber: l.parcelNumber,
+      openingBid: l.openingBid,
+      status: l.status,
+      saleDate: l.saleDate,
+      saleType: l.saleType,
+    })),
+  };
 }
 
 /** The same shaping the parcel page uses; a looked-up address has no sale list behind it. */
@@ -138,6 +265,7 @@ async function lookupInner(
         extras,
         location,
         view: viewOf(raw, extras),
+        context: await contextOf(raw),
         citations: [],
         ageHours: hit.ageHours,
         source: "realestateapi",
@@ -169,6 +297,7 @@ async function lookupInner(
       data: found.data,
       extras: found.extras,
       view: viewOf(found.raw, found.extras),
+      context: await contextOf(found.raw),
       citations: [],
       ageHours: 0,
       location,

@@ -147,6 +147,7 @@ export function PropertySearch() {
             extras={state.extras}
             streetView={state.streetView}
             view={state.view}
+            context={state.context}
           />
         </div>
       )}

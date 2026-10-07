@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import type { SearchedProperty } from "@/lib/property/providers/websearch";
 import type { ReapiExtras } from "@/lib/property/address-lookup";
+import Link from "next/link";
 import type { PropertyView } from "@/lib/property/reapi-view";
+import type { LookupContext } from "@/app/lookup-action";
+import { money as fmtMoney, relativeDays, saleDate } from "@/lib/format";
+import { Callout } from "./ui";
+import { DealCalculator } from "./deal-calculator";
 import { StreetViewFrame } from "./street-view-frame";
 import { PropertyDetailTabs, PropertySummary } from "./property-card";
 
@@ -31,6 +36,8 @@ export interface ResultProps {
   streetView?: { location: string; date: string | null };
   /** The parcel page's card, when the lookup kept the full record. */
   view?: PropertyView;
+  /** County rules, records links, deal inputs and sale matches. */
+  context?: LookupContext;
 }
 
 const money = (n: number | null | undefined) =>
@@ -238,7 +245,7 @@ function Card({ children, tight = false }: { children: ReactNode; tight?: boolea
  * is no "closest match" or "what was read" section: those described the web
  * search, which returned other properties' figures and cited the pages it read.
  */
-export function PropertyResult({ data: p, ageHours = 0, extras, streetView, view }: ResultProps) {
+export function PropertyResult({ data: p, ageHours = 0, extras, streetView, view, context }: ResultProps) {
   /*
    * The parcel page's layout, so an address looked up on the home page reads
    * exactly like a parcel in a sale: the four-card strip, then the tabs.
@@ -255,6 +262,7 @@ export function PropertyResult({ data: p, ageHours = 0, extras, streetView, view
             county record{ageHours > 0 ? ` · read ${ageHours < 24 ? `${ageHours}h` : `${Math.floor(ageHours / 24)}d`} ago` : ""}
           </span>
         </div>
+        {context?.saleLots.length ? <InSale context={context} /> : null}
         <div className="mt-6">
           <PropertySummary
             view={view}
@@ -274,8 +282,37 @@ export function PropertyResult({ data: p, ageHours = 0, extras, streetView, view
             }
           />
         </div>
-        <div className="mt-6">
-          <PropertyDetailTabs view={view} />
+        {/*
+          The parcel page's arrangement: the record in the wide column, the
+          deal maths beside it. Without a county context (an answer cached
+          before it existed) the tabs take the full width.
+        */}
+        <div
+          className={`mt-6 grid gap-6 ${context ? "lg:grid-cols-[minmax(0,1fr)_360px]" : ""}`}
+        >
+          <div className="min-w-0 space-y-6">
+            <PropertyDetailTabs view={view} />
+            {context ? <CountyCards context={context} /> : null}
+          </div>
+          {context?.rule ? (
+            <aside className="space-y-3 lg:sticky lg:top-20 lg:self-start">
+              <h4 className="text-lg font-semibold">Deal analysis</h4>
+              <DealCalculator
+                state={context.state}
+                saleType={context.rule.saleType}
+                assessedValue={context.deal.assessedValue}
+                marketValue={context.deal.marketValue}
+                fips={context.fips}
+                historyBucket={context.history?.bucket ?? null}
+                historyKey={context.history?.key}
+              />
+              <p className="text-xs leading-relaxed text-muted">
+                Priced as if this address came up at a {context.countyName} County{" "}
+                {context.rule.type.toLowerCase()} sale. It is not in one of our sale lists
+                {context.saleLots.length ? " unless shown above" : ""}, so there is no opening bid.
+              </p>
+            </aside>
+          ) : null}
         </div>
         <p className="mx-2 mt-8 mb-2 border-t border-border pt-6 text-sm leading-relaxed text-muted">
           Figures come from the county assessor record and RealEstateAPI&apos;s valuation model, not
@@ -332,5 +369,94 @@ export function PropertyResult({ data: p, ageHours = 0, extras, streetView, view
         bidding.
       </p>
     </Card>
+  );
+}
+
+/** This address is a lot in one of our upcoming sales: the full parcel page is one click away. */
+function InSale({ context }: { context: LookupContext }) {
+  return (
+    <div className="mx-2 mt-4">
+      <Callout tone="warn" title="This property is in an upcoming tax sale">
+        <ul className="mt-1 space-y-1">
+          {context.saleLots.map((l) => (
+            <li key={l.lotId}>
+              <Link href={`/lots/${l.lotId}`} className="font-medium text-accent hover:underline">
+                {context.countyName} County {l.saleType} · {saleDate(l.saleDate)} (
+                {relativeDays(l.saleDate)})
+              </Link>
+              {l.openingBid ? ` · opening bid ${fmtMoney(l.openingBid)}` : ""}
+              {l.parcelNumber ? ` · parcel ${l.parcelNumber}` : ""} →
+            </li>
+          ))}
+        </ul>
+      </Callout>
+    </div>
+  );
+}
+
+/** County records links and the county's sale rules, as on the parcel page. */
+function CountyCards({ context }: { context: LookupContext }) {
+  const r = context.rule;
+  const row = (label: string, value?: string) =>
+    value ? (
+      <div>
+        <dt className="text-sm font-semibold text-accent">{label}</dt>
+        <dd className="mt-0.5 text-sm leading-relaxed text-muted">{value}</dd>
+      </div>
+    ) : null;
+  return (
+    <>
+      {r ? (
+        <section className="rounded-3xl border border-border/70 bg-surface p-6 shadow-[var(--shadow-sm)]">
+          <h4 className="text-lg font-semibold">{context.countyName} County rules</h4>
+          {r.isStateDefault ? (
+            <p className="mt-1 text-xs text-muted">State defaults — this county has not been researched individually.</p>
+          ) : null}
+          <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+            {row("Sale type", r.type)}
+            {row("Redemption", r.redemption)}
+            {row("Return if redeemed", r.returns)}
+            {row("Statute", r.statute)}
+          </dl>
+          {r.survivingLiens ? (
+            <div className="mt-4">
+              <Callout tone="danger" title="Liens that survive">
+                {r.survivingLiens}
+              </Callout>
+            </div>
+          ) : null}
+          {r.quietTitle ? (
+            <div className="mt-3">
+              <Callout tone="warn" title="Quiet title">
+                {r.quietTitle}
+              </Callout>
+            </div>
+          ) : null}
+          <Link
+            href={context.atlasHref}
+            className="mt-3 inline-block text-sm text-accent hover:underline"
+          >
+            Full county profile →
+          </Link>
+        </section>
+      ) : null}
+      {context.links.length ? (
+        <section className="rounded-3xl border border-border/70 bg-surface p-6 shadow-[var(--shadow-sm)]">
+          <h4 className="text-lg font-semibold">County records</h4>
+          <p className="mt-1 text-xs text-muted">
+            Official appraiser / assessor — free. Copy the parcel number if the link opens a search page.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {context.links.map((l) => (
+              <li key={l.url}>
+                <a href={l.url} target="_blank" rel="noopener noreferrer" className="text-sm text-accent hover:underline">
+                  {l.label} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </>
   );
 }
