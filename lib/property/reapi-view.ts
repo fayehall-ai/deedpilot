@@ -364,7 +364,19 @@ export function buildPropertyView(rawIn: Record<string, unknown> | null, lot: Lo
     ? [
         { label: "Open Mortgages", value: num(current.filter((m) => m.open !== false).length) },
         { label: "Estimated Balance", value: openBalance ? money(openBalance) : "$0" },
-        { label: "Involuntary Liens", value: liens.length ? liens.join(", ") : "None" },
+        /*
+         * Flags, not a lien search. PropertyDetail carries only three booleans
+         * (lien, judgment, taxLien) — no amounts, no lienholders — and they are
+         * false on houses that carry liens: 5076 Momenti St reads all three
+         * false where PropStream lists 3 involuntary liens for $6,533.53. So a
+         * clean result says "none recorded", never "None", and names its
+         * source; it is not a title or lien search and must not read as one.
+         */
+        {
+          label: "Lien Flags",
+          value: liens.length ? liens.join(", ") : "None recorded",
+          note: "RealEstateAPI flags · not a lien search",
+        },
         n(ti.taxDelinquentYear)
           ? { label: "Tax Delinquent Since", value: String(n(ti.taxDelinquentYear)) }
           : null,

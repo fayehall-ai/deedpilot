@@ -153,6 +153,11 @@ eq(bid.opportunity.slice(0, 3).map((x) => [x.label, x.value]), [
   ["Taxes Owed", "$980"],
 ], "auction figures first");
 
+// Lien flags never claim the property is lien-free.
+const lienStat = v.debt.find((s) => s.label === "Lien Flags");
+eq([lienStat?.value, lienStat?.note], ["None recorded", "RealEstateAPI flags · not a lien search"], "lien wording");
+eq(v.debt.some((s) => s.value === "None"), false, "no bare None");
+
 eq(usDate("2022-04-25T00:00:00.000Z"), "04/25/2022", "usDate");
 eq(ownershipLength(12), "1 Year", "1 year");
 eq(ownershipLength(0), null, "zero months");
