@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>USTLA Auctions — Next 8 Weeks</title>
+  <link rel="stylesheet" href="results.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>USTLA auctions · next 8 weeks</h1>
+      <p id="range" class="muted"></p>
+    </div>
+    <div class="actions">
+      <button id="refresh" type="button">Refresh</button>
+      <button id="csv" type="button" disabled>Download CSV</button>
+      <button id="open" type="button">Open USTLA</button>
+    </div>
+  </header>
+
+  <div id="status" class="status">Opening USTLA…</div>
+
+  <section id="summary" class="summary" hidden></section>
+
+  <div id="filters" class="filters" hidden>
+    <input id="q" type="search" placeholder="Search county, state, procedure…" />
+    <select id="state"><option value="">All states</option></select>
+    <select id="type"><option value="">All types</option></select>
+    <select id="format"><option value="">All formats</option></select>
+    <span id="shown" class="muted"></span>
+  </div>
+
+  <main id="list"></main>
+
+  <script src="results.js"></script>
+</body>
+</html>
