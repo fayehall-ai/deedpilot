@@ -66,7 +66,16 @@ export function PropertySearch() {
         <div className="glass rounded-3xl p-[clamp(1.35rem,1.6vw,2rem)]">
           <h2 className="font-display text-xl font-medium text-ink-fg">Look up any address</h2>
           <div className="mt-4">
-            <form action={action}>
+            {/*
+              A closure, not `action` itself. Handed the server action directly,
+              React encodes it into the SSR markup for no-JS submission, and under
+              Cache Components that encoding counts as request data: it alone kept
+              `/` from prerendering, so every crawler hit rendered the page. A
+              client function still runs as a form action, so `useFormStatus`
+              and the pending state are unchanged. What is lost is submitting
+              with JavaScript off, which could never show a result here anyway.
+            */}
+            <form action={(fd) => action(fd)}>
               {/*
                 Styled for the ink band it sits on. A surface-coloured field on a dark
                 ground is nearly invisible, and this is the one control a visitor may

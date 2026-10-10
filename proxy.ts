@@ -29,16 +29,17 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SITE_COOKIE, UNLOCK_PATH, siteGateConfigured, sitePasswordMatches } from "@/lib/site-gate/token";
 import { isPublicHost } from "@/lib/site-gate/public-host";
+import { CALENDAR_PARAMS } from "@/lib/calendar/grid";
 
 export function proxy(request: NextRequest) {
   // Unarmed: no password configured, so the site behaves exactly as before.
-  if (!siteGateConfigured()) return NextResponse.next();
+  if (!siteGateConfigured()) return pass(request);
 
   // The public domain is open; its paid features carry daily limits instead.
-  if (isPublicHost(request.headers.get("host"))) return NextResponse.next();
+  if (isPublicHost(request.headers.get("host"))) return pass(request);
 
   if (sitePasswordMatches(request.cookies.get(SITE_COOKIE)?.value)) {
-    return NextResponse.next();
+    return pass(request);
   }
 
   const url = request.nextUrl.clone();
@@ -47,6 +48,25 @@ export function proxy(request: NextRequest) {
   url.search = "";
   if (target !== "/") url.searchParams.set("next", target);
   return NextResponse.redirect(url);
+}
+
+/**
+ * Let the request through, sending a filtered home page to its dynamic copy.
+ *
+ * `/` is prerendered so the CDN can answer crawlers without a render. Its
+ * calendar filters live in the query string, which a prerendered page cannot
+ * read, so a home URL carrying one is rewritten to `/home-filtered`. The
+ * reader's URL is unchanged. Only the calendar's own parameters count: a
+ * `?utm_source=` or `?fbclid=` on a shared link still gets the cached page.
+ */
+function pass(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname === "/" && CALENDAR_PARAMS.some((k) => searchParams.has(k))) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/home-filtered";
+    return NextResponse.rewrite(url);
+  }
+  return NextResponse.next();
 }
 
 /**

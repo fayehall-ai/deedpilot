@@ -358,6 +358,13 @@ function csv(raw: string | string[] | undefined): string[] {
   );
 }
 
+/**
+ * Every query parameter the calendar reads. `proxy.ts` routes a home-page URL
+ * carrying any of these to the dynamic copy of the page; keep the two in step
+ * with `parseCalendarFilters` below.
+ */
+export const CALENDAR_PARAMS = ["m", "state", "type", "platform", "leads"] as const;
+
 export function parseCalendarFilters(
   params: RawParams,
   today: string,

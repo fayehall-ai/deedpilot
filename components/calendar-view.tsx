@@ -13,6 +13,7 @@
  */
 import Link from "next/link";
 import { connection } from "next/server";
+import { cacheLife } from "next/cache";
 import {
   getCalendarAuctions,
   getCalendarFacets,
@@ -87,20 +88,47 @@ export async function CalendarView(props: {
    * shell and the highlighted day would be whenever the page was last built.
    */
   await connection();
-  const params = await props.searchParams;
-  const today = todayIso();
+  return (
+    <CalendarMonth
+      params={await props.searchParams}
+      basePath={props.basePath ?? "/calendar"}
+      today={todayIso()}
+    />
+  );
+}
+
+/**
+ * The unfiltered calendar, cached rather than rendered per request.
+ *
+ * For the bare home page, which is what crawlers fetch. With `CalendarView`
+ * there, every bot hit on `/` was a function invocation and three Postgres
+ * reads for a page that only changes on the nightly ingest. Inside a cache
+ * scope the clock may be read, so "today" is resolved here and expires with
+ * the entry instead of freezing at build time. Filtered URLs never reach this:
+ * `proxy.ts` sends them to the request-time copy of the page.
+ */
+export async function CachedCalendarView({ basePath }: { basePath: string }) {
+  "use cache";
+  cacheLife("minutes");
+  return <CalendarMonth params={{}} basePath={basePath} today={todayIso()} />;
+}
+
+async function CalendarMonth({
+  params,
+  basePath,
+  today,
+}: {
+  params: Record<string, string | string[] | undefined>;
+  basePath: string;
+  today: string;
+}) {
   /*
    * Resolved even when `?m=` is present: `calendarHref` compares against it to
    * decide whether to write the parameter at all, so a request that skipped the
    * lookup would emit a different URL for the same month than one that didn't.
    * It is a cached, filter-independent value, so this costs one memoised read.
    */
-  const filters = parseCalendarFilters(
-    params,
-    today,
-    props.basePath ?? "/calendar",
-    await getDefaultCalendarMonth(),
-  );
+  const filters = parseCalendarFilters(params, today, basePath, await getDefaultCalendarMonth());
 
   const { start, end } = gridRange(filters.month);
   const { first, last } = monthBounds(filters.month);
